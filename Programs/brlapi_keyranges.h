@@ -50,7 +50,7 @@ extern void freeKeyrangeList(KeyrangeList **l);
 
 /* Function : inKeyrangeList */
 /* Determines if the range list l contains x */
-/* If yes, returns the adress of the cell [a..b] such that a<=x<=b */
+/* If yes, returns the address of the cell [a..b] such that a<=x<=b */
 /* If no, returns NULL */
 extern KeyrangeList *inKeyrangeList(KeyrangeList *l, KeyrangeElem n);
 

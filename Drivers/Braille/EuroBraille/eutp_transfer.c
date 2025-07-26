@@ -31,12 +31,12 @@ extern unsigned char extensions[];
 int		brtopc(t_env* env)
 {
   int		fd; /* fd of a temporary file */
-  unsigned int		lines = 0; /* number of packets transfered */
+  unsigned int		lines = 0; /* number of packets transferred */
   unsigned char destext = 0;  /* conversion of the destination file */
   unsigned char		buf[BUFFER_SIZE]; /* received buffer */
   unsigned char	str[BUFFER_SIZE];  /* sent buffer */
   unsigned char ext = extensions[env->curext];  /* current extension */
-  unsigned char filename[15]; /* The transfered file name */
+  unsigned char filename[15]; /* The transferred file name */
   unsigned char filename1[15]; /* The filename without extension */
 
   while (1)
@@ -149,7 +149,7 @@ int		brtopc(t_env* env)
 /*
 ** When this function returns 4242, it's the end of file
 ** Otherwise, the length of the trame is returned.
-** The trame is formated to be directly sent to the braille terminal
+** The trame is formatted to be directly sent to the braille terminal
 */
 static unsigned int	read_trame_from_file(t_env* env, unsigned char* res,
 					     unsigned int *size)

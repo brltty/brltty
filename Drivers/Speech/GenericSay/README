@@ -3,7 +3,7 @@ BRLTTY speech driver for "GEnericSay"
 This driver is intended to be used with any speech synthesis program
 like the rsynth package.
 
-This is preliminary code, still experimental.  Need improovements...
+This is preliminary code, still experimental.  Need improvements...
 
 From the perspective of brltty: The command "/usr/local/bin/say" is
 invoked with no arguments, and each text string which is to be spoken is

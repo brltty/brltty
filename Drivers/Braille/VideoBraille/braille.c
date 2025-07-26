@@ -116,7 +116,7 @@ static void BrButtons(vbButtons *dest) {
 static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev) {
   /*	Seems to signal en error */ 
   if (!vbinit()) {
-    /* Theese are pretty static */ 
+    /* These are pretty static */
     brl->textColumns=40;
     brl->textRows=1;
     return 1;

@@ -852,7 +852,7 @@ DriverVer = %DriverDate%,%DriverVersion%
 ; Microsoft Narrator Device
 "WinUSB: Microsoft Narrator"=USB_Install, USB\NarratorOverride
 
-; ========== Class definition (for Windows 8 and ealier versions)===========
+; ========== Class definition (for Windows 8 and earlier versions)===========
 
 ; =================== Installation ===================
 

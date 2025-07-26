@@ -319,7 +319,7 @@ static unsigned int unauthConnLog = 0;
 static const BrailleDriver *trueBraille;
 static BrailleDriver ApiBraille;
 
-/* Identication of the REAL braille driver currently used */
+/* Identification of the REAL braille driver currently used */
 
 /* The following variable contains the size of the braille display */
 /* stored as a pair of _network_-formatted integers */
