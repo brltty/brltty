@@ -5,7 +5,7 @@ This driver lets use a Graphical User Interface as BrlTTY device:
 it behaves just like a real braille device, its cost excepted :)
 
 It is mostly intended for sighted developers who don't have access to a real
-device, but still want to have an idea of the accessiblity of their application.
+device, but still want to have an idea of the accessibility of their application.
 
 How to run basically
 ====================

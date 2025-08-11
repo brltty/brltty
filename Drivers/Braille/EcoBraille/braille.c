@@ -207,7 +207,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   BrailleSize = brl->textColumns + model->NbStCells + 1;
 
   /* Allocate space for buffers */
-  rawdata = malloc(BrailleSize); /* Phisical size */
+  rawdata = malloc(BrailleSize); /* Physical size */
   if(!rawdata){
      goto failure;
   }    
@@ -356,7 +356,7 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 	        /* Nothing */
 	        break;
 
-	   case KEY_SHIFT: /* Cursor traking */
+	   case KEY_SHIFT: /* Cursor tracking */
 		if(*(pBuff+6)==KEY_F8){
 		     return(BRL_CMD_CSRTRK);
 		}
@@ -382,7 +382,7 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 	        /* Nothing */
 	        break;
 
-	   case KEY_F5: /* togle cursor visibility */
+	   case KEY_F5: /* toggle cursor visibility */
 	        res = BRL_CMD_CSRVIS;
 	        break;
 

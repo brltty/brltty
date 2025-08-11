@@ -45,7 +45,7 @@ Basic Braille:
 Starting with the Active Braille, Handy Tech has introduced a resistor 
 which limits the amount of power drawn via USB. This eliminates 
 excessive draining of the host's battery. This artificial reduction in 
-power consumtion has the side effect that the dots do not lower as 
+power consumption has the side effect that the dots do not lower as
 quickly. This leads to a kind of blurring when you scroll rapidly 
 through a screen. If you are a user who does a lot of rapid scrolling, 
 you will likely notice this effect. The Basic Braille allows this 

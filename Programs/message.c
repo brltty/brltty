@@ -380,7 +380,7 @@ makeBraille (const wchar_t *text, size_t textLength, size_t *brailleLength, int 
       toCellOffset, CTB_NO_CURSOR
     );
 
-    // this sholdn't happen
+    // this shouldn't happen
     if (textCount > textLength) break;
 
     if (textCount == textLength) {

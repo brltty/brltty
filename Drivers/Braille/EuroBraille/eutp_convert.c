@@ -150,7 +150,7 @@ int		normalize_filename(t_env* env)
 			     || toupper(name[i - 1]) == 'B'))
     {
       env->curext = toupper(name[i - 1]);
-      retval = 0;  /* no conversion neccesary */
+      retval = 0;  /* no conversion necessary */
     }
   else
     {

@@ -71,7 +71,7 @@ name val
 Start a new terminal definition:
 identification = NUMBER
 the number is the code returned by the terminal on identification 
-request; this starts a new terminal defintion - no need to change this info
+request; this starts a new terminal definition - no need to change this info
 
 Info about the terminal - Name and size of the terminal:
 terminal = "String to describe the Terminal"
@@ -96,7 +96,7 @@ current - current line number
 row - cursor position - row
 col - cursor position - column
 tracking - cursor tracking
-dispmode - dispmode (text / attribut)
+dispmode - dispmode (text / attribute)
 frozen - screen frozen
 visible - cursor visible
 size - cursor size
