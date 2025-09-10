@@ -106,8 +106,10 @@ makeMountPoint (const char *path, const char *reference, const char *type) {
   if (mountFileSystem(path, reference, type)) {
     MountEntry *entry;
 
-    logMessage(LOG_NOTICE, "file system mounted: %s[%s] -> %s",
-               type, reference, path);
+    logMessage(LOG_NOTICE,
+      "file system mounted: %s[%s] -> %s",
+      type, reference, path
+    );
 
     if ((entry = malloc(sizeof(*entry)))) {
       memset(entry, 0, sizeof(*entry));
@@ -142,8 +144,10 @@ makeMountPoint (const char *path, const char *reference, const char *type) {
       logMallocError();
     }
   } else {
-    logMessage(LOG_ERR, "file system mount error: %s[%s] -> %s: %s",
-               type, reference, path, strerror(errno));
+    logMessage((errno == ENODEV)? LOG_DEBUG: LOG_ERR,
+      "file system mount error: %s[%s] -> %s: %s",
+      type, reference, path, strerror(errno)
+    );
   }
 
   return 0;
