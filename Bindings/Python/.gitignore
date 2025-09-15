@@ -2,6 +2,7 @@
 /*.auto.pyx
 
 /build/
+/dist
 /installed-files
 
 /brlapi.html
