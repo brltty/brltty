@@ -110,7 +110,7 @@ setProperties() {
 
 makeToolChain() {
    [ -d "${properties[TOOLCHAIN]}" ] || {
-      logMessage task "installing tool chain for ABI: ${abiName}"
+      logTask "installing tool chain for ABI: ${abiName}"
 
       VERBOSE=no "${properties[NDK]}/build/tools/make-standalone-toolchain.sh" \
          --platform="${properties[PLATFORM]}" \
@@ -181,7 +181,7 @@ then
       exit 0
    fi
 else
-   logMessage task "configuring build: ${buildDirectory}"
+   logTask "configuring build: ${buildDirectory}"
 fi
 
 toolsDirectory="${properties[TOOLCHAIN]}/bin"

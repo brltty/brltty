@@ -159,6 +159,14 @@ proc logWarning {{message ""}} {
    logMessage warning $message
 }
 
+proc logNotice {{message ""}} {
+   logMessage notice $message
+}
+
+proc logTask {{message ""}} {
+   logMessage task $message
+}
+
 proc logNote {{message ""}} {
    logMessage note $message
 }

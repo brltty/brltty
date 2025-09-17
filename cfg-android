@@ -105,7 +105,7 @@ prepareArchitecture() {
    )
 }
 
-logMessage task "preparing ABI build trees"
+logTask "preparing ABI build trees"
 prepareArchitecture arm arm-linux-androideabi armeabi-v7a "-mthumb"
 prepareArchitecture arm64 aarch64-linux-android arm64-v8a
 prepareArchitecture x86 i686-linux-android x86
@@ -113,7 +113,7 @@ prepareArchitecture x86_64 x86_64-linux-android x86_64
 
 "${noToplevelConfigure}" || {
    [ -n "${toplevelABI}" ] || toplevelABI="${defaultToplevelABI}"
-   logMessage task "configuring top-level for ${toplevelABI}"
+   logTask "configuring top-level for ${toplevelABI}"
    "${sourceRoot}/cfg-android-abi" -f "${toplevelABI}"
 }
 

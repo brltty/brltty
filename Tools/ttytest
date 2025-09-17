@@ -117,7 +117,7 @@ proc logSerialConfiguration {} {
       append log " [getSerialPropertyLabel $name]"
    }
 
-   logMessage task $log
+   logTask $log
 }
 
 proc configureSerialProperty {name value} {

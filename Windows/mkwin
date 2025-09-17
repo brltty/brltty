@@ -66,7 +66,7 @@ installPackages() {
       shift 1
 
       local name="$(getVariable "${package}Name")"
-      logMessage task "installing package files: ${name}"
+      logTask "installing package files: ${name}"
       "installPackage_${package}"
    done
 }
@@ -135,7 +135,7 @@ sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
 [ -f "${sourceRoot}/configure" ] || semanticError "not a source tree: ${sourceRoot}"
 
 revisionIdentifier="$("${sourceRoot}/getrevid" "${sourceRoot}")"
-logMessage task "revision identifier: ${revisionIdentifier}"
+logTask "revision identifier: ${revisionIdentifier}"
 
 [ -n "${buildRevision}" ] || {
    buildRevision="${revisionIdentifier%-g*}-"
@@ -224,13 +224,13 @@ mkdir -p "${temporaryDirectory}"
 cd "${temporaryDirectory}"
 temporaryDirectory="$(pwd -W)"
 
-logMessage task "copying source tree"
+logTask "copying source tree"
 newSourceRoot="${temporaryDirectory}/source"
 cp -a "${sourceRoot}" "${newSourceRoot}"
 cd "${newSourceRoot}"
 sourceRoot="${newSourceRoot}"
 
-logMessage task "applying patches"
+logTask "applying patches"
 for patch in affinity
 do
    patch -p0 <"Windows/${patch}.patch"
@@ -245,7 +245,7 @@ buildRoot="${temporaryDirectory}/build"
 mkdir -p "${buildRoot}"
 cd "${buildRoot}"
 
-logMessage task "configuring build"
+logTask "configuring build"
 "../source/cfg-windows" \
    --prefix=/ \
    --enable-relocatable-install \
@@ -256,21 +256,21 @@ logMessage task "configuring build"
 buildVersion="${BRLTTY_VERSION}-${buildRevision}"
 buildName="${BRLTTY_TARNAME}-win-${buildVersion}-${usbPackage}"
 
-logMessage task "building programs"
+logTask "building programs"
 make -s
 make -s -C Drivers/BrlAPI/WindowEyes we-dynamic-library-windows
 
-logMessage task "building documents"
+logTask "building documents"
 make -s -C Documents
 
-logMessage task "installing files"
+logTask "installing files"
 installRoot="${temporaryDirectory}/install/${buildName}"
 make -s install install-messages \
    JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib \
    PYTHON_PREFIX="Python" \
    INSTALL_ROOT="${installRoot}"
 
-logMessage task "updating files"
+logTask "updating files"
 documentDirectory="doc"
 
 readmeHeader="\
@@ -385,7 +385,7 @@ cd "${programDirectory}"
 installFiles "bin/" *.dll *.cat
 installFiles "/" *.bat
 
-logMessage task "USB package: ${usbPackage}"
+logTask "USB package: ${usbPackage}"
 installPackages "${usbWindowsPackages[@]}"
 
 cd /mingw/bin
@@ -472,7 +472,7 @@ done
 
 if [ -n "${ahkRoot}" ]
 then
-   logMessage task "creating configurator"
+   logTask "creating configurator"
    cd "${installRoot}"
    cp "${programDirectory}/brlttycnf.ahk" .
    "${ahkRoot}/Compiler/Ahk2Exe.exe" //in brlttycnf.ahk //out brlttycnf.exe
@@ -483,7 +483,7 @@ fi
 
 if [ -n "${unix2dosPath}" ]
 then
-   logMessage task "converting text files"
+   logTask "converting text files"
    cd "${installRoot}/.."
 
    find . -print |
@@ -521,14 +521,14 @@ fi
 
 if "${invokeShell}"
 then
-   logMessage task "invoking shell"
+   logTask "invoking shell"
    cd "${installRoot}"
    "${SHELL:-/bin/sh}" || :
 fi
 
 if [ -n "${zipPath}" ]
 then
-   logMessage task "creating archive"
+   logTask "creating archive"
    archiveFile="${initialDirectory}/${buildName}.zip"
    rm -f "${archiveFile}"
    cd "${installRoot}/.."
@@ -539,7 +539,7 @@ fi
 
 if [ -n "${nsisRoot}" ]
 then
-   logMessage task "creating installer"
+   logTask "creating installer"
    cd "${installRoot}/.."
    mv "${nsisStrings}" "${buildName}"
    installerFile="${buildName}.exe"
@@ -557,10 +557,10 @@ else
 fi
 
 "${keepBuild}" || {
-   logMessage task "cleaning up"
+   logTask "cleaning up"
    cd "${initialDirectory}"
    rm -f -r "${temporaryDirectory}"
 }
 
-logMessage task "done"
+logTask "done"
 exit 0

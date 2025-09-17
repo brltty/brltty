@@ -34,7 +34,7 @@ mkBuild() {
    [ -n "${mkOldLogName}" ] || internalError "old log name not defined"
    [ -n "${mkNewLogName}" ] || internalError "new log name not defined"
 
-   logMessage task "building for ${mkPlatformName}"
+   logTask "building for ${mkPlatformName}"
    local newLogFile="${mkNewLogName}.${mkLogFileExtension}"
    local oldLogFile="${mkLogsDirectory}/${mkOldLogName}.${mkLogFileExtension}"
 
@@ -44,7 +44,7 @@ mkBuild() {
       exit 10
    }
 
-   logMessage task "build completed successfully"
+   logTask "build completed successfully"
    sed -e "s%${sourceRoot}%.../brltty%g" -i "${newLogFile}"
    diff "${mkDiffOptions[@]}" -- "${oldLogFile}" "${newLogFile}"
 }

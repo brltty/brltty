@@ -35,7 +35,7 @@ parseProgramArguments "${@}"
 
 try() {
    ("${@}"; exit "${?}") 2>/dev/null && {
-      logMessage task "key generated"
+      logTask "key generated"
       exit 0
    }
 }

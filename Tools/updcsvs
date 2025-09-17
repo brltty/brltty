@@ -103,7 +103,7 @@ proc updateTables {lists} {
 }
 
 if {![updateTables [makeLists "brltty.conf.in"]]} {
-   logMessage task "no files updated"
+   logTask "no files updated"
 }
 
 exit 0

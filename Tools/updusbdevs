@@ -662,7 +662,7 @@ proc updateFile {file newLines} {
    if {$testMode} {
       writeProgramMessage "test mode - file not updated: $file"
    } else {
-      logMessage notice "updating file: $file"
+      logNotice "updating file: $file"
       replaceFile $file "[join $lines \n]\n"
    }
 
@@ -746,7 +746,7 @@ parseFileArguments files $schemes $positionalArguments
 makeLines lines [array names files] [makeDeviceTable [parseDrivers]]
 
 if {![updateFiles files lines]} {
-   logMessage task "no files updated"
+   logTask "no files updated"
 }
 
 exit 0
