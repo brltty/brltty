@@ -16,8 +16,8 @@ dependencies {
 android {
   namespace "org.a11y.brlapi"
 
-  compileSdkVersion "android-34"
-  buildToolsVersion "29.0.3"
+  compileSdkVersion "android-35"
+  buildToolsVersion "35.0.0"
 
   defaultConfig {
     targetSdkVersion 34

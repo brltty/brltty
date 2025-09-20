@@ -163,4 +163,8 @@ public abstract class APITests {
   // API level 34 - Android 14
   public final static boolean haveUpsideDownCake
   = haveAPILevel(Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
+
+  // API level 35 - Android 15
+  public final static boolean haveVanillaIceCream
+  = haveAPILevel(Build.VERSION_CODES.VANILLA_ICE_CREAM);
 }
