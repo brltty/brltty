@@ -21,6 +21,7 @@
 
 include de-g1.ctb
 
+class a a
 class b b
 class f f
 class h h
@@ -31,6 +32,7 @@ class r r
 class hilmnrsu hilmnrsu
 class l l
 class lnr lnr
+class cegn cegn
 class cost cost
 class st st
 class konsonant bcdfghjklmnpqrstvwxyz
@@ -111,10 +113,13 @@ always einnen 15-35-1345-14 ⠨⠯⠓⠌⠎⠑⠔⠝⠉⠎⠩⠦ ⠨⠯⠓⠌⠎
 always lateinisch 123-1-2345-1246-24-156 shouldn't use the ein-contraction
 always eillustration 15-24-12345-136-23456-1235-5-1345
 always eillustrier 15-24-12345-136-23456-1235-346-1235
+before i always eindustr 15-35-145-136-23456-1235
 always einformation 15-35-124-26-134-5-1345
 always einitiativ 15-35-24-2345-24-5-1236
+before t always einstitu 15-35-23456-24-2345-136
 before t always einstrumen 15-35-23456-1235-136-134-14
 always eintoleranz 15-35-2345-135-123-12456-235-1356
+always nukleinsäur 1345-136-13-123-15-35-234-34-1235
 
 always el 13456
 begmidword elineal 15-123-35-15-25
@@ -209,7 +214,10 @@ word bel 12-13456
 before konsonant always bem 12-12356
 before konsonant always ben 12-14
 before konsonant always ber 12-12456
+always schrauber 156-1235-16-12-12456
+always zauber 1356-16-12-12456
 before konsonant always gel 1245-13456 klingelton shouldn't use the ge-contraction
+always evangel 15-1236-235-1245-13456
 before konsonant always gen 1245-14
 always genetik 1245-14-15-2345-24-13
 always genetisch 1245-14-15-2345-24-156
@@ -224,8 +232,14 @@ before konsonant always ter 2345-12456
 always güter 1245-1256-2345-12456 should use the er-contraction
 always güteregel 1245-1256-236-1235-15-1245-13456
 always gütericht 1245-1256-236-2-3456
+
 midendword ich 3456
+always clavichord 6-14-123-1-1236-24-1456-26-145
+always klavichord 13-123-1-1236-24-1456-26-145
+
 midendword ig 45
+midendword igraph 24-1245-1235-1-1234-125
+
 always in 35
 
 midendword lich 456
@@ -250,7 +264,14 @@ always holländer 125-135-123-123-345-1345-145-12456 shouldn't use the ll-contra
 always hollaender 125-135-123-123-345-1345-145-12456 shouldn't use the ll-contraction
 midendword mm 1346
 always wurm = wurmmittel shouldn't use the mm-contraction
+
 begmidword or 26
+always neorass 1345-15-135-1235-1-2346
+prfword neoreal 1345-15-135-1235-15-1-123
+always neoreal 1345-15-135-1235-15-25
+always neorokoko =
+prfword neoroman 1345-15-135-1235-135-134-1-1345
+always neoroman 1345-15-135-1235-135-134-235
 
 always schance 234-1456-235-6-14-15
 always schancen 234-1456-235-6-14-14
@@ -286,6 +307,7 @@ always sselbständ 234-234-13456-12-5-23456 shouldn't use the selbst-contraction
 always sselbstaend 234-234-13456-12-5-23456 shouldn't use the selbst-contraction
 after konsonant always ssetz 234-2-15
 after konsonant midendword ssesam 234-234-123456-1-134 shouldn't use the sam-contraction
+always esicher 15-234-3456-12456
 always ssicher 234-234-3456-12456
 after konsonant always ssitz 234-2-24
 always ssolch 234-234-1456
@@ -326,6 +348,8 @@ always all 1-12345
 always ell 15-12345
 always emm 15-1346
 always esch 15-156
+always eschlag 15-156-1245
+always eschläg 15-5-156-1245
 always eschließ 15-156-2346
 always eschreib 15-156-12
 always eschrift 15-156-2345
@@ -337,6 +361,8 @@ always est 15-23456
 endword tel 2345-13456
 always scheitel 156-146-2345-13456 shouldn't use the te-contraction
 always bettel 23-2345-2345-13456 shouldn't use the te-contraction
+endword telchen 2345-13456-1456-14
+endword telchens 2345-13456-1456-14-234
 endword tele 2345-13456-15
 endword teln 2345-13456-1345
 endword telnd 2345-13456-1345-145
@@ -379,7 +405,25 @@ endword terische 2345-12456-24-156-15
 endword terischem 2345-12456-24-156-12356
 endword terischen 2345-12456-24-156-14
 endword terischer 2345-12456-24-156-12456
+endword terischere 2345-12456-24-156-12456-15
+endword terischerem 2345-12456-24-156-12456-12356
+endword terischeren 2345-12456-24-156-12456-14
+endword terischerer 2345-12456-24-156-12456-12456
+endword terischeres 2345-12456-24-156-12456-123456
 endword terisches 2345-12456-24-156-123456
+endword terischste 2345-12456-24-156-23456-15
+endword terischstem 2345-12456-24-156-23456-12356
+endword terischsten 2345-12456-24-156-23456-14
+endword terischster 2345-12456-24-156-23456-12456
+endword terischstes 2345-12456-24-156-23456-123456
+endword terist 2345-12456-24-23456
+endword teristen 2345-12456-24-23456-14
+endword teristisch 2345-12456-5-156
+endword teristische 2345-12456-5-156-15
+endword teristischen 2345-12456-5-156-14
+endword teristischem 2345-12456-5-156-12356
+endword teristischer 2345-12456-5-156-12456
+endword teristisches 2345-12456-5-156-123456
 endword ters 2345-12456-234
 always liter 123-24-2345-12456
 endword tern 2345-12456-1345
@@ -449,11 +493,19 @@ before st midendword gelungs 1245-13456-136-234
 prfword gem 1245-12356 shouldn't use the ge-contraction
 prfword gen 1245-14 shouldn't use the ge-contraction
 midendword gend 1245-14-145 shouldn't use the ge-contraction
+always regendurch 1235-15-1245-14-2-1456
 endword gens 1245-14-234 shouldn't use the ge-contraction
 midendword ger 1245-12456 should use er-contraction if not part of a word intro
+always gerammel 12346-1235-1-1346-13456
+always gerechne 12346-1235-15-1456-1345-15
 always gerinnsel 12346-1235-35-1345-234-13456
 always gerinnung 12346-1235-35-1345-136
 always geripp 12346-1235-24-1234-1234
+always gerissen 12346-1235-24-2346-14
+always geritten 12346-1235-24-2345-2345-14
+always geroste 12346-1235-135-23456-15
+always gerutsch 12346-1235-136-2345-156
+always gerüttel 12346-1235-1256-2345-2345-13456
 
 before r begword abge 1-12-12346
 before r begword ange 235-12346
@@ -499,8 +551,13 @@ always trigraph = shouldn't use the ig-contraction
 # Vorsilbenkürzungen
 begword ent 2346
 word enter 14-2345-12456 shouldn't use the ent-contraction
+sufword enthusiast 14-2345-125-136-234-24-1-23456
+
 begword ex 1346
+
 begword pro 12345
+before cegn begword profi 12345-124-24
+
 begword ver 36
 word verb 1236-12456-12
 word verben 1236-12456-12-14
@@ -681,7 +738,8 @@ midendword ativ 5-1236
 #always religion 1235-13456-45-245
 midendword ismus 5-24
 midendword istisch 5-156
-always atheistisch 1-2345-125-15-5-156
+always theist 2345-125-15-24-23456
+always theistisch 2345-125-15-5-156
 endword nismus 1345-5-24 shouldn't use the nis-contraction
 midendword nistisch 1345-5-156
 midendword ität 5-345
@@ -887,6 +945,12 @@ always kreuzbein 13-1235-126-1356-12-1246
 always schienbein 156-346-1345-12-1246
 always schlüsselbein 156-123-1256-2346-13456-12-1246 shouldn't use the bei-contraction
 always reibeisen 1235-146-12-146-234-14
+before a always beinform 23-35-124-26-134
+always beinfra 23-35-124-1235-1
+before t always beinspek 23-35-234-1234-15-13
+before t always beinstitu 23-35-23456-24-2345-136
+before t always beinstrumen 23-35-23456-1235-136-134-14
+always beinstanz 23-35-23456-235-1356
 
 word dem 12356
 always dem 2-12356
@@ -980,8 +1044,28 @@ always nichtzuck 2-1345-1356-136-46
 
 word so 1234
 always so 2-1234
+always sobernheim 234-135-12-12456-1345-125-146-134
+always soccer 234-135-6-14-6-14-12456
+always society =
+always sodafabrik =
+always sodaproduk =
+always sodawasser 234-135-145-1-2456-1-2346-12456
+always sodbrenn 234-135-145-12-1235-14-1345
+always sodium =
+sufword sodom =
+before i always masoch 134-1-234-135-1456
+word sofia =
+word sofias =
+word sofie 234-135-124-346
+always sokrat =
+before i always solips =
+always solist 234-135-123-24-23456
+always solistisch 234-135-123-5-156
+always solitär =
 always soper 234-135-1234-12456
 always sopfer 234-135-1234-124-12456
+always sophist 234-135-1234-125-24-23456
+always sophistisch 234-135-1234-125-5-156
 endword son =
 endword sor =
 endword sos =
@@ -1001,6 +1085,7 @@ always		chromosom	1456-1235-135-134-135-234-135-134 shouldn't use the so-contrac
 always		iso		=
 always		konsol		=
 always		konson		=
+always		monopson	=
 begmidword	sensor		234-14-234-26
 endword		sensor		234-14-234-135-1235
 endword		sensor		234-14-234-135-1235
@@ -1075,6 +1160,7 @@ prfword bund 12-256-145
 prfword bunde 12-256-145-15
 prfword bunden 12-256-145-14
 prfword bundes 12-256-145-123456
+always völkerbund 5-1236-13-12456-12-256-145
 always diffundier 145-24-124-124-256-145-346-1235
 before t always fundamen 124-256-145-1-134-14
 before t always aufundamen 16-124-256-145-1-134-14
@@ -1192,6 +1278,9 @@ always favorit 124-1-1236-26-24-2345 shouldn't use the vor-contraction
 
 word wie 126
 always wie 2-126
+always geschwiegen 12346-156-2456-346-1245-14
+midendword verschwieg 1236-12456-156-2456-346-1245
+sufword verschwieg 36-156-2456-346-1245
 always tätowier 2345-345-2345-135-2456-346-1235
 always zwieback 1356-2456-346-12-1-46
 always zwiebel 1356-2456-346-12-13456 shouldn't use the wie-contraction
@@ -1377,8 +1466,10 @@ always änder 5-12456
 always abänder 1-12-5-12456
 always bänder 12-345-1345-145-12456 shouldn't use the änder-contraction
 always aender 5-12456
+before t always geränder 12346-1235-345-1345-145-12456
 prfword ränder 1235-345-1345-145-12456
 prfword rändern 1235-345-1345-145-12456-1345
+
 always arbeit 356-12
 always arbeits 356-12-234
 always arbeitsam 356-12-2346
@@ -1644,7 +1735,32 @@ always haft 125-124
 contraction hf
 always häft 5-125-124
 always haeft 5-125-124
+
+# ai
+before g always draina 145-1235-1-24-1345-1
+always entertain 14-2345-12456-2345-1-24-1345
 word hain =
+always paint =
+always train = training shouldn't use the first possible in-contraction
+always ukrain =
+
+# ou
+always allround 1-12345-1235-135-136-1345-145
+always background 12-1-46-1245-1235-135-136-1345-145
+always bloodhound =
+always bounty =
+always countdown =
+always country =
+always discount =
+always foundation 124-135-136-1345-145-5-1345
+always greyhound =
+always lounge 123-135-136-1345-12346
+always mountain =
+always outbound =
+always paramount 1234-356-1-134-135-136-1345-2345
+always roundtrip =
+always surround =
+
 always hamburger 125-1-134-12-136-1235-1245-12456 shouldn't use the ge-contraction
 always hand 125-145
 always händ 5-125-145
@@ -1855,9 +1971,11 @@ before e always gerani 1245-12456-235-24
 before e always gradi =
 before e always histori 125-24-23456-26-24
 before e always hortensi 125-26-2345-14-234-24
+before e always hoteli 125-135-2345-13456-24
 always hygiene 125-6-13456-1245-24-14-15
 always ehygiene 15-125-6-13456-1245-24-14-15
 before e always immobili 24-1346-135-12-24-123-24
+before e always beimmobili 23-24-1346-135-12-24-123-24
 before e always indonesi 35-145-135-1345-123456-24
 before e always itali 24-2345-25-24
 before e always jordani 245-26-145-235-24
@@ -1874,6 +1992,7 @@ before e always mazedoni =
 before e always mikronesi 134-24-13-1235-135-1345-123456-24
 before e always moldawi =
 before e always polynesi 1234-135-123-6-13456-1345-123456-24
+before e always prinzipi 1234-1235-35-1356-24-1234-24
 before e always skandinavi 234-13-235-145-35-1-1236-24
 before e always somali 234-135-134-25-24
 before e always spani 234-1234-235-24
@@ -2061,8 +2180,10 @@ always ploetzlich 1234-456
 always politik 1234-13
 contraction pk
 always politisch 1234-156
+
 always punkt 1234-2345
 contraction pt
+always pünkt 5-1234-2345
 
 always recht 1235-2345
 contraction rt
@@ -2226,7 +2347,6 @@ always tragehilf 2345-1245-15-125-24-123-124 shouldn't use the eh-contraction
 
 always träg 5-2345-1245
 always sträg 234-5-2345-1245
-always train = training shouldn't use the first possible in-contraction
 always treff 2345-124
 contraction tf
 always mitreff 134-24-2345-124
@@ -2325,6 +2445,7 @@ always zähl 5-1356-123
 always zeit 1356-2345
 contraction zt
 always polizei 1234-135-123-24-1356-146 polizeitruppen
+begword prophezei 12345-1234-125-15-1356-146
 
 before st midendword zug =
 word zum 1356-134
@@ -2414,7 +2535,6 @@ begword anlagen 235-123-1-1245-14
 always anlauf 235-123-16-124 shouldn't use the auf-contraction
 before m always anleihe 235-123-146-125-15 Anleihemarkt shouldn't use the em-contraction
 before m always film =
-class cegn cegn
 before cegn begword anti 235-2345-24
 before cegn always alkali 25-13-25-24
 before cegn begword epi =
@@ -2656,11 +2776,62 @@ word angeles 235-1245-13456-123456 shouldn't use the ge-contraction
 word angelika 235-1245-13456-24-13-1 shouldn't use the ge-contraction
 word angelina 235-1245-13456-35-1 shouldn't use the ge-contraction
 word angelo 235-1245-13456-135 shouldn't use the ge-contraction
+always aristotel 356-24-23456-135-2345-13456
 always daniel 145-235-24-13456 shouldn't use the ie-contraction
 always gabriel 1245-1-12-1235-24-13456 shouldn't use the ie-contraction
 always gabriell 1245-1-12-1235-24-15-12345 shouldn't use the ie-contraction
+sufword gerald 1245-12456-25-145
 always gerlind 1245-12456-123-35-145 should use the er-contraction
 always solveig 234-135-123-1235-146-1245 shouldn't use the so-contraction
+
+endword stisch 234-2345-24-156
+endword stische 234-2345-24-156-15
+endword stischen 234-2345-24-156-14
+endword stisches 234-2345-24-156-123456
+endword stischs 234-2345-24-156-234
+always agnostisch 1-1245-1345-135-23456-24-156
+always akustisch 1-13-136-23456-24-156
+always anankastisch 235-235-13-1-23456-24-156
+always blastisch 12-123-1-23456-24-156
+always bombastisch 12-135-134-12-1-23456-24-156
+always chiastisch 1456-24-1-23456-24-156
+always cineastisch 6-14-35-15-1-23456-24-156
+always diagnostisch 145-24-1-1245-1345-135-23456-24-156
+always doxastisch 145-135-6-1346-1-23456-24-156
+always drastisch 145-1235-1-23456-24-156
+always dynastisch 145-6-13456-1345-1-23456-24-156
+always elastisch 13456-1-23456-24-156
+always fantastisch 124-235-2345-1-23456-24-156
+always faustisch 124-16-23456-24-156
+always gespenstisch 12346-234-1234-14-23456-24-156
+always gnostisch 1245-1345-135-23456-24-156
+always gymnastisch 1245-6-13456-134-1345-1-23456-24-156
+always ikonoklastisch 24-13-135-1345-135-13-123-1-23456-24-156
+always kataklystisch 13-1-2345-1-13-123-6-13456-23456-24-156
+always kaustisch 13-16-23456-24-156
+always klastisch 13-123-1-23456-24-156
+always monastisch 134-135-1345-1-23456-24-156
+always marastisch 134-356-1-23456-24-156
+always mystisch 134-6-13456-23456-24-156
+always periphrastisch 1234-12456-24-1234-125-1235-1-23456-24-156
+always plastisch 1234-123-1-23456-24-156
+always pleonastisch 1234-123-15-135-1345-1-23456-24-156
+always orgastisch 26-1245-1-23456-24-156
+always orgiastisch 26-1245-24-1-23456-24-156
+always phantastisch 1234-125-235-2345-1-23456-24-156
+sufword prognostisch 12345-1245-1345-135-23456-24-156
+always sarkastisch 234-356-13-1-23456-24-156
+always scholastisch 156-135-123-1-23456-24-156
+always spastisch 234-1234-1-23456-24-156
+always stochastisch 23456-135-1456-1-23456-24-156
+endword sterror 234-2345-12456-1235-135-1235
+always sterror 234-2345-12456-1235-26
+before e always sterrass 234-2345-12456-1235-1-2346
+before e always monsterrass 134-135-1345-23456-12456-1235-1-2346
+before e always stribün =
+before e always strepp =
+before e always strupp =
+always schrist 234-1456-1235-24-23456
 
 # TODO:
 # 8-Punkte-Plan
