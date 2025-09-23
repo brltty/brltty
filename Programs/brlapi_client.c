@@ -20,7 +20,9 @@
 /* api_client.c handles connection with BrlApi */
 
 #ifdef __ANDROID__
+#ifndef __ANDROID_API__
 #define __ANDROID_API__ 21
+#endif /* __ANDROID_API__ */
 #endif /* __ANDROID__ */
 
 #define WIN_ERRNO_STORAGE_CLASS static
