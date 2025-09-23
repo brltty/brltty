@@ -34,7 +34,7 @@ The ${ndkRootVariable} environment variable must point to the root directory for
 END_OF_PROGRAM_USAGE_NOTES
 }
 
-defaultToplevelABI="armeabi-v7a"
+defaultToplevelABI="arm64-v8a"
 
 addProgramOption a string.ABI toplevelABI "the top-level's ABI" "${defaultToplevelABI}"
 addProgramOption n flag noToplevelConfigure "don't configure the top-level"
