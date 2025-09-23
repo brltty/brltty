@@ -147,6 +147,13 @@ findTool() {
    shift 1
    local toolNames=( "${@}" )
 
+   local toolPrefixPatterns=(
+      "${properties[SYSTEM]}-"
+      "${properties[SYSTEM]}[1-9][0-9]-"
+      "llvm-"
+      ""
+   )
+
    logDetail "finding tool: ${variable}: ${toolNames[*]}"
    local toolName
 
@@ -154,7 +161,7 @@ findTool() {
    do
       local toolPrefixPattern
 
-      for toolPrefixPattern in "${properties[SYSTEM]}-" "${properties[SYSTEM]}[1-9][0-9]-" "llvm-"
+      for toolPrefixPattern in "${toolPrefixPatterns[@]}"
       do
          local toolPaths=( "${toolsDirectory}/"${toolPrefixPattern}"${toolName}" )
          local toolCount="${#toolPaths[*]}"

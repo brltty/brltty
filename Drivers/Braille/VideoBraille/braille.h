@@ -39,6 +39,6 @@
 typedef struct {
   unsigned char bigbuttons;
   char routingkey : 7;
-  char keypressed : 1;
+  unsigned char keypressed:1;
 } vbButtons;
 
