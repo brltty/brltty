@@ -112,10 +112,15 @@ makeToolChain() {
    [ -d "${properties[TOOLCHAIN]}" ] || {
       logTask "installing tool chain for ABI: ${abiName}"
 
-      VERBOSE=no "${properties[NDK]}/build/tools/make-standalone-toolchain.sh" \
-         --platform="${properties[PLATFORM]}" \
-         --arch="${properties[ARCH]}" \
-         --install-dir="${properties[TOOLCHAIN]}" || exit "${?}"
+      if [ -d "${properties[NDK]}/platforms" ]
+      then
+         VERBOSE=no "${properties[NDK]}/build/tools/make-standalone-toolchain.sh" \
+            --platform="${properties[PLATFORM]}" \
+            --arch="${properties[ARCH]}" \
+            --install-dir="${properties[TOOLCHAIN]}" || exit "${?}"
+      else
+         ln -s "${properties[NDK]}/toolchains/llvm/prebuilt/linux-x86_64" "${properties[TOOLCHAIN]}"
+      fi
    }
 }
 
@@ -139,25 +144,52 @@ linkMissingHeaders() {
 
 findTool() {
    local variable="${1}"
-   local name="${2}"
+   shift 1
+   local toolNames=( "${@}" )
 
-   logDetail "finding tool: ${name}"
-   local path="${toolsDirectory}/${properties["SYSTEM"]}-${name}"
+   local toolPrefixPatterns=(
+      "${properties[SYSTEM]}-"
+      "${properties[SYSTEM]}[1-9][0-9]-"
+      "llvm-"
+      ""
+   )
 
-   [ -f "${path}" ] || {
-      logError "tool not found: ${path}"
-      exit 8
-   }
+   logDetail "finding tool: ${variable}: ${toolNames[*]}"
+   local toolName
 
-   logNote "tool found: ${path}"
-   setVariable "${variable}" "${path}"
-   export "${variable}"
+   for toolName in "${toolNames[@]}"
+   do
+      local toolPrefixPattern
+
+      for toolPrefixPattern in "${toolPrefixPatterns[@]}"
+      do
+         local toolPaths=( "${toolsDirectory}/"${toolPrefixPattern}"${toolName}" )
+         local toolCount="${#toolPaths[*]}"
+         [ "${toolCount}" -gt 0 ] || continue
+
+         local toolPath="${toolPaths[toolCount - 1]}"
+         logDetail "checking for tool: ${toolPath}"
+
+         [ -f "${toolPath}" ] && {
+            setVariable "${variable}" "${toolPath}"
+            export "${variable}"
+
+            logNote "tool found: ${variable}: ${toolPath}"
+            return 0
+         }
+      done
+   done
+
+   setVariable "${variable}" "TOOL_NOT_FOUND_${variable}"
+   logWarning "tool not found: ${variable}: ${toolNames[*]}"
 }
 
 addProgramOption f flag forceReconfigure "force a reconfigure"
 addProgramParameter ABI abiName "name of ABI to configure" "the source tree"
 parseProgramArguments "${@}"
+
 set -e
+shopt -s nullglob
 
 abiRoot="${programDirectory}/Android/ABI/${abiName}"
 abiPropertiesFile="${abiRoot}/build.properties"
@@ -167,6 +199,11 @@ setProperties
 
 makeToolChain
 linkMissingHeaders
+
+[ -L "${properties[TOOLCHAIN]}" ] && {
+   declare -n systemTriple="properties[SYSTEM]"
+   systemTriple="${systemTriple/arm-/armv7a-}"
+}
 
 buildDirectory="$(pwd)"
 buildMakeFile="${buildDirectory}/Makefile"
@@ -186,7 +223,7 @@ fi
 
 toolsDirectory="${properties[TOOLCHAIN]}/bin"
 export PATH="${toolsDirectory}:${PATH}"
-findTool CC gcc
+findTool CC gcc clang
 findTool LD ld
 findTool STRIP strip
 findTool RANLIB ranlib
