@@ -212,7 +212,7 @@ if [ -f "${buildMakeFile}" ]
 then
    if "${forceReconfigure}"
    then
-      logWarning "reconfiguring build: ${buildDirectory}"
+      logNotice "reconfiguring build: ${buildDirectory}"
    else
       logNote "build already configured: ${buildDirectory}"
       exit 0
