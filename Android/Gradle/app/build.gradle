@@ -40,7 +40,7 @@ android {
   }
 
   defaultConfig {
-    targetSdkVersion 35
+    targetSdkVersion 36
     minSdkVersion 27
 
     versionName brltty.config.versionName
