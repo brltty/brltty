@@ -167,4 +167,8 @@ public abstract class APITests {
   // API level 35 - Android 15
   public final static boolean haveVanillaIceCream
   = haveAPILevel(Build.VERSION_CODES.VANILLA_ICE_CREAM);
+
+  // API level 36 - Android 16
+  public final static boolean haveBaklava
+  = haveAPILevel(Build.VERSION_CODES.BAKLAVA);
 }

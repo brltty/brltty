@@ -18,7 +18,7 @@ dependencies {
 android {
   namespace "org.a11y.brltty.android"
 
-  compileSdkVersion "android-35"
+  compileSdkVersion "android-36"
   buildToolsVersion "35.0.0"
 
 //ndkVersion "21.4.7075529" // r21e

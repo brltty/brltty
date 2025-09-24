@@ -11,7 +11,7 @@ apply from: "brltty-component.gradle"
 android {
   namespace "org.a11y.brltty.core"
 
-  compileSdkVersion "android-35"
+  compileSdkVersion "android-36"
   buildToolsVersion "35.0.0"
 
   defaultConfig {

@@ -11,7 +11,7 @@ apply from: rootProject.file("brlapi-android.gradle")
 android {
   namespace "org.a11y.brlapi.android"
 
-  compileSdkVersion "android-35"
+  compileSdkVersion "android-36"
   buildToolsVersion "35.0.0"
 
   defaultConfig {
