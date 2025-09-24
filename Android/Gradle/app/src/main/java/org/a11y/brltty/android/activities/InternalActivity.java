@@ -32,6 +32,11 @@ import android.content.ActivityNotFoundException;
 import android.net.Uri;
 import java.io.File;
 
+import android.view.View;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets;
+
 public abstract class InternalActivity extends Activity {
   private final static String LOG_TAG = InternalActivity.class.getName();
 
@@ -69,6 +74,27 @@ public abstract class InternalActivity extends Activity {
 
   protected final void showMessage (int message) {
     showMessage(message, false);
+  }
+
+  protected final void applySystemWindowInsets (View rootView) {
+    ViewCompat.setOnApplyWindowInsetsListener(rootView,
+      (view, insets) -> {
+        Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+        view.setPadding(
+          view.getPaddingLeft(),
+          systemBars.top,
+          view.getPaddingRight(),
+          systemBars.bottom
+        );
+
+        return insets;
+      }
+    );
+  }
+
+  protected final void applySystemWindowInsets (int rootView) {
+    applySystemWindowInsets(findViewById(rootView));
   }
 
   protected final void launch (Intent intent) {
