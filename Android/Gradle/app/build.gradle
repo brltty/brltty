@@ -41,7 +41,7 @@ android {
 
   defaultConfig {
     targetSdkVersion 35
-    minSdkVersion 24
+    minSdkVersion 27
 
     versionName brltty.config.versionName
     versionCode brltty.config.versionCode as int
