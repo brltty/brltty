@@ -49,7 +49,6 @@ jobs:
             tcl:p
             pdcurses:p
             icu:p
-            tcl:p
             libiconv:p
             toolchain:p
             libusb:p
@@ -70,7 +69,7 @@ jobs:
       - name: Install BRLTTY
         run: |
           mkdir -p install/{bin,etc,lib,python}
-          make install install-messages JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib     PYTHON_PREFIX="Python" INSTALL_ROOT="./install"
+          make install install-messages JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib PYTHON_PREFIX="Python" INSTALL_ROOT="./install"
           cp Documents/brltty.conf install/etc/
           cp Programs/*.exe Programs/*.dll install/bin
           cp Bindings/Python/dist/* install/python/
