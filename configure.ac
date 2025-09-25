@@ -759,7 +759,7 @@ BRLTTY_ARG_DISABLE(
 
       BRLTTY_ARG_WITH(
           [api-socket-path], [PATH],
-          [where local sockets for teh api are stored],
+          [where local sockets for the api are stored],
           [api_socket_path], ["${default_api_socket_path}"]
       )
 

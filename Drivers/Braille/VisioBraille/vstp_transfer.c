@@ -397,7 +397,7 @@ void transfer_finish(transferfun *f) {
 }
 
 /* transfer_abort */
-/* if something nasty occured, try to clean */
+/* if something nasty occurred, try to clean */
 void transfer_abort(int exitnum) {
  brlapi_sendRaw(VB_RESET,strlen(VB_RESET));
  brlapi_leaveRaw();

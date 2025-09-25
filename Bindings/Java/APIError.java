@@ -56,7 +56,7 @@ public class APIError extends Error {
   public final static int TTYBUSY             =  2; /* Already a connection running in this tty */
   public final static int DEVICEBUSY          =  3; /* Already a connection using RAW mode */
   public final static int UNKNOWN_INSTRUCTION =  4; /* Not implemented in protocol */
-  public final static int ILLEGAL_INSTRUCTION =  5; /* Forbiden in current mode */
+  public final static int ILLEGAL_INSTRUCTION =  5; /* Forbidden in current mode */
   public final static int INVALID_PARAMETER   =  6; /* Out of range or have no sense */
   public final static int INVALID_PACKET      =  7; /* Invalid size */
   public final static int CONNREFUSED         =  8; /* Connection refused */

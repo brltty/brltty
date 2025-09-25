@@ -340,7 +340,7 @@ License: LGPL
 AutoProv: yes
 AutoReq: yes
 
-Summary: Appliation Programming Interface for BRLTTY.
+Summary: Application Programming Interface for BRLTTY.
 %description -n brlapi
 This package provides the run-time support for the Application
 Programming Interface to BRLTTY.
@@ -364,7 +364,7 @@ BuildRequires: libXtst-devel
 AutoProv: no
 AutoReq: yes
 
-Summary: Appliation Programming Interface for BRLTTY.
+Summary: Application Programming Interface for BRLTTY.
 %description -n brlapi-utils
 This package provides a set of commands that use the BrlAPI interface.
 

@@ -42,7 +42,7 @@
 #define TYPEMATIC_DELAY 10	/* nbr of cycles before a key is repeated */
 #define TYPEMATIC_REPEAT 2	/* nbr of cycles between each key repeat */
 
-/* Delay in miliseconds between forced full refresh of the display.
+/* Delay in milliseconds between forced full refresh of the display.
  * This is to minimize garbage effects due to noise on the serial line.
  */
 #define REFRESH_RATE 1000

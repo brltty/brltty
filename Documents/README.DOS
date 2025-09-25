@@ -175,7 +175,7 @@ need a newer version (2.57). Also, the build works best when a specific version
 of ``automake`` (1.9.6) is used.
 
 We've written a script that builds the cross-compiler, and that also takes care
-of all of the idiosyncracies that we encountered when doing so.
+of all of the idiosyncrasies that we encountered when doing so.
 
 The ``mkdostools`` Script
 -------------------------
