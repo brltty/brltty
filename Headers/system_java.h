@@ -64,6 +64,7 @@ extern int findJavaStaticField (
 );
 
 extern char *getJavaLocaleName (void);
+extern char *getJavaCharacterName (wchar_t character);
 
 #ifdef __cplusplus
 }

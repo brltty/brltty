@@ -409,6 +409,41 @@ getJavaLocaleName (void) {
   return name;
 }
 
+char *
+getJavaCharacterName (wchar_t character) {
+  char *name = NULL;
+  JNIEnv *env;
+
+  if ((env = getJavaNativeInterface())) {
+    jclass Character_class = NULL;
+
+    if (findJavaClass(env, &Character_class, JAVA_OBJ_CHARACTER)) {
+      jmethodID Character_getName = 0;
+
+      if (findJavaStaticMethod(env, &Character_getName, Character_class, "getName",
+                               JAVA_SIG_METHOD(JAVA_SIG_STRING,
+                                               JAVA_SIG_INT // codePoint
+                                              ))) {
+        jstring jName = (*env)->CallStaticObjectMethod(env, Character_class, Character_getName, character);
+
+        if (!clearJavaException(env, 1)) {
+          jboolean isCopy;
+          const char *cName = (*env)->GetStringUTFChars(env, jName, &isCopy);
+
+          if (!(name = strdup(cName))) {
+            logMallocError();
+          }
+
+          (*env)->ReleaseStringUTFChars(env, jName, cName);
+          (*env)->DeleteLocalRef(env, jName);
+        }
+      }
+    }
+  }
+
+  return name;
+}
+
 #if defined(__ANDROID__)
 #include <locale.h>
 #include "messages.h"

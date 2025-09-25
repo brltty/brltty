@@ -24,6 +24,10 @@
 #include "unicode.h"
 #include "ascii.h"
 
+#ifdef __ANDROID__
+#include "system_java.h"
+#endif /* __ANDROID__ */
+
 #ifdef HAVE_ICU
 #include <unicode/uversion.h>
 #include <unicode/uchar.h>
@@ -73,11 +77,28 @@ nextBaseCharacter (const UChar **current, const UChar *end) {
 
 int
 getCharacterName (wchar_t character, char *buffer, size_t size) {
-#ifdef HAVE_ICU
+#if defined(__ANDROID__)
+  int ok = 0;
+  char *name = getJavaCharacterName(character);
+
+  if (name) {
+    size_t length = strlen(name);
+
+    if (length < size) {
+      char *end = mempcpy(buffer, name, length);
+      *end = 0;
+      ok = 1;
+    }
+
+    free(name);
+  }
+
+  return ok;
+#elif defined(HAVE_ICU)
   return getName(character, buffer, size, U_EXTENDED_CHAR_NAME);
 #else /* HAVE_ICU */
   return 0;
-#endif /* HAVE_ICU */
+#endif /* get character name */
 }
 
 int
