@@ -132,7 +132,7 @@ public class ActionsActivity extends InternalActivity {
     super.onCreate(savedState);
 
     setContentView(R.layout.actions_activity);
-    applySystemWindowInsets(R.id.root_view);
+    applySystemWindowInsets();
 
     developerBuild = findViewById(R.id.GLOBAL_CHECKBOX_DEVELOPER_BUILD);
     allowDowngrade = findViewById(R.id.GLOBAL_CHECKBOX_ALLOW_DOWNGRADE);

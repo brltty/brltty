@@ -49,7 +49,7 @@ public class AboutActivity extends InternalActivity {
     super.onCreate(savedState);
 
     setContentView(R.layout.about_activity);
-    applySystemWindowInsets(R.id.root_view);
+    applySystemWindowInsets();
 
     String name = getPackageName();
     try {

@@ -97,6 +97,10 @@ public abstract class InternalActivity extends Activity {
     applySystemWindowInsets(findViewById(rootView));
   }
 
+  protected final void applySystemWindowInsets () {
+    applySystemWindowInsets(getWindow().getDecorView().findViewById(android.R.id.content));
+  }
+
   protected final void launch (Intent intent) {
     try {
       startActivity(intent);
