@@ -12,7 +12,7 @@ apply from: "brltty-assets.gradle"
 
 dependencies {
   implementation project(":core")
-  implementation "androidx.core:core:1.16.0"
+  implementation "androidx.core:core:1.17.0"
 }
 
 android {
