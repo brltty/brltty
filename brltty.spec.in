@@ -722,7 +722,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_udevrulesdir}/*-generic*
 
 %files dracut
-/usr/lib/dracut/modules.d/99brltty
+/usr/lib/dracut/modules.d/50brltty
 %config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty/Initramfs/dracut.conf
 %config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty/Initramfs/cmdline
 
