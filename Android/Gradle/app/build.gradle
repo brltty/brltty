@@ -19,7 +19,6 @@ android {
   namespace "org.a11y.brltty.android"
 
   compileSdkVersion "android-36"
-  buildToolsVersion "35.0.0"
 
 //ndkVersion "21.4.7075529" // r21e
   ndkVersion "27.1.12297006" // r27b

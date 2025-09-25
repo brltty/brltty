@@ -12,7 +12,6 @@ android {
   namespace "org.a11y.brlapi.android"
 
   compileSdkVersion "android-36"
-  buildToolsVersion "35.0.0"
 
   defaultConfig {
     targetSdkVersion 36
