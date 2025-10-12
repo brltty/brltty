@@ -673,27 +673,32 @@ setRootMountPropagation (int flag) {
 }
 
 static int
-prepareDevicesDirectory (void) {
-  const char *mountTarget = getDevicesDirectory();
+isolateDirectory (const char *directory, const char *label) {
+  const char *mountTarget = directory;
   if (!mountTarget) return 1;
 
   const char *mountType = "tmpfs";
   const char *mountSource = mountType;
 
   if (mount(mountSource, mountTarget, mountType, 0, "") != -1) {
-    logMessage(LOG_DEBUG, "devices mountpoint is %s: %s", mountType, mountTarget);
+    logMessage(LOG_DEBUG, "%s mountpoint is %s: %s", label, mountType, mountTarget);
 
     if (mount(NULL, mountTarget, NULL, (MS_PRIVATE), "") != -1) {
-      logMessage(LOG_DEBUG, "devices mountpoint is private: %s", mountTarget);
+      logMessage(LOG_DEBUG, "%s mountpoint is private: %s", label, mountTarget);
       return 1;
     } else {
-      logSystemError("mount[devices,private]");
+      logSystemError("mount[private]");
     }
   } else {
-    logSystemError("mount[devices]");
+    logSystemError("mount[tmpfs]");
   }
 
   return 0;
+}
+
+static int
+isolateDevicesDirectory (void) {
+  return isolateDirectory(getDevicesDirectory(), "devices");
 }
 
 #ifdef HAVE_SCHED_H
@@ -765,8 +770,8 @@ isolateNamespaces (void) {
     if (unshare(unshareFlags) == -1) {
       logSystemError("unshare");
     } else if (isolatingMounts) {
-      if (setRootMountPropagation(MS_PRIVATE)) {
-        prepareDevicesDirectory();
+      if (setRootMountPropagation(MS_SLAVE)) {
+        isolateDevicesDirectory();
       }
     }
   } else {
