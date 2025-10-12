@@ -20,7 +20,7 @@ SUPPORTED HARDWARE
 ==================
 
 This driver has only been tested on a "tieman Braillenotebook V2.1" with a
-build-in MultiBraille MB145CR, but the following hardware should also be
+built-in MultiBraille MB145CR, but the following hardware should also be
 supported:
 
 - Brailleline 125 (MB125CR)

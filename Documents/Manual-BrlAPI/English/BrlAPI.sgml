@@ -186,7 +186,7 @@ chose to handle it -->
 <p>Here is explained what <em/BrlAPI/ is, and what it precisely does.
 These explanations should be simple enough to be accessible to every user.
 For a more technical review of <em/BrlAPI/'s functionalities, please see chapter
-<ref id="sec-library" name="Libary description">.
+<ref id="sec-library" name="Library description">.
 
 <sect1>Historical notes.
 
@@ -466,7 +466,7 @@ on top of the two previous ones.  It means that the <em/BrlAPI/ server will show
 server will record it (on <em/A/'s sheet which hence becomes opaque again), but
 it won't be displayed on the braille device, since <em/B/'s sheet is still at
 the top and opaque (i.e. with some text on it).  But if <em/B/ issues a void
-write, the server clears its ouput buffer (i.e. <em/B/'s sheet becomes
+write, the server clears its output buffer (i.e. <em/B/'s sheet becomes
 transparent), and as a result <em/A/'s output appear on the braille display (by
 transparency through <em/B/'s sheet).
 
@@ -512,7 +512,7 @@ Whenever the user switches to VT 3, the <em/BrlAPI/ server remembers the window
 that <em/screen/ told to be active.  If it was window 1, it then displays
 <em/C/'s output (if any).  Else <em/brltty/'s usual screen reading is shown.
 Of course, several clients may be run in window 1 as well, and the "sheet pile"
-mecanism applies: <em/brltty/'s sheet first (at the root of the Ttys tree), then
+mechanism applies: <em/brltty/'s sheet first (at the root of the Ttys tree), then
 <em/screen/'s sheet (which is transparent, on VT 3), then <em/C/'s sheet (on
 window 1 of VT 3), then other clients' sheets (on the same window).
 
@@ -749,7 +749,7 @@ a key press (a command here, which is driver-independent) may be waited for:
 The command is returned, as described in <tt>&lt;brlapi_constants.h></tt>
 and <tt>&lt;brlapi_keycodes.h></tt>.
 It is not transmitted to <em/brltty/: it is up to the application to define
-the behavior, here cleanly exitting, as described below.
+the behavior, here cleanly exiting, as described below.
 
 The first parameter tells the lib to block until a key press is indeed read.
 
@@ -1025,7 +1025,7 @@ terminal. Generally, this function has to open the file referred to by
 the <tt/tty/ argument, and to configure the associated communication
 port. The <tt/parameters/ argument contains parameters passed to the
 driver with the -B command-line option. It's up to the driver's
-author to decide wether or not he/she wants to use this argument,
+author to decide whether or not he/she wants to use this argument,
 and what for. The function can perform some additional tasks such
 as trying to identify precisely which braille terminal model is
 connected to the computer, by sending it a request and analyzing its
@@ -1053,7 +1053,7 @@ displayed should be done in this function.
 The <tt/brl_writeStatus()/ function is very similar to <tt/brl_writeWindow()/.
 The only difference is that whereas <tt/brl_writeWindow()/ writes on the
 main braille display, <tt/brl_writeStatus()/ writes on an auxiliary braille
-display, which occasionaly appears on some braille terminals. The
+display, which occasionally appears on some braille terminals. The
 remarks that have been done concerning optimizations for refreshing
 the display still apply here.
 
@@ -1357,7 +1357,7 @@ Authorization methods are as follow:
   <item><tt/NONE/: the client doesn't need to send an authorization packet.
   <item><tt/KEY/: data holds a secret key, the authorization is successful only
 if the key matches the server secret key.
-  <item><tt/CREDENTIALS/: Operating-System-specific credentials are explicitely
+  <item><tt/CREDENTIALS/: Operating-System-specific credentials are explicitly
 sent over the socket, the authorization is successful if the server considers
 the credentials sufficient.
 </itemize>
@@ -1389,8 +1389,8 @@ first a series of integers: the first one gives the number of following
 integers, which are the numbers of ttys that leads to the tty that
 the application wants to take control of (it can be empty if the tty is 
 one of the machine's VT). The last integer of this series tells the number of
-the tty to get control of. Finaly, how key presses should be reported is sent:
-either a driver name or "", preceded by the number of caracters in the driver
+the tty to get control of. Finally, how key presses should be reported is sent:
+either a driver name or "", preceded by the number of characters in the driver
 name (0 in the case of ""), as an unsigned byte. This packet is then
 acknowledged by the server.
 
@@ -1399,7 +1399,7 @@ acknowledged by the server.
 As soon as the client gets a tty, it must be prepared to handle
 <tt/BRLAPI_PACKET_KEY/ incoming packets
 at any time (as soon as the key
-was pressed on the braille terminal, hopefuly).
+was pressed on the braille terminal, hopefully).
 The data holds a key code as 2 integers, or
 the key flags then the command code
 as 2 integers, depending on what has been request in the

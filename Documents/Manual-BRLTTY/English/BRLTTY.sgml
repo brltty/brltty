@@ -3106,7 +3106,7 @@ here are some notes on how it works.
     by double-clicking the left button.
   <item>
     Copy the current line to the cut buffer
-    by tripple-clicking the left button.
+    by triple-clicking the left button.
   <item>
     Copy a linear region to the cut buffer as follows:
     <enum>
