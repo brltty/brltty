@@ -557,6 +557,32 @@ makeWritablePath (const char *file) {
   return makeDirectoryPath(&opt_writableDirectory, file);
 }
 
+const char *
+getDevicesDirectory (void) {
+  static const char *devicesDirectory = NULL;
+
+  if (!devicesDirectory) {
+    const char *directory = makeWritablePath("dev");
+
+    if (directory) {
+      if (ensureDirectory(directory, 0)) {
+        devicesDirectory = directory;
+      }
+    }
+
+    if (devicesDirectory) logMessage(LOG_DEBUG, "devices directory: %s", devicesDirectory);
+  }
+
+  return devicesDirectory;
+}
+
+char *
+makeDevicesPath (const char *file) {
+  const char *directory = getDevicesDirectory();
+  if (directory) return makePath(directory, file);
+  return NULL;
+}
+
 char *
 getWorkingDirectory (void) {
 #if defined(GRUB_RUNTIME)

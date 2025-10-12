@@ -21,6 +21,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <sys/mount.h>
 
 #include "log.h"
 #include "strfmt.h"
@@ -664,6 +665,37 @@ logCurrentCapabilities (const char *label) {
 }
 #endif /* CAP_IS_SUPPORTED */
 
+static int
+setRootMountPropagation (int flag) {
+  if (mount(NULL, "/", NULL, (flag | MS_REC), NULL) != -1) return 1;
+  logSystemError("mount[root,propagatin]");
+  return 0;
+}
+
+static int
+prepareDevicesDirectory (void) {
+  const char *mountTarget = getDevicesDirectory();
+  if (!mountTarget) return 1;
+
+  const char *mountType = "tmpfs";
+  const char *mountSource = mountType;
+
+  if (mount(mountSource, mountTarget, mountType, 0, "") != -1) {
+    logMessage(LOG_DEBUG, "devices mountpoint is %s: %s", mountType, mountTarget);
+
+    if (mount(NULL, mountTarget, NULL, (MS_PRIVATE), "") != -1) {
+      logMessage(LOG_DEBUG, "devices mountpoint is private: %s", mountTarget);
+      return 1;
+    } else {
+      logSystemError("mount[devices,private]");
+    }
+  } else {
+    logSystemError("mount[devices]");
+  }
+
+  return 0;
+}
+
 #ifdef HAVE_SCHED_H
 #include <sched.h>
 
@@ -681,19 +713,20 @@ static const IsolatedNamespaceEntry isolatedNamespaceTable[] = {
   },
   #endif /* CLONE_NEWCGROUP */
 
-  #ifdef CLONE_NEWNS
-  { .unshareFlag = CLONE_NEWNS,
-    .name = "mount",
-    .summary = "mount points",
-  },
-  #endif /* CLONE_NEWNS */
-
   #ifdef CLONE_NEWUTS
   { .unshareFlag = CLONE_NEWUTS,
     .name = "UTS",
     .summary = "host name and NIS domain name",
   },
   #endif /* CLONE_NEWUTS */
+
+  // should be last
+  #ifdef CLONE_NEWNS
+  { .unshareFlag = CLONE_NEWNS,
+    .name = "mount",
+    .summary = "mount points",
+  },
+  #endif /* CLONE_NEWNS */
 }; static const uint8_t isolatedNamespaceCount = ARRAY_COUNT(isolatedNamespaceTable);
 
 static void
@@ -721,8 +754,20 @@ isolateNamespaces (void) {
       ine += 1;
     }
 
+    int isolatingMounts = !!(unshareFlags & CLONE_NEWNS);
+
+    if (isolatingMounts) {
+      if (!setRootMountPropagation(MS_SHARED)) {
+        isolatingMounts = 0;
+      }
+    }
+
     if (unshare(unshareFlags) == -1) {
       logSystemError("unshare");
+    } else if (isolatingMounts) {
+      if (setRootMountPropagation(MS_PRIVATE)) {
+        prepareDevicesDirectory();
+      }
     }
   } else {
     logMessage(LOG_WARNING, "can't isolate namespaces");

@@ -67,6 +67,9 @@ extern char *makeUpdatablePath (const char *file);
 extern const char *getWritableDirectory (void);
 extern char *makeWritablePath (const char *file);
 
+extern const char *getDevicesDirectory (void);
+extern char *makeDevicesPath (const char *file);
+
 extern char *getWorkingDirectory (void);
 extern int setWorkingDirectory (const char *path);
 
