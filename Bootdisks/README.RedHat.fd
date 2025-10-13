@@ -33,7 +33,7 @@ to spend an hour on your own choosing which packages you want installed.
 This was last tried with RedHat 7.2.
 
 First step is compiling BRLTTY. The bootdisk will use one and only one
-BRLTTY driver, so you must choose wich. Do:
+BRLTTY driver, so you must choose which. Do:
 
 make distclean
 ./configure --enable-standalone-programs --with-init-path

@@ -142,7 +142,7 @@ insertMapped (ScreenKey key) {
       case SCR_KEY_FUNCTION + 12:
         return(simulateKey(88, 0));
       default:
-        logMessage(LOG_WARNING, "Key %4.4X not suported.", key);
+        logMessage(LOG_WARNING, "Key %4.4X not supported.", key);
         return 0;
     }
     end = sequence + strlen(sequence);

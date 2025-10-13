@@ -17,17 +17,17 @@ standard parallel port and 2 RS232-E compatible ports. Power supply by
 mains adaptor 220/12V AC +/- 10%, 20VA or by built-in NiCad rechargeable
 batteries. Length: 380mm Width: 180mm Height: 65mm Weight: 2.7kg
 
-Techinal description
---------------------
+Technical description
+---------------------
 The LogText is almost like a VT-100 terminal regarding functionality.
 It has an internal screen buffer of 80x25 characters and it is then
-only neccesary to update the internal screen when there is changes.
+only necessary to update the internal screen when there are changes.
 The user can move around on the internal screen without communicating
-with the computer. The LogText do request updates of the specefic
-line but it is not neccesary to update a line if it has not changed.
+with the computer. The LogText do request updates of the specific
+line but it is not necessary to update a line if it has not changed.
 When the LogText is in cursor tracking mode and the user presses one
 of the arrow keys, the LogText will first request an update of the
-specefic line and then a request for update of the line on the computer
+specific line and then a request for update of the line on the computer
 screen which hold the cursor. A sequence could look like 0xff 0x03 0xff
 0x00 when in cursor tracking mode.
 
@@ -37,7 +37,7 @@ keys is escaped with 0x00 and the following character is similar to
 VT-100 cursor movement codes. An arrow up will send the sequence
 0x00 0x48. As 0x00 is used for escaping cursor movements and 0xff is
 used for requesting updates, these two codes can not be send from the
-LogText. This gives that the LogText can send 254 different charcaters.
+LogText. This gives that the LogText can send 254 different characters.
 The translation table used is codepage XXX and can then produce six
 danish letters. The rest of the table is used for abbreviations.
 
@@ -53,7 +53,7 @@ by saving the last absolute line which was requested from the LogText.
 That is, if the user requested line 4 and is in cursor tracking mode
 the sequence would be 0xff 0x04 0xff 0x00. In the case the computer
 will know that the user is looking at line 4 and that the LogText
-should have an update if line 4 changes. It is not neccesary to update
+should have an update if line 4 changes. It is not necessary to update
 lines from the computer screen if the user is not looking at them.
 If the cursor moves an update should be send.
 

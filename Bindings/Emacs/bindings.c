@@ -795,8 +795,8 @@ emacs_module_init(struct emacs_runtime *runtime) {
     "\n\n(fn CONNECTION WAIT)"
   )
   register_function(readKeyWithTimeout, 2, 2, "read-key-with-timeout",
-    "Read a keypress from CONNECTION waiting MILISECONDS."
-    "\n\n(fn CONNECTION MILISECONDS)"
+    "Read a keypress from CONNECTION waiting MILLISECONDS."
+    "\n\n(fn CONNECTION MILLISECONDS)"
   )
   register_function(acceptKeys, changeKeysMinArity, emacs_variadic_function, "accept-keys",
     "Ask the server to give KEY-CODES to the application."

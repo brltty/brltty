@@ -516,7 +516,7 @@ then
          fi
       done
 else
-   logWarning "text files not convertable"
+   logWarning "text files not convertible"
 fi
 
 if "${invokeShell}"
