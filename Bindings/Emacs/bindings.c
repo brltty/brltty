@@ -100,7 +100,7 @@ openConnection(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
     .host = host, .auth = auth
   };
   brlapi_connectionSettings_t actualSettings;
-  int result;
+  brlapi_fileDescriptor result;
 
   if (env->non_local_exit_check(env) != emacs_funcall_exit_return) {
     if (handle) free(handle);
@@ -114,7 +114,7 @@ openConnection(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
   if (host) free(host);
   if (auth) free(auth);
   
-  if (result == -1) {
+  if (result == BRLAPI_INVALID_FILE_DESCRIPTOR) {
     error(env);
     free(handle);
     return NULL;

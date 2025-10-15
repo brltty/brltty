@@ -435,6 +435,7 @@ openConnection (
   brlapi_handle_t **handle, int *fileDescriptor,
   jobject *jRequestedHost, jobject *jRequestedAuth
 ) {
+  brlapi_fileDescriptor fd;
   if (jRequestedSettings) {
     GET_CLASS(env, class, jRequestedSettings, 0);
 
@@ -466,14 +467,14 @@ openConnection (
     return 0;
   }
 
-  *fileDescriptor = brlapi__openConnection(
-    *handle, cRequestedSettings, cActualSettings
-  );
+  fd = brlapi__openConnection(*handle, cRequestedSettings, cActualSettings);
 
-  if (*fileDescriptor < 0) {
+  if (fd == BRLAPI_INVALID_FILE_DESCRIPTOR) {
     throwConnectError(env, cRequestedSettings);
     return 0;
   }
+
+  *fileDescriptor = fd;
 
   if (cActualSettings) {
     GET_CLASS(env, class, jActualSettings, 0);

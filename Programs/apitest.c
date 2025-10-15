@@ -489,7 +489,7 @@ main (int argc, char *argv[]) {
   settings.host = opt_host;
   settings.auth = opt_auth;
   fprintf(stderr, "Connecting to BrlAPI... ");
-  if ((fd=brlapi_openConnection(&settings, &settings)) != (brlapi_fileDescriptor)(-1)) {
+  if ((fd=brlapi_openConnection(&settings, &settings)) != BRLAPI_INVALID_FILE_DESCRIPTOR) {
     fprintf(stderr, "done (fd=%"PRIfd")\n", fd);
     fprintf(stderr,"Connected to %s using auth %s\n", settings.host, settings.auth);
 

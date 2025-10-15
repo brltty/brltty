@@ -639,7 +639,7 @@ which were actually used to initialize connection. <tt/NULL/ will also be nice
 for now.
 
 <tscreen><code>
-  if (brlapi_openConnection(NULL, NULL)<0) {
+  if (brlapi_openConnection(NULL, NULL)==BRLAPI_INVALID_FILE_DESCRIPTOR) {
     brlapi_perror("brlapi_openConnection");
     exit(1);
   }
@@ -843,7 +843,7 @@ int main()
   unsigned int x, y;
 
 /* Connect to BrlAPI */
-  if (brlapi_openConnection(NULL, NULL)<0)
+  if (brlapi_openConnection(NULL, NULL)==BRLAPI_INVALID_FILE_DESCRIPTOR)
   {
     brlapi_perror("brlapi_openConnection");
     exit(1);

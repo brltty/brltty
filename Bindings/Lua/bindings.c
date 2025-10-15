@@ -41,7 +41,7 @@ static int openConnection(lua_State *L) {
   );
   luaL_setmetatable(L, handle_t);
 
-  if (brlapi__openConnection(handle, &desiredSettings, &actualSettings) == -1)
+  if (brlapi__openConnection(handle, &desiredSettings, &actualSettings) == BRLAPI_INVALID_FILE_DESCRIPTOR)
     error(L);
 
   lua_pushstring(L, actualSettings.host);

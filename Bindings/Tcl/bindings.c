@@ -1613,9 +1613,9 @@ FUNCTION_HANDLER(general, openConnection) {
     session->tclInterpreter = interp;
 
     if ((session->handle = allocateMemory(brlapi_getHandleSize()))) {
-      int result = brlapi__openConnection(session->handle, &options.settings, &session->settings);
+      brlapi_fileDescriptor result = brlapi__openConnection(session->handle, &options.settings, &session->settings);
 
-      if (result != -1) {
+      if (result != BRLAPI_INVALID_FILE_DESCRIPTOR) {
         session->fileDescriptor = result;
 
         brlapi__setClientData(session->handle, session);

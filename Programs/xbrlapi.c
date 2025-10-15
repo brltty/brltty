@@ -218,7 +218,7 @@ static int tobrltty_init(char *auth, char *host) {
   brlapi_param_clientPriority_t priority;
   brlapi_param_retainDots_t dots;
 
-  if ((brlapi_fd = brlapi_openConnection(&settings,&settings))<0)
+  if ((brlapi_fd = brlapi_openConnection(&settings,&settings))==BRLAPI_INVALID_FILE_DESCRIPTOR)
   {
     if (!had_succeeded)
     {

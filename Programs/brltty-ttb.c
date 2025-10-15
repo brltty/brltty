@@ -1345,7 +1345,7 @@ typedef struct {
 #ifdef ENABLE_API
 static int
 haveBrailleDisplay (EditTableData *etd) {
-  return etd->brlapiFileDescriptor != (brlapi_fileDescriptor)-1;
+  return etd->brlapiFileDescriptor != BRLAPI_INVALID_FILE_DESCRIPTOR;
 }
 
 static void
@@ -1360,7 +1360,7 @@ setBrlapiError (EditTableData *etd, const char *function) {
 static void
 releaseBrailleDisplay (EditTableData *etd) {
   brlapi_closeConnection();
-  etd->brlapiFileDescriptor = (brlapi_fileDescriptor)-1;
+  etd->brlapiFileDescriptor = BRLAPI_INVALID_FILE_DESCRIPTOR;
 }
 
 static int
