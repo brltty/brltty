@@ -11,11 +11,10 @@ apply from: "brltty-component.gradle"
 android {
   namespace "org.a11y.brltty.core"
 
-  compileSdkVersion "android-34"
-  buildToolsVersion "29.0.3"
+  compileSdkVersion "android-36"
 
   defaultConfig {
-    targetSdkVersion 34
-    minSdkVersion 16
+    targetSdkVersion 36
+    minSdkVersion 27
   }
 }

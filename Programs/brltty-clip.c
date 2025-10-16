@@ -166,7 +166,7 @@ main (int argc, char *argv[]) {
 
   brlapi_fileDescriptor fileDescriptor = brlapi_openConnection(&settings, &settings);
 
-  if (fileDescriptor != (brlapi_fileDescriptor)(-1)) {
+  if (fileDescriptor != BRLAPI_INVALID_FILE_DESCRIPTOR) {
     char *oldContent = NULL;
 
     LineProcessingData lpd = {

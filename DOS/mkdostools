@@ -143,7 +143,7 @@ function handleDirectoryOption {
    setVariable "${variable}" "$(realpath "${!variable}")"
    readonly "${variable}"
 
-   [ -z "${name}" ] || logMessage detail "${name} directory: ${!variable}"
+   [ -z "${name}" ] || logDetail "${name} directory: ${!variable}"
 }
 
 function logArrayElements {
@@ -152,16 +152,16 @@ function logArrayElements {
 
    message="${name} properties:"
 
-   eval local 'indeces="${!'"${array}"'[*]}"'
+   eval local 'indices="${!'"${array}"'[*]}"'
    local index
 
-   for index in ${indeces}
+   for index in ${indices}
    do
       local variable="${array}[${index}]"
       message+=" ${index}=${!variable}"
    done
 
-   logMessage detail "${message}"
+   logDetail "${message}"
 }
 
 function findHostCommand {
@@ -176,7 +176,7 @@ function findHostCommand {
       [ -z "${path}" ] || {
          setVariable "${variable}" "${path}"
          export "${variable}"
-         logMessage detail "host command location: ${variable} -> ${!variable}"
+         logDetail "host command location: ${variable} -> ${!variable}"
          return 0
       }
    done
@@ -188,7 +188,7 @@ function pathChange {
    local newPath="${1}"
 
    export PATH="${newPath}"
-   logMessage detail "host command search path: ${PATH}"
+   logDetail "host command search path: ${PATH}"
 }
 
 function pathPrepend {
@@ -285,7 +285,7 @@ function logPackageTask {
 
    local nameVariable="${array}[name]"
    local versionVariable="${array}[version]"
-   logMessage task "${task}: ${!nameVariable}-${!versionVariable}"
+   logTask "${task}: ${!nameVariable}-${!versionVariable}"
 }
 
 function unpackArchive {
@@ -466,12 +466,12 @@ readonly targetSystem
 pathChange "$(getconf PATH)"
 unset MAKEFLAGS
 
-logMessage task "finding host commands"
+logTask "finding host commands"
 findHostCommand CC cc gcc
 findHostCommand CXX c++ g++ cxx gxx
 findHostCommand LIBTOOL libtool
 
-logMessage task "verifying archives"
+logTask "verifying archives"
 gnuVerifyArchive gnuAutoconfOld autoconf "${autoconfOldVersion}"
 gnuVerifyArchive gnuAutoconfNew autoconf "${autoconfNewVersion}"
 gnuVerifyArchive gnuAutomake automake "${automakeVersion}"
@@ -480,7 +480,7 @@ gnuVerifyArchive gnuGcc gcc "${gccVersion}"
 djgppVerifyArchive djgppGcc gcc s2 "${gnuGcc[version]}"
 djgppVerifyArchive djgppCrx djcrx "" "${crxVersion}"
 
-logMessage task "preparing build directory"
+logTask "preparing build directory"
 initializeDirectory "${buildDirectory}"
 cd "${buildDirectory}"
 
@@ -492,7 +492,7 @@ buildHostAutoconf gnuAutoconfOld AUTOCONF_OLD AUTOHEADER_OLD
 buildHostAutoconf gnuAutoconfNew AUTOCONF AUTOHEADER
 buildHostArchive gnuAutomake
 
-logMessage task "patching gcc source"
+logTask "patching gcc source"
 logBuildDirectory
 chmod u=rwx,go=r "${gccUnpackScript}"
 runBuildCommand unpack-gcc.log "./${gccUnpackScript}" "$(realpath --relative-to=. "${gnuGcc["path"]}")"
@@ -501,7 +501,7 @@ cd gnu
 unpackArchive gnuBinutils
 cd ..
 
-logMessage task "preparing install directory"
+logTask "preparing install directory"
 initializeDirectory "${installDirectory}"
 pathPrepend "$${installDirectory}/bin"
 readonly targetDirectory="${installDirectory}/${targetSystem}"
@@ -510,7 +510,7 @@ makeDirectory "${targetDirectory}/bin"
 cp -r lib "${targetDirectory}"
 cp -r include "${targetDirectory}"
 
-logMessage task "building stubify"
+logTask "building stubify"
 cd src/stub
 logBuildDirectory
 runBuildCommand compile.log "${CC}" -O2 stubify.c -o "${targetDirectory}/bin/stubify"
@@ -519,14 +519,14 @@ cd ../..
 buildTargetPackage gnuBinutils
 buildTargetPackage djgppGcc --with-headers="${targetDirectory}/include"
 
-logMessage task "creating symbolic links"
+logTask "creating symbolic links"
 cd "${targetDirectory}/lib"
 ln -s libstdc++.a libstdcxx.a
 ln -s libsupc++.a libsupcxx.a
 
-logMessage task "cleaning up"
+logTask "cleaning up"
 cd /
 emptyDirectory "${buildDirectory}"
 
-logMessage task "done"
+logTask "done"
 exit 0

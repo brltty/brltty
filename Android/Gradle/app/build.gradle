@@ -12,17 +12,17 @@ apply from: "brltty-assets.gradle"
 
 dependencies {
   implementation project(":core")
-  implementation "androidx.core:core:1.5.0"
+  implementation "androidx.core:core:1.17.0"
 }
 
 android {
   namespace "org.a11y.brltty.android"
 
-  compileSdkVersion "android-34"
-  buildToolsVersion "29.0.3"
+  compileSdkVersion "android-36"
 
-//ndkVersion "21.4.7075529" // r21e - LTS
-//ndkVersion "22.1.7171670" // r22b - stable
+//ndkVersion "21.4.7075529" // r21e
+  ndkVersion "27.1.12297006" // r27b
+//ndkVersion "28.2.13676358" // r28c
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
@@ -39,8 +39,8 @@ android {
   }
 
   defaultConfig {
-    targetSdkVersion 34
-    minSdkVersion 16
+    targetSdkVersion 36
+    minSdkVersion 27
 
     versionName brltty.config.versionName
     versionCode brltty.config.versionCode as int

@@ -24,6 +24,10 @@
 #include "unicode.h"
 #include "ascii.h"
 
+#ifdef __ANDROID__
+#include "system_java.h"
+#endif /* __ANDROID__ */
+
 #ifdef HAVE_ICU
 #include <unicode/uversion.h>
 #include <unicode/uchar.h>
@@ -41,7 +45,7 @@ isUcharCompatible (wchar_t character) {
 }
 
 static int
-getName (wchar_t character, char *buffer, size_t size, UCharNameChoice choice) {
+getUcharName (wchar_t character, char *buffer, size_t size, UCharNameChoice choice) {
   UErrorCode error = U_ZERO_ERROR;
   u_charName(character, choice, buffer, size, &error);
   return U_SUCCESS(error) && *buffer;
@@ -73,11 +77,30 @@ nextBaseCharacter (const UChar **current, const UChar *end) {
 
 int
 getCharacterName (wchar_t character, char *buffer, size_t size) {
-#ifdef HAVE_ICU
-  return getName(character, buffer, size, U_EXTENDED_CHAR_NAME);
-#else /* HAVE_ICU */
-  return 0;
-#endif /* HAVE_ICU */
+  int gotName = 0;
+
+  if (size > 1) {
+#if defined(__ANDROID__)
+    char *name = getJavaCharacterName(character);
+
+    if (name) {
+      size_t length = strlen(name);
+      if (length >= size) length = size - 1;
+
+      char *end = mempcpy(buffer, name, length);
+      *end = 0;
+      gotName = 1;
+
+      free(name);
+    }
+#elif defined(HAVE_ICU)
+    if (getUcharName(character, buffer, size, U_EXTENDED_CHAR_NAME)) {
+      gotName = 1;
+    }
+#endif /* get character name */
+  }
+
+  return gotName;
 }
 
 int
@@ -92,7 +115,7 @@ getCharacterByName (wchar_t *character, const char *name) {
 int
 getCharacterAlias (wchar_t character, char *buffer, size_t size) {
 #ifdef HAVE_ICU
-  return getName(character, buffer, size, U_CHAR_NAME_ALIAS);
+  return getUcharName(character, buffer, size, U_CHAR_NAME_ALIAS);
 #else /* HAVE_ICU */
   return 0;
 #endif /* HAVE_ICU */

@@ -35,7 +35,7 @@ Right: toggle cursor visibility
 
 F1-Up Mode:
 F1/F2: search screen backward/forward for cut text
-Left/Right: go to previous/next line wit different highlighting
+Left/Right: go to previous/next line with different highlighting
 Up/Down: go to previous/next paragraph (blank line separation)
 Center: route cursor to current line
 

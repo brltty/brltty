@@ -123,7 +123,7 @@ neededPackages=(
 
 if [ "${#neededPackages[@]}" -gt 0 ]
 then
-   logMessage task "packages needed: ${#neededPackages[@]}"
+   logTask "packages needed: ${#neededPackages[@]}"
 
    "${listNeededPackages}" && {
       for package in "${neededPackages[@]}"
@@ -136,7 +136,7 @@ then
       installPackages "${neededPackages[@]}"
    }
 else
-   logMessage task "no needed packages"
+   logTask "no needed packages"
 fi
 
 exit 0

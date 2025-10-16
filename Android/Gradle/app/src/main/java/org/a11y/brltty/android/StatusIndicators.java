@@ -191,7 +191,7 @@ public abstract class StatusIndicators {
           }
         }
 
-        if (APITests.haveQ) {
+        if (APITests.haveQuinceTart) {
           if (info instanceof CellInfoNr) {
             return ((CellInfoNr)info).getCellSignalStrength();
           }

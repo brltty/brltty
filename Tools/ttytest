@@ -110,14 +110,14 @@ addSerialOption cstopb stopBits 2
 
 proc logSerialConfiguration {} {
    global devicePath
-   set log "serial cofiguration: $devicePath"
+   set log "serial configuration: $devicePath"
 
    foreach name [getSerialPropertyNames] {
       append log ", [getSerialPropertySetting $name]"
       append log " [getSerialPropertyLabel $name]"
    }
 
-   logMessage task $log
+   logTask $log
 }
 
 proc configureSerialProperty {name value} {

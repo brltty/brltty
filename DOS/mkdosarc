@@ -106,25 +106,25 @@ needTemporaryDirectory
 buildDirectory="${temporaryDirectory}/build"
 mkdir -p "${buildDirectory}"
 
-installDirectory="${temporaryDirectory}/intall/${installDirectory}"
+installDirectory="${temporaryDirectory}/install/${installDirectory}"
 mkdir -p "${installDirectory}"
 documentSubdirectory="doc"
 manualSubdirectory="${documentSubdirectory}/Manual"
 
 cd "${buildDirectory}"
-logMessage task "configuring build"
+logTask "configuring build"
 "${sourceDirectory}/cfg-dos" --prefix="${installDirectory}"
 
-logMessage task "building programs"
+logTask "building programs"
 make -s -C Programs all-commands
 
-logMessage task "building documentation"
+logTask "building documentation"
 make -s -C Documents all
 
-logMessage task "installing files"
+logTask "installing files"
 make -s -C Programs install-commands install-tables
 
-logMessage task "updating files"
+logTask "updating files"
 
 cd "${installDirectory}/bin"
 mv brltty-lscmds.exe brllscmd.exe
@@ -197,7 +197,7 @@ installFile "Documents/brltty.conf" "etc/brltty.cfg"
 installFile "Programs/revision_identifier.auto.h" "REVISION.txt"
 sed -e 's/"//g' -i "${installDirectory}/REVISION.txt"
 
-logMessage task "converting text files"
+logTask "converting text files"
 cd "${installDirectory}"
 find . -print |
    while read path
@@ -241,7 +241,7 @@ find . -print |
       fi
    done
 
-logMessage task "checking for name collisions"
+logTask "checking for name collisions"
 cd "${installDirectory}"
 find . -type d -print |
    while read directory
@@ -275,14 +275,14 @@ find . -type d -print |
    done
 
 ! "${invokeShell}" || {
-   logMessage task "invoking shell"
+   logTask "invoking shell"
    cd "${installDirectory}"
    "${SHELL:-/bin/sh}" || :
 }
 
-logMessage task "creating archive"
+logTask "creating archive"
 cd "${installDirectory}/.."
 zip -q -r "${archivePath}" "${installDirectory##*/}"
 
-logMessage task "done"
+logTask "done"
 exit 0

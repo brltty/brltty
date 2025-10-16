@@ -91,6 +91,7 @@ always agreement 1-1245-1235-15-15-134-14-2345
 always amüsement 1-134-1256-234-15-134-14-2345
 always appartement 1-1234-1234-356-236-134-14-2345
 always bombardement 12-135-134-12-356-145-15-134-14-2345
+always etablissement 15-2345-1-12-123-24-2346-15-134-14-2345
 always implement 24-134-1234-123-15-134-14-2345
 always inkrement 35-13-1235-15-134-14-2345
 before t always komplemen 13-135-134-1234-123-15-134-14
@@ -418,7 +419,9 @@ always kompositeur 13-135-134-1234-135-234-24-2345-126-1235
 always kondukteur 13-135-1345-145-136-13-2345-126-1235
 always konstrukteur 13-135-1345-23456-1235-136-13-2345-126-1235
 always monteur 134-135-1345-2345-126-1235
+always numeroteur 1345-136-134-12456-135-2345-126-1235
 always operateur 135-1234-12456-1-2345-126-1235
+always politeur 1234-135-123-24-2345-126-1235
 always porteur 1234-26-2345-126-1235
 sufword profiteur 12345-124-24-2345-126-1235
 midendword profiteur 1234-1235-135-124-24-2345-126-1235
@@ -430,10 +433,16 @@ always restaurateur 1235-15-23456-16-1235-1-2345-126-1235
 always saboteur 234-1-12-135-2345-126-1235
 always esaboteur 15-234-1-12-135-2345-126-1235
 always ssaboteur 234-234-1-12-135-2345-126-1235
+always skulpteur 234-13-136-123-1234-2345-126-1235
+always solarteur 234-135-123-356-2345-126-1235
 always spediteur 234-1234-15-145-24-2345-126-1235
 always espediteur 15-234-1234-15-145-24-2345-126-1235
 always sspediteur 234-234-1234-15-145-24-2345-126-1235
 always stuckateur 23456-136-46-1-2345-126-1235
+
+before e always schweineteur 156-2456-1246-15-2345-126-1235
+before e always sauteur 234-16-2345-126-1235
+before e always sündteur 234-1256-1345-145-2345-126-1235
 
 always dehydr =
 always deifizier 145-15-24-124-24-1356-346-1235
@@ -926,6 +935,7 @@ before lnr always pizza =
 always ⠏⠇⠁⠞⠑⠁⠥ =
 always prall 1234-1235-1-12345 shouldn't use the aller- or allen-contraction
 always premier 1234-1235-12356-24-12456
+always prestige 1234-1235-15-23456-24-12346
 before hilmnrsu always presse 1234-1235-15-2346-15
 prfword pressen 1234-1235-15-2346-14
 prfword pressend 1234-1235-15-2346-14-145
@@ -1018,6 +1028,7 @@ midendword samt =
 
 before hilmnrsu always säure 234-34-1235-15
 prfword säuren 234-34-1235-14
+before konsonant always säuren 234-34-1235-14
 
 before l always sauna 234-16-1345-1
 prfword solos =
@@ -1522,3 +1533,13 @@ always abiturienten 1-12-24-2345-136-1235-24-14-2345-14
 always abonnenten 1-12-135-1345-1345-14-2345-14
 always adressaten 1-145-1235-15-2346-1-2345-14
 always studenten 23456-136-145-14-2345-14
+
+always tereignis 2345-12456-146-1245-1346
+
+sufword regen 1235-15-1245-14
+
+before cost always alltags 1-12345-2345-1-1245-234
+before cost always funktions 124-256-13-2345-24-135-1345-234
+before cost always gesundheits 12346-234-256-145-125-234
+before cost always realitäts 1235-15-25-5-345-234
+before cost always sicherheits 234-3456-12456-125-234

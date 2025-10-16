@@ -100,7 +100,7 @@ openConnection(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
     .host = host, .auth = auth
   };
   brlapi_connectionSettings_t actualSettings;
-  int result;
+  brlapi_fileDescriptor result;
 
   if (env->non_local_exit_check(env) != emacs_funcall_exit_return) {
     if (handle) free(handle);
@@ -114,7 +114,7 @@ openConnection(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
   if (host) free(host);
   if (auth) free(auth);
   
-  if (result == -1) {
+  if (result == BRLAPI_INVALID_FILE_DESCRIPTOR) {
     error(env);
     free(handle);
     return NULL;
@@ -795,8 +795,8 @@ emacs_module_init(struct emacs_runtime *runtime) {
     "\n\n(fn CONNECTION WAIT)"
   )
   register_function(readKeyWithTimeout, 2, 2, "read-key-with-timeout",
-    "Read a keypress from CONNECTION waiting MILISECONDS."
-    "\n\n(fn CONNECTION MILISECONDS)"
+    "Read a keypress from CONNECTION waiting MILLISECONDS."
+    "\n\n(fn CONNECTION MILLISECONDS)"
   )
   register_function(acceptKeys, changeKeysMinArity, emacs_variadic_function, "accept-keys",
     "Ask the server to give KEY-CODES to the application."

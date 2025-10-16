@@ -141,19 +141,19 @@ public abstract class APITests {
   = haveAPILevel(Build.VERSION_CODES.P);
 
   // API level 29 - Android 10
-  public final static boolean haveQ
+  public final static boolean haveQuinceTart
   = haveAPILevel(Build.VERSION_CODES.Q);
 
   // API level 30 - Android 11
-  public final static boolean haveR
+  public final static boolean haveRedVelvetCake
   = haveAPILevel(Build.VERSION_CODES.R);
 
   // API level 31 - Android 12
-  public final static boolean haveS
+  public final static boolean haveSnowCone
   = haveAPILevel(Build.VERSION_CODES.S);
 
   // API level 32 - Android 12L
-  public final static boolean haveSV2
+  public final static boolean haveSnowConeV2
   = haveAPILevel(Build.VERSION_CODES.S_V2);
 
   // API level 33 - Android 13
@@ -163,4 +163,12 @@ public abstract class APITests {
   // API level 34 - Android 14
   public final static boolean haveUpsideDownCake
   = haveAPILevel(Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
+
+  // API level 35 - Android 15
+  public final static boolean haveVanillaIceCream
+  = haveAPILevel(Build.VERSION_CODES.VANILLA_ICE_CREAM);
+
+  // API level 36 - Android 16
+  public final static boolean haveBaklava
+  = haveAPILevel(Build.VERSION_CODES.BAKLAVA);
 }

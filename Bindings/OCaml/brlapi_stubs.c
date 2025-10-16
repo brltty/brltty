@@ -193,7 +193,7 @@ CAMLprim value brlapiml_openConnection(value settings)
   brlapiSettings.auth = String_val(Field(settings, 0));
   brlapiSettings.host = String_val(Field(settings, 1));
   res = brlapi_openConnection(&brlapiSettings, &brlapiSettings);
-  if (res<0) raise_brlapi_error();
+  if (res==BRLAPI_INVALID_FILE_DESCRIPTOR) raise_brlapi_error();
   s = caml_alloc_tuple(2);
   Store_field(s, 0, caml_copy_string(brlapiSettings.auth));
   Store_field(s, 1, caml_copy_string(brlapiSettings.host));
@@ -211,7 +211,7 @@ CAMLprim value brlapiml_openConnectionWithHandle(value settings)
   brlapiSettings.auth = String_val(Field(settings, 0));
   brlapiSettings.host = String_val(Field(settings, 1));
   handle = caml_alloc_custom(&customOperations, brlapi_getHandleSize(), 0, 1);
-  if (brlapi__openConnection(Data_custom_val(handle), &brlapiSettings, &brlapiSettings)<0) raise_brlapi_error();
+  if (brlapi__openConnection(Data_custom_val(handle), &brlapiSettings, &brlapiSettings)==BRLAPI_INVALID_FILE_DESCRIPTOR) raise_brlapi_error();
   CAMLreturn(handle);
 }
 

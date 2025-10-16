@@ -59,7 +59,7 @@ to permanently switch to an input mode; if one has already been selected, then
 it indicates that you wish to permanently change the states of dots 7 and 8. In
 conjunction with either of the fore-going: pressing dot 3 turns dot 7 on, and
 pressing dot 6 turns dot 8 on. The braille keyboard can be returned to screen
-navigation mode by pressing the letter "n" (dots 1, 3, 4, ane 5) together with
+navigation mode by pressing the letter "n" (dots 1, 3, 4, and 5) together with
 the space bar.
 
 When the BrailleNote's Visual Display is assigned to the serial port, then a

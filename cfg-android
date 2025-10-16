@@ -34,7 +34,7 @@ The ${ndkRootVariable} environment variable must point to the root directory for
 END_OF_PROGRAM_USAGE_NOTES
 }
 
-defaultToplevelABI="armeabi-v7a"
+defaultToplevelABI="arm64-v8a"
 
 addProgramOption a string.ABI toplevelABI "the top-level's ABI" "${defaultToplevelABI}"
 addProgramOption n flag noToplevelConfigure "don't configure the top-level"
@@ -89,7 +89,7 @@ prepareArchitecture() {
             return 0
          fi
       else
-         logNote "creating ABI build properties: ${abi}"
+         logTask "creating ABI build properties: ${abi}"
       fi
 
       : >"${propertiesFile}"
@@ -105,15 +105,15 @@ prepareArchitecture() {
    )
 }
 
-logMessage task "preparing ABI build trees"
+logNotice "preparing ABI build trees"
 prepareArchitecture arm arm-linux-androideabi armeabi-v7a "-mthumb"
-prepareArchitecture arm64 aarch64-linux-android arm64-v8a
+prepareArchitecture arm64 aarch64-linux-android arm64-v8a "" "-Wl,-z,max-page-size=16384"
 prepareArchitecture x86 i686-linux-android x86
-prepareArchitecture x86_64 x86_64-linux-android x86_64
+prepareArchitecture x86_64 x86_64-linux-android x86_64 "" "-Wl,-z,max-page-size=16384"
 
 "${noToplevelConfigure}" || {
    [ -n "${toplevelABI}" ] || toplevelABI="${defaultToplevelABI}"
-   logMessage task "configuring top-level for ${toplevelABI}"
+   logNotice "configuring top-level build for ${toplevelABI}"
    "${sourceRoot}/cfg-android-abi" -f "${toplevelABI}"
 }
 

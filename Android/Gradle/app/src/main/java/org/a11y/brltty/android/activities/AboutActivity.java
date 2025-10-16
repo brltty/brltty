@@ -47,7 +47,9 @@ public class AboutActivity extends InternalActivity {
   @Override
   protected void onCreate (Bundle savedState) {
     super.onCreate(savedState);
+
     setContentView(R.layout.about_activity);
+    applySystemWindowInsets();
 
     String name = getPackageName();
     try {

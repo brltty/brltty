@@ -53,7 +53,7 @@ proc loadStringList {} {
 
    set strings [dict create]
    set path [file join $androidDirectory STRINGS]
-   logMessage detail "loading string list: $path"
+   logDetail "loading string list: $path"
 
    set order 0
    set pattern {^\s*(\S+)\s+(.*?)\s*$}
@@ -96,7 +96,7 @@ proc auditStringList {} {
 }
 
 proc loadStringResources {directory} {
-   logMessage detail "loading resource directory: $directory"
+   logDetail "loading resource directory: $directory"
    set strings [dict create]
 
    set pattern {^\s*<\s*string}
@@ -106,7 +106,7 @@ proc loadStringResources {directory} {
    append pattern {\s*>\s*(.*?)\s*<\s*/string\s*>\s*$}
 
    foreach path [glob "$directory/*.xml"] {
-      logMessage detail "loading string resources: $path"
+      logDetail "loading string resources: $path"
 
       if {[catch [list open $path {RDONLY}] channel] == 0} {
          set order 0

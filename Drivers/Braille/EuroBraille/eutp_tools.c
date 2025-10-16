@@ -21,7 +21,7 @@ void			brl_lasting_message(char* msg)
 
 /*
 ** When extracted from the braille terminal, the filenames are padded to
-** 8 chars with blank characters. This function removes theese blanks.
+** 8 chars with blank characters. This function removes these blanks.
 */
 void		remove_blanks(unsigned char *str)
 {

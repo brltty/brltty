@@ -145,7 +145,7 @@ USB Support
 -----------
 
 USB devices are supported thanks to the ``LibUSB-Win32`` and the ``LibUSB-1.0``
-packages. If both are installed, preferrence is given to ``LibUSB-1.0``.
+packages. If both are installed, preference is given to ``LibUSB-1.0``.
 
 Pre-built versions of BRLTTY have USB support compiled in, and the required
 Windows drivers are also included, so you just need to let the installer set
@@ -277,7 +277,7 @@ All arguments are passed through to the ``run-brltty.bat`` script.
 ``kill-brltty.bat``
 ~~~~~~~~~~~~~~~~~~~
 
-Forceably terminate the manually-run BRLTTY process.
+Forcibly terminate the manually-run BRLTTY process.
 
 ``enable-brlapi.bat``
 ~~~~~~~~~~~~~~~~~~~~~~

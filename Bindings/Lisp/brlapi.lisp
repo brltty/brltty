@@ -103,7 +103,7 @@ The sublist for each returned property contains, in order, its name, its value, 
   (host :string))
 
 (defun open-connection (&key auth host)
-  "Open a new connection to BRLTTY on HOST usng AUTH for authorization.
+  "Open a new connection to BRLTTY on HOST using AUTH for authorization.
 Return a DISPLAY object which can further be used to interact with BRLTTY."
   (with-foreign-object (settings 'settings)
     (setf (foreign-slot-value settings 'settings 'auth)

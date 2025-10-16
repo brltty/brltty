@@ -161,10 +161,11 @@ cancelSpeech (const void *data) {
 static int
 openConnection (void) {
   if (!connectionHandle) {
-    char **error_message = NULL;
-    if (!(connectionHandle = spd_open2("brltty", "main", NULL, SPD_MODE_THREADED, NULL, autospawn, error_message))) {
-      logMessage(LOG_ERR, "speech dispatcher open failure: %s",*error_message);
-      free(*error_message);
+    char *error_message = NULL;
+    logMessage(LOG_CATEGORY(SPEECH_DRIVER), "trying to connect to Speech Dispatcher");
+    if (!(connectionHandle = spd_open2("brltty", "main", NULL, SPD_MODE_THREADED, NULL, autospawn, &error_message))) {
+      logMessage(LOG_ERR, "speech dispatcher open failure: %s",error_message);
+      free(error_message);
       return 0;
     }
 

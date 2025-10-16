@@ -44,7 +44,7 @@ readonly configureOptions=(
    --disable-x
 
    --without-libbraille
-   --with-braille-driver=-ba,-bg,-tt,-vr,al,at,bm,bn,ce,eu,fs,hm,ht,hw,ic,ir,md,mm,mt,np,pg,pm,sk,vo
+   --with-braille-driver=-ba,-bg,-tt,-vr,al,at,bm,bn,ce,cn,eu,fs,hm,ht,hw,ic,ir,md,mm,mt,np,pg,pm,sk,vo
 
    --without-espeak
    --without-espeak-ng
@@ -109,19 +109,24 @@ setProperties() {
 }
 
 makeToolChain() {
-   [ -d "${properties[TOOLCHAIN]}" ] || {
-      logMessage task "installing tool chain for ABI: ${abiName}"
+   [ -d "${properties["TOOLCHAIN"]}" ] || {
+      logTask "installing tool chain for ABI: ${abiName}"
 
-      VERBOSE=no "${properties[NDK]}/build/tools/make-standalone-toolchain.sh" \
-         --platform="${properties[PLATFORM]}" \
-         --arch="${properties[ARCH]}" \
-         --install-dir="${properties[TOOLCHAIN]}" || exit "${?}"
+      if [ -d "${properties["NDK"]}/platforms" ]
+      then
+         VERBOSE=no "${properties["NDK"]}/build/tools/make-standalone-toolchain.sh" \
+            --platform="${properties["PLATFORM"]}" \
+            --arch="${properties["ARCH"]}" \
+            --install-dir="${properties["TOOLCHAIN"]}" || exit "${?}"
+      else
+         ln -s "${properties["NDK"]}/toolchains/llvm/prebuilt/linux-x86_64" "${properties["TOOLCHAIN"]}"
+      fi
    }
 }
 
 linkMissingHeaders() {
    local buildInclude="/usr/include"
-   local hostInclude="${properties[TOOLCHAIN]}/sysroot${buildInclude}"
+   local hostInclude="${properties["TOOLCHAIN"]}/sysroot${buildInclude}"
    local header
 
    for header in bluetooth
@@ -139,25 +144,52 @@ linkMissingHeaders() {
 
 findTool() {
    local variable="${1}"
-   local name="${2}"
+   shift 1
+   local toolNames=( "${@}" )
 
-   logDetail "finding tool: ${name}"
-   local path="${toolsDirectory}/${properties["SYSTEM"]}-${name}"
+   local toolPrefixPatterns=(
+      "${properties["SYSTEM"]}-"
+      "${properties["SYSTEM"]}[1-9][0-9]-"
+      "llvm-"
+      ""
+   )
 
-   [ -f "${path}" ] || {
-      logError "tool not found: ${path}"
-      exit 8
-   }
+   logDetail "finding tool: ${variable}: ${toolNames[*]}"
+   local toolName
 
-   logNote "tool found: ${path}"
-   setVariable "${variable}" "${path}"
-   export "${variable}"
+   for toolName in "${toolNames[@]}"
+   do
+      local toolPrefixPattern
+
+      for toolPrefixPattern in "${toolPrefixPatterns[@]}"
+      do
+         local toolPaths=( "${toolsDirectory}/"${toolPrefixPattern}"${toolName}" )
+         local toolCount="${#toolPaths[*]}"
+         [ "${toolCount}" -gt 0 ] || continue
+
+         local toolPath="${toolPaths[toolCount - 1]}"
+         logDetail "checking for tool: ${toolPath}"
+
+         [ -f "${toolPath}" ] && {
+            setVariable "${variable}" "${toolPath}"
+            export "${variable}"
+
+            logNote "tool found: ${variable}: ${toolPath}"
+            return 0
+         }
+      done
+   done
+
+   setVariable "${variable}" "TOOL_NOT_FOUND_${variable}"
+   logWarning "tool not found: ${variable}: ${toolNames[*]}"
 }
 
 addProgramOption f flag forceReconfigure "force a reconfigure"
 addProgramParameter ABI abiName "name of ABI to configure" "the source tree"
 parseProgramArguments "${@}"
+
 set -e
+shopt -s nullglob
 
 abiRoot="${programDirectory}/Android/ABI/${abiName}"
 abiPropertiesFile="${abiRoot}/build.properties"
@@ -168,6 +200,11 @@ setProperties
 makeToolChain
 linkMissingHeaders
 
+[ -L "${properties["TOOLCHAIN"]}" ] && {
+   declare -n systemTriplet="properties["SYSTEM"]"
+   systemTriplet="${systemTriplet/arm-/armv7a-}"
+}
+
 buildDirectory="$(pwd)"
 buildMakeFile="${buildDirectory}/Makefile"
 
@@ -175,29 +212,29 @@ if [ -f "${buildMakeFile}" ]
 then
    if "${forceReconfigure}"
    then
-      logWarning "reconfiguring build: ${buildDirectory}"
+      logNotice "reconfiguring build: ${buildDirectory}"
    else
       logNote "build already configured: ${buildDirectory}"
       exit 0
    fi
 else
-   logMessage task "configuring build: ${buildDirectory}"
+   logTask "configuring build: ${buildDirectory}"
 fi
 
-toolsDirectory="${properties[TOOLCHAIN]}/bin"
+toolsDirectory="${properties["TOOLCHAIN"]}/bin"
 export PATH="${toolsDirectory}:${PATH}"
-findTool CC gcc
+findTool CC gcc clang
 findTool LD ld
 findTool STRIP strip
 findTool RANLIB ranlib
 
-sysrootDirectory="${properties[TOOLCHAIN]}/sysroot"
+sysrootDirectory="${properties["TOOLCHAIN"]}/sysroot"
 export PKG_CONFIG_SYSROOT_DIR="${sysrootDirectory}"
 export PKG_CONFIG_LIBDIR="${sysrootDirectory}/usr/lib/pkgconfig:${sysrootDirectory}/usr/share/pkgconfig"
 export PKG_CONFIG_PATH=""
 
-export CFLAGS="${properties[CFLAGS]}"
-export LDFLAGS="${properties[LDFLAGS]}"
+export CFLAGS="${properties["CFLAGS"]}"
+export LDFLAGS="${properties["LDFLAGS"]}"
 
-"${properties[SOURCE]}/configure" --quiet --host="${properties[SYSTEM]}" "${configureOptions[@]}"
+"${properties["SOURCE"]}/configure" --quiet --host="${properties["SYSTEM"]}" "${configureOptions[@]}"
 exit 0

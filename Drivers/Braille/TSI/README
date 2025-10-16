@@ -123,7 +123,7 @@ Initialization and reset
 When BRLTTY is started, it will call a function within this driver to detect
 and initialize a braille display. If none is connected, then the whole
 BRLTTY process will sleep until a braille display is connected and turned on.
-Immediatly, it will be detected, identified, initialized, and updated with
+Immediately, it will be detected, identified, initialized, and updated with
 a welcome message, and then with some text from the screen. It will then be
 ready for use.
 
@@ -153,16 +153,16 @@ BRLTTY. Here again is how to bring up the help screen:
 I am open to suggestions. If you don't like the help screen, if you find the
 names of the keys confusing, if you find an inconsistency or if you just don't
 like the bindings I have chosen, send me your comments. It is not very hard to
-change which keys trigger which function. I have tryed to come up with the
+change which keys trigger which function. I have tried to come up with the
 best arrangement but you might have a better idea.
 
 If any of the keys mentioned in the help screen do not work or are somehow
-inconsistant, please let me know.
+inconsistent, please let me know.
 
-In general the key bindings are the same for all the diplays, Navigator
+In general the key bindings are the same for all the displays, Navigator
 and PowerBraille models alike. The Navigator 80 and the PoewrBraille 40 simply
 have some added key bindings to take advantage of their routing keys.
-Furthermore, certain key combinations that can conviniently be pressed on
+Furthermore, certain key combinations that can conveniently be pressed on
 the Navigator 20/40 cannot be entered on a PowerBraille since it does not
 have the cursor left/right keys and since it uses rockers instead of button
 pairs.
@@ -172,7 +172,7 @@ vary according to the model of the display that is detected. In fact, the
 first line of the help screen identifies the display model that was detected.
 If this is incorrect, then you're in trouble and you should contact me!
 
-I've tryed to keep key bindings similar to what is used under DOS, but there
+I've tried to keep key bindings similar to what is used under DOS, but there
 are several differences. Basic movement of the braille display is the
 same, but several bindings have been added for more elaborate
 functionalities. You also have those keys that are mapped to the keyboard
@@ -182,14 +182,14 @@ rightmost of the front middle buttons simply jumps to the cursor; it is not
 a toggle. The left button toggles the link/unlink (whether or not the braille
 display should follow the cursor if it moves), but unlinking the braille
 display from the cursor can be done without bringing the braille window back
-to the cursor beeforehand.
+to the cursor beforehand.
 
 Also note that there is no function to combine lines and wrap words...
 There is however a function to skip identical lines.
 
 For Navigator 20/40 users:
     You will find one interesting addition to cursor routing: now you do not
-only have a function that routes the cursor to the biginning of the display,
+only have a function that routes the cursor to the beginning of the display,
 you also have another function that brings it somewhere towards the end of
 the display. I find it quite useful. BRLTTY also supports a cut-and-paste
 functionality that can be triggered from the braille display. This has

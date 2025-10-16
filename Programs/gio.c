@@ -120,8 +120,11 @@ gioGetProperties (
     }
   }
 
+  logMessage(LOG_CATEGORY(GENERIC_IO),
+    "unsupported generic resource identifier: %s", *identifier
+  );
+
   errno = ENOSYS;
-  logMessage(LOG_WARNING, "unsupported generic resource identifier: %s", *identifier);
   return NULL;
 }
 

@@ -62,7 +62,7 @@ findCommand() {
 }
 
 executeCommand() {
-   logMessage detail "executing command: ${*}"
+   logDetail "executing command: ${*}"
 
    exitStatus=0
    "${@}" || exitStatus="${?}"
@@ -105,7 +105,7 @@ applyPatch() {
    then
       grep -q "${pattern}" "${path}" || {
          local name="${patch##*/}"
-         logMessage task "applying patch: ${name}"
+         logTask "applying patch: ${name}"
 
          "${dryRun}" || {
             downloadFile "${patch}"
@@ -125,7 +125,7 @@ installFile() {
    local target="${directory}/${source}"
 
    [ -e "${target}" ] || {
-      logMessage task "installing file: ${target}"
+      logTask "installing file: ${target}"
 
       "${dryRun}" || {
          downloadFile "${file}"
@@ -144,7 +144,7 @@ installLink() {
    local from="${directory}/${name}"
 
    havePath "${from}" || {
-      logMessage task "installing link: ${from} -> ${to}"
+      logTask "installing link: ${from} -> ${to}"
       [ -e "${to}" ] || semanticError "link target not found: ${to}"
       "${dryRun}" || executeCommand ln -s "${to}" "${from}"
    }
@@ -155,7 +155,7 @@ installWindowsArchive() {
    local path="${2}"
 
    havePath "${path}" || {
-      logMessage task "installing Windows archive: ${archive}"
+      logTask "installing Windows archive: ${archive}"
 
       "${dryRun}" || {
          downloadFile "${archive}"
@@ -185,7 +185,7 @@ installMingwArchive() {
    local path="${2}"
 
    havePath "${mingwDirectory}/${path}" || {
-      logMessage task "installing MinGW archive: ${archive}"
+      logTask "installing MinGW archive: ${archive}"
 
       "${dryRun}" || {
          downloadFile "MinGW/${archive}"
@@ -201,7 +201,7 @@ installMingwPackage() {
    local path="${2}"
 
    havePath "${path}" || {
-      logMessage task "installing MinGW package: ${package}"
+      logTask "installing MinGW package: ${package}"
       "${dryRun}" || executeCommand mingw-get --verbose=0 install "${package}"
    }
 }
@@ -259,7 +259,7 @@ installPythonDependencies() {
       local directory="${python%/*}"
 
       findCommand cython cython || {
-         logMessage task "installing Cython"
+         logTask "installing Cython"
          "${dryRun}" || executeCommand pip -q install cython
       }
 
@@ -269,11 +269,11 @@ installPythonDependencies() {
     # applyPatch "Cython/PythonCygwinCCompiler.patch" "${directory}/lib/distutils" "cygwinccompiler.py" "vcruntime140"
 
       findCommand wheel wheel || {
-         logMessage task "installing Wheel"
+         logTask "installing Wheel"
          "${dryRun}" || executeCommand pip -q install wheel
       }
 
-      logMessage task "ensuring Setuptools is up to date"
+      logTask "ensuring Setuptools is up to date"
       "${dryRun}" || executeCommand pip -q install --upgrade setuptools
    else
       logWarning "Python not found"
@@ -351,10 +351,10 @@ installLibUSB1
 installPythonDependencies
 
 "${keepFiles}" || {
-   logMessage task "cleaning up"
+   logTask "cleaning up"
    cd "${initialDirectory}"
    rm -f -r "${temporaryDirectory}"
 }
 
-logMessage task "done"
+logTask "done"
 exit 0

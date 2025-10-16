@@ -55,6 +55,7 @@ extern "C" {
 #define JAVA_OBJ_UTIL(name) "java/util/" name
 #define JAVA_OBJ_CONCURRENT(name) JAVA_OBJ_UTIL("concurrent/" name)
 
+#define JAVA_OBJ_CHARACTER JAVA_OBJ_LANG("Character")
 #define JAVA_OBJ_CHAR_SEQUENCE JAVA_OBJ_LANG("CharSequence")
 #define JAVA_OBJ_CLASS JAVA_OBJ_LANG("Class")
 #define JAVA_OBJ_EOF_EXCEPTION JAVA_OBJ_IO("EOFException")

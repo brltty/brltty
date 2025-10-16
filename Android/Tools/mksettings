@@ -164,7 +164,7 @@ foreach propertyName $propertyNames {
 }
 
 if {!$updated} {
-   logMessage task "no files updated"
+   logTask "no files updated"
 }
 
 exit 0

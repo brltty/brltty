@@ -69,5 +69,5 @@ executeGradleTask clean
 executeGradleTask :app:assembleDebug
 executeGradleTask :app:assembleRelease
 
-logMessage task "done"
+logTask "done"
 exit 0

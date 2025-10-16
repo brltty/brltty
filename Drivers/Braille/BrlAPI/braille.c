@@ -73,7 +73,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   settings.host = parameters[PARM_HOST];
   settings.auth = parameters[PARM_AUTH];
 
-  CHECK((brlapi_openConnection(&settings, &settings)>=0), out);
+  CHECK((brlapi_openConnection(&settings, &settings)!=BRLAPI_INVALID_FILE_DESCRIPTOR), out);
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
              "Connected to %s using %s", settings.host, settings.auth);
 

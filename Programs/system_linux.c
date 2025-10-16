@@ -1081,7 +1081,7 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
     if ((errno == ENOENT) || (errno == EACCES)) {
       free(path);
 
-      if ((path = makeWritablePath(locatePathName(name)))) {
+      if ((path = makeDevicesPath(locatePathName(name)))) {
         descriptor = createCharacterDevice(path, flags, major, minor);
       }
     }

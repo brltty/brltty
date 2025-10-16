@@ -254,7 +254,7 @@ Building the Package
 ====================
 
 Building BRLTTY is a four step process. The first is to run `./autogen` to
-setup your build enviroment for the first time. You typically only need to do
+setup your build environment for the first time. You typically only need to do
 this once. The second is to run `./configure' to prepare the build environment
 for your operating system, and to customize it for your particular requirement.
 The third is to run `make' to compile and link BRLTTY and its drivers. The

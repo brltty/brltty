@@ -461,7 +461,7 @@ usbSubmitRequest (
           break;
 
         default:
-          logMessage(LOG_ERR, "USB endpoint direction not suppported: %d",
+          logMessage(LOG_ERR, "USB endpoint direction not supported: %d",
                      eptx->transferDirection);
           errno = ENOSYS;
           break;

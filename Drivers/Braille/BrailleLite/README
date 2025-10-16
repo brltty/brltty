@@ -61,7 +61,7 @@ Stéphane Doyon and Dave Mielke, September 2001, version 0.5.3:
 -Fixed binding for switching virtual terminal with o-chord... it was wrong.
 Stéphane Doyon, September 2001, version 0.5.2:
 -Added baudrate parameter. Fixed up initialization, in particular a bug
-    with use of qbase buffer unitialized.
+    with use of qbase buffer uninitialized.
 Stéphane Doyon, September 2001, version 0.5.1:
 -Added bindings for CMD_BACK and CR_MSGATTRIB.
 Stéphane Doyon, August 2001
