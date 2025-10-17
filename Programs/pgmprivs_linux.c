@@ -771,6 +771,7 @@ isolateNamespaces (void) {
       logSystemError("unshare");
     } else if (isolatingMounts) {
       if (setRootMountPropagation(MS_SLAVE)) {
+        logMessage(LOG_DEBUG, "root file system is enslaved");
         isolateDevicesDirectory();
       }
     }
