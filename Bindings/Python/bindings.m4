@@ -36,10 +36,16 @@ then
    test -n "${PYTHON_VERSION}" || {
       BRLTTY_PYTHON_QUERY([PYTHON_VERSION], [version])
 
-      test -n "${PYTHON_VERSION}" || {
+      if test -n "${PYTHON_VERSION}"
+      then
+         test "${PYTHON_VERSION}" = "3" || {
+            AC_MSG_WARN([Python version ${PYTHON_VERSION} is not supported])
+            PYTHON_OK=false
+         }
+      else
          AC_MSG_WARN([Python version not defined])
          PYTHON_OK=false
-      }
+      fi
    }
    AC_SUBST([PYTHON_VERSION])
 
