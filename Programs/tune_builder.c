@@ -551,19 +551,14 @@ parseTuneText (TuneBuilder *tb, const wchar_t *text) {
   wchar_t *string = buffer;
   wchar_t *operand;
 
-#undef WCSTOK_HAS_NEXT_ARGUMENT
-#if !( (defined(__MINGW32__) && defined(__i386__)) || defined(__MSDOS__) )
-#define WCSTOK_HAS_NEXT_ARGUMENT
-#endif /* WCSTOK_HAS_NEXT_ARGUMENT */
-
-  #ifdef WCSTOK_HAS_NEXT_ARGUMENT
+  #ifdef WCSTOK_HAS_END_ARGUMENT
   wchar_t *next;
-  #endif /* WCSTOK_HAS_NEXT_ARGUMENT */
+  #endif /* WCSTOK_HAS_END_ARGUMENT */
 
   while ((operand = wcstok(string, delimiters
-                           #ifdef WCSTOK_HAS_NEXT_ARGUMENT
+                           #ifdef WCSTOK_HAS_END_ARGUMENT
                            , &next
-                           #endif /* WCSTOK_HAS_NEXT_ARGUMENT */
+                           #endif /* WCSTOK_HAS_END_ARGUMENT */
                           ))) {
     if (*operand == '#') break;
     if (!parseCommand(tb, operand)) return 0;

@@ -384,6 +384,11 @@ mbsinit (const mbstate_t *ps) {
 #define iswLatin1(wc) (1)
 #endif /* HAVE_WCHAR_H */
 
+#undef WCSTOK_HAS_END_ARGUMENT
+#if !( (defined(__MINGW32__) && defined(__i386__)) || defined(__MSDOS__) )
+#define WCSTOK_HAS_END_ARGUMENT
+#endif /* WCSTOK_HAS_END_ARGUMENT */
+
 #ifdef WORDS_BIGENDIAN
 #define CHARSET_ENDIAN_SUFFIX "BE"
 #else /* WORDS_BIGENDIAN */
