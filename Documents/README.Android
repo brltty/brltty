@@ -386,7 +386,7 @@ an action (e.g. a tap) which the user needs to be able to perform.
 If the application's developer has provided descriptive text
 then that text is rendered.
 If not, then BRLTTY renders a generic description within (parentheses).
-It contains the widget's type, and, if available, it's source code identifier.
+It contains the widget's type, and, if available, its source code identifier.
 
 Global Actions
 ~~~~~~~~~~~~~~
@@ -446,7 +446,7 @@ if your braille device has a braille keyboard
 then you can perform text selection actions
 via chords that also include dots 7 and 8.
 For example, Space + Dots78 + Dots14 (c)
-copies the selected text to Adroid's clipboard.
+copies the selected text to Android's clipboard.
 This works as of Android release 4.3 (Jelly Bean MR2).
 
 .. table:: Text Selection and Clipboard Actions
@@ -537,7 +537,7 @@ in order to help distinguish them from the surrounding text.
 Each annotation is placed immediately before
 the text of the element that it describes.
 It consists of a three-letter tag,
-optionally followed by descriptivE data,
+optionally followed by descriptive data,
 all enclosed within (parentheses).
 Here are some examples:
 
@@ -798,7 +798,7 @@ The ``-u`` option, which is the short form of the ``--no-ui`` option, means to
 bypass the graphical interface.
 
 There may be password prompts for installing packages that are provided by
-various vendours. Any of these can be easily skipped.
+various vendors. Any of these can be easily skipped.
 
 The 64-bit versions of the SDK and NDK depend on 32-bit system libraries. If
 you're using a 64-bit version then you need to first ensure that these are

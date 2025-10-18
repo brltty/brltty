@@ -13,8 +13,8 @@ translate character sequences on the screen into their corresponding contracted
 braille representations.
 
 Contraction tables can usually be found in the ``/etc/brltty/Contraction/``
-directory (see |README.Customize| for more details). SEe
-`Contraction Table list`_ for a list of BRLTTY's contraction tables.
+directory (see |README.Customize| for more details). See
+`Contraction Table List`_ for a list of BRLTTY's contraction tables.
 
 A contraction table consists of a sequence of directives, one per line, that 
 define how character sequences are to be represented in contracted braille.
@@ -47,7 +47,7 @@ Whenever a character needs to be written, its representation as defined via
 within the *representation* operand of every contraction directive should be
 explicitly defined via `The Always Directive`_. If a character's representation
 hasn't been defined then the Unicode Replacement Character (U+FFFD) is used -
-if it's representation hasn't been defined then all eight dots are used.
+if its representation hasn't been defined then all eight dots are used.
 
 The Literal Directive
 ---------------------
@@ -301,7 +301,7 @@ This directive only works if at least ICU version 57 is installed.
 
 This directive relies on data provided by the CLDR package.
 CLDR stands for the Common Locale Data Repository project.
-Knoqwn names for this package include:
+Known names for this package include:
 
 * cldr-emoji-annotation
 * unicode-cldr
@@ -330,7 +330,7 @@ convention (see |README.BrailleDots| for details). The special dot number
 ``0`` means no dots, and may not be used in conjunction with any other dot
 numbers.
 
-The equals (``=``) sign , when used all by itself, means that the *characters*
+The equals (``=``) sign, when used all by itself, means that the *characters*
 operand of the contraction directive is to be written without any translation.
 
 Contraction Table List

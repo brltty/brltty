@@ -412,7 +412,7 @@ The Macro Directive
 
 .. parsed-literal:: macro *keys* *command* ...
 
-Use this directive to bind a sequence of BRLTY commands to a key combination.
+Use this directive to bind a sequence of BRLTTY commands to a key combination.
 
 *keys*
    The key combination being defined.

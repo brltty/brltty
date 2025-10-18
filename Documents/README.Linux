@@ -68,7 +68,7 @@ While we always endeavour to ensure that BRLTTY isn't abusing this freedom,
 we also don't feel that it's worth risking the possibility
 that our code might be hacked.
 To reduce this possibility, therefore, BRLTTY first
-establishes a `safer execution environment`_ within which It only has
+establishes a `safer execution environment`_ within which it only has
 access to those `privileged host operations`_ that it actually needs.
 This is a best security practice known as **least privilege**.
 
@@ -243,7 +243,7 @@ The following actions are taken for each of the state directories:
 
 * Its owning user and group are changed to be
   the user and the primary group of the user
-  that BRLTTY Is executing as.
+  that BRLTTY is executing as.
   The same change is also made to whatever the directory contains.
   This requires the |cap_chown| (temporary) capability
   for a directory or file that's owned by a different user.
@@ -271,7 +271,7 @@ if the last component of its path is its expected name:
 This is a protective measure, given that command line options, etc
 can be used to change the location of a state directory
 to a non-BRLTTY-specific location.
-It prevents BRLTTY from Attempting to gain full access
+It prevents BRLTTY from attempting to gain full access
 to another program's data, or, even worse, to a public directory.
 If it's really necessary to use such a directory
 then it's far better to let a human being take care of it.
@@ -492,9 +492,9 @@ See the ``PR_SET_NO_NEW_PRIVS`` section of the man page for ``prctl``
 for details.
 The quick summary is that, when executing any host command:
 
-* It's set-user-ID bit will be ignored.
-* It's set-group-ID bit will be ignored.
-* It's file capabilities will be ignored.
+* Its set-user-ID bit will be ignored.
+* Its set-group-ID bit will be ignored.
+* Its file capabilities will be ignored.
 
 The current list of approved system calls
 is in the ``syscalls_linux.h`` header,
@@ -930,7 +930,7 @@ after having switched to `the unprivileged user`_.
 
 This situation could be easily resolved
 by granting group read and write permissions to the device.
-This shouldn't be problematic because its owned by the ``root`` group.
+This shouldn't be problematic because it's owned by the ``root`` group.
 Even better, of course, would be to give the device its own group
 (e.g. named ``uinput``).
 
@@ -942,7 +942,7 @@ Udev rule to add an ACL (access control list) entry to the device::
 
 If BRLTTY finds that it isn't permitted to open the device
 (perhaps because the Udev rule isn't present)
-then its fallback method Is to create a private copy of the device file
+then its fallback method is to create a private copy of the device file
 within its |writable directory|.
 This requires the |cap_mknod| capability.
 
@@ -991,7 +991,7 @@ It's used for:
 * Creating a virtual LED device in order to
   monitor what the keyboard LEDs are showing.
   This is done to support the generation of
-  An audio-based rendering of LED state changes.
+  an audio-based rendering of LED state changes.
 
 Creating Private Copies of Device Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

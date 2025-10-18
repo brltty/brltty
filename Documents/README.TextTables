@@ -45,12 +45,12 @@ follows:
 2) If the character is within the Unicode private use row U+F000 through U+F0FF
    then its low-order byte is:
 
-   A) interpreted as a single-byte character within the locAL character set
+   A) interpreted as a single-byte character within the local character set
    B) translated to Unicode
    C) reprocessed
 
 3) An explicit representation (defined via `The Char Directive`_,
-   `The Glyph Directive`_, or `The Byte Directive`_.
+   `The Glyph Directive`_, or `The Byte Directive`_).
 
 4) An equivalent representation (defined via `The Alias Directive`_).
 
