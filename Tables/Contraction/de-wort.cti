@@ -673,7 +673,8 @@ always kaufpreis 13-16-124-1234-1235-146-234
 always kavallerie 13-1-1236-1-12345-12456-346 shouldn't use the aller-contraction
 prfword kavallerien 13-1-1236-1-12345-12456-24-14 shouldn't use the aller-contraction
 always kavallerist 13-1-1236-1-12345-12456-24-23456 shouldn't use the aller-contraction
-always keyboard =
+always board =
+always mainboard =
 always kitaleit 13-24-2345-1-123-146-2345 shouldn't use the al-contraction
 always klageruf 13-123-1-12346-123-136-124
 sufword klang 13-123-235-1245 shouldn't use the lang-contraction
@@ -1539,7 +1540,16 @@ always tereignis 2345-12456-146-1245-1346
 sufword regen 1235-15-1245-14
 
 before cost always alltags 1-12345-2345-1-1245-234
+before cost always ausgangs 16-234-1245-235-1245-234
+before cost always betriebs 23-2345-1235-346-12-234
+prfword betriebst 23-2345-1235-346-12-23456
+before cost always bezirks 23-1356-24-1235-13-234
+before cost always drillings 145-1235-24-12345-35-1245-234
+before cost always eingangs 1246-1245-235-1245-234
 before cost always funktions 124-256-13-2345-24-135-1345-234
+before cost always gesangs 12346-234-235-1245-234
 before cost always gesundheits 12346-234-256-145-125-234
+before cost always jahres 245-1235-123456
 before cost always realitäts 1235-15-25-5-345-234
 before cost always sicherheits 234-3456-12456-125-234
+before cost always vorstands 2-26-2-23456-234
