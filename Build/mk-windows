@@ -19,7 +19,7 @@
 
 . "`dirname "${0}"`/mk-prologue.sh"
 windowsDirectory="${sourceRoot}/Windows"
-. "${windowsDirectory}/mingw.sh"
+. "${windowsDirectory}/mingw32.sh"
 
 readonly defaultUsbPackageNames=( libusb libusb-1.0 )
 
@@ -38,7 +38,7 @@ processExtraProgramParameters() {
 optionalProgramParameters
 parseProgramArguments "${@}"
 
-mkIgnoreMismatch "^mkwin: revision identifier: "
+mkIgnoreMismatch "^mkwin32: revision identifier: "
 mkIgnoreMismatch "^ *Creating library "
 mkIgnoreMismatch "^Successfully compiled: "
 
@@ -54,7 +54,7 @@ do
    mkPlatformName="Windows[${usbPackage}]"
    mkOldLogName="Windows-${usbPackage}"
    mkNewLogName="${programName}-${usbPackage}"
-   mkBuild "${windowsDirectory}/mkwin" -P "${pythonLocation}" -u "${usbPackage}" -- "${sourceRoot}"
+   mkBuild "${windowsDirectory}/mkwin32" -P "${pythonLocation}" -u "${usbPackage}" -- "${sourceRoot}"
 done
 
 exit 0

@@ -1,15 +1,15 @@
-mkwin: revision identifier: BRLTTY-6.6-60-g2ce4a91a
-mkwin: MinGW command not found: linuxdoc
-mkwin: copying source tree
-mkwin: applying patches
+mkwin32: revision identifier: BRLTTY-6.6-60-g2ce4a91a
+mkwin32: MinGW command not found: linuxdoc
+mkwin32: copying source tree
+mkwin32: applying patches
 patching file Programs/usb_libusb-1.0.c
 patching file Programs/usb_libusb.c
-mkwin: configuring build
+mkwin32: configuring build
 ../source/brltty-prologue.bash: line 287: declare: -A: invalid option
 declare: usage: declare [-afFirtx] [-p] [name[=value] ...]
 ../source/brltty-prologue.bash: line 387: declare: -n: invalid option
 declare: usage: declare [-afFirtx] [-p] [name[=value] ...]
-mkwin: building programs
+mkwin32: building programs
 In file included from c:\Program Files (x86)\Python311-32\include/Python.h:86,
                  from ../../../source/Bindings/Python/bindings.c:25:
 c:\Program Files (x86)\Python311-32\include/cpython/pytime.h:184:12: warning: 'struct timeval' declared inside parameter list will not be visible outside of this definition or declaration
@@ -42,11 +42,11 @@ brlapi.auto.c:33285:47: note: format string is defined here
 brlapi.auto.c:33284:13: warning: too many arguments for format [-Wformat-extra-args]
 33284 |             "%s.%s size changed, may indicate binary incompatibility. "
       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-mkwin: building documents
+mkwin32: building documents
 linuxdoc is not installed - document will not be made
 linuxdoc is not installed - document will not be made
 linuxdoc is not installed - document will not be made
-mkwin: installing files
+mkwin32: installing files
 c:\Program Files (x86)\Python311-32\Lib\site-packages\setuptools\_distutils\cmd.py:66: SetuptoolsDeprecationWarning: setup.py install is deprecated.
 !!
 
@@ -75,14 +75,14 @@ c:\Program Files (x86)\Python311-32\Lib\site-packages\setuptools\_distutils\cmd.
   self.initialize_options()
 c:\Program Files (x86)\Python311-32\Lib\site-packages\wheel\bdist_wheel.py:109: RuntimeWarning: Config variable 'Py_DEBUG' is unset, Python ABI tag may be incorrect
   if get_flag("Py_DEBUG", hasattr(sys, "gettotalrefcount"), warn=(impl == "cp")):
-mkwin: updating files
-mkwin: USB package: libusb
-mkwin: installing package files: LibUSB (aka LibUSB-Win32)
+mkwin32: updating files
+mkwin32: USB package: libusb
+mkwin32: installing package files: LibUSB (aka LibUSB-Win32)
    Creating library brlapi.lib and object brlapi.exp
-mkwin: creating configurator
-Successfully compiled: C:\Users\dave\AppData\Local\Temp\brltty-mkwin\install\brltty-win-6.6-60-libusb\brlttycnf.exe
-mkwin: converting text files
-mkwin: creating archive
-mkwin: creating installer
-mkwin: cleaning up
-mkwin: done
+mkwin32: creating configurator
+Successfully compiled: C:\Users\dave\AppData\Local\Temp\brltty-mkwin32\install\brltty-win-6.6-60-libusb\brlttycnf.exe
+mkwin32: converting text files
+mkwin32: creating archive
+mkwin32: creating installer
+mkwin32: cleaning up
+mkwin32: done
