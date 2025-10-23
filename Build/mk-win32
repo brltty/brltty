@@ -51,8 +51,8 @@ read <"${windowsDirectory}/python-location" pythonLocation || exit "${?}"
 
 for usbPackage in "${usbPackageNames[@]}"
 do
-   mkPlatformName="Windows[${usbPackage}]"
-   mkOldLogName="Windows-${usbPackage}"
+   mkPlatformName="win32[${usbPackage}]"
+   mkOldLogName="Windows32-${usbPackage}"
    mkNewLogName="${programName}-${usbPackage}"
    mkBuild "${windowsDirectory}/mkwin32" -P "${pythonLocation}" -u "${usbPackage}" -- "${sourceRoot}"
 done
