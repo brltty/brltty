@@ -1672,7 +1672,6 @@ BRLTTY_BRAILLE_DRIVER([ts], [TSI])
 BRLTTY_BRAILLE_DRIVER([tt], [TTY], [$(CURSES_LIBS)])
 BRLTTY_BRAILLE_DRIVER([vd], [VideoBraille])
 BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
-BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 test -n "${gui_toolkit_package}" && {
    BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XTK_LIBS) $(X11_LIBS)])
