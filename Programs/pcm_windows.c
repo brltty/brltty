@@ -138,7 +138,7 @@ openPcmDevice (int errorLevel, const char *device) {
   pcm->bufSize = 0;
 
   if ((mmres = waveOutOpen(&pcm->handle, pcm->deviceID,
-	  &pcm->format, (DWORD) pcm->done, 0, CALLBACK_EVENT)) != MMSYSERR_NOERROR) {
+	  &pcm->format, (DWORD_PTR) pcm->done, 0, CALLBACK_EVENT)) != MMSYSERR_NOERROR) {
     LogWaveOutError(mmres, errorLevel, "opening PCM device");
     goto outEvent;
   }
@@ -171,7 +171,7 @@ updateWaveOutFormat(PcmDevice *pcm, WAVEFORMATEX *format, const char *errmsg) {
     waveOutClose(pcm->handle);
     pcm->handle = INVALID_HANDLE_VALUE;
     if ((mmres = waveOutOpen(&pcm->handle, pcm->deviceID, format,
-	    (DWORD) pcm->done, 0, CALLBACK_EVENT)) == MMSYSERR_NOERROR) {
+	    (DWORD_PTR) pcm->done, 0, CALLBACK_EVENT)) == MMSYSERR_NOERROR) {
       pcm->format = *format;
       return 1;
     }

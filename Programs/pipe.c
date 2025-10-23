@@ -146,8 +146,8 @@ createWindowsPipe (NamedPipeObject *obj) {
                                                  PIPE_ACCESS_INBOUND | FILE_FLAG_OVERLAPPED,
                                                  PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
                                                  1, 0, 0, 0, NULL)) != INVALID_HANDLE_VALUE) {
-      logMessage(LOG_DEBUG, "named pipe created: %s: handle=%u",
-                 obj->host.path, (unsigned int)obj->input.descriptor);
+      logMessage(LOG_DEBUG, "named pipe created: %s: handle=%"PRIfd,
+                 obj->host.path, obj->input.descriptor);
 
       return 1;
     } else {

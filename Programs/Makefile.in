@@ -966,7 +966,7 @@ spktest.$O:
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) $(CHARSET_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) report.$O
+SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) $(CHARSET_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) kbd_keycodes.$O report.$O
 
 scrtest$X: $(SCRTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
