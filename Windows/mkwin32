@@ -108,7 +108,7 @@ installPackage_winusb() {
 }
 
 . "`dirname "${0}"`/../brltty-prologue.sh"
-. "${programDirectory}/mingw.sh"
+. "${programDirectory}/mingw32.sh"
 
 defaultUsbPackage="libusb"
 defaultTemporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"

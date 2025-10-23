@@ -280,4 +280,4 @@ getPythonLocation() {
    return 0
 }
 
-[ "${MSYSTEM}" = "MINGW32" ] || semanticError "this script is for MinGW only"
+[ "${MSYSTEM}" = "MINGW32" ] || semanticError "this script is for MinGW32 only"

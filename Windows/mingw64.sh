@@ -1,4 +1,3 @@
-#!/bin/sh
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -17,27 +16,4 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-listInstalledPackages() {
-   pacman --query --native | awk '{print $1}'
-}
-
-installPackages() {
-   pacman --sync --needed --quiet --noprogressbar --noconfirm -- "${@}"
-}
-
-removePackages() {
-   pacman --remove --noprogressbar --noconfirm -- "${@}"
-}
-
-describePackage() {
-   pacman --sync --info -- "${1}"
-}
-
-whichPackage() {
-   pacman --files -- "${1}"
-}
-
-searchPackage() {
-   pacman --sync --search -- "${1}"
-}
-
+[ "${MSYSTEM}" = "MINGW64" ] || semanticError "this script is for MinGW64 only"
