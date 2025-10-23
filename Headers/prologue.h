@@ -274,7 +274,11 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define setSystemErrno() setErrno(getSystemError())
 #define setSocketErrno() setErrno(getSocketError())
 
-#if defined(__MINGW32__)
+#if defined(__MINGW64__)
+#define PRIsize "llu"
+#define PRIssize "lld"
+
+#elif defined(__MINGW32__)
 #define PRIsize "u"
 #define PRIssize "d"
 
