@@ -254,7 +254,7 @@ logTask "configuring build"
 
 . ./brltty-config.sh
 buildVersion="${BRLTTY_VERSION}-${buildRevision}"
-buildName="${BRLTTY_TARNAME}-win-${buildVersion}-${usbPackage}"
+buildName="${BRLTTY_TARNAME}-win32-${buildVersion}-${usbPackage}"
 
 logTask "building programs"
 make -s

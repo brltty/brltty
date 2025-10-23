@@ -638,12 +638,10 @@ AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 case "${host_os}"
 in
    mingw*)
-      CPPFLAGS="${CPPFLAGS} -I/usr/include"
-      LIBS="$LIBS -L/lib"
       BRLTTY_HAVE_WINDOWS_LIBRARY([ws2_32])
       BRLTTY_HAVE_WINDOWS_LIBRARY([gdi32])
       BRLTTY_HAVE_WINDOWS_LIBRARY([winmm])
-      AC_SEARCH_LIBS([regexec], [systre regex])
+      AC_SEARCH_LIBS([regexec], [systre])
       ;;
    cygwin*)
       BRLTTY_HAVE_WINDOWS_LIBRARY([gdi32])

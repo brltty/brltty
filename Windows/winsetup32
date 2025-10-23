@@ -331,7 +331,6 @@ installMingwPackage msys-unzip /bin/unzip
 installMingwPackage msys-wget /bin/wget
 installMingwPackage msys-zip /bin/zip
 
-installMingwPackage msys-libregex /usr/include/regex.h
 installMingwPackage mingw32-libpdcurses /mingw/include/curses.h
 installMingwPackage mingw32-pthreads-w32 /mingw/include/pthread.h
 installMingwPackage mingw32-tcl /mingw/bin/tclsh

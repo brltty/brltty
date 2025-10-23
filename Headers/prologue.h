@@ -137,22 +137,37 @@ static inline void __sync_synchronize (void) {}
 #ifndef WINVER
 #define WINVER _WIN32_WINNT
 #endif /* WINVER */
+#endif /* WINDOWS */
 
+#if defined(__MSDOS__)
+#undef WCHAR_MAX
+
+#elif defined(HAVE_WCHAR_H)
+#include <wchar.h>
+#include <wctype.h>
+#endif /* HAVE_WCHAR_H */
+
+#ifdef WINDOWS
 #ifdef __MINGW32__
+#ifndef __MINGW64__
 #ifndef __USE_W32_SOCKETS
 #define __USE_W32_SOCKETS
 #endif /* __USE_W32_SOCKETS */
+#endif /* __MINGW64__ */
 
+#include <winsock2.h>
 #include <ws2tcpip.h>
 #endif /* __MINGW32__ */
 
 #include <windows.h>
 #include <winerror.h>
-#endif /* WINDOWS */
 
 #ifdef __MINGW32__
+#ifndef __MINGW64__
 #include <_mingw.h>
+#endif /* __MINGW64__ */
 #endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
 /*
  * The (poorly named) macro "interface" is unfortunately defined within
@@ -277,15 +292,6 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #else /* format for key_t */
 #define PRIkey PRIX32
 #endif /* format for key_t */
-
-#if defined(__MSDOS__)
-#undef WCHAR_MAX
-
-#elif defined(HAVE_WCHAR_H)
-#include <wchar.h>
-#include <wctype.h>
-
-#endif /* HAVE_WCHAR_H */
 
 #ifdef WCHAR_MAX
 #define WC_C(wc) L##wc

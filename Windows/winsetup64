@@ -26,18 +26,17 @@ umask 022
 readonly toolsDirectory="${programDirectory}/../Tools"
 
 readonly packageList=(
+   mingw64/mingw-w64-x86_64-libiconv
    mingw64/mingw-w64-x86_64-libsystre
+   mingw64/mingw-w64-x86_64-ncurses
 
-   msys/libiconv-devel
-   msys/ncurses-devel
-
-   msys/tcl
    msys/autoconf-wrapper
-
    msys/binutils
+   msys/tcl
+
    msys/make
-   msys/gcc
-   msys/clang
+   mingw64/mingw-w64-x86_64-gcc
+   mingw64/mingw-w64-x86_64-clang
 
    msys/tar
    msys/gzip
