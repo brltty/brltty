@@ -946,7 +946,7 @@ brltty-lsinc.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) report.$O $(TTB_OBJECTS) $(KTB_OBJECTS) $(PREFS_OBJECTS) $(CHARSET_OBJECTS) dataarea.$O cmd.$O cmd_queue.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) hidkeys.$O learn.$O
+BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) report.$O $(TTB_OBJECTS) $(KTB_OBJECTS) $(PREFS_OBJECTS) $(CHARSET_OBJECTS) dataarea.$O cmd.$O cmd_queue.$O drivers.$O cmd_brlapi.$O driver.$O $(BRAILLE_OBJECTS) hidkeys.$O learn.$O
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(HID_LIBS) $(LDLIBS)

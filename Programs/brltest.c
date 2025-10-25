@@ -299,6 +299,11 @@ getScreenCommandContext (void) {
   return KTB_CTX_DEFAULT;
 }
 
+int
+currentVirtualTerminal (void) {
+  return 0;
+}
+
 #include "alert.h"
 
 void
