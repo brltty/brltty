@@ -814,8 +814,8 @@ AC_CACHE_CHECK(
                  return 0;
                }
             ]]),
-         [brltty_cv_function_$1=yes],
-         [brltty_cv_function_$1=no]
+            [brltty_cv_function_$1=yes],
+            [brltty_cv_function_$1=no]
          ])
       fi
    ]
