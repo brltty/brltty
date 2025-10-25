@@ -115,9 +115,9 @@ readScreen (short left, short top, short width, short height, ScreenCharacter *b
   const ScreenCharacter *end = character + (box.width * box.height);
 
   while (character < end) {
-    wchar_t *text = &character->text;
+    uint32_t text = character->text;
 
-    if ((*text <= 0) || (*text > UNICODE_LAST_CHARACTER)) {
+    if (text > UNICODE_LAST_CHARACTER) {
       // This is not a valid Unicode character - return the replacement character.
 
       size_t index = character - buffer;
@@ -125,11 +125,11 @@ readScreen (short left, short top, short width, short height, ScreenCharacter *b
       unsigned int row = box.top + (index / box.width);
 
       logMessage(LOG_ERR,
-        "invalid character U+%04lX on screen at [%u,%u]",
-        (unsigned long)*text, column, row
+        "invalid character U+%04"PRIX32 " on screen at [%u,%u]",
+        text, column, row
       );
 
-      *text = UNICODE_REPLACEMENT_CHARACTER;
+      character->text = UNICODE_REPLACEMENT_CHARACTER;
     }
 
     character += 1;
