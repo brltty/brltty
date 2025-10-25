@@ -117,7 +117,7 @@ readScreen (short left, short top, short width, short height, ScreenCharacter *b
   while (character < end) {
     uint32_t text = character->text;
 
-    if (text > UNICODE_LAST_CHARACTER) {
+    if (!text || (text > UNICODE_LAST_CHARACTER)) {
       // This is not a valid Unicode character - return the replacement character.
 
       size_t index = character - buffer;
