@@ -22,22 +22,13 @@ DRIVER_USAGE = AzerBraille, Clio, NoteBraille, Scriba, Esys, Esytime, Iris, b.no
 DRIVER_VERSION = 2.0
 DRIVER_DEVELOPERS = Yannick PLASSIARD <yan@mistigri.org>, Olivier BERT <obert01@mistigri.org>, Nicolas PITRE <nico@fluxnic.net>
 include $(SRC_TOP)braille.mk
+BRL_OBJECTS = eu_braille.$O eu_clio.$O eu_esysiris.$O
 
-SRC_FILES = eu_braille.c eu_clio.c eu_esysiris.c
+braille.$O: $(BRL_OBJECTS)
+	$(MKREL) $@ $(BRL_OBJECTS)
 
-OBJ_FILES = $(SRC_FILES:.c=.$O)
-
-braille.$O: $(OBJ_FILES)
-	$(MKREL) $@ $(OBJ_FILES)
-
-eu_braille.$O:
-	$(CC) $(BRL_CFLAGS) -o $@ -c $(SRC_DIR)/eu_braille.c
-
-eu_clio.$O:
-	$(CC) $(BRL_CFLAGS) -o $@ -c $(SRC_DIR)/eu_clio.c
-
-eu_esysiris.$O:
-	$(CC) $(BRL_CFLAGS) -o $@ -c $(SRC_DIR)/eu_esysiris.c
+$(BRL_OBJECTS):
+	$(CC) $(BRL_CFLAGS) -o $@ -c $(SRC_DIR)/$<
 
 ###############################################################################
 

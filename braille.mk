@@ -16,19 +16,21 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-TXT2HLP = $(BLD_TOP)$(PGM_DIR)/txt2hlp$X
-$(TXT2HLP)$X:
-	cd $(@D) && $(MAKE) $(@F)
+BRL_OBJECTS = braille.$O
 
 BRL_DEFS = '-DDRIVER_NAME=$(DRIVER_NAME)' '-DDRIVER_CODE=$(DRIVER_CODE)' '-DDRIVER_COMMENT="$(DRIVER_COMMENT)"' '-DDRIVER_VERSION="$(DRIVER_VERSION)"' '-DDRIVER_DEVELOPERS="$(DRIVER_DEVELOPERS)"'
 BRL_CFLAGS = $(LIBCFLAGS) $(BRL_DEFS)
 BRL_CXXFLAGS = $(LIBCXXFLAGS) $(BRL_DEFS)
+
 BRL_MOD_NAME = $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)b$(DRIVER_CODE)
 BRL_MOD_FILE = $(BRL_MOD_NAME).$(MOD_EXT)
 $(BRL_MOD_FILE): braille.$O
 	$(INSTALL_DIRECTORY) $(@D)
 	$(MKSHR) $(@) braille.$O $(BRL_OBJS)
 braille-driver: $(BRL_MOD_FILE)
+
+%.$O: $(SRC_TOP)$(PGM_DIR)/%.c $(SRC_TOP)$(HDR_DIR)/%.h
+	$(CC) $(BRL_CFLAGS) -c $<
 
 install-api::
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
@@ -41,4 +43,3 @@ uninstall::
 
 clean::
 	-rm -f $(BRL_MOD_NAME).*
-	-rm -f $(BLD_TOP)$(DAT_DIR)/brltty-$(DRIVER_CODE)[-.]*

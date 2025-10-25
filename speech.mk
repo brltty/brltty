@@ -16,15 +16,21 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+SPK_OBJECTS = speech.$O
+
 SPK_DEFS ='-DDRIVER_NAME=$(DRIVER_NAME)' '-DDRIVER_CODE=$(DRIVER_CODE)' '-DDRIVER_COMMENT="$(DRIVER_COMMENT)"' '-DDRIVER_VERSION="$(DRIVER_VERSION)"' '-DDRIVER_DEVELOPERS="$(DRIVER_DEVELOPERS)"'
 SPK_CFLAGS = $(LIBCFLAGS) $(SPK_DEFS)
 SPK_CXXFLAGS = $(LIBCXXFLAGS) $(SPK_DEFS)
+
 SPK_MOD_NAME = $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)s$(DRIVER_CODE)
 SPK_MOD_FILE = $(SPK_MOD_NAME).$(MOD_EXT)
 $(SPK_MOD_FILE): speech.$O
 	$(INSTALL_DIRECTORY) $(@D)
 	$(MKSHR) $(@) speech.$O $(SPK_OBJS)
 speech-driver: $(SPK_MOD_FILE)
+
+%.$O: $(SRC_TOP)$(PGM_DIR)/%.c $(SRC_TOP)$(HDR_DIR)/%.h
+	$(CC) $(spk_CFLAGS) -c $<
 
 install::
 
