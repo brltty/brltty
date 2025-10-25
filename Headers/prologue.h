@@ -194,6 +194,23 @@ extern void usleep (int usec);
 #endif /* usleep */
 #endif /* __MINGW32__ */
 
+#ifdef __MINGW64__
+#ifdef __clang__
+static inline int 
+ffs (int i) {
+  if (i == 0) return 0;
+  int bit = 1;
+
+  while (!(i & 1)) {
+    i >>= 1;
+    bit += 1;
+  }
+
+  return bit;
+}
+#endif /* __clang__ */
+#endif /* __MINGW64__ */
+
 #ifdef GRUB_RUNTIME
 #undef NESTED_FUNC_ATTR
 #define NESTED_FUNC_ATTR __attribute__((__regparm__(1)))
