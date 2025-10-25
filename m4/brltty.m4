@@ -418,11 +418,11 @@ AC_SUBST([brltty_internal_codes_$1])
 AC_SUBST([brltty_internal_names_$1])
 
 set -- ${brltty_internal_codes_$1} ${brltty_external_codes_$1}
-AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_$2_codes]), ["${*}"], 
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_$2_codes]), ["${*}"],
                    [Define this to be a string containing a list of the $1 $2 codes.])
 
 AC_SUBST([default_$1_$2], ["${1}"])
-AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([default_$1_$2]), ["${1}"], 
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([default_$1_$2]), ["${1}"],
                    [Define this to be a string containing the default $1 $2 code.])
 
 $1_driver_libraries=""
@@ -759,18 +759,24 @@ AC_CACHE_CHECK(
    [if DLL $1 can be loaded],
    [brltty_cv_dll_$1],
    [
-      AC_RUN_IFELSE(
-         [
-            AC_LANG_SOURCE([[
-               #include <windows.h>
-               int main () {
-                  return !LoadLibrary("$1.DLL");
-               }
-            ]])
-         ],
-         [brltty_cv_dll_$1=yes],
-         [brltty_cv_dll_$1=no]
-      )
+      # If cross-compiling we cannot run the test program.
+      # Assume that all Windows libraries exist.
+      if test "x${cross_compiling}" = "xyes"; then
+         brltty_cv_dll_$1=yes
+      else
+         AC_RUN_IFELSE(
+            [
+               AC_LANG_SOURCE([[
+                  #include <windows.h>
+                  int main () {
+                     return !LoadLibrary("$1.DLL");
+                  }
+               ]])
+            ],
+            [brltty_cv_dll_$1=yes],
+            [brltty_cv_dll_$1=no]
+         )
+      fi
    ]
 )
 if test "${brltty_cv_dll_$1}" = "yes"
@@ -787,25 +793,31 @@ AC_CACHE_CHECK(
    [if function $1 in DLL $2 exists],
    [brltty_cv_function_$1],
    [
-      AC_RUN_IFELSE([
-         AC_LANG_SOURCE([[
-            #include <windows.h>
-            #include <stdio.h>
-            #include <errno.h>
+      # When cross-compiling we cannot run the test program.
+      # Use a link-time check for the symbol.
+      if test "x${cross_compiling}" = "xyes"; then
+         AC_CHECK_LIB([$2], [$1], [brltty_cv_function_$1=yes], [brltty_cv_function_$1=no])
+      else
+         AC_RUN_IFELSE([
+            AC_LANG_SOURCE([[
+               #include <windows.h>
+               #include <stdio.h>
+               #include <errno.h>
 
-            int
-            main (void) {
-              HMODULE module;
-              HINSTANCE instance;
-              if (!(instance = LoadLibrary("$2.dll"))) return 1;
-              if (!(module = GetModuleHandle("$2.dll"))) return 2;
-              if (!(GetProcAddress(module, "$1"))) return 3;
-              return 0;
-            }
-         ]]),
+               int
+               main (void) {
+                 HMODULE module;
+                 HINSTANCE instance;
+                 if (!(instance = LoadLibrary("$2.dll"))) return 1;
+                 if (!(module = GetModuleHandle("$2.dll"))) return 2;
+                 if (!(GetProcAddress(module, "$1"))) return 3;
+                 return 0;
+               }
+            ]]),
          [brltty_cv_function_$1=yes],
          [brltty_cv_function_$1=no]
-      ])
+         ])
+      fi
    ]
 )
 if test "${brltty_cv_function_$1}" = "yes"
@@ -844,4 +856,3 @@ $1=$($PKG_CONFIG --silence-errors --variable="$3" -- "$2")
 test -n "${$1}" || $1="$4"
 AC_SUBST([$1])
 ])
-
