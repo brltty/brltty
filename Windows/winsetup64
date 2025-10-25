@@ -28,11 +28,14 @@ readonly toolsDirectory="${programDirectory}/../Tools"
 readonly packageList=(
    mingw64/mingw-w64-x86_64-libiconv
    mingw64/mingw-w64-x86_64-libsystre
+   mingw64/mingw-w64-x86_64-libusb
+   mingw64/mingw-w64-x86_64-libusb-win32
    mingw64/mingw-w64-x86_64-ncurses
 
    msys/autoconf-wrapper
    msys/binutils
    msys/tcl
+   msys/git
 
    msys/make
    mingw64/mingw-w64-x86_64-gcc
