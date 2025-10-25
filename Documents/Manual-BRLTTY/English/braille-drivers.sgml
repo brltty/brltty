@@ -51,10 +51,13 @@ EcoBraille
 EuroBraille
   |AzerBraille@
   |Clio@
-  |Esys@
-  |Iris@
   |NoteBraille@
   |Scriba@
+  |Esys@
+  |Esytime@
+  |Iris@
+  |b.note@
+  |b.book@
 FrankAudiodata
   |B2K84@
 FreedomScientific

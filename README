@@ -168,7 +168,8 @@ The following braille displays are supported:
 -  CombiBraille [25/45/85]
 -  DotPad
 -  EcoBraille [20/40/80]
--  EuroBraille [AzerBraille, Clio, Esys, Iris, NoteBraille, Scriba]
+-  EuroBraille [AzerBraille, Clio, NoteBraille, Scriba,
+                Esys, Esytime, Iris, b.note, b.book]
 -  FrankAudiodata [B2K84]
 -  FreedomScientific [Focus 1 44/70/84, Focus 2 40/80, Focus Blue 14/40/80,
                       PAC Mate 20/40]
