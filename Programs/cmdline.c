@@ -382,6 +382,39 @@ showOptions (
 }
 
 static void
+showHelp (
+  OptionProcessingInformation *info,
+  const CommandLineUsage *usage
+) {
+  FILE *usageStream = stdout;
+
+  size_t width = UINT16_MAX;
+  getConsoleSize(&width, NULL);
+  char line[width+1];
+
+  {
+    const char *purpose = gettext(usage->purpose);
+
+    if (purpose && *purpose) {
+      showWrappedText(usageStream, purpose, line, 0, width);
+      fputc('\n', usageStream);
+    }
+  }
+
+  showSyntax(usageStream, !!info->options->count, usage->parameters);
+  showOptions(usageStream, line, width, info);
+
+  {
+    const char *const *const *notes = usage->notes;
+
+    if (notes && *notes) {
+      fputc('\n', usageStream);
+      showFormattedLines(usageStream, notes, line, width);
+    }
+  }
+}
+
+static void
 processCommandLine (
   OptionProcessingInformation *info,
   int *argumentCount,
@@ -710,39 +743,9 @@ processCommandLine (
     }
   }
 
+  if (info->showHelp) showHelp(info, usage);
   *argumentVector += optind;
   *argumentCount -= optind;
-
-  if (info->showHelp) {
-    FILE *usageStream = stdout;
-
-    size_t width = UINT16_MAX;
-    getConsoleSize(&width, NULL);
-    char line[width+1];
-
-    {
-      const char *purpose = gettext(usage->purpose);
-
-      if (purpose && *purpose) {
-        showWrappedText(usageStream, purpose, line, 0, width);
-        fputc('\n', usageStream);
-      }
-    }
-
-    showSyntax(usageStream, !!info->options->count, usage->parameters);
-    showOptions(usageStream, line, width, info);
-
-    {
-      const char *const *const *notes = usage->notes;
-
-      if (notes && *notes) {
-        fputc('\n', usageStream);
-        showFormattedLines(usageStream, notes, line, width);
-      }
-    }
-
-    info->showHelp = 1;
-  }
 
 #ifdef HAVE_GETOPT_LONG
   {
