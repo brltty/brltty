@@ -51,7 +51,7 @@ main (int argc, char *argv[]) {
         .parameters = "attributes-table",
       }
     };
-    PROCESS_OPTIONS(descriptor, argc, argv);
+    PROCESS_COMMAND_LINE(descriptor, argc, argv);
   }
 
   if (argc) {

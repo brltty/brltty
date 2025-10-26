@@ -415,7 +415,7 @@ showHelp (
 }
 
 static void
-processCommandLine (
+processOptions (
   OptionProcessingInformation *info,
   int *argumentCount,
   char ***argumentVector
@@ -1182,7 +1182,7 @@ exitOptions (void *data) {
 }
 
 ProgramExitStatus
-processOptions (const CommandLineDescriptor *descriptor, int *argumentCount, char ***argumentVector) {
+processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount, char ***argumentVector) {
   uint8_t ensuredSettings[descriptor->options->count];
   memset(ensuredSettings, 0, sizeof(ensuredSettings));
 
@@ -1197,7 +1197,7 @@ processOptions (const CommandLineDescriptor *descriptor, int *argumentCount, cha
 
   onProgramExit("options", exitOptions, (void *)descriptor->options);
   beginProgram(*argumentCount, *argumentVector);
-  processCommandLine(&info, argumentCount, argumentVector);
+  processOptions(&info, argumentCount, argumentVector);
 
   if (info.showHelp) {
     showHelp(&info, &descriptor->usage);

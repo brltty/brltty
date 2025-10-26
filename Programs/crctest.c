@@ -122,7 +122,7 @@ main (int argc, char *argv[]) {
       }
     };
 
-    PROCESS_OPTIONS(descriptor, argc, argv);
+    PROCESS_COMMAND_LINE(descriptor, argc, argv);
   }
 
   if (!validateOptions()) return PROG_EXIT_SYNTAX;

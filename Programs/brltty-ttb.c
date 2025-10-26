@@ -2516,7 +2516,7 @@ main (int argc, char *argv[]) {
       }
     };
 
-    PROCESS_OPTIONS(descriptor, argc, argv);
+    PROCESS_COMMAND_LINE(descriptor, argc, argv);
   }
 
   if (argc == 0) {

@@ -904,7 +904,7 @@ brlttyPrepare (int argc, char *argv[]) {
       }
     };
 
-    ProgramExitStatus exitStatus = processOptions(&descriptor, &argc, &argv);
+    ProgramExitStatus exitStatus = processCommandLine(&descriptor, &argc, &argv);
 
     switch (exitStatus) {
       case PROG_EXIT_SYNTAX:

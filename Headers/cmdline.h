@@ -27,13 +27,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern ProgramExitStatus processOptions (
+extern ProgramExitStatus processCommandLine (
   const CommandLineDescriptor *descriptor,
   int *argumentCount, char ***argumentVector
 );
 
-#define PROCESS_OPTIONS(descriptorVariable, argcVariable, argvVariable) { \
-  ProgramExitStatus exitStatus = processOptions(&descriptorVariable, &argcVariable, &argvVariable); \
+#define PROCESS_COMMAND_LINE(descriptorVariable, argcVariable, argvVariable) { \
+  ProgramExitStatus exitStatus = processCommandLine(&descriptorVariable, &argcVariable, &argvVariable); \
   if (exitStatus == PROG_EXIT_FORCE) return PROG_EXIT_SUCCESS; \
   if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus; \
 }
