@@ -24,7 +24,7 @@ DRIVER_DEVELOPERS = Yannick PLASSIARD <yan@mistigri.org>, Olivier BERT <obert01@
 BRL_OBJECTS = braille.$O clio.$O esysiris.$O
 include $(SRC_TOP)braille.mk
 
-$(BRL_OBJECTS): %.o: %.c
+$(BRL_OBJECTS): %.o: $(SRC_DIR)/%.c
 	$(CC) $(BRL_CFLAGS) -o $@ -c $<
 
 ###############################################################################

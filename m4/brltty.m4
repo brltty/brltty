@@ -482,7 +482,7 @@ if test "${brltty_enabled_$1_support}" != "no"
 then
    if test -n "${brltty_internal_codes_$1}"
    then
-      [$1_driver_objects="`echo "${brltty_internal_names_$1}" | sed -e 's%\([^ ][^ ]*\)%$(BLD_TOP)Drivers/$2/\1/$1.$(ARCH_EXT)%g'`"]
+      [$1_driver_objects="`echo "${brltty_internal_names_$1}" | sed -e 's%\([^ ][^ ]*\)%$(BLD_TOP)Drivers/$2/\1/$1.$(ARC_EXT)%g'`"]
       $1_help="$1-help"
    fi
 
