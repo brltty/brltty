@@ -47,7 +47,7 @@ typedef struct {
   const CommandLineOptions *const options;
   uint8_t *const ensuredSettings;
 
-  uint8_t exitImmediately:1;
+  uint8_t showHelp:1;
   uint8_t warning:1;
   uint8_t syntaxError:1;
 } OptionProcessingInformation;
@@ -501,7 +501,6 @@ processCommandLine (
   opterr = 0;
   optind = 1;
   int lastOptInd = -1;
-  int optHelp = 0;
 
   while (1) {
     int letter;
@@ -706,7 +705,7 @@ processCommandLine (
       }
 
       case 'h': // help - show usage summary and then exit
-        optHelp = 1;
+        info->showHelp = 1;
         break;
     }
   }
@@ -714,7 +713,7 @@ processCommandLine (
   *argumentVector += optind;
   *argumentCount -= optind;
 
-  if (optHelp) {
+  if (info->showHelp) {
     FILE *usageStream = stdout;
 
     size_t width = UINT16_MAX;
@@ -742,7 +741,7 @@ processCommandLine (
       }
     }
 
-    info->exitImmediately = 1;
+    info->showHelp = 1;
   }
 
 #ifdef HAVE_GETOPT_LONG
@@ -1190,7 +1189,7 @@ processOptions (const CommandLineDescriptor *descriptor, int *argumentCount, cha
     .options = descriptor->options,
     .ensuredSettings = ensuredSettings,
 
-    .exitImmediately = 0,
+    .showHelp = 0,
     .warning = 0,
     .syntaxError = 0
   };
@@ -1198,6 +1197,7 @@ processOptions (const CommandLineDescriptor *descriptor, int *argumentCount, cha
   onProgramExit("options", exitOptions, (void *)descriptor->options);
   beginProgram(*argumentCount, *argumentVector);
   processCommandLine(&info, argumentCount, argumentVector, &descriptor->usage);
+  if (info.showHelp) return PROG_EXIT_FORCE;
 
   if (descriptor->doBootParameters && *descriptor->doBootParameters) {
     processBootParameters(&info, descriptor->applicationName);
@@ -1217,7 +1217,6 @@ processOptions (const CommandLineDescriptor *descriptor, int *argumentCount, cha
   }
   processInternalSettings(&info, 1);
 
-  if (info.exitImmediately) return PROG_EXIT_FORCE;
   if (info.syntaxError) return PROG_EXIT_SYNTAX;
 
   toAbsolutePaths(&info);
