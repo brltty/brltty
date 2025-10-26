@@ -39,7 +39,7 @@ configureOptions=(
    --disable-x
 
    --without-libbraille
-   --disable-speech-support
+   --with-speech-driver=al,bl,cb,-all
    --with-screen-driver=wn,-all
 
    --without-pgmprivs-package
