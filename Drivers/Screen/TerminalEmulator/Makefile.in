@@ -21,7 +21,7 @@ DRIVER_NAME = TerminalEmulator
 DRIVER_USAGE = terminal emulator with shared memory segment
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
-SCR_OBJECTS = em_screen.$O scr_terminal.$O msg_queue.$O
+SCR_OBJECTS = screen.$O scr_terminal.$O msg_queue.$O
 include $(SRC_TOP)screen.mk
 
 screen.$O:
