@@ -541,16 +541,6 @@ AC_CACHE_CHECK([for shared object creation command], [brltty_cv_prog_make_object
 ])
 AC_SUBST([MKSHR], ["${brltty_cv_prog_make_object_shared}"])
 
-AC_CACHE_CHECK([for make relocatable object command], [brltty_cv_prog_make_object_relocatable], [dnl
-case "${host_os}"
-in
-   *)
-      brltty_cv_prog_make_object_relocatable="\$(LD) -r -o"
-      ;;
-esac])
-MKREL="${brltty_cv_prog_make_object_relocatable}"
-AC_SUBST([MKREL])
-
 AC_CACHE_CHECK([for dynamic library creation command], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
