@@ -42,9 +42,6 @@ mkIgnoreMismatch "^mkwin64: revision identifier: "
 mkIgnoreMismatch "^ *Creating library "
 mkIgnoreMismatch "^Successfully compiled: "
 
-mkIgnoreMismatch "^declare: usage: "
-mkIgnoreMismatch "^.*: declare: -[nA]: "
-
 read <"${windowsDirectory}/python-location" pythonLocation || exit "${?}"
 [ -e "${pythonLocation}" ] || logError "Python not found: ${pythonLocation}"
 [ -d "${pythonLocation}" ] || logError "not a directory: ${pythonLocation}"
