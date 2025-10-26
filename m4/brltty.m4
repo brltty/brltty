@@ -761,7 +761,8 @@ AC_CACHE_CHECK(
    [
       # If cross-compiling we cannot run the test program.
       # Assume that all Windows libraries exist.
-      if test "x${cross_compiling}" = "xyes"; then
+      if test "x${cross_compiling}" = "xyes"
+      then
          brltty_cv_dll_$1=yes
       else
          AC_RUN_IFELSE(
@@ -795,7 +796,8 @@ AC_CACHE_CHECK(
    [
       # When cross-compiling we cannot run the test program.
       # Use a link-time check for the symbol.
-      if test "x${cross_compiling}" = "xyes"; then
+      if test "x${cross_compiling}" = "xyes"
+      then
          AC_CHECK_LIB([$2], [$1], [brltty_cv_function_$1=yes], [brltty_cv_function_$1=no])
       else
          AC_RUN_IFELSE([
