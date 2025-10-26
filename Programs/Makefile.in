@@ -1047,21 +1047,21 @@ apitest.$O:
 
 braille-drivers: $(BUILD_API)
 	for driver in $(BRAILLE_EXTERNAL_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) driver-module) || exit 1; \
+	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) module) || exit 1; \
 	done
 
 ###############################################################################
 
 speech-drivers:
 	for driver in $(SPEECH_EXTERNAL_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) driver-module) || exit 1; \
+	do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) module) || exit 1; \
 	done
 
 ###############################################################################
 
 screen-drivers:
 	for driver in $(SCREEN_EXTERNAL_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) driver-module) || exit 1; \
+	do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) module) || exit 1; \
 	done
 
 ###############################################################################
