@@ -418,8 +418,7 @@ static void
 processCommandLine (
   OptionProcessingInformation *info,
   int *argumentCount,
-  char ***argumentVector,
-  const CommandLineUsage *usage
+  char ***argumentVector
 ) {
   const char *reset = NULL;
   const char resetPrefix = '+';
@@ -743,7 +742,6 @@ processCommandLine (
     }
   }
 
-  if (info->showHelp) showHelp(info, usage);
   *argumentVector += optind;
   *argumentCount -= optind;
 
@@ -1199,8 +1197,12 @@ processOptions (const CommandLineDescriptor *descriptor, int *argumentCount, cha
 
   onProgramExit("options", exitOptions, (void *)descriptor->options);
   beginProgram(*argumentCount, *argumentVector);
-  processCommandLine(&info, argumentCount, argumentVector, &descriptor->usage);
-  if (info.showHelp) return PROG_EXIT_FORCE;
+  processCommandLine(&info, argumentCount, argumentVector);
+
+  if (info.showHelp) {
+    showHelp(&info, &descriptor->usage);
+    return PROG_EXIT_FORCE;
+  }
 
   if (descriptor->doBootParameters && *descriptor->doBootParameters) {
     processBootParameters(&info, descriptor->applicationName);
