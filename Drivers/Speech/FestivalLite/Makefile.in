@@ -21,9 +21,9 @@ DRIVER_NAME = FestivalLite
 DRIVER_USAGE = software engine
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
-SPK_OBJS = @speech_libraries_fl@
+DRIVER_DEPENDENCIES = @speech_libraries_fl@
 include $(SRC_TOP)speech.mk
 
 speech.$O:
-	$(CC) $(SPK_CFLAGS) -I$(FLITE_ROOT)/include/flite -DREGISTER_VOX=register_$(FLITE_VOICE) -DUNREGISTER_VOX=unregister_$(FLITE_VOICE) -c $(SRC_DIR)/speech.c
+	$(CC) $(DRIVER_CFLAGS) -I$(FLITE_ROOT)/include/flite -DREGISTER_VOX=register_$(FLITE_VOICE) -DUNREGISTER_VOX=unregister_$(FLITE_VOICE) -c $(SRC_DIR)/speech.c
 

@@ -21,9 +21,9 @@ DRIVER_NAME = eSpeak
 DRIVER_USAGE = software engine
 DRIVER_VERSION = 0.3 
 DRIVER_DEVELOPERS = Nicolas Pitre <nico@fluxnic.net>
-SPK_OBJS = @speech_libraries_es@
+DRIVER_DEPENDENCIES = @speech_libraries_es@
 include $(SRC_TOP)speech.mk
 
 speech.$O:
-	$(CC) $(SPK_CFLAGS) -I$(ESPEAK_ROOT)/include -c $(SRC_DIR)/speech.c
+	$(CC) $(DRIVER_CFLAGS) -I$(ESPEAK_ROOT)/include -c $(SRC_DIR)/speech.c
 

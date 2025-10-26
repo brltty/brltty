@@ -21,9 +21,9 @@ DRIVER_NAME = AtSpi
 DRIVER_USAGE = X11 desktop via AT-SPI 1
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
-SCR_OBJS = @screen_libraries_as@
+DRIVER_DEPENDENCIES = @screen_libraries_as@
 include $(SRC_TOP)screen.mk
 
 screen.$O:
-	$(CC) $(SCR_CFLAGS) $(CSPI_INCLUDES) -c $(SRC_DIR)/screen.c
+	$(CC) $(DRIVER_CFLAGS) $(CSPI_INCLUDES) -c $(SRC_DIR)/screen.c
 

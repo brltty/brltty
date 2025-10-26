@@ -21,9 +21,9 @@ DRIVER_NAME = FileViewer
 DRIVER_USAGE = file viewer
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
-SCR_OBJS = @screen_libraries_fv@
+DRIVER_DEPENDENCIES = @screen_libraries_fv@
 include $(SRC_TOP)screen.mk
 
 screen.$O:
-	$(CC) $(SCR_CFLAGS) -c $(SRC_DIR)/screen.c
+	$(CC) $(DRIVER_CFLAGS) -c $(SRC_DIR)/screen.c
 

@@ -21,9 +21,9 @@ DRIVER_NAME = TTY
 DRIVER_USAGE = terminal connected via serial port
 DRIVER_VERSION = 0.2 (August, 2004)
 DRIVER_DEVELOPERS = Samuel Thibault <samuel.thibault@ens-lyon.org>
-BRL_OBJS = @braille_libraries_tt@
+DRIVER_DEPENDENCIES = @braille_libraries_tt@
 include $(SRC_TOP)braille.mk
 
 braille.$O:
-	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
+	$(CC) $(DRIVER_CFLAGS) -c $(SRC_DIR)/braille.c
 

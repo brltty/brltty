@@ -21,9 +21,9 @@ DRIVER_NAME = XWindow
 DRIVER_USAGE = graphical (X11, Windows)
 DRIVER_VERSION = 0.1, 2004
 DRIVER_DEVELOPERS = Samuel Thibault <samuel.thibault@ens-lyon.org>
-BRL_OBJS = @braille_libraries_xw@
+DRIVER_DEPENDENCIES = @braille_libraries_xw@
 include $(SRC_TOP)braille.mk
 
 braille.$O:
-	$(CC) $(BRL_CFLAGS) $(X11_INCLUDES) -c $(SRC_DIR)/braille.c
+	$(CC) $(DRIVER_CFLAGS) $(X11_INCLUDES) -c $(SRC_DIR)/braille.c
 

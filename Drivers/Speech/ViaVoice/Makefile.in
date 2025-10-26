@@ -21,9 +21,9 @@ DRIVER_NAME = ViaVoice
 DRIVER_USAGE = software engine
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
-SPK_OBJS = @speech_libraries_vv@
+DRIVER_DEPENDENCIES = @speech_libraries_vv@
 include $(SRC_TOP)speech.mk
 
 speech.$O:
-	$(CC) $(SPK_CFLAGS) -c $(SRC_DIR)/speech.c
+	$(CC) $(DRIVER_CFLAGS) -c $(SRC_DIR)/speech.c
 

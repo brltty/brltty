@@ -21,9 +21,9 @@ DRIVER_NAME = Libbraille
 DRIVER_USAGE = Libbraille
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Sébastien Sablé <sable@users.sourceforge.net>
-BRL_OBJS = @braille_libraries_lb@
+DRIVER_DEPENDENCIES = @braille_libraries_lb@
 include $(SRC_TOP)braille.mk
 
 braille.$O:
-	$(CC) $(BRL_CFLAGS) -I$(LIBBRAILLE_ROOT)/include -c $(SRC_DIR)/braille.c
+	$(CC) $(DRIVER_CFLAGS) -I$(LIBBRAILLE_ROOT)/include -c $(SRC_DIR)/braille.c
 

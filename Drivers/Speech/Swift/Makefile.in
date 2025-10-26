@@ -21,9 +21,9 @@ DRIVER_NAME = Swift
 DRIVER_USAGE = software engine
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
-SPK_OBJS = @speech_libraries_sw@
+DRIVER_DEPENDENCIES = @speech_libraries_sw@
 include $(SRC_TOP)speech.mk
 
 speech.$O:
-	$(CC) $(SPK_CFLAGS) -I$(SWIFT_ROOT)/include -c $(SRC_DIR)/speech.c
+	$(CC) $(DRIVER_CFLAGS) -I$(SWIFT_ROOT)/include -c $(SRC_DIR)/speech.c
 

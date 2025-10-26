@@ -24,5 +24,5 @@ DRIVER_DEVELOPERS = Nikhil Nair
 include $(SRC_TOP)braille.mk
 
 braille.$O:
-	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
+	$(CC) $(DRIVER_CFLAGS) -c $(SRC_DIR)/braille.c
 

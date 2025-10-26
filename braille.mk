@@ -16,26 +16,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-BRL_OBJECTS ?= braille.$O
-
-BRL_DEFS = '-DDRIVER_NAME=$(DRIVER_NAME)' '-DDRIVER_CODE=$(DRIVER_CODE)' '-DDRIVER_COMMENT="$(DRIVER_COMMENT)"' '-DDRIVER_VERSION="$(DRIVER_VERSION)"' '-DDRIVER_DEVELOPERS="$(DRIVER_DEVELOPERS)"'
-BRL_CFLAGS = $(LIBCFLAGS) $(BRL_DEFS)
-BRL_CXXFLAGS = $(LIBCXXFLAGS) $(BRL_DEFS)
-
-BRL_ARCHIVE = braille.$(ARC_EXT)
-braille-archive: $(BRL_ARCHIVE)
-$(BRL_ARCHIVE): $(BRL_OBJECTS)
-	$(AR) rcs $@ $(BRL_OBJECTS)
-
-BRL_MOD_NAME = $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)b$(DRIVER_CODE)
-BRL_MOD_FILE = $(BRL_MOD_NAME).$(MOD_EXT)
-braille-driver: $(BRL_MOD_FILE)
-$(BRL_MOD_FILE): $(BRL_ARCHIVE)
-	$(INSTALL_DIRECTORY) $(@D)
-	$(MKSHR) $(@) $(BRL_ARCHIVE) $(BRL_OBJS)
-
-%.$O: $(SRC_TOP)$(PGM_DIR)/%.c $(SRC_TOP)$(HDR_DIR)/%.h
-	$(CC) $(BRL_CFLAGS) -c $<
+DRIVER_TYPE = braille
+DRIVER_LETTER = b
+include $(SRC_TOP)driver.mk
 
 install-api::
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
@@ -45,8 +28,4 @@ install:: $(INSTALL_API)
 
 uninstall::
 	rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/*-$(DRIVER_CODE).h
-
-clean::
-	-rm -f $(BRL_MOD_NAME).*
-	-rm -f $(BRL_ARCHIVE)
 

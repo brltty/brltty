@@ -21,9 +21,9 @@ DRIVER_NAME = BrlAPI
 DRIVER_USAGE = BrlAPI client
 DRIVER_VERSION = 0.1, 2005
 DRIVER_DEVELOPERS = Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, Samuel Thibault <samuel.thibault@ens-lyon.org>
-BRL_OBJS = @braille_libraries_ba@
+DRIVER_DEPENDENCIES = @braille_libraries_ba@
 include $(SRC_TOP)braille.mk
 
 braille.$O: | brlapi
-	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
+	$(CC) $(DRIVER_CFLAGS) -c $(SRC_DIR)/braille.c
 

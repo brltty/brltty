@@ -21,10 +21,10 @@ DRIVER_NAME = AtSpi2
 DRIVER_USAGE = X11 desktop via AT-SPI 2
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
-SCR_OBJS = @screen_libraries_a2@
-SCR_OBJECTS = screen.$O xsel.$O
+DRIVER_DEPENDENCIES = @screen_libraries_a2@
+DRIVER_OBJECTS = screen.$O xsel.$O
 include $(SRC_TOP)screen.mk
 
 screen.$O:
-	$(CC) $(SCR_CFLAGS) $(ATSPI2_INCLUDES) $(DBUS_INCLUDES) $(GLIB2_INCLUDES) -c $(SRC_DIR)/screen.c
+	$(CC) $(DRIVER_CFLAGS) $(ATSPI2_INCLUDES) $(DBUS_INCLUDES) $(GLIB2_INCLUDES) -c $(SRC_DIR)/screen.c
 

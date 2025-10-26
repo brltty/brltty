@@ -21,9 +21,9 @@ DRIVER_NAME = SpeechDispatcher
 DRIVER_USAGE = multi-engine server
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
-SPK_OBJS = $(SPEECHD_LIBS)
+DRIVER_DEPENDENCIES = $(SPEECHD_LIBS)
 include $(SRC_TOP)speech.mk
 
 speech.$O:
-	$(CC) $(SPK_CFLAGS) $(SPEECHD_INCLUDES) -c $(SRC_DIR)/speech.c
+	$(CC) $(DRIVER_CFLAGS) $(SPEECHD_INCLUDES) -c $(SRC_DIR)/speech.c
 

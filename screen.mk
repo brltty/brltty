@@ -16,32 +16,11 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-SCR_OBJECTS ?= screen.$O
-
-SCR_DEFS ='-DDRIVER_NAME=$(DRIVER_NAME)' '-DDRIVER_CODE=$(DRIVER_CODE)' '-DDRIVER_COMMENT="$(DRIVER_COMMENT)"' '-DDRIVER_VERSION="$(DRIVER_VERSION)"' '-DDRIVER_DEVELOPERS="$(DRIVER_DEVELOPERS)"'
-SCR_CFLAGS = $(LIBCFLAGS) $(SCR_DEFS)
-SCR_CXXFLAGS = $(LIBCXXFLAGS) $(SCR_DEFS)
-
-SCR_ARCHIVE = screen.$(ARC_EXT)
-screen-archive: $(SCR_ARCHIVE)
-$(SCR_ARCHIVE): $(SCR_OBJECTS)
-	$(AR) rcs $@ $(SCR_OBJECTS)
-
-SCR_MOD_NAME = $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)x$(DRIVER_CODE)
-SCR_MOD_FILE = $(SCR_MOD_NAME).$(MOD_EXT)
-screen-driver: $(SCR_MOD_FILE)
-$(SCR_MOD_FILE): $(SCR_ARCHIVE)
-	$(INSTALL_DIRECTORY) $(@D)
-	$(MKSHR) $(@) $(SCR_ARCHIVE) $(SCR_OBJS)
-
-%.$O: $(SRC_TOP)$(PGM_DIR)/%.c $(SRC_TOP)$(HDR_DIR)/%.h
-	$(CC) $(SCR_CFLAGS) -c $<
+DRIVER_TYPE = screen
+DRIVER_LETTER = x
+include $(SRC_TOP)driver.mk
 
 install::
 
 uninstall::
-
-clean::
-	-rm -f $(SCR_MOD_NAME).*
-	-rm -f $(SCR_ARCHIVE)
 
