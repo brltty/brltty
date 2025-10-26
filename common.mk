@@ -46,11 +46,6 @@ COMMANDS_ARGUMENTS = $(COMMANDS_OPTIONS) $(COMMANDS_SOURCES)
 brlapi:
 	cd $(BLD_TOP)$(PGM_DIR) && $(MAKE) api
 
-$(BLD_TOP)$(BRL_DIR)/EuroBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/EuroBraille/eu_braille.$O
-$(BLD_TOP)$(BRL_DIR)/EuroBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/EuroBraille/eu_clio.$O
-$(BLD_TOP)$(BRL_DIR)/EuroBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/EuroBraille/eu_esysiris.$O
-	cd $(@D) && $(MAKE) $(@F)
-
 INSTALL_PROGRAM_DIRECTORY = $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)
 install-program-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_PROGRAM_DIRECTORY)
