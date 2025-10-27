@@ -235,28 +235,148 @@ done:
 }
 
 static void
+showParameterSyntax (
+  FILE *stream,
+  const CommandLineParameters *parameters,
+  const char *extra
+) {
+  const CommandLineParameter *parameter = parameters->table;
+  const CommandLineParameter *end = parameter + parameters->count;
+  unsigned int depth = 0;
+
+  while (parameter < end) {
+    fputc(' ', stream);
+
+    if (parameter->optional) {
+      fputc('[', stream);
+      depth += 1;
+    }
+
+    fputs(parameter->label, stream);
+    parameter += 1;
+  }
+
+  if (extra) {
+    fprintf(stream, " [%s ...", extra);
+    depth += 1;
+  }
+
+  while (depth > 0) {
+    fputc(']', stream);
+    depth -= 1;
+  }
+}
+
+static void
 showSyntax (
   FILE *stream,
-  int haveOptions,
-  const char *parameters
+  const CommandLineDescriptor *descriptor
 ) {
   fprintf(stream, "%s: %s", gettext("Syntax"), programName);
 
-  if (haveOptions) {
-    fprintf(stream, " [-%s ...]", gettext("option"));
+  if (descriptor->options) {
+    if (descriptor->options->count > 0) {
+      fprintf(stream, " [-%s ...]", gettext("option"));
+    }
   }
 
-  if (parameters && *parameters) {
-    fprintf(stream, " %s", parameters);
+  if (descriptor->parameters) {
+    showParameterSyntax(stream, descriptor->parameters, descriptor->extraParameters.label);
+  } else {
+    const char *parameters = descriptor->usage.parameters;
+
+    if (parameters) {
+      fprintf(stream, " %s", parameters);
+    }
   }
 
   fprintf(stream, "\n");
 }
 
 static void
+showParameter (
+  FILE *stream, char *line, unsigned int lineWidth,
+  const char *label, unsigned int labelWidth,
+  const char *description
+) {
+  unsigned int lineLength = 0;
+  while (lineLength < 2) line[lineLength++] = ' ';
+
+  {
+    unsigned int end = lineLength + labelWidth;
+
+    if (label) {
+      size_t labelLength = strlen(label);
+
+      memcpy(line+lineLength, label, labelLength);
+      lineLength += labelLength;
+    }
+
+    while (lineLength < end) line[lineLength++] = ' ';
+  }
+  line[lineLength++] = ' ';
+
+  line[lineLength++] = ' ';
+  {
+    if (!description) description = "";
+    showWrappedText(stream, description, line, lineLength, lineWidth);
+  }
+}
+
+static void
+showParameters (
+  FILE *stream, char *line, unsigned int lineWidth,
+  const CommandLineDescriptor *descriptor
+) {
+  const CommandLineParameters *parameters = descriptor->parameters;
+
+  if (parameters) {
+    unsigned int labelWidth = 0;
+
+    for (unsigned int parameterIndex=0; parameterIndex<parameters->count; parameterIndex+=1) {
+      const CommandLineParameter *parameter = &parameters->table[parameterIndex];
+
+      if (parameter->label) {
+        unsigned int length = strlen(parameter->label);
+        labelWidth = MAX(labelWidth, length);
+      }
+    }
+
+    {
+      const char *label = descriptor->extraParameters.label;
+
+      if (label) {
+        unsigned int length = strlen(label);
+        labelWidth = MAX(labelWidth, length);
+      }
+    }
+
+    if (labelWidth > 0) {
+      fprintf(stream, "\n%s:\n", gettext("Parameters"));
+
+      for (unsigned int parameterIndex=0; parameterIndex<parameters->count; parameterIndex+=1) {
+        const CommandLineParameter *parameter = &parameters->table[parameterIndex];
+
+        showParameter(
+          stream, line, lineWidth,
+          parameter->label, labelWidth,
+          parameter->description
+        );
+      }
+
+      showParameter(
+        stream, line, lineWidth,
+        descriptor->extraParameters.label, labelWidth,
+        descriptor->extraParameters.description
+      );
+    }
+  }
+}
+
+static void
 showOptions (
   FILE *stream, char *line, unsigned int lineWidth,
-  OptionProcessingInformation *info
+  const OptionProcessingInformation *info
 ) {
   size_t optionCount = info->options->count;
 
@@ -383,10 +503,11 @@ showOptions (
 
 static void
 showHelp (
-  OptionProcessingInformation *info,
-  const CommandLineUsage *usage
+  const CommandLineDescriptor *descriptor,
+  const OptionProcessingInformation *info
 ) {
   FILE *usageStream = stdout;
+  const CommandLineUsage *usage = &descriptor->usage;
 
   size_t width = UINT16_MAX;
   getConsoleSize(&width, NULL);
@@ -401,7 +522,8 @@ showHelp (
     }
   }
 
-  showSyntax(usageStream, !!info->options->count, usage->parameters);
+  showSyntax(usageStream, descriptor);
+  showParameters(usageStream, line, width, descriptor);
   showOptions(usageStream, line, width, info);
 
   {
@@ -755,6 +877,57 @@ processOptions (
     }
   }
 #endif /* HAVE_GETOPT_LONG */
+}
+
+static int
+processParameters (
+  const CommandLineDescriptor *descriptor,
+  int *argumentCount,
+  char ***argumentVector
+) {
+  const CommandLineParameters *parameters = descriptor->parameters;
+
+  if (parameters) {
+    const CommandLineParameter *parameter = parameters->table;
+    const CommandLineParameter *end = parameter + parameters->count;
+
+    while (parameter < end) {
+      if (!*argumentCount) {
+        if (parameter->optional) break;
+
+        logMessage(LOG_ERR, 
+          "%s: %s",
+          gettext("missing parameter"),
+          parameter->label
+        );
+
+        return 0;
+      }
+
+      if (parameter->setting) {
+        *parameter->setting = **argumentVector;
+      }
+
+      *argumentVector += 1;
+      *argumentCount -= 1;
+
+      parameter += 1;
+    }
+
+    while (parameter < end) {
+      if (parameter->setting) *parameter->setting = "";
+      parameter += 1;
+    }
+
+    if (*argumentCount > 0) {
+      if (!descriptor->extraParameters.label) {
+        logMessage(LOG_ERR, "%s", gettext("too many parameters"));
+        return 0;
+      }
+    }
+  }
+
+  return 1;
 }
 
 static void
@@ -1200,7 +1373,7 @@ processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount,
   processOptions(&info, argumentCount, argumentVector);
 
   if (info.showHelp) {
-    showHelp(&info, &descriptor->usage);
+    showHelp(descriptor, &info);
     return PROG_EXIT_FORCE;
   }
 
@@ -1222,7 +1395,13 @@ processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount,
   }
   processInternalSettings(&info, 1);
 
-  if (info.syntaxError) return PROG_EXIT_SYNTAX;
+  if (info.syntaxError) {
+    return PROG_EXIT_SYNTAX;
+  }
+
+  if (!processParameters(descriptor, argumentCount, argumentVector)) {
+    return PROG_EXIT_SYNTAX;
+  }
 
   toAbsolutePaths(&info);
   return PROG_EXIT_SUCCESS;

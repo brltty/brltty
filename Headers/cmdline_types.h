@@ -78,6 +78,27 @@ static const CommandLineOptions name = { \
   .count = ARRAY_COUNT(name##Table), \
 };
 
+typedef struct {
+  const char *label;
+  const char *description;
+  char **setting;
+  char optional;
+} CommandLineParameter;
+
+typedef struct {
+  const CommandLineParameter *table;
+  size_t count;
+} CommandLineParameters;
+
+#define BEGIN_PARAMETER_TABLE(name) \
+static const CommandLineParameter name##Table[] = {
+
+#define END_PARAMETER_TABLE(name) }; \
+static const CommandLineParameters name = { \
+  .table = name##Table, \
+  .count = ARRAY_COUNT(name##Table), \
+};
+
 #define DECLARE_USAGE_NOTES(name) const char *const name[]
 #define BEGIN_USAGE_NOTES(name) DECLARE_USAGE_NOTES(name) = {
 #define END_USAGE_NOTES NULL};
@@ -91,6 +112,12 @@ typedef struct {
 
 typedef struct {
   const CommandLineOptions *options;
+  const CommandLineParameters *parameters;
+
+  struct {
+    const char *label;
+    const char *description;
+  } extraParameters;
 
   const char *applicationName;
   char **configurationFile;
