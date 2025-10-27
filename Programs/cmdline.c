@@ -126,6 +126,8 @@ typedef struct {
   size_t length;
 } HelpTextDescriptor;
 
+static const char *defaultParameterLabel = "?";
+
 static void
 showWrappedText (
   FILE *stream, const char *text, char *line,
@@ -261,7 +263,12 @@ showParameterSyntax (
         depth += 1;
       }
 
-      fputs(gettext(parameter->label), stream);
+      {
+        const char *label = parameter->label;
+        if (!label) label = defaultParameterLabel;
+        fputs(gettext(label), stream);
+      }
+
       parameter += 1;
     }
 
@@ -347,15 +354,11 @@ showParameters (
 
       {
         HelpTextDescriptor *label = &labels[parameterIndex];
+        if (!(label->text = parameter->label)) label->text = defaultParameterLabel;
 
-        if (parameter->label) {
-          label->text = gettext(parameter->label);
-          label->length = strlen(label->text);
-          labelWidth = MAX(labelWidth, label->length);
-        } else {
-          label->text = NULL;
-          label->length = 0;
-        }
+        label->text = gettext(label->text);
+        label->length = strlen(label->text);
+        labelWidth = MAX(labelWidth, label->length);
       }
     }
 
@@ -386,11 +389,18 @@ showParameters (
         );
       }
 
-      showParameter(
-        stream, line, lineWidth,
-        labels[parameterCount].text, labelWidth,
-        gettext(descriptor->extraParameters.description)
-      );
+      {
+        const HelpTextDescriptor *label = &labels[parameterCount];
+        const char *extra = label->text;
+
+        if (extra) {
+          showParameter(
+            stream, line, lineWidth,
+            extra, labelWidth,
+            gettext(descriptor->extraParameters.description)
+          );
+        }
+      }
     }
   }
 }
