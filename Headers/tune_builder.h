@@ -35,7 +35,7 @@ typedef enum {
 } TuneStatus;
 
 typedef struct TuneBuilderStruct TuneBuilder;
-extern DECLARE_USAGE_NOTES(tuneBuilderUsageNotes);
+extern DECLARE_COMMAND_LINE_NOTES(tuneBuilderNotes);
 
 extern TuneBuilder *newTuneBuilder (void);
 extern void resetTuneBuilder (TuneBuilder *tune);

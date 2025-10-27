@@ -86,11 +86,11 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
 END_COMMAND_LINE_OPTIONS(programOptions)
 
 static
-BEGIN_USAGE_NOTES(usageNotes)
+BEGIN_COMMAND_LINE_NOTES(programNotes)
   "If the tune is specified on the command line then each argument contains a command group.",
   "If it's read from a file then each line contains a command group.",
   "Each specified file contains a different tune.",
-END_USAGE_NOTES
+END_COMMAND_LINE_NOTES
 
 static void
 beginTuneStream (const char *name, void *data) {
@@ -158,7 +158,7 @@ main (int argc, char *argv[]) {
       .usage = {
         .purpose = strtext("Compose a tune with the tune builder and play it with the tone generator."),
         .parameters = "commands ... | -f [{file | -} ...]",
-        .notes = USAGE_NOTES(usageNotes, tuneBuilderUsageNotes),
+        .notes = COMMAND_LINE_NOTES(programNotes, tuneBuilderNotes),
       }
     };
 

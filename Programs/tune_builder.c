@@ -681,7 +681,7 @@ destroyTuneBuilder (TuneBuilder *tb) {
   free(tb);
 }
 
-BEGIN_USAGE_NOTES(tuneBuilderUsageNotes)
+BEGIN_COMMAND_LINE_NOTES(tuneBuilderNotes)
   "A command group is zero or more commands separated from one another by whitespace.",
   "A number sign [#] at the beginning or after whitespace begins a comment.",
   "",
@@ -785,4 +785,4 @@ BEGIN_USAGE_NOTES(tuneBuilderUsageNotes)
   "The t<number> command changes the tempo (speed).",
   "It's the number of beats per minute, and must be within the range 40 through 255.",
   "The initial tempo is 120 beats per minute.",
-END_USAGE_NOTES
+END_COMMAND_LINE_NOTES

@@ -210,12 +210,12 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
 END_COMMAND_LINE_OPTIONS(programOptions)
 
 static
-BEGIN_USAGE_NOTES(usageNotes)
+BEGIN_COMMAND_LINE_NOTES(programNotes)
   "When writing a report or feature, the bytes don't need to be, but can be, separated from one another by whitespace.",
   "Each byte is either two hexadecimal digits or zero or more braille dot numbers within [square brackets].",
   "A byte may optionally be followed by an asterisk [*] and a decimal count - if not specified, 1 is assumed.",
   "The first byte is the report number - specify 00 for no report number.",
-END_USAGE_NOTES
+END_COMMAND_LINE_NOTES
 
 static FILE *outputStream;
 static int outputError;
@@ -1063,7 +1063,7 @@ main (int argc, char *argv[]) {
 
       .usage = {
         .purpose = strtext("Find HID devices, list report descriptors, read/write reports/features, or monitor input from a HID device."),
-        .notes = USAGE_NOTES(usageNotes),
+        .notes = COMMAND_LINE_NOTES(programNotes),
       }
     };
 

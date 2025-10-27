@@ -44,7 +44,7 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
 END_COMMAND_LINE_OPTIONS(programOptions)
 
 static
-BEGIN_USAGE_NOTES(usageNotes)
+BEGIN_COMMAND_LINE_NOTES(programNotes)
   "The output format is printf-like -",
   "arbitrary text which may contain",
   "field specifiers (introduced via a percent sign [%])",
@@ -67,7 +67,7 @@ BEGIN_USAGE_NOTES(usageNotes)
   "  \\t  horizontal tab",
   "  \\v  vertical tab",
   "  \\\\  literal backslasha  ",
-END_USAGE_NOTES
+END_COMMAND_LINE_NOTES
 
 static void
 onFormatError (void) {
@@ -236,7 +236,7 @@ main (int argc, char *argv[]) {
       .usage = {
         .purpose = strtext("List the characters defined within a CLDR (Common Locale Data Repository Project) annotations file."),
         .parameters = "input-file",
-        .notes = USAGE_NOTES(usageNotes),
+        .notes = COMMAND_LINE_NOTES(programNotes),
       }
     };
 
