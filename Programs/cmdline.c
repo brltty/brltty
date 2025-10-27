@@ -247,10 +247,11 @@ showParameterSyntax (
   const CommandLineParameters *parameters = descriptor->parameters;
 
   if (descriptor->parameters) {
-    const CommandLineParameter *parameter = parameters->table;
-    const CommandLineParameter *end = parameter + parameters->count;
     const char *extra = descriptor->extraParameters.label;
     unsigned int depth = 0;
+
+    const CommandLineParameter *parameter = parameters->table;
+    const CommandLineParameter *end = parameter + parameters->count;
 
     while (parameter < end) {
       fputc(' ', stream);
@@ -260,12 +261,12 @@ showParameterSyntax (
         depth += 1;
       }
 
-      fputs(parameter->label, stream);
+      fputs(gettext(parameter->label), stream);
       parameter += 1;
     }
 
     if (extra) {
-      fprintf(stream, " [%s ...", extra);
+      fprintf(stream, " [%s ...", gettext(extra));
       depth += 1;
     }
 
@@ -337,23 +338,38 @@ showParameters (
   const CommandLineParameters *parameters = descriptor->parameters;
 
   if (parameters) {
+    size_t parameterCount = parameters->count;
+    HelpTextDescriptor labels[parameterCount + 1];
     unsigned int labelWidth = 0;
 
     for (unsigned int parameterIndex=0; parameterIndex<parameters->count; parameterIndex+=1) {
       const CommandLineParameter *parameter = &parameters->table[parameterIndex];
 
-      if (parameter->label) {
-        unsigned int length = strlen(parameter->label);
-        labelWidth = MAX(labelWidth, length);
+      {
+        HelpTextDescriptor *label = &labels[parameterIndex];
+
+        if (parameter->label) {
+          label->text = gettext(parameter->label);
+          label->length = strlen(label->text);
+          labelWidth = MAX(labelWidth, label->length);
+        } else {
+          label->text = NULL;
+          label->length = 0;
+        }
       }
     }
 
     {
-      const char *label = descriptor->extraParameters.label;
+      HelpTextDescriptor *label = &labels[parameterCount];
+      const char *extra = descriptor->extraParameters.label;
 
-      if (label) {
-        unsigned int length = strlen(label);
-        labelWidth = MAX(labelWidth, length);
+      if (extra) {
+        label->text = gettext(extra);
+        label->length = strlen(label->text);
+        labelWidth = MAX(labelWidth, label->length);
+      } else {
+        label->text = NULL;
+        label->length = 0;
       }
     }
 
@@ -365,15 +381,15 @@ showParameters (
 
         showParameter(
           stream, line, lineWidth,
-          parameter->label, labelWidth,
-          parameter->description
+          labels[parameterIndex].text, labelWidth,
+          gettext(parameter->description)
         );
       }
 
       showParameter(
         stream, line, lineWidth,
-        descriptor->extraParameters.label, labelWidth,
-        descriptor->extraParameters.description
+        labels[parameterCount].text, labelWidth,
+        gettext(descriptor->extraParameters.description)
       );
     }
   }
