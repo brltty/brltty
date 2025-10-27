@@ -1369,13 +1369,19 @@ exitOptions (void *data) {
   resetOptions(options);
 }
 
+BEGIN_COMMAND_LINE_OPTIONS(defaultOptions)
+END_COMMAND_LINE_OPTIONS(defaultOptions)
+
 ProgramExitStatus
 processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount, char ***argumentVector) {
-  uint8_t ensuredSettings[descriptor->options->count];
+  CommandLineDescriptor cld = *descriptor;
+  if (!cld.options) cld.options = &defaultOptions;
+
+  uint8_t ensuredSettings[cld.options->count];
   memset(ensuredSettings, 0, sizeof(ensuredSettings));
 
   OptionProcessingInformation opi = {
-    .options = descriptor->options,
+    .options = cld.options,
     .ensuredSettings = ensuredSettings,
 
     .showHelp = 0,
@@ -1383,29 +1389,29 @@ processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount,
     .syntaxError = 0
   };
 
-  onProgramExit("options", exitOptions, (void *)descriptor->options);
+  onProgramExit("options", exitOptions, (void *)cld.options);
   beginProgram(*argumentCount, *argumentVector);
   processOptions(&opi, argumentCount, argumentVector);
 
   if (opi.showHelp) {
-    showHelp(descriptor, &opi);
+    showHelp(&cld, &opi);
     return PROG_EXIT_FORCE;
   }
 
-  if (descriptor->doBootParameters && *descriptor->doBootParameters) {
-    processBootParameters(&opi, descriptor->applicationName);
+  if (cld.doBootParameters && *cld.doBootParameters) {
+    processBootParameters(&opi, cld.applicationName);
   }
 
-  if (descriptor->doEnvironmentVariables && *descriptor->doEnvironmentVariables) {
-    processEnvironmentVariables(&opi, descriptor->applicationName);
+  if (cld.doEnvironmentVariables && *cld.doEnvironmentVariables) {
+    processEnvironmentVariables(&opi, cld.applicationName);
   }
 
   processInternalSettings(&opi, 0);
   {
-    int configurationFileSpecified = descriptor->configurationFile && *descriptor->configurationFile;
+    int configurationFileSpecified = cld.configurationFile && *cld.configurationFile;
 
     if (configurationFileSpecified) {
-      processConfigurationFile(&opi, *descriptor->configurationFile, !configurationFileSpecified);
+      processConfigurationFile(&opi, *cld.configurationFile, !configurationFileSpecified);
     }
   }
   processInternalSettings(&opi, 1);
@@ -1414,7 +1420,7 @@ processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount,
     return PROG_EXIT_SYNTAX;
   }
 
-  if (!processParameters(descriptor, argumentCount, argumentVector)) {
+  if (!processParameters(&cld, argumentCount, argumentVector)) {
     return PROG_EXIT_SYNTAX;
   }
 
