@@ -121,6 +121,11 @@ ensureSetting (
   return 1;
 }
 
+typedef struct {
+  const char *text;
+  size_t length;
+} HelpTextDescriptor;
+
 static void
 showWrappedText (
   FILE *stream, const char *text, char *line,
@@ -381,7 +386,9 @@ showOptions (
 ) {
   size_t optionCount = opi->options->count;
 
-  if (opi->options->count > 0) {
+  if (optionCount > 0) {
+    HelpTextDescriptor arguments[optionCount];
+
     unsigned int letterWidth = 0;
     unsigned int wordWidth = 0;
     unsigned int argumentWidth = 0;
@@ -395,8 +402,20 @@ showOptions (
         wordWidth = MAX(wordWidth, length);
       }
 
+      {
+        HelpTextDescriptor *argument = &arguments[optionIndex];
+
+        if (option->argument) {
+          argument->text = gettext(option->argument);
+          argument->length = strlen(argument->text);
+          argumentWidth = MAX(argumentWidth, argument->length);
+        } else {
+          argument->text = NULL;
+          argument->length = 0;
+        }
+      }
+
       if (option->letter) letterWidth = 2;
-      if (option->argument) argumentWidth = MAX(argumentWidth, strlen(gettext(option->argument)));
     }
 
     fprintf(stream, "\n%s:\n", gettext("Options"));
@@ -413,10 +432,6 @@ showOptions (
         if (option->letter) {
           line[lineLength++] = '-';
           line[lineLength++] = option->letter;
-        }
-
-        while (lineLength < letterWidth) {
-          line[lineLength++] = ' ';
         }
 
         while (lineLength < end) line[lineLength++] = ' ';
@@ -444,11 +459,10 @@ showOptions (
         unsigned int end = lineLength + argumentWidth;
 
         if (option->argument) {
-          const char *argument = gettext(option->argument);
-          size_t argumentLength = strlen(argument);
+          const HelpTextDescriptor *argument = &arguments[optionIndex];
 
-          memcpy(line+lineLength, argument, argumentLength);
-          lineLength += argumentLength;
+          memcpy(line+lineLength, argument->text, argument->length);
+          lineLength += argument->length;
         }
 
         while (lineLength < end) line[lineLength++] = ' ';
