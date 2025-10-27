@@ -237,33 +237,43 @@ done:
 static void
 showParameterSyntax (
   FILE *stream,
-  const CommandLineParameters *parameters,
-  const char *extra
+  const CommandLineDescriptor *descriptor
 ) {
-  const CommandLineParameter *parameter = parameters->table;
-  const CommandLineParameter *end = parameter + parameters->count;
-  unsigned int depth = 0;
+  const CommandLineParameters *parameters = descriptor->parameters;
 
-  while (parameter < end) {
-    fputc(' ', stream);
+  if (descriptor->parameters) {
+    const CommandLineParameter *parameter = parameters->table;
+    const CommandLineParameter *end = parameter + parameters->count;
+    const char *extra = descriptor->extraParameters.label;
+    unsigned int depth = 0;
 
-    if (parameter->optional) {
-      fputc('[', stream);
+    while (parameter < end) {
+      fputc(' ', stream);
+
+      if (parameter->optional) {
+        fputc('[', stream);
+        depth += 1;
+      }
+
+      fputs(parameter->label, stream);
+      parameter += 1;
+    }
+
+    if (extra) {
+      fprintf(stream, " [%s ...", extra);
       depth += 1;
     }
 
-    fputs(parameter->label, stream);
-    parameter += 1;
-  }
+    while (depth > 0) {
+      fputc(']', stream);
+      depth -= 1;
+    }
+  } else {
+    const char *parameters = descriptor->usage.parameters;
 
-  if (extra) {
-    fprintf(stream, " [%s ...", extra);
-    depth += 1;
-  }
-
-  while (depth > 0) {
-    fputc(']', stream);
-    depth -= 1;
+    if (parameters) {
+      fprintf(stream, " %s", parameters);
+    }
   }
 }
 
@@ -280,16 +290,7 @@ showSyntax (
     }
   }
 
-  if (descriptor->parameters) {
-    showParameterSyntax(stream, descriptor->parameters, descriptor->extraParameters.label);
-  } else {
-    const char *parameters = descriptor->usage.parameters;
-
-    if (parameters) {
-      fprintf(stream, " %s", parameters);
-    }
-  }
-
+  showParameterSyntax(stream, descriptor);
   fprintf(stream, "\n");
 }
 
