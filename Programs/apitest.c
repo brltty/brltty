@@ -56,7 +56,7 @@ static int opt_parameters;
 static int opt_suspendMode;
 static int opt_threadMode;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "brlapi",
     .letter = 'b',
     .argument = "[host][:port]",
@@ -124,7 +124,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_threadMode,
     .description = "Exercise threaded use"
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static void showDisplaySize(void)
 {

@@ -37,7 +37,7 @@ static char *opt_boxHeight;
 char *opt_screenDriver;
 char *opt_driversDirectory;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "screen-driver",
     .letter = 'x',
     .argument = "driver",
@@ -82,7 +82,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.adjust = toAbsoluteInstallPath,
     .description = "Path to directory for loading drivers."
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static int
 setRegion (

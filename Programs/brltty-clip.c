@@ -33,7 +33,7 @@ static int opt_getContent;
 static char *opt_setContent;
 static int opt_removeNewline;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "brlapi",
     .letter = 'b',
     .argument = "[host][:port]",
@@ -66,7 +66,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_removeNewline,
     .description = "Remove a trailing newline."
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static const brlapi_param_t apiParameter = BRLAPI_PARAM_CLIPBOARD_CONTENT;
 static const brlapi_param_subparam_t apiSubparam = 0;

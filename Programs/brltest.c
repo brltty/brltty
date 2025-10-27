@@ -47,7 +47,7 @@ char *opt_brailleDevice;
 char *opt_driversDirectory;
 char *opt_tablesDirectory;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "device",
     .letter = 'd',
     .argument = "device",
@@ -82,7 +82,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory which can be written to.")
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 int
 main (int argc, char *argv[]) {

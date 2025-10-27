@@ -33,7 +33,7 @@
 
 static char *opt_outputFormat;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "output-format",
     .letter = 'f',
     .argument = strtext("string"),
@@ -41,7 +41,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.setting = DEFAULT_OUTPUT_FORMAT,
     .description = strtext("The format of each output line.")
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static
 BEGIN_USAGE_NOTES(usageNotes)

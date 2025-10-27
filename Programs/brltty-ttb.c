@@ -142,7 +142,7 @@ static int opt_edit;
 static int opt_undefined;
 #endif /* HAVE_UNDEFINED_CHARACTERS_SUPPORT */
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "edit",
     .letter = 'e',
     .setting.flag = &opt_edit,
@@ -186,7 +186,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory containing text tables.")
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static const BrlDotTable dotsInternal = {
   BRL_DOT_1, BRL_DOT_2, BRL_DOT_3, BRL_DOT_4,

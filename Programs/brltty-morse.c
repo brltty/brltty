@@ -41,7 +41,7 @@ static char *opt_tuneDevice;
 static char *opt_midiInstrument;
 #endif /* HAVE_MIDI_SUPPORT */
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "files",
     .letter = 'f',
     .setting.flag = &opt_fromFiles,
@@ -106,7 +106,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Name of MIDI instrument."
   },
 #endif /* HAVE_MIDI_SUPPORT */
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static
 DATA_OPERANDS_PROCESSOR(processMorseLine) {

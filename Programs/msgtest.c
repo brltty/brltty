@@ -36,7 +36,7 @@ static char *opt_domainName;
 static FILE *outputStream;
 static int opt_utf8Output;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "directory",
     .letter = 'd',
     .argument = strtext("path"),
@@ -64,7 +64,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_utf8Output,
     .description = strtext("write the translations using UTF-8")
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static int
 noOutputErrorYet (void) {

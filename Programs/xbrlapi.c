@@ -90,7 +90,7 @@ static int brlapi_fd;
 
 static void *clipboardData;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "brlapi",
     .letter = 'b',
     .argument = strtext("[host][:port]"),
@@ -143,7 +143,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &windowNameFile,
     .description = strtext("file to write the name of the focused window to")
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 /******************************************************************************
  * error handling

@@ -40,7 +40,7 @@ static int opt_listRestructuredText;
 char *opt_tablesDirectory;
 char *opt_driversDirectory;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "braille-driver",
     .letter = 'b',
     .argument = strtext("driver"),
@@ -89,7 +89,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory for loading drivers.")
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static void *driverObject;
 

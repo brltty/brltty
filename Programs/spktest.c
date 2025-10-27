@@ -41,7 +41,7 @@ static char *opt_speechRate;
 char *opt_pcmDevice;
 char *opt_driversDirectory;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "text-string",
     .letter = 't',
     .argument = "string",
@@ -78,7 +78,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.adjust = toAbsoluteInstallPath,
     .description = "Path to directory for loading drivers."
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static int
 say (SpeechSynthesizer *spk, const char *string) {

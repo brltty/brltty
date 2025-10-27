@@ -42,7 +42,7 @@ static int opt_noBaseCharacters;
 static const char tableName_autoselect[] = "auto";
 static const char tableName_unicode[] = "unicode";
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "input-table",
     .letter = 'i',
     .argument = strtext("file"),
@@ -79,7 +79,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory for text tables.")
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static TextTable *inputTable;
 static TextTable *outputTable;

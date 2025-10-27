@@ -65,14 +65,14 @@ typedef struct {
   size_t count;
 } CommandLineOptions;
 
-#define BEGIN_OPTION_TABLE(name) \
+#define BEGIN_COMMAND_LINE_OPTIONS(name) \
 static const CommandLineOption name##Table[] = { \
   { .word = "help", \
     .letter = 'h', \
     .description = strtext("Show this usage summary, and then exit.") \
   },
 
-#define END_OPTION_TABLE(name) }; \
+#define END_COMMAND_LINE_OPTIONS(name) }; \
 static const CommandLineOptions name = { \
   .table = name##Table, \
   .count = ARRAY_COUNT(name##Table), \
@@ -90,10 +90,10 @@ typedef struct {
   size_t count;
 } CommandLineParameters;
 
-#define BEGIN_PARAMETER_TABLE(name) \
+#define BEGIN_COMMAND_LINE_PARAMETERS(name) \
 static const CommandLineParameter name##Table[] = {
 
-#define END_PARAMETER_TABLE(name) }; \
+#define END_COMMAND_LINE_PARAMETERS(name) }; \
 static const CommandLineParameters name = { \
   .table = name##Table, \
   .count = ARRAY_COUNT(name##Table), \

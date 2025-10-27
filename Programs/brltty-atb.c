@@ -26,7 +26,7 @@
 
 char *opt_tablesDirectory;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "tables-directory",
     .letter = 'T',
     .argument = strtext("directory"),
@@ -35,7 +35,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory containing tables.")
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 int
 main (int argc, char *argv[]) {

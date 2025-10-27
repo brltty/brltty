@@ -33,7 +33,7 @@ static char *opt_xorMask;
 static char *opt_checkValue;
 static char *opt_residue;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "name",
     .letter = 'n',
     .argument = "string",
@@ -103,7 +103,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_residue,
     .description = "the residue"
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static int
 validateOptions (void) {

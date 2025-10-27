@@ -54,7 +54,7 @@ static int opt_logOutput;
 static int opt_logSequences;
 static int opt_logUnexpected;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "driver-directives",
     .letter = 'x',
     .setting.flag = &opt_driverDirectives,
@@ -118,7 +118,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_logUnexpected,
     .description = strtext("log unexpected input/output")
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static void writeDriverDirective (const char *format, ...) PRINTF(1, 2);
 

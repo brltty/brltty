@@ -45,7 +45,7 @@ static char *opt_outputWidth;
 static int opt_reformatText;
 static int opt_forceOutput;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "output-width",
     .letter = 'w',
     .argument = "columns",
@@ -96,7 +96,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory containing tables.")
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static wchar_t *inputBuffer;
 static size_t inputSize;

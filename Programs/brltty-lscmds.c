@@ -27,8 +27,8 @@
 #include "ktb_cmds.h"
 #include "cmd.h"
 
-BEGIN_OPTION_TABLE(programOptions)
-END_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static void
 writeCharacter (char character) {

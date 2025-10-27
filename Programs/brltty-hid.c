@@ -63,7 +63,7 @@ static char *opt_writeFeature;
 static int opt_echoInput;
 static char *opt_inputTimeout;
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "match-usb-devices",
     .letter = 'u',
     .setting.flag = &opt_matchUSBDevices,
@@ -207,7 +207,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_inputTimeout,
     .description = strtext("The input timeout (in seconds).")
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 static
 BEGIN_USAGE_NOTES(usageNotes)

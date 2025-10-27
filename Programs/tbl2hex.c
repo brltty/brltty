@@ -35,8 +35,8 @@
 #include "ctb.h"
 #include "ctb_internal.h"
 
-BEGIN_OPTION_TABLE(programOptions)
-END_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 typedef struct {
   void *object;

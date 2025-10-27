@@ -393,7 +393,7 @@ static const char *const optionStrings_SpeechDriver[] = {
 };
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-BEGIN_OPTION_TABLE(programOptions)
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "version",
     .letter = 'V',
     .setting.flag = &opt_version,
@@ -813,7 +813,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_verify,
     .description = strtext("Write the start-up logs, and then exit.")
   },
-END_OPTION_TABLE(programOptions)
+END_COMMAND_LINE_OPTIONS(programOptions)
 
 int
 changeLogLevel (const char *operand) {
