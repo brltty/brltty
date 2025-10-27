@@ -155,22 +155,34 @@ showWrappedText (
       }
     }
 
-    if (charCount > 0) {
-      memcpy(line+offset, text, charCount);
+    {
       unsigned int length = offset + charCount;
 
-      writeWithConsoleEncoding(stream, line, length);
-      fputc('\n', stream);
-    }
+      if (charCount > 0) {
+        memcpy(line+offset, text, charCount);
+      } else {
+        while (length > 0) {
+          if (!isspace(line[--length])) {
+            length += 1;
+            break;
+          }
+        }
+      }
 
-    while (charCount < charsLeft) {
-      if (!isspace(text[charCount])) break;
-      charCount += 1;
-    }
+      if (length > 0) {
+        writeWithConsoleEncoding(stream, line, length);
+        fputc('\n', stream);
+      }
 
-    if (!(charsLeft -= charCount)) break;
-    text += charCount;
-    memset(line, ' ', offset);
+      while (charCount < charsLeft) {
+        if (!isspace(text[charCount])) break;
+        charCount += 1;
+      }
+
+      if (!(charsLeft -= charCount)) break;
+      text += charCount;
+      memset(line, ' ', offset);
+    }
   }
 }
 
