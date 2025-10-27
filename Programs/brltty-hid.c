@@ -209,6 +209,9 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 static
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "When writing a report or feature, the bytes don't need to be, but can be, separated from one another by whitespace.",
@@ -1059,6 +1062,7 @@ main (int argc, char *argv[]) {
   {
     const CommandLineDescriptor descriptor = {
       .options = &programOptions,
+      .parameters = &programParameters,
       .applicationName = "brltty-hid",
 
       .usage = {
@@ -1072,11 +1076,6 @@ main (int argc, char *argv[]) {
 
   outputStream = stdout;
   outputError = 0;
-
-  if (argc) {
-    logMessage(LOG_ERR, "too many parameters");
-    return PROG_EXIT_SYNTAX;
-  }
 
   if (!parseOperands()) return PROG_EXIT_SYNTAX;
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;

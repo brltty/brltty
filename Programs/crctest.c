@@ -105,6 +105,9 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 static int
 validateOptions (void) {
   return 1;
@@ -115,6 +118,7 @@ main (int argc, char *argv[]) {
   {
     const CommandLineDescriptor descriptor = {
       .options = &programOptions,
+      .parameters = &programParameters,
       .applicationName = "crctest",
 
       .usage = {

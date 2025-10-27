@@ -126,6 +126,9 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 static void showDisplaySize(void)
 {
   unsigned int x, y;
@@ -476,6 +479,7 @@ main (int argc, char *argv[]) {
   {
     const CommandLineDescriptor descriptor = {
       .options = &programOptions,
+      .parameters = &programParameters,
       .applicationName = "apitest",
 
       .usage = {

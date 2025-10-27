@@ -815,6 +815,9 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 int
 changeLogLevel (const char *operand) {
   int ok = 1;
@@ -893,6 +896,7 @@ brlttyPrepare (int argc, char *argv[]) {
   {
     const CommandLineDescriptor descriptor = {
       .options = &programOptions,
+      .parameters = &programParameters,
 
       .applicationName = "brltty",
       .configurationFile = &opt_configurationFile,
@@ -914,10 +918,6 @@ brlttyPrepare (int argc, char *argv[]) {
       default:
         return exitStatus;
     }
-  }
-
-  if (argc) {
-    logMessage(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
   }
 
   setMessagesDirectory(opt_localeDirectory);
