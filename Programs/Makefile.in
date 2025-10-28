@@ -367,6 +367,16 @@ pref_tables.$O:
 
 ###############################################################################
 
+CMDTEST_OBJECTS = cmdtest.$O $(PROGRAM_OBJECTS)
+
+cmdtest$X: $(CMDTEST_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(CMDTEST_OBJECTS) $(LDLIBS)
+
+cmdtest.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmdtest.c
+
+###############################################################################
+
 CRCTEST_OBJECTS = crctest.$O $(PROGRAM_OBJECTS) crc_algorithms.$O crc_generate.$O crc_verify.$O
 
 crctest$X: $(CRCTEST_OBJECTS)
