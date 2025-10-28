@@ -128,6 +128,13 @@ typedef struct {
 
 static const char *defaultParameterLabel = "?";
 
+static const char *
+getTranslatedText (const char *text) {
+  if (!text) return "";
+  if (*text) text = gettext(text);
+  return text;
+}
+
 static void
 showWrappedText (
   FILE *stream, const char *text, char *line,
@@ -397,7 +404,7 @@ showParameters (
         showParameter(
           stream, line, lineWidth,
           labels[parameterIndex].text, labelWidth,
-          gettext(parameter->description)
+          getTranslatedText(parameter->description)
         );
       }
 
@@ -409,7 +416,7 @@ showParameters (
           showParameter(
             stream, line, lineWidth,
             extra, labelWidth,
-            gettext(descriptor->extraParameters.description)
+            getTranslatedText(descriptor->extraParameters.description)
           );
         }
       }
@@ -509,9 +516,9 @@ showOptions (
 
       line[lineLength++] = ' ';
       {
-        const int formatStrings = !!(option->flags & OPT_Format);
-        const char *description = option->description? gettext(option->description): "";
+        const char *description = getTranslatedText(option->description);
 
+        const int formatStrings = !!(option->flags & OPT_Format);
         char buffer[0X400];
         char *from = buffer;
         const char *const to = from + sizeof(buffer);
