@@ -16,5 +16,5 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-note For this key table to work correctly, ensure that USB-HID-A is set to Send to Screen Reader.
-note * This setting can be found within the USB section of the device's internal Settings Menu.
+note For this key table to work correctly, ensure that Keyboard USB-HID-A is set to Send to Screen Reader.
+note * This setting can be found within the USB section of the device's internal settings menu.
