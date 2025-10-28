@@ -132,7 +132,7 @@ typedef struct {
   size_t length;
 } HelpTextDescriptor;
 
-static const char *defaultParameterLabel = "?";
+static const char *defaultParameterName = "?";
 
 static const char *
 getTranslatedText (const char *text) {
@@ -274,7 +274,7 @@ showParameterSyntax (
   const CommandLineParameters *parameters = descriptor->parameters;
 
   if (descriptor->parameters) {
-    const char *extra = descriptor->extraParameters.label;
+    const char *extra = descriptor->extraParameters.name;
     unsigned int depth = 0;
 
     const CommandLineParameter *parameter = parameters->table;
@@ -289,16 +289,16 @@ showParameterSyntax (
       }
 
       {
-        const char *label = parameter->label;
-        if (!label) label = defaultParameterLabel;
-        fputs(gettext(label), stream);
+        const char *name = parameter->name;
+        if (!name) name = defaultParameterName;
+        fputs(getTranslatedText(name), stream);
       }
 
       parameter += 1;
     }
 
     if (extra) {
-      fprintf(stream, " [%s ...", gettext(extra));
+      fprintf(stream, " [%s ...", getTranslatedText(extra));
       depth += 1;
     }
 
@@ -335,20 +335,20 @@ showSyntax (
 static void
 showParameter (
   FILE *stream, char *line, unsigned int lineWidth,
-  const char *label, unsigned int labelWidth,
+  const char *name, unsigned int nameWidth,
   const char *description
 ) {
   unsigned int lineLength = 0;
   while (lineLength < 2) line[lineLength++] = ' ';
 
   {
-    unsigned int end = lineLength + labelWidth;
+    unsigned int end = lineLength + nameWidth;
 
-    if (label) {
-      size_t labelLength = strlen(label);
+    if (name) {
+      size_t nameLength = strlen(name);
 
-      memcpy(line+lineLength, label, labelLength);
-      lineLength += labelLength;
+      memcpy(line+lineLength, name, nameLength);
+      lineLength += nameLength;
     }
 
     while (lineLength < end) line[lineLength++] = ' ';
@@ -371,37 +371,37 @@ showParameters (
 
   if (parameters) {
     size_t parameterCount = parameters->count;
-    HelpTextDescriptor labels[parameterCount + 1];
-    unsigned int labelWidth = 0;
+    HelpTextDescriptor names[parameterCount + 1];
+    unsigned int nameWidth = 0;
 
     for (unsigned int parameterIndex=0; parameterIndex<parameters->count; parameterIndex+=1) {
       const CommandLineParameter *parameter = &parameters->table[parameterIndex];
 
       {
-        HelpTextDescriptor *label = &labels[parameterIndex];
-        if (!(label->text = parameter->label)) label->text = defaultParameterLabel;
+        HelpTextDescriptor *name = &names[parameterIndex];
+        if (!(name->text = parameter->name)) name->text = defaultParameterName;
 
-        label->text = gettext(label->text);
-        label->length = strlen(label->text);
-        labelWidth = MAX(labelWidth, label->length);
+        name->text = getTranslatedText(name->text);
+        name->length = strlen(name->text);
+        nameWidth = MAX(nameWidth, name->length);
       }
     }
 
     {
-      HelpTextDescriptor *label = &labels[parameterCount];
-      const char *extra = descriptor->extraParameters.label;
+      HelpTextDescriptor *name = &names[parameterCount];
+      const char *extra = descriptor->extraParameters.name;
 
       if (extra) {
-        label->text = gettext(extra);
-        label->length = strlen(label->text);
-        labelWidth = MAX(labelWidth, label->length);
+        name->text = getTranslatedText(extra);
+        name->length = strlen(name->text);
+        nameWidth = MAX(nameWidth, name->length);
       } else {
-        label->text = NULL;
-        label->length = 0;
+        name->text = NULL;
+        name->length = 0;
       }
     }
 
-    if (labelWidth > 0) {
+    if (nameWidth > 0) {
       fprintf(stream, "\n%s:\n", gettext("Parameters"));
 
       for (unsigned int parameterIndex=0; parameterIndex<parameters->count; parameterIndex+=1) {
@@ -409,19 +409,19 @@ showParameters (
 
         showParameter(
           stream, line, lineWidth,
-          labels[parameterIndex].text, labelWidth,
+          names[parameterIndex].text, nameWidth,
           getTranslatedText(parameter->description)
         );
       }
 
       {
-        const HelpTextDescriptor *label = &labels[parameterCount];
-        const char *extra = label->text;
+        const HelpTextDescriptor *name = &names[parameterCount];
+        const char *extra = name->text;
 
         if (extra) {
           showParameter(
             stream, line, lineWidth,
-            extra, labelWidth,
+            extra, nameWidth,
             getTranslatedText(descriptor->extraParameters.description)
           );
         }
@@ -457,7 +457,7 @@ showOptions (
         HelpTextDescriptor *argument = &arguments[optionIndex];
 
         if (option->argument) {
-          argument->text = gettext(option->argument);
+          argument->text = getTranslatedText(option->argument);
           argument->length = strlen(argument->text);
           argumentWidth = MAX(argumentWidth, argument->length);
         } else {
@@ -580,7 +580,7 @@ showHelp (
   char line[width+1];
 
   {
-    const char *purpose = gettext(usage->purpose);
+    const char *purpose = getTranslatedText(usage->purpose);
 
     if (purpose && *purpose) {
       showWrappedText(usageStream, purpose, line, 0, width);
@@ -964,7 +964,7 @@ processParameters (
         logMessage(LOG_ERR, 
           "%s: %s",
           gettext("missing parameter"),
-          parameter->label
+          parameter->name
         );
 
         return 0;
@@ -986,7 +986,7 @@ processParameters (
     }
 
     if (*argumentCount > 0) {
-      if (!descriptor->extraParameters.label) {
+      if (!descriptor->extraParameters.name) {
         logMessage(LOG_ERR, "%s", gettext("too many parameters"));
         return 0;
       }

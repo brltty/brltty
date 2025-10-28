@@ -40,13 +40,13 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .letter = 'c',
     .flags = OPT_Extend,
     .setting.flag = &counterOption,
-    .description = "counts the number of times the option is specified",
+    .description = "counts the number of times this option is specified",
   },
 
   { .word = "text",
     .letter = 't',
     .argument = "text",
-    .internal.setting = "option not specified - this is the default value",
+    .internal.setting = "this is the default text (because this option wasn't specified)",
     .setting.string = &textOption,
     .description = "arbitrary text - rightmost specification wins",
   },
@@ -64,12 +64,12 @@ static const char *firstParameter;
 static const char *secondParameter;
 
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
-  { .label = "first",
+  { .name = "first",
     .description = "this parameter is required",
     .setting = &firstParameter,
   },
 
-  { .label = "second",
+  { .name = "second",
     .description = "this parameter is optional",
     .setting = &secondParameter,
     .optional = 1,
@@ -86,7 +86,7 @@ main (int argc, char *argv[]) {
       .parameters = &programParameters,
 
       .extraParameters = {
-         .label = "extra",
+         .name = "extra",
          .description = "zero or more additional parameters",
       },
 

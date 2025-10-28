@@ -79,7 +79,7 @@ static const CommandLineOptions name = { \
 };
 
 typedef struct {
-  const char *label;
+  const char *name;
   const char *description;
   const char **setting;
   char optional;
@@ -115,7 +115,7 @@ typedef struct {
   const CommandLineParameters *parameters;
 
   struct {
-    const char *label;
+    const char *name;
     const char *description;
   } extraParameters;
 
