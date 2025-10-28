@@ -18,6 +18,7 @@
 
 title EuroBraille B.Book
 
+include b.kti
 include common.kti
 include joysticks.kti
 include navctl.kti
