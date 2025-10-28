@@ -103,11 +103,11 @@ ensureSetting (
           } else {
             unsigned int on;
 
-            if (!validateFlagKeyword(&on, value)) {
+            if (validateFlagKeyword(&on, value)) {
+              *option->setting.flag = !!on;
+            } else {
               logMessage(LOG_ERR, "%s: %s", gettext("invalid counter setting"), value);
               opi->warning = 1;
-            } else if (on) {
-              *option->setting.flag += 1;
             }
           }
         } else {

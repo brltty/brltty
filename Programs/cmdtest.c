@@ -21,12 +21,21 @@
 #include "program.h"
 #include "cmdline.h"
 #include "log.h"
+#include "parse.h"
 
-static int counterOption;
 static int flagOption;
-static char *stringOption;
+static int counterOption;
+
+static char *textOption;
+static char *listOption;
 
 BEGIN_COMMAND_LINE_OPTIONS(programOptions)
+  { .word = "flag",
+    .letter = 'f',
+    .setting.flag = &flagOption,
+    .description = "defaults to false - true if specified at least once",
+  },
+
   { .word = "counter",
     .letter = 'c',
     .flags = OPT_Extend,
@@ -34,18 +43,20 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .description = "counts the number of times the option is specified",
   },
 
-  { .word = "flag",
-    .letter = 'f',
-    .setting.flag = &flagOption,
-    .description = "defaults to false - true if specified at least once",
+  { .word = "text",
+    .letter = 't',
+    .argument = "text",
+    .internal.setting = "option not specified - this is the default value",
+    .setting.string = &textOption,
+    .description = "arbitrary text - rightmost specification wins",
   },
 
-  { .word = "string",
-    .letter = 's',
-    .argument = "text",
-    .internal.setting = "this is the default value",
-    .setting.string = &stringOption,
-    .description = "arbitrary text may be specified",
+  { .word = "list",
+    .letter = 'l',
+    .argument = "item",
+    .flags = OPT_Extend,
+    .setting.string = &listOption,
+    .description = "each specification adds an item to the list",
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
@@ -96,9 +107,11 @@ main (int argc, char *argv[]) {
     logMessage(logLevel, "Extra Parameter: %s", argv[index]);
   }
 
+  logMessage(logLevel, "Flag: %s", (flagOption? fkpTrueFalse.on: fkpTrueFalse.off));
   logMessage(logLevel, "Counter: %d", counterOption);
-  logMessage(logLevel, "Flag: %d", flagOption);
-  logMessage(logLevel, "String: %s", stringOption);
+
+  logMessage(logLevel, "Text: %s", textOption);
+  logMessage(logLevel, "List: %s", listOption);
 
   return PROG_EXIT_SUCCESS;
 }
