@@ -100,18 +100,18 @@ main (int argc, char *argv[]) {
     PROCESS_COMMAND_LINE(descriptor, argc, argv);
   }
 
+  logMessage(logLevel, "Flag: %s", (flagOption? fkpTrueFalse.on: fkpTrueFalse.off));
+  logMessage(logLevel, "Counter: %d", counterOption);
+
+  logMessage(logLevel, "Text: %s", textOption);
+  logMessage(logLevel, "List: %s", listOption);
+
   logMessage(logLevel, "First Parameter: %s", firstParameter);
   logMessage(logLevel, "Second Parameter: %s", secondParameter);
 
   for (int index=0; index<argc; index+=1) {
     logMessage(logLevel, "Extra Parameter: %s", argv[index]);
   }
-
-  logMessage(logLevel, "Flag: %s", (flagOption? fkpTrueFalse.on: fkpTrueFalse.off));
-  logMessage(logLevel, "Counter: %d", counterOption);
-
-  logMessage(logLevel, "Text: %s", textOption);
-  logMessage(logLevel, "List: %s", listOption);
 
   return PROG_EXIT_SUCCESS;
 }

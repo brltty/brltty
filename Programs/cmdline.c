@@ -101,14 +101,8 @@ ensureSetting (
           if (isInteger(&count, value) && (count >= 0)) {
             *option->setting.flag = count;
           } else {
-            unsigned int on;
-
-            if (validateFlagKeyword(&on, value)) {
-              *option->setting.flag = !!on;
-            } else {
-              logMessage(LOG_ERR, "%s: %s", gettext("invalid counter setting"), value);
-              opi->warning = 1;
-            }
+            logMessage(LOG_ERR, "%s: %s", gettext("invalid counter setting"), value);
+            opi->warning = 1;
           }
         } else {
           unsigned int on;
@@ -217,7 +211,7 @@ showFormattedLines (
     while (1) {
       const char *text = *chunk;
       if (!text) break;
-      text = gettext(text);
+      text = getTranslatedText(text);
 
       if (*text && !iswspace(*text)) {
         size_t textLength = strlen(text);
@@ -1108,7 +1102,11 @@ processInternalSettings (
       const char *setting = option->internal.setting;
       char *newSetting = NULL;
 
-      if (!setting) setting = option->argument? "": OPT_WORD_FALSE;
+      if (!setting) {
+        setting = option->argument? "":
+                  (option->flags & OPT_Extend)? "0":
+                  OPT_WORD_FALSE;
+      }
 
       if (option->internal.adjust) {
         if (*setting) {
