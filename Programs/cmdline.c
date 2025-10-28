@@ -101,8 +101,14 @@ ensureSetting (
           if (isInteger(&count, value) && (count >= 0)) {
             *option->setting.flag = count;
           } else {
-            logMessage(LOG_ERR, "%s: %s", gettext("invalid counter setting"), value);
-            opi->warning = 1;
+            unsigned int on;
+
+            if (!validateFlagKeyword(&on, value)) {
+              logMessage(LOG_ERR, "%s: %s", gettext("invalid counter setting"), value);
+              opi->warning = 1;
+            } else if (on) {
+              *option->setting.flag += 1;
+            }
           }
         } else {
           unsigned int on;
