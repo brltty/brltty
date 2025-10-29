@@ -118,7 +118,7 @@ extern ssize_t writeSocketDescriptor (SocketDescriptor socketDescriptor, const v
 
 extern int getConsoleSize (size_t *width, size_t *height);
 extern const char *getConsoleEncoding (void);
-extern void writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count);
+extern int writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count);
 
 extern const char *getNamedPipeDirectory (void);
 extern int createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput);

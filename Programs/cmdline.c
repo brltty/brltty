@@ -60,15 +60,20 @@ getTranslatedText (const char *text) {
 }
 
 static int
-putString (FILE *stream, const char *string) {
-  fputs(string, stream);
-  return !ferror(stream);
+putBytes (FILE *stream, const char *bytes, size_t count) {
+  if (writeWithConsoleEncoding(stream, bytes, count)) return 1;
+  logSystemError("help text write");
+  return 0;
 }
 
 static int
-putByte (FILE *stream, int byte) {
-  fputc(byte, stream);
-  return !ferror(stream);
+putByte (FILE *stream, char byte) {
+  return putBytes(stream, &byte, 1);
+}
+
+static int
+putString (FILE *stream, const char *string) {
+  return putBytes(stream, string, strlen(string));
 }
 
 static int
@@ -118,7 +123,7 @@ putWrappedText (
       }
 
       if (length > 0) {
-        writeWithConsoleEncoding(stream, line, length);
+        if (!putBytes(stream, line, length)) return 0;
         if (!putNewline(stream)) return 0;
       }
 

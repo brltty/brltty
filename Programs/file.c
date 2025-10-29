@@ -1325,7 +1325,7 @@ createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput) {
 }
 #endif /* basic file/socket descriptor operations */
 
-void
+int
 writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count) {
   static const char *consoleEncoding = NULL;
   if (!consoleEncoding) consoleEncoding = getConsoleEncoding();
@@ -1367,18 +1367,16 @@ writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count) {
       &outputNext, &outputLeft
     );
 
-    if (result != -1) {
-      size_t length = outputNext - outputBuffer;
-      outputBuffer[length] = 0;
-      fputs(outputBuffer, stream);
-    }
-
-    return;
+    if (result == -1) return 0;
+    outputBuffer[outputNext - outputBuffer] = 0;
+    fputs(outputBuffer, stream);
+    return !ferror(stream);
   }
 ENCODING_NOT_SUPPORTED:
 #endif /* HAVE_ICONV_H */
 
   fwrite(bytes, 1, count, stream);
+  return !ferror(stream);
 }
 
 #ifdef GOT_SOCKETS
