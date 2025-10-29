@@ -1368,8 +1368,7 @@ writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count) {
     );
 
     if (result == -1) return 0;
-    outputBuffer[outputNext - outputBuffer] = 0;
-    fputs(outputBuffer, stream);
+    fwrite(outputBuffer, 1, (outputNext - outputBuffer), stream);
     return !ferror(stream);
   }
 ENCODING_NOT_SUPPORTED:
