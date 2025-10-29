@@ -76,7 +76,7 @@ putNewline (FILE *stream) {
   return putByte(stream, '\n');
 }
 
-static void
+static int
 putWrappedText (
   FILE *stream, const char *text, char *line,
   unsigned int offset, unsigned int width
@@ -119,7 +119,7 @@ putWrappedText (
 
       if (length > 0) {
         writeWithConsoleEncoding(stream, line, length);
-        putNewline(stream);
+        if (!putNewline(stream)) return 0;
       }
 
       while (charCount < charsLeft) {
@@ -132,9 +132,11 @@ putWrappedText (
       memset(line, ' ', offset);
     }
   }
+
+  return 1;
 }
 
-static void
+static int
 putFormattedLines (
   FILE *stream, const char *const *const *blocks,
   char *line, int width
@@ -179,26 +181,47 @@ putFormattedLines (
         paragraphText[paragraphLength += textLength] = 0;
       } else {
         if (paragraphLength) {
-          putWrappedText(stream, paragraphText, line, 0, width);
+          if (!putWrappedText(stream, paragraphText, line, 0, width)) return 0;
           paragraphLength = 0;
         }
 
-        fprintf(stream, "%s\n", text);
+        if (!putString(stream, text)) return 0;
+        if (!putNewline(stream)) return 0;
       }
 
       chunk += 1;
     }
 
     if (paragraphLength) {
-      putWrappedText(stream, paragraphText, line, 0, width);
+      if (!putWrappedText(stream, paragraphText, line, 0, width)) return 0;
       paragraphLength = 0;
     }
 
-    if (*block) putNewline(stream);
+    if (*block) {
+      if (!putNewline(stream)) {
+        return 0;
+      }
+    }
   }
 
 done:
   if (paragraphText) free(paragraphText);
+  return 1;
+}
+
+static int
+putHeader (FILE *stream, const char *header) {
+  return putString(stream, header)
+      && putByte(stream, ':')
+      ;
+}
+
+static int
+putTitle (FILE *stream, const char *title) {
+  return putNewline(stream)
+      && putHeader(stream, title)
+      && putNewline(stream)
+      ;
 }
 
 typedef struct {
@@ -208,14 +231,14 @@ typedef struct {
 
 static const char *defaultParameterName = "?";
 
-static void
+static int
 showParameterSyntax (
   FILE *stream,
   const CommandLineDescriptor *descriptor
 ) {
   const CommandLineParameters *parameters = descriptor->parameters;
 
-  if (descriptor->parameters) {
+  if (parameters) {
     const char *extra = descriptor->extraParameters.name;
     unsigned int depth = 0;
 
@@ -223,58 +246,67 @@ showParameterSyntax (
     const CommandLineParameter *end = parameter + parameters->count;
 
     while (parameter < end) {
-      putByte(stream, ' ');
+      if (!putByte(stream, ' ')) return 0;
 
       if (parameter->optional) {
-        putByte(stream, '[');
+        if (!putByte(stream, '[')) return 0;
         depth += 1;
       }
 
       {
         const char *name = parameter->name;
         if (!name) name = defaultParameterName;
-        putString(stream, getTranslatedText(name));
+        if (!putString(stream, getTranslatedText(name))) return 0;
       }
 
       parameter += 1;
     }
 
     if (extra) {
-      fprintf(stream, " [%s ...", getTranslatedText(extra));
+      if (!putString(stream, " [")) return 0;
+      if (!putString(stream, getTranslatedText(extra))) return 0;
+      if (!putString(stream, " ...")) return 0;
       depth += 1;
     }
 
     while (depth > 0) {
-      putByte(stream, ']');
+      if (!putByte(stream, ']')) return 0;
       depth -= 1;
     }
   } else {
     const char *parameters = descriptor->usage.parameters;
 
     if (parameters) {
-      fprintf(stream, " %s", parameters);
+      if (!putByte(stream, ' ')) return 0;
+      if (!putString(stream, getTranslatedText(parameters))) return 0;
     }
   }
+
+  return 1;
 }
 
-static void
+static int
 showSyntax (
   FILE *stream,
   const CommandLineDescriptor *descriptor
 ) {
-  fprintf(stream, "%s: %s", gettext("Syntax"), programName);
+  if (!putHeader(stream, gettext("Syntax"))) return 0;
+  if (!putByte(stream, ' ')) return 0;
+  if (!putString(stream, programName)) return 0;
 
   if (descriptor->options) {
     if (descriptor->options->count > 0) {
-      fprintf(stream, " [-%s ...]", gettext("option"));
+      if (!putString(stream, " [-")) return 0;
+      if (!putString(stream, gettext("option"))) return 0;
+      if (!putString(stream, " ...]")) return 0;
     }
   }
 
-  showParameterSyntax(stream, descriptor);
-  fprintf(stream, "\n");
+  if (!showParameterSyntax(stream, descriptor)) return 0;
+  return putNewline(stream);
 }
 
-static void
+static int
 showParameter (
   FILE *stream, char *line, unsigned int lineWidth,
   const char *name, unsigned int nameWidth,
@@ -300,11 +332,13 @@ showParameter (
   line[lineLength++] = ' ';
   {
     if (!description) description = "";
-    putWrappedText(stream, description, line, lineLength, lineWidth);
+    if (!putWrappedText(stream, description, line, lineLength, lineWidth)) return 0;
   }
+
+  return 1;
 }
 
-static void
+static int
 showParameters (
   FILE *stream, char *line, unsigned int lineWidth,
   const CommandLineDescriptor *descriptor
@@ -344,16 +378,18 @@ showParameters (
     }
 
     if (nameWidth > 0) {
-      fprintf(stream, "\n%s:\n", gettext("Parameters"));
+      if (!putTitle(stream, gettext("Parameters"))) return 0;
 
       for (unsigned int parameterIndex=0; parameterIndex<parameters->count; parameterIndex+=1) {
         const CommandLineParameter *parameter = &parameters->table[parameterIndex];
 
-        showParameter(
+        int shown = showParameter(
           stream, line, lineWidth,
           names[parameterIndex].text, nameWidth,
           getTranslatedText(parameter->description)
         );
+
+        if (!shown) return 0;
       }
 
       {
@@ -361,18 +397,22 @@ showParameters (
         const char *extra = name->text;
 
         if (extra) {
-          showParameter(
+          int shown = showParameter(
             stream, line, lineWidth,
             extra, nameWidth,
             getTranslatedText(descriptor->extraParameters.description)
           );
+
+          if (!shown) return 0;
         }
       }
     }
   }
+
+  return 1;
 }
 
-static void
+static int
 showOptions (
   FILE *stream, char *line, unsigned int lineWidth,
   const OptionProcessingData *opd
@@ -411,7 +451,7 @@ showOptions (
       if (option->letter) letterWidth = 2;
     }
 
-    fprintf(stream, "\n%s:\n", gettext("Options"));
+    if (!putTitle(stream, gettext("Options"))) return 0;
 
     for (unsigned int optionIndex=0; optionIndex<optionCount; optionIndex+=1) {
       const CommandLineOption *option = &opd->options->table[optionIndex];
@@ -497,24 +537,28 @@ showOptions (
           }
 
           while (index < limit) strings[index++] = "";
+
           snprintf(from, (to - from),
             description, strings[0], strings[1], strings[2], strings[3]
           );
+
           description = from;
         }
 
-        putWrappedText(stream, description, line, lineLength, lineWidth);
+        if (!putWrappedText(stream, description, line, lineLength, lineWidth)) return 0;
       }
     }
   }
+
+  return 1;
 }
 
-static void
+static int
 showHelp (
   const CommandLineDescriptor *descriptor,
   const OptionProcessingData *opd
 ) {
-  FILE *usageStream = stdout;
+  FILE *stream = stdout;
   const CommandLineUsage *usage = &descriptor->usage;
 
   size_t width = UINT16_MAX;
@@ -525,23 +569,25 @@ showHelp (
     const char *purpose = getTranslatedText(usage->purpose);
 
     if (purpose && *purpose) {
-      putWrappedText(usageStream, purpose, line, 0, width);
-      putNewline(usageStream);
+      if (!putWrappedText(stream, purpose, line, 0, width)) return 0;
+      if (!putNewline(stream)) return 0;
     }
   }
 
-  showSyntax(usageStream, descriptor);
-  showParameters(usageStream, line, width, descriptor);
-  showOptions(usageStream, line, width, opd);
+  if (!showSyntax(stream, descriptor)) return 0;
+  if (!showParameters(stream, line, width, descriptor)) return 0;
+  if (!showOptions(stream, line, width, opd)) return 0;
 
   {
     const char *const *const *notes = usage->notes;
 
     if (notes && *notes) {
-      putNewline(usageStream);
-      putFormattedLines(usageStream, notes, line, width);
+      if (!putNewline(stream)) return 0;
+      if (!putFormattedLines(stream, notes, line, width)) return 0;
     }
   }
+
+  return 1;
 }
 
 static int
@@ -1460,8 +1506,7 @@ processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount,
   processOptions(&opd, argumentCount, argumentVector);
 
   if (opd.showHelp) {
-    showHelp(&cld, &opd);
-    return PROG_EXIT_FORCE;
+    return showHelp(&cld, &opd)? PROG_EXIT_FORCE: PROG_EXIT_FATAL;
   }
 
   if (cld.doBootParameters && *cld.doBootParameters) {
