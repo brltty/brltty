@@ -50,83 +50,7 @@ typedef struct {
   uint8_t showHelp:1;
   uint8_t warning:1;
   uint8_t syntaxError:1;
-} OptionProcessingInformation;
-
-static int
-hasExtendableArgument (const CommandLineOption *option) {
-  return option->argument && (option->flags & OPT_Extend);
-}
-
-static uint8_t *
-getEnsuredSetting (
-  const OptionProcessingInformation *opi,
-  const CommandLineOption *option
-) {
-  return &opi->ensuredSettings[option - opi->options->table];
-}
-
-static void
-setEnsuredSetting (
-  const OptionProcessingInformation *opi,
-  const CommandLineOption *option,
-  uint8_t yes
-) {
-  *getEnsuredSetting(opi, option) = yes;
-}
-
-static int
-ensureSetting (
-  OptionProcessingInformation *opi,
-  const CommandLineOption *option,
-  const char *value
-) {
-  uint8_t *ensured = getEnsuredSetting(opi, option);
-
-  if (!*ensured || hasExtendableArgument(option)) {
-    *ensured = 1;
-
-    if (option->argument) {
-      if (option->setting.string) {
-        if (option->flags & OPT_Extend) {
-          if (!extendStringSetting(option->setting.string, value, 1)) return 0;
-        } else if (!changeStringSetting(option->setting.string, value)) {
-          return 0;
-        }
-      }
-    } else {
-      if (option->setting.flag) {
-        if (option->flags & OPT_Extend) {
-          int count;
-
-          if (isInteger(&count, value) && (count >= 0)) {
-            *option->setting.flag = count;
-          } else {
-            logMessage(LOG_ERR, "%s: %s", gettext("invalid counter setting"), value);
-            opi->warning = 1;
-          }
-        } else {
-          unsigned int on;
-
-          if (validateFlagKeyword(&on, value)) {
-            *option->setting.flag = on;
-          } else {
-            logMessage(LOG_ERR, "%s: %s", gettext("invalid flag setting"), value);
-            opi->warning = 1;
-          }
-        }
-      }
-    }
-  }
-
-  return 1;
-}
-
-typedef struct {
-  const char *text;
-  size_t length;
-} HelpTextDescriptor;
-
-static const char *defaultParameterName = "?";
+} OptionProcessingData;
 
 static const char *
 getTranslatedText (const char *text) {
@@ -135,8 +59,25 @@ getTranslatedText (const char *text) {
   return text;
 }
 
+static int
+putString (FILE *stream, const char *string) {
+  fputs(string, stream);
+  return !ferror(stream);
+}
+
+static int
+putByte (FILE *stream, int byte) {
+  fputc(byte, stream);
+  return !ferror(stream);
+}
+
+static int
+putNewline (FILE *stream) {
+  return putByte(stream, '\n');
+}
+
 static void
-showWrappedText (
+putWrappedText (
   FILE *stream, const char *text, char *line,
   unsigned int offset, unsigned int width
 ) {
@@ -178,7 +119,7 @@ showWrappedText (
 
       if (length > 0) {
         writeWithConsoleEncoding(stream, line, length);
-        fputc('\n', stream);
+        putNewline(stream);
       }
 
       while (charCount < charsLeft) {
@@ -194,7 +135,7 @@ showWrappedText (
 }
 
 static void
-showFormattedLines (
+putFormattedLines (
   FILE *stream, const char *const *const *blocks,
   char *line, int width
 ) {
@@ -238,7 +179,7 @@ showFormattedLines (
         paragraphText[paragraphLength += textLength] = 0;
       } else {
         if (paragraphLength) {
-          showWrappedText(stream, paragraphText, line, 0, width);
+          putWrappedText(stream, paragraphText, line, 0, width);
           paragraphLength = 0;
         }
 
@@ -249,16 +190,23 @@ showFormattedLines (
     }
 
     if (paragraphLength) {
-      showWrappedText(stream, paragraphText, line, 0, width);
+      putWrappedText(stream, paragraphText, line, 0, width);
       paragraphLength = 0;
     }
 
-    if (*block) fputc('\n', stream);
+    if (*block) putNewline(stream);
   }
 
 done:
   if (paragraphText) free(paragraphText);
 }
+
+typedef struct {
+  const char *text;
+  size_t length;
+} HelpTextDescriptor;
+
+static const char *defaultParameterName = "?";
 
 static void
 showParameterSyntax (
@@ -275,17 +223,17 @@ showParameterSyntax (
     const CommandLineParameter *end = parameter + parameters->count;
 
     while (parameter < end) {
-      fputc(' ', stream);
+      putByte(stream, ' ');
 
       if (parameter->optional) {
-        fputc('[', stream);
+        putByte(stream, '[');
         depth += 1;
       }
 
       {
         const char *name = parameter->name;
         if (!name) name = defaultParameterName;
-        fputs(getTranslatedText(name), stream);
+        putString(stream, getTranslatedText(name));
       }
 
       parameter += 1;
@@ -297,7 +245,7 @@ showParameterSyntax (
     }
 
     while (depth > 0) {
-      fputc(']', stream);
+      putByte(stream, ']');
       depth -= 1;
     }
   } else {
@@ -352,7 +300,7 @@ showParameter (
   line[lineLength++] = ' ';
   {
     if (!description) description = "";
-    showWrappedText(stream, description, line, lineLength, lineWidth);
+    putWrappedText(stream, description, line, lineLength, lineWidth);
   }
 }
 
@@ -427,9 +375,9 @@ showParameters (
 static void
 showOptions (
   FILE *stream, char *line, unsigned int lineWidth,
-  const OptionProcessingInformation *opi
+  const OptionProcessingData *opd
 ) {
-  size_t optionCount = opi->options->count;
+  size_t optionCount = opd->options->count;
 
   if (optionCount > 0) {
     HelpTextDescriptor arguments[optionCount];
@@ -439,7 +387,7 @@ showOptions (
     unsigned int argumentWidth = 0;
 
     for (unsigned int optionIndex=0; optionIndex<optionCount; optionIndex+=1) {
-      const CommandLineOption *option = &opi->options->table[optionIndex];
+      const CommandLineOption *option = &opd->options->table[optionIndex];
 
       if (option->word) {
         unsigned int length = strlen(option->word);
@@ -466,7 +414,7 @@ showOptions (
     fprintf(stream, "\n%s:\n", gettext("Options"));
 
     for (unsigned int optionIndex=0; optionIndex<optionCount; optionIndex+=1) {
-      const CommandLineOption *option = &opi->options->table[optionIndex];
+      const CommandLineOption *option = &opd->options->table[optionIndex];
 
       unsigned int lineLength = 0;
       while (lineLength < 2) line[lineLength++] = ' ';
@@ -555,7 +503,7 @@ showOptions (
           description = from;
         }
 
-        showWrappedText(stream, description, line, lineLength, lineWidth);
+        putWrappedText(stream, description, line, lineLength, lineWidth);
       }
     }
   }
@@ -564,7 +512,7 @@ showOptions (
 static void
 showHelp (
   const CommandLineDescriptor *descriptor,
-  const OptionProcessingInformation *opi
+  const OptionProcessingData *opd
 ) {
   FILE *usageStream = stdout;
   const CommandLineUsage *usage = &descriptor->usage;
@@ -577,28 +525,97 @@ showHelp (
     const char *purpose = getTranslatedText(usage->purpose);
 
     if (purpose && *purpose) {
-      showWrappedText(usageStream, purpose, line, 0, width);
-      fputc('\n', usageStream);
+      putWrappedText(usageStream, purpose, line, 0, width);
+      putNewline(usageStream);
     }
   }
 
   showSyntax(usageStream, descriptor);
   showParameters(usageStream, line, width, descriptor);
-  showOptions(usageStream, line, width, opi);
+  showOptions(usageStream, line, width, opd);
 
   {
     const char *const *const *notes = usage->notes;
 
     if (notes && *notes) {
-      fputc('\n', usageStream);
-      showFormattedLines(usageStream, notes, line, width);
+      putNewline(usageStream);
+      putFormattedLines(usageStream, notes, line, width);
     }
   }
 }
 
+static int
+hasExtendableArgument (const CommandLineOption *option) {
+  return option->argument && (option->flags & OPT_Extend);
+}
+
+static uint8_t *
+getEnsuredSetting (
+  const OptionProcessingData *opd,
+  const CommandLineOption *option
+) {
+  return &opd->ensuredSettings[option - opd->options->table];
+}
+
+static void
+setEnsuredSetting (
+  const OptionProcessingData *opd,
+  const CommandLineOption *option,
+  uint8_t yes
+) {
+  *getEnsuredSetting(opd, option) = yes;
+}
+
+static int
+ensureSetting (
+  OptionProcessingData *opd,
+  const CommandLineOption *option,
+  const char *value
+) {
+  uint8_t *ensured = getEnsuredSetting(opd, option);
+
+  if (!*ensured || hasExtendableArgument(option)) {
+    *ensured = 1;
+
+    if (option->argument) {
+      if (option->setting.string) {
+        if (option->flags & OPT_Extend) {
+          if (!extendStringSetting(option->setting.string, value, 1)) return 0;
+        } else if (!changeStringSetting(option->setting.string, value)) {
+          return 0;
+        }
+      }
+    } else {
+      if (option->setting.flag) {
+        if (option->flags & OPT_Extend) {
+          int count;
+
+          if (isInteger(&count, value) && (count >= 0)) {
+            *option->setting.flag = count;
+          } else {
+            logMessage(LOG_ERR, "%s: %s", gettext("invalid counter setting"), value);
+            opd->warning = 1;
+          }
+        } else {
+          unsigned int on;
+
+          if (validateFlagKeyword(&on, value)) {
+            *option->setting.flag = on;
+          } else {
+            logMessage(LOG_ERR, "%s: %s", gettext("invalid flag setting"), value);
+            opd->warning = 1;
+          }
+        }
+      }
+    }
+  }
+
+  return 1;
+}
+
 static void
 processOptions (
-  OptionProcessingInformation *opi,
+  OptionProcessingData *opd,
   int *argumentCount,
   char ***argumentVector
 ) {
@@ -608,14 +625,14 @@ processOptions (
 
   int dosSyntax = 0;
   const int firstNonLetter = 0X80;
-  const CommandLineOption *letterToOption[firstNonLetter + opi->options->count];
+  const CommandLineOption *letterToOption[firstNonLetter + opd->options->count];
 
   for (unsigned int index=0; index<ARRAY_COUNT(letterToOption); index+=1) {
     letterToOption[index] = NULL;
   }
 
-  int indexToLetter[opi->options->count];
-  char shortOptions[2 + (opi->options->count * 2) + 1];
+  int indexToLetter[opd->options->count];
+  char shortOptions[2 + (opd->options->count * 2) + 1];
 
   {
     int nextNonLetter = firstNonLetter;
@@ -624,8 +641,8 @@ processOptions (
     *opt++ = '+'; // stop parsing options as soon as a non-option argument is encountered
     *opt++ = ':'; // Don't write any error messages
 
-    for (unsigned int index=0; index<opi->options->count; index+=1) {
-      const CommandLineOption *option = &opi->options->table[index];
+    for (unsigned int index=0; index<opd->options->count; index+=1) {
+      const CommandLineOption *option = &opd->options->table[index];
       int letter = option->letter;
 
       if (letter) {
@@ -653,13 +670,13 @@ processOptions (
   }
 
 #ifdef HAVE_GETOPT_LONG
-  struct option longOptions[(opi->options->count * 2) + 1];
+  struct option longOptions[(opd->options->count * 2) + 1];
 
   {
     struct option *opt = longOptions;
 
-    for (unsigned int index=0; index<opi->options->count; index+=1) {
-      const CommandLineOption *option = &opi->options->table[index];
+    for (unsigned int index=0; index<opd->options->count; index+=1) {
+      const CommandLineOption *option = &opd->options->table[index];
       const char *word = option->word;
       if (!word) continue;
       int letter = indexToLetter[index];
@@ -744,8 +761,8 @@ processOptions (
           } else {
             letter = -1;
 
-            for (unsigned int index=0; index<opi->options->count; index+=1) {
-              option = &opi->options->table[index];
+            for (unsigned int index=0; index<opd->options->count; index+=1) {
+              option = &opd->options->table[index];
               const char *word = option->word;
 
               if (word) {
@@ -829,7 +846,7 @@ processOptions (
 
         if (option->argument) {
           if (!*optarg) {
-            setEnsuredSetting(opi, option, 0);
+            setEnsuredSetting(opd, option, 0);
             break;
           }
 
@@ -850,14 +867,14 @@ processOptions (
           }
         }
 
-        setEnsuredSetting(opi, option, 1);
+        setEnsuredSetting(opd, option, 1);
         break;
       }
 
       case 0: { // reset a flag
         const CommandLineOption *option = letterToOption[resetLetter];
         *option->setting.flag = 0;
-        setEnsuredSetting(opi, option, 1);
+        setEnsuredSetting(opd, option, 1);
         break;
       }
 
@@ -866,17 +883,17 @@ processOptions (
         char message[0X100];
 
       case '?': // an unknown option has been specified
-        opi->syntaxError = 1;
+        opd->syntaxError = 1;
         problem = gettext("unknown option");
         goto logOptionProblem;
 
       case ':': // the operand for a string option hasn't been specified
-        opi->syntaxError = 1;
+        opd->syntaxError = 1;
         problem = gettext("missing operand");
         goto logOptionProblem;
 
       case '-': // the operand for an option is invalid
-        opi->warning = 1;
+        opd->warning = 1;
         problem = gettext("invalid operand");
         goto logOptionProblem;
 
@@ -919,7 +936,7 @@ processOptions (
       }
 
       case 'h': // help - show usage summary and then exit
-        opi->showHelp = 1;
+        opd->showHelp = 1;
         break;
     }
   }
@@ -992,7 +1009,7 @@ processParameters (
 
 static void
 processBootParameters (
-  OptionProcessingInformation *opi,
+  OptionProcessingData *opd,
   const char *parameter
 ) {
   const char *value;
@@ -1008,8 +1025,8 @@ processBootParameters (
     int parameterCount = 0;
     char **parameters = splitString(value, ',', &parameterCount);
 
-    for (unsigned int optionIndex=0; optionIndex<opi->options->count; optionIndex+=1) {
-      const CommandLineOption *option = &opi->options->table[optionIndex];
+    for (unsigned int optionIndex=0; optionIndex<opd->options->count; optionIndex+=1) {
+      const CommandLineOption *option = &opd->options->table[optionIndex];
 
       if ((option->bootParameter) && (option->bootParameter <= parameterCount)) {
         char *parameter = parameters[option->bootParameter-1];
@@ -1023,7 +1040,7 @@ processBootParameters (
             } while (*++byte);
           }
 
-          ensureSetting(opi, option, parameter);
+          ensureSetting(opd, option, parameter);
         }
       }
     }
@@ -1036,7 +1053,7 @@ processBootParameters (
 
 static int
 processEnvironmentVariable (
-  OptionProcessingInformation *opi,
+  OptionProcessingData *opd,
   const CommandLineOption *option,
   const char *prefix
 ) {
@@ -1066,7 +1083,7 @@ processEnvironmentVariable (
       const char *setting = getenv(name);
 
       if (setting && *setting) {
-        if (!ensureSetting(opi, option, setting)) {
+        if (!ensureSetting(opd, option, setting)) {
           return 0;
         }
       }
@@ -1078,13 +1095,13 @@ processEnvironmentVariable (
 
 static int
 processEnvironmentVariables (
-  OptionProcessingInformation *opi,
+  OptionProcessingData *opd,
   const char *prefix
 ) {
-  for (unsigned int optionIndex=0; optionIndex<opi->options->count; optionIndex+=1) {
-    const CommandLineOption *option = &opi->options->table[optionIndex];
+  for (unsigned int optionIndex=0; optionIndex<opd->options->count; optionIndex+=1) {
+    const CommandLineOption *option = &opd->options->table[optionIndex];
 
-    if (!processEnvironmentVariable(opi, option, prefix)) return 0;
+    if (!processEnvironmentVariable(opd, option, prefix)) return 0;
   }
 
   return 1;
@@ -1092,11 +1109,11 @@ processEnvironmentVariables (
 
 static void
 processInternalSettings (
-  OptionProcessingInformation *opi,
+  OptionProcessingData *opd,
   int config
 ) {
-  for (unsigned int optionIndex=0; optionIndex<opi->options->count; optionIndex+=1) {
-    const CommandLineOption *option = &opi->options->table[optionIndex];
+  for (unsigned int optionIndex=0; optionIndex<opd->options->count; optionIndex+=1) {
+    const CommandLineOption *option = &opd->options->table[optionIndex];
 
     if (!(option->flags & OPT_Config) == !config) {
       const char *setting = option->internal.setting;
@@ -1120,7 +1137,7 @@ processInternalSettings (
         }
       }
 
-      ensureSetting(opi, option, setting);
+      ensureSetting(opd, option, setting);
       if (newSetting) free(newSetting);
     }
   }
@@ -1148,7 +1165,7 @@ searchConfigurationDirective (const void *target, const void *element) {
 }
 
 typedef struct {
-  OptionProcessingInformation *opi;
+  OptionProcessingData *opd;
   char **settings;
 
   struct {
@@ -1174,12 +1191,12 @@ processConfigurationDirective (
   const ConfigurationDirective *directive = findConfigurationDirective(keyword, conf);
 
   if (directive) {
-    const CommandLineOption *option = &conf->opi->options->table[directive->option];
+    const CommandLineOption *option = &conf->opd->options->table[directive->option];
     char **setting = &conf->settings[directive->option];
 
     if (*setting && !hasExtendableArgument(option)) {
       logMessage(LOG_ERR, "%s: %" PRIws, gettext("configuration directive specified more than once"), keyword);
-      conf->opi->warning = 1;
+      conf->opd->warning = 1;
 
       free(*setting);
       *setting = NULL;
@@ -1195,7 +1212,7 @@ processConfigurationDirective (
     }
   } else {
     logMessage(LOG_ERR, "%s: %" PRIws, gettext("unknown configuration directive"), keyword);
-    conf->opi->warning = 1;
+    conf->opd->warning = 1;
   }
 
   return 1;
@@ -1220,10 +1237,10 @@ static DATA_OPERANDS_PROCESSOR(processConfigurationOperands) {
         ok = 0;
       }
     } else {
-      conf->opi->warning = 1;
+      conf->opd->warning = 1;
     }
   } else {
-    conf->opi->warning = 1;
+    conf->opd->warning = 1;
   }
 
   return ok;
@@ -1282,8 +1299,8 @@ freeConfigurationDirectives (ConfigurationFileProcessingData *conf) {
 
 static int
 addConfigurationDirectives (ConfigurationFileProcessingData *conf) {
-  for (unsigned int optionIndex=0; optionIndex<conf->opi->options->count; optionIndex+=1) {
-    const CommandLineOption *option = &conf->opi->options->table[optionIndex];
+  for (unsigned int optionIndex=0; optionIndex<conf->opd->options->count; optionIndex+=1) {
+    const CommandLineOption *option = &conf->opd->options->table[optionIndex];
 
     if ((option->flags & OPT_Config) && option->word) {
       ConfigurationDirective *directive;
@@ -1317,7 +1334,7 @@ addConfigurationDirectives (ConfigurationFileProcessingData *conf) {
 
 static void
 processConfigurationFile (
-  OptionProcessingInformation *opi,
+  OptionProcessingData *opd,
   const char *path,
   int optional
 ) {
@@ -1325,11 +1342,11 @@ processConfigurationFile (
     FILE *file = openDataFile(path, "r", optional);
 
     if (file) {
-      char *settings[opi->options->count];
-      ConfigurationDirective *directives[opi->options->count];
+      char *settings[opd->options->count];
+      ConfigurationDirective *directives[opd->options->count];
 
       ConfigurationFileProcessingData conf = {
-        .opi = opi,
+        .opd = opd,
         .settings = settings,
 
         .directive = {
@@ -1341,7 +1358,7 @@ processConfigurationFile (
       if (addConfigurationDirectives(&conf)) {
         int processed;
 
-        for (unsigned int index=0; index<opi->options->count; index+=1) {
+        for (unsigned int index=0; index<opd->options->count; index+=1) {
           conf.settings[index] = NULL;
         }
 
@@ -1354,18 +1371,18 @@ processConfigurationFile (
           processed = processDataStream(NULL, file, path, &dataFileParameters);
         }
 
-        for (unsigned int index=0; index<opi->options->count; index+=1) {
+        for (unsigned int index=0; index<opd->options->count; index+=1) {
           char *setting = conf.settings[index];
 
           if (setting) {
-            ensureSetting(opi, &opi->options->table[index], setting);
+            ensureSetting(opd, &opd->options->table[index], setting);
             free(setting);
           }
         }
 
         if (!processed) {
           logMessage(LOG_ERR, gettext("file '%s' processing error."), path);
-          opi->warning = 1;
+          opd->warning = 1;
         }
 
         freeConfigurationDirectives(&conf);
@@ -1373,18 +1390,18 @@ processConfigurationFile (
 
       fclose(file);
     } else if (!optional || (errno != ENOENT)) {
-      opi->warning = 1;
+      opd->warning = 1;
     }
   }
 }
 
 static void
-toAbsolutePaths (OptionProcessingInformation *opi) {
+toAbsolutePaths (OptionProcessingData *opd) {
   char *parent = getWorkingDirectory();
 
   if (parent) {
-    for (unsigned int optionIndex=0; optionIndex<opi->options->count; optionIndex+=1) {
-      const CommandLineOption *option = &opi->options->table[optionIndex];
+    for (unsigned int optionIndex=0; optionIndex<opd->options->count; optionIndex+=1) {
+      const CommandLineOption *option = &opd->options->table[optionIndex];
 
       if (option->internal.adjust == toAbsoluteInstallPath) {
         if (**option->setting.string) {
@@ -1429,7 +1446,7 @@ processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount,
   uint8_t ensuredSettings[cld.options->count];
   memset(ensuredSettings, 0, sizeof(ensuredSettings));
 
-  OptionProcessingInformation opi = {
+  OptionProcessingData opd = {
     .options = cld.options,
     .ensuredSettings = ensuredSettings,
 
@@ -1440,32 +1457,32 @@ processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount,
 
   onProgramExit("options", exitOptions, (void *)cld.options);
   beginProgram(*argumentCount, *argumentVector);
-  processOptions(&opi, argumentCount, argumentVector);
+  processOptions(&opd, argumentCount, argumentVector);
 
-  if (opi.showHelp) {
-    showHelp(&cld, &opi);
+  if (opd.showHelp) {
+    showHelp(&cld, &opd);
     return PROG_EXIT_FORCE;
   }
 
   if (cld.doBootParameters && *cld.doBootParameters) {
-    processBootParameters(&opi, cld.applicationName);
+    processBootParameters(&opd, cld.applicationName);
   }
 
   if (cld.doEnvironmentVariables && *cld.doEnvironmentVariables) {
-    processEnvironmentVariables(&opi, cld.applicationName);
+    processEnvironmentVariables(&opd, cld.applicationName);
   }
 
-  processInternalSettings(&opi, 0);
+  processInternalSettings(&opd, 0);
   {
     int configurationFileSpecified = cld.configurationFile && *cld.configurationFile;
 
     if (configurationFileSpecified) {
-      processConfigurationFile(&opi, *cld.configurationFile, !configurationFileSpecified);
+      processConfigurationFile(&opd, *cld.configurationFile, !configurationFileSpecified);
     }
   }
-  processInternalSettings(&opi, 1);
+  processInternalSettings(&opd, 1);
 
-  if (opi.syntaxError) {
+  if (opd.syntaxError) {
     return PROG_EXIT_SYNTAX;
   }
 
@@ -1473,7 +1490,7 @@ processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount,
     return PROG_EXIT_SYNTAX;
   }
 
-  toAbsolutePaths(&opi);
+  toAbsolutePaths(&opd);
   return PROG_EXIT_SUCCESS;
 }
 
