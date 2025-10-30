@@ -60,24 +60,31 @@ getTranslatedText (const char *text) {
 }
 
 static int
-putBytes (FILE *stream, const char *bytes, size_t count) {
-  if (writeWithConsoleEncoding(stream, bytes, count)) return 1;
-
+putCheck (FILE *stream, const char *action) {
+  if (!ferror(stream)) return 1;
   int error = errno;
-  fflush(stream);
-  logActionError(error, "help text write");
 
+  fflush(stream);
+  logActionError(error, action);
   return 0;
 }
 
 static int
+putBytes (FILE *stream, const char *bytes, size_t count) {
+  fwrite(bytes, 1, count, stream);
+  return putCheck(stream, "fwrite");
+}
+
+static int
 putByte (FILE *stream, char byte) {
-  return putBytes(stream, &byte, 1);
+  fputc(byte, stream);
+  return putCheck(stream, "fputc");
 }
 
 static int
 putString (FILE *stream, const char *string) {
-  return putBytes(stream, string, strlen(string));
+  fputs(string, stream);
+  return putCheck(stream, "fputs");
 }
 
 static int
@@ -239,6 +246,9 @@ typedef struct {
 } HelpTextDescriptor;
 
 static const char *defaultParameterName = "?";
+static const char *repeatableArgumentIndicator = " ...";
+static const char optionalArgumentPrefix = '[';
+static const char optionalArgumentSuffix = ']';
 
 static int
 showParameterSyntax (
@@ -258,7 +268,7 @@ showParameterSyntax (
       if (!putByte(stream, ' ')) return 0;
 
       if (parameter->optional) {
-        if (!putByte(stream, '[')) return 0;
+        if (!putByte(stream, optionalArgumentPrefix)) return 0;
         depth += 1;
       }
 
@@ -272,14 +282,15 @@ showParameterSyntax (
     }
 
     if (extra) {
-      if (!putString(stream, " [")) return 0;
+      if (!putByte(stream, ' ')) return 0;
+      if (!putByte(stream, optionalArgumentPrefix)) return 0;
       if (!putString(stream, getTranslatedText(extra))) return 0;
-      if (!putString(stream, " ...")) return 0;
+      if (!putString(stream, repeatableArgumentIndicator)) return 0;
       depth += 1;
     }
 
     while (depth > 0) {
-      if (!putByte(stream, ']')) return 0;
+      if (!putByte(stream, optionalArgumentSuffix)) return 0;
       depth -= 1;
     }
   } else {
@@ -305,9 +316,12 @@ showSyntax (
 
   if (descriptor->options) {
     if (descriptor->options->count > 0) {
-      if (!putString(stream, " [-")) return 0;
+      if (!putByte(stream, ' ')) return 0;
+      if (!putByte(stream, optionalArgumentPrefix)) return 0;
+      if (!putByte(stream, '-')) return 0;
       if (!putString(stream, gettext("option"))) return 0;
-      if (!putString(stream, " ...]")) return 0;
+      if (!putString(stream, repeatableArgumentIndicator)) return 0;
+      if (!putByte(stream, optionalArgumentSuffix)) return 0;
     }
   }
 
@@ -318,7 +332,7 @@ showSyntax (
 static int
 showParameter (
   FILE *stream, char *line, unsigned int lineWidth,
-  const char *name, unsigned int nameWidth,
+  const char *name, unsigned int nameWidth, int repeatable,
   const char *description
 ) {
   unsigned int lineLength = 0;
@@ -329,9 +343,15 @@ showParameter (
 
     if (name) {
       size_t nameLength = strlen(name);
-
       memcpy(line+lineLength, name, nameLength);
       lineLength += nameLength;
+
+      if (repeatable) {
+        const char *indicator = repeatableArgumentIndicator;
+        size_t indicatorLength = strlen(indicator);
+        memcpy(line+lineLength, indicator, indicatorLength);
+        lineLength += indicatorLength;
+      }
     }
 
     while (lineLength < end) line[lineLength++] = ' ';
@@ -379,7 +399,8 @@ showParameters (
       if (extra) {
         name->text = getTranslatedText(extra);
         name->length = strlen(name->text);
-        nameWidth = MAX(nameWidth, name->length);
+        size_t width = name->length + strlen(repeatableArgumentIndicator);
+        nameWidth = MAX(nameWidth, width);
       } else {
         name->text = NULL;
         name->length = 0;
@@ -394,7 +415,7 @@ showParameters (
 
         int shown = showParameter(
           stream, line, lineWidth,
-          names[parameterIndex].text, nameWidth,
+          names[parameterIndex].text, nameWidth, 0,
           getTranslatedText(parameter->description)
         );
 
@@ -408,7 +429,7 @@ showParameters (
         if (extra) {
           int shown = showParameter(
             stream, line, lineWidth,
-            extra, nameWidth,
+            extra, nameWidth, 1,
             getTranslatedText(descriptor->extraParameters.description)
           );
 
