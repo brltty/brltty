@@ -811,7 +811,8 @@ static dbus_uint32_t *getState(const char *sender, const char *path)
     goto out;
   }
   ret = malloc(sizeof(*ret) * count);
-  memcpy(ret, states, sizeof(*ret) * count);
+  if (ret)
+    memcpy(ret, states, sizeof(*ret) * count);
 
 out:
   dbus_message_unref(reply);
