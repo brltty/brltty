@@ -62,7 +62,11 @@ getTranslatedText (const char *text) {
 static int
 putBytes (FILE *stream, const char *bytes, size_t count) {
   if (writeWithConsoleEncoding(stream, bytes, count)) return 1;
-  logSystemError("help text write");
+
+  int error = errno;
+  fflush(stream);
+  logActionError(error, "help text write");
+
   return 0;
 }
 
@@ -84,57 +88,57 @@ putNewline (FILE *stream) {
 static int
 putWrappedText (
   FILE *stream, const char *text, char *line,
-  unsigned int offset, unsigned int width
+  unsigned int lineIndent, unsigned int lineWidth
 ) {
-  unsigned int limit = width - offset;
-  unsigned int charsLeft = strlen(text);
+  unsigned int textWidth = lineWidth - lineIndent;
+  unsigned int textLeft = strlen(text);
 
   while (1) {
-    unsigned int charCount = charsLeft;
+    unsigned int textLength = textLeft;
 
-    if (charCount > limit) {
-      charCount = limit;
+    if (textLength > textWidth) {
+      textLength = textWidth;
 
-      while (charCount > 0) {
-        if (isspace(text[charCount])) break;
-        charCount -= 1;
+      while (textLength > 0) {
+        if (isspace(text[textLength])) break;
+        textLength -= 1;
       }
 
-      while (charCount > 0) {
-        if (!isspace(text[--charCount])) {
-          charCount += 1;
+      while (textLength > 0) {
+        if (!isspace(text[--textLength])) {
+          textLength += 1;
           break;
         }
       }
     }
 
     {
-      unsigned int length = offset + charCount;
+      unsigned int lineLength = lineIndent + textLength;
 
-      if (charCount > 0) {
-        memcpy(line+offset, text, charCount);
+      if (textLength > 0) {
+        memcpy(line+lineIndent, text, textLength);
       } else {
-        while (length > 0) {
-          if (!isspace(line[--length])) {
-            length += 1;
+        while (lineLength > 0) {
+          if (!isspace(line[--lineLength])) {
+            lineLength += 1;
             break;
           }
         }
       }
 
-      if (length > 0) {
-        if (!putBytes(stream, line, length)) return 0;
+      if (lineLength > 0) {
+        if (!putBytes(stream, line, lineLength)) return 0;
         if (!putNewline(stream)) return 0;
       }
 
-      while (charCount < charsLeft) {
-        if (!isspace(text[charCount])) break;
-        charCount += 1;
+      while (textLength < textLeft) {
+        if (!isspace(text[textLength])) break;
+        textLength += 1;
       }
 
-      if (!(charsLeft -= charCount)) break;
-      text += charCount;
-      memset(line, ' ', offset);
+      if (!(textLeft -= textLength)) break;
+      text += textLength;
+      memset(line, ' ', lineIndent);
     }
   }
 
@@ -144,7 +148,7 @@ putWrappedText (
 static int
 putFormattedLines (
   FILE *stream, const char *const *const *blocks,
-  char *line, int width
+  char *line, int lineWidth
 ) {
   const char *const *const *block = blocks;
 
@@ -163,10 +167,10 @@ putFormattedLines (
 
       if (*text && !iswspace(*text)) {
         size_t textLength = strlen(text);
-
         size_t newLength = paragraphLength + textLength + 1;
-        int extending = !!paragraphLength;
-        if (extending) newLength += 1;
+
+        int extendingParagraph = !!paragraphLength;
+        if (extendingParagraph) newLength += 1;
 
         if (newLength > paragraphSize) {
           size_t newSize = (newLength | 0XFF) + 1;
@@ -181,12 +185,12 @@ putFormattedLines (
           paragraphSize = newSize;
         }
 
-        if (extending) paragraphText[paragraphLength++] = ' ';
+        if (extendingParagraph) paragraphText[paragraphLength++] = ' ';
         memcpy(&paragraphText[paragraphLength], text, textLength);
         paragraphText[paragraphLength += textLength] = 0;
       } else {
         if (paragraphLength) {
-          if (!putWrappedText(stream, paragraphText, line, 0, width)) return 0;
+          if (!putWrappedText(stream, paragraphText, line, 0, lineWidth)) return 0;
           paragraphLength = 0;
         }
 
@@ -198,7 +202,7 @@ putFormattedLines (
     }
 
     if (paragraphLength) {
-      if (!putWrappedText(stream, paragraphText, line, 0, width)) return 0;
+      if (!putWrappedText(stream, paragraphText, line, 0, lineWidth)) return 0;
       paragraphLength = 0;
     }
 
