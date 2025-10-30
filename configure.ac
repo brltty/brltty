@@ -813,6 +813,7 @@ BRLTTY_ARG_ENABLE(
 ])
 AC_SUBST(fuzzer_libs)
 
+have_tinfo="no"
 brltty_curses_libs_save="${LIBS}"
 BRLTTY_PACKAGE_CHOOSE([curses],
    [ncursesw ncursesw/ncurses.h],
@@ -823,8 +824,10 @@ BRLTTY_PACKAGE_CHOOSE([curses],
    [pdcurses curses.h])
 if test -n "${curses_package}"
 then
-   AC_CHECK_LIB([tinfo], [intrflush])
+   AC_CHECK_LIB([tinfo], [intrflush],
+                [have_tinfo="yes"])
 fi
+
 curses_libs="${LIBS%${brltty_curses_libs_save}}"
 LIBS="${brltty_curses_libs_save}"
 AC_SUBST([curses_libs])
@@ -1882,7 +1885,11 @@ in
       ;;
 esac
 
-BRLTTY_SCREEN_DRIVER([fv], [FileViewer], [-ltinfo])
+if test "${have_tinfo}" = "yes"; then
+   BRLTTY_SCREEN_DRIVER([fv], [FileViewer], [-ltinfo])
+else
+   BRLTTY_SCREEN_DRIVER([fv], [FileViewer])
+fi
 
 all_brltty_pty=""
 install_brltty_pty=""
