@@ -140,9 +140,13 @@ brlapi_python_paramCallbackDescriptor_t *brlapi_python_watchParameter(brlapi_han
     return NULL;
   }
 
-  Py_INCREF(func);
-
   descr = malloc(sizeof(*descr));
+  if (!descr) {
+    PyErr_SetString(PyExc_MemoryError, "allocating callback descriptor failed");
+    return NULL;
+  }
+
+  Py_INCREF(func);
   descr->callback = func;
 
   brlapi_descr = brlapi__watchParameter(handle, param, subparam, flags, brlapi_python_parameter_callback, descr, NULL, 0);
