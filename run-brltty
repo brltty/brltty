@@ -21,11 +21,12 @@
 command=brltty
 
 handleInitialHelpOption "${@}" <<END-OF-HELP
-Run ${command} from its build tree.
+Run ${command} from within its build tree.
 
 Syntax: ${programName} {-h | [-option ...]}
 
 All of the options are passed through to ${command} itself.
+To see its usage summary, use its --help long option.
 
 See run-command -h for more details.
 END-OF-HELP
@@ -37,5 +38,5 @@ export BRLTTY_TABLES_DIRECTORY="${sourceRoot}/Tables"
 export BRLTTY_DRIVERS_DIRECTORY="${buildRoot}/lib"
 export BRLTTY_LOCALE_DIRECTORY="${buildRoot}/Messages/locale"
 
-exec "${programDirectory}/run-command" "${buildRoot}/Programs/${command}" -E "${@}"
+exec "${programDirectory}/run-command" "${command}" -E "${@}"
 exit "${?}"

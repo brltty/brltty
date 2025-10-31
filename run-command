@@ -18,6 +18,7 @@
 ###############################################################################
 
 . "$(dirname "${0}")/prologue.sh"
+commandSubdirectory=Programs
 
 handleInitialHelpOption "${@}" <<END-OF-HELP
 Execute the specified command, with the specified arguments,
@@ -25,8 +26,9 @@ such that it picks up shared objects from the BRLTTY build tree.
 
 Syntax: ${programName} {-h | command [argument ...]}
 
-The working directory must be somewhere within the build tree that's to be used.
+The current working directory must be somewhere within the build tree that's to be used.
 If it isn't then the source tree will be used.
+If the command isn't an absolute path then it's relative to the ${commandSubdirectory}/ subdirectory of the tree.
 
 Environment Variables:
   <COMMAND>_VALGRIND_DIRECTORY=path
@@ -37,16 +39,19 @@ END-OF-HELP
 setBuildRoot
 
 [ "${#}" -gt 0 ] || syntaxError "missing command"
-commandName="${1}"
+commandPath="${1}"
 shift 1
 
-readonly commandPath="$(type -P "${commandName}")"
-[ -n "${commandPath}" ] || semanticError "command not found: ${commandName}"
-readonly commandName="${commandPath##*/}"
+[ "${commandPath}" = "${commandPath#/}" ] && commandPath="${buildRoot}/${commandSubdirectory}/${commandPath}"
+[ -e "${commandPath}" ] || semanticError "command not found: ${commandPath}"
+[ -f "${commandPath}" ] || semanticError "not a command: ${commandPath}"
+[ -x "${commandPath}" ] || semanticError "command not executable: ${commandPath}"
+
+commandName="${commandPath##*/}"
 set -- "${commandPath}" "${@}"
 
 [ -n "${LD_LIBRARY_PATH}" ] && LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
-export LD_LIBRARY_PATH="${buildRoot}/Programs${LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="${buildRoot}/${commandSubdirectory}${LD_LIBRARY_PATH}"
 
 readonly variablePrefix="${commandName^^?}"
 getVariable "${variablePrefix}_VALGRIND_DIRECTORY" vgDirectory
