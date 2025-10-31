@@ -6,6 +6,7 @@ drivers_directory="@drivers_directory@"
 program_directory="@program_directory@"
 xbrlapi="$program_directory/xbrlapi"
 brltty="$program_directory/brltty"
+xbrltty_flags="-b ba -x a2 -N"
 
 if [ -x "${xbrlapi}" ]; then
   if "${xbrlapi}" 2>/dev/null ; then
@@ -13,7 +14,7 @@ if [ -x "${xbrlapi}" ]; then
     if [ -x "${brltty}" -a \
          -e "$drivers_directory/libbrlttybba.so" -a \
          -e "$drivers_directory/libbrlttyxa2.so" ]; then
-      "${brltty}" -b ba -s no -x a2 -N 2>/dev/null
+      "${brltty}" ${xbrltty_flags} 2>/dev/null
     fi
   fi
 fi
