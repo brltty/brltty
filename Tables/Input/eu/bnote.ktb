@@ -18,6 +18,6 @@
 
 title EuroBraille B.Note
 
-include b.kti
+include bcommon.kti
 include common.kti
 include keypads.kti

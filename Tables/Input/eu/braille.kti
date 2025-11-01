@@ -55,6 +55,14 @@ bind Space+Dot3+Dot6 KEY_DELETE
 bind Space+Dot1+Dot2+Dot4+Dot5 KEY_ESCAPE
 bind Space+Dot1+Dot3+Dot5 KEY_INSERT
 
+bind Space+Dot1+Dot2+Dot5 HELP
+bind Space+Dot2+Dot3+Dot4 INFO
+bind Space+Dot2+Dot3+Dot4+Dot5 TIME
+
+bind Space+Dot1+Dot2+Dot3+Dot4 PREFMENU
+bind Space+Dot1+Dot2+Dot3+Dot4+Dot7 PREFLOAD
+bind Space+Dot1+Dot2+Dot3+Dot4+Dot8 PREFSAVE
+
 bind Backspace+Dot1 KEY_FUNCTION+0
 bind Backspace+Dot1+Dot2 KEY_FUNCTION+1
 bind Backspace+Dot1+Dot4 KEY_FUNCTION+2
