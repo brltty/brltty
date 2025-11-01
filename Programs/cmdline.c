@@ -332,7 +332,7 @@ showSyntax (
 static int
 showParameter (
   FILE *stream, char *line, unsigned int lineWidth,
-  const char *name, unsigned int nameWidth, int repeatable,
+  const char *name, int isRepeatable, unsigned int nameWidth,
   const char *description
 ) {
   unsigned int lineLength = 0;
@@ -346,7 +346,7 @@ showParameter (
       memcpy(line+lineLength, name, nameLength);
       lineLength += nameLength;
 
-      if (repeatable) {
+      if (isRepeatable) {
         const char *indicator = repeatableArgumentIndicator;
         size_t indicatorLength = strlen(indicator);
         memcpy(line+lineLength, indicator, indicatorLength);
@@ -415,7 +415,7 @@ showParameters (
 
         int shown = showParameter(
           stream, line, lineWidth,
-          names[parameterIndex].text, nameWidth, 0,
+          names[parameterIndex].text, 0, nameWidth,
           getTranslatedText(parameter->description)
         );
 
@@ -429,7 +429,7 @@ showParameters (
         if (extra) {
           int shown = showParameter(
             stream, line, lineWidth,
-            extra, nameWidth, 1,
+            extra, 1, nameWidth,
             getTranslatedText(descriptor->extraParameters.description)
           );
 

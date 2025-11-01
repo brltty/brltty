@@ -65,12 +65,12 @@ static const char *secondParameter;
 
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
   { .name = "first",
-    .description = "this parameter is required",
+    .description = "a required parameter",
     .setting = &firstParameter,
   },
 
   { .name = "second",
-    .description = "this parameter is optional",
+    .description = "an optional parameter",
     .setting = &secondParameter,
     .optional = 1,
   },
