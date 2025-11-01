@@ -28,7 +28,7 @@ Syntax: ${programName} {-h | command [argument ...]}
 
 The current working directory must be somewhere within the build tree that's to be used.
 If it isn't then the source tree will be used.
-If the command isn't an absolute path then it's relative to the ${commandSubdirectory}/ subdirectory of the tree.
+If the command is just a name, i.e. it doesn't contain a slash, then it's in the ${commandSubdirectory}/ subdirectory of the tree.
 
 Environment Variables:
   <COMMAND>_VALGRIND_DIRECTORY=path
@@ -42,10 +42,10 @@ setBuildRoot
 commandPath="${1}"
 shift 1
 
-[ "${commandPath}" = "${commandPath#/}" ] && commandPath="${buildRoot}/${commandSubdirectory}/${commandPath}"
+[ "${commandPath}" = "${commandPath#*/}" ] && commandPath="${buildRoot}/${commandSubdirectory}/${commandPath}"
 [ -e "${commandPath}" ] || semanticError "command not found: ${commandPath}"
-[ -f "${commandPath}" ] || semanticError "not a command: ${commandPath}"
-[ -x "${commandPath}" ] || semanticError "command not executable: ${commandPath}"
+[ -f "${commandPath}" ] || semanticError "not a file: ${commandPath}"
+[ -x "${commandPath}" ] || semanticError "file not executable: ${commandPath}"
 
 commandName="${commandPath##*/}"
 set -- "${commandPath}" "${@}"
