@@ -42,12 +42,11 @@ setBuildRoot
 commandPath="${1}"
 shift 1
 
-[ "${commandPath}" = "${commandPath#*/}" ] && commandPath="${buildRoot}/${commandSubdirectory}/${commandPath}"
+commandName="${commandPath##*/}"
+[ "${commandPath}" = "${commandName}" ] && commandPath="${buildRoot}/${commandSubdirectory}/${commandPath}"
 [ -e "${commandPath}" ] || semanticError "command not found: ${commandPath}"
 [ -f "${commandPath}" ] || semanticError "not a file: ${commandPath}"
 [ -x "${commandPath}" ] || semanticError "file not executable: ${commandPath}"
-
-commandName="${commandPath##*/}"
 set -- "${commandPath}" "${@}"
 
 [ -n "${LD_LIBRARY_PATH}" ] && LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
