@@ -725,6 +725,7 @@
 #screen-driver	lx	# Linux
 #screen-driver	pb	# PcBios
 #screen-driver	sc	# Screen
+#screen-driver	tx	# Tmux
 #screen-driver	wn	# Windows
 
 

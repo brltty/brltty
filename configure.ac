@@ -1883,6 +1883,7 @@ in
 esac
 
 BRLTTY_SCREEN_DRIVER([fv], [FileViewer], [-ltinfo])
+BRLTTY_SCREEN_DRIVER([tx], [Tmux])
 
 all_brltty_pty=""
 install_brltty_pty=""
