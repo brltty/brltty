@@ -67,8 +67,6 @@ readScreenRow (int row, int width, ScreenCharacter *buffer) {
  * This is needed because the forked subprocess shares its parent's
  * file descriptors.  A readScreen equivalent is not needed.
  */
-extern int constructRoutingScreen (void);
-extern void destructRoutingScreen (void);
 
 extern const ScreenDriver *screen;
 extern const ScreenDriver noScreen;

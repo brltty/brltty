@@ -366,6 +366,11 @@ updateSessionAttributes (void) {
       value += 1;
     }
   }
+
+  // Notify routing system that screen was updated
+  if (isRouting()) {
+    onCursorPositionChanged();
+  }
 }
 
 void

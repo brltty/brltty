@@ -243,20 +243,3 @@ KeyTableCommandContext
 getScreenCommandContext (void) {
   return currentScreen->getCommandContext();
 }
-
-
-int
-constructRoutingScreen (void) {
-  /* This function should be used in a forked process. Though we want to
-   * have a separate file descriptor for the main screen from the one used
-   * in the main thread.  So we close and reopen the device.
-   */
-  mainScreen.destruct();
-  return mainScreen.construct();
-}
-
-void
-destructRoutingScreen (void) {
-  mainScreen.destruct();
-  mainScreen.releaseParameters();
-}

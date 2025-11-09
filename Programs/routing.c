@@ -23,63 +23,20 @@
 #include <string.h>
 #include <errno.h>
 
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif /* HAVE_SIGNAL_H */
-
-#ifdef SIGUSR1
-#include <sys/wait.h>
-#endif /* SIGUSR1 */
-
 #include "parameters.h"
 #include "log.h"
-#include "program.h"
-#include "thread.h"
-#include "async_wait.h"
+#include "async_alarm.h"
+#include "async_handle.h"
 #include "timing.h"
 #include "scr.h"
 #include "routing.h"
+#include "embed.h"
 
 typedef enum {
   CRR_DONE,
   CRR_NEAR,
   CRR_FAIL
 } RoutingResult;
-
-typedef struct {
-#ifdef SIGUSR1
-  struct {
-    sigset_t mask;
-  } signal;
-#endif /* SIGUSR1 */
-
-  struct {
-    int number;
-    int width;
-    int height;
-  } screen;
-
-  struct {
-    int scroll;
-    int row;
-    ScreenCharacter *buffer;
-  } vertical;
-
-  struct {
-    int column;
-    int row;
-  } current;
-
-  struct {
-    int column;
-    int row;
-  } previous;
-
-  struct {
-    long sum;
-    int count;
-  } time;
-} CursorRoutingData;
 
 typedef enum {
   CURSOR_DIR_LEFT,
@@ -122,80 +79,155 @@ static const CursorAxisEntry cursorAxisTable[] = {
   }
 };
 
+typedef enum {
+  RS_IDLE,
+  RS_INITIAL_POSITION,
+  RS_ADJUSTING,
+  RS_WAITING_FOR_MOTION,
+  RS_COMPLETED
+} RoutingState;
+
+typedef enum {
+  RP_INITIAL_VERTICAL,
+  RP_INITIAL_HORIZONTAL,
+  RP_RETRY_VERTICAL,
+  RP_RETRY_HORIZONTAL_FINAL
+} RoutingPhase;
+
+typedef struct {
+  RoutingState state;
+  RoutingPhase phase;
+
+  struct {
+    int column;
+    int row;
+    int screen;
+  } target;
+
+  struct {
+    int number;
+    int width;
+    int height;
+  } screen;
+
+  struct {
+    int scroll;
+    int row;
+    ScreenCharacter *buffer;
+  } vertical;
+
+  struct {
+    int column;
+    int row;
+  } current;
+
+  struct {
+    int column;
+    int row;
+  } previous;
+
+  struct {
+    long sum;
+    int count;
+  } time;
+
+  struct {
+    TimeValue start;
+    long timeout;
+    int hasMoved;
+    int direction;
+    const CursorAxisEntry *axis;
+    int where;
+    int targetRow;
+    int targetColumn;
+  } motion;
+
+  RoutingStatus status;
+  AsyncHandle timeoutAlarm;
+} RoutingContext;
+
+static RoutingContext routingContext = {
+  .state = RS_IDLE
+};
+
 #define logRouting(...) logMessage(LOG_CATEGORY(CURSOR_ROUTING), __VA_ARGS__)
 
+static void completeRouting(RoutingStatus status);
+static void processRoutingStateMachine(void);
+static RoutingResult evaluateCursorMotion(RoutingContext *ctx);
+
 static int
-readRow (CursorRoutingData *crd, ScreenCharacter *buffer, int row) {
-  if (!buffer) buffer = crd->vertical.buffer;
-  if (readScreenRow(row, crd->screen.width, buffer)) return 1;
+readRow (RoutingContext *ctx, ScreenCharacter *buffer, int row) {
+  if (!buffer) buffer = ctx->vertical.buffer;
+  if (readScreenRow(row, ctx->screen.width, buffer)) return 1;
   logRouting("read failed: row=%d", row);
   return 0;
 }
 
 static int
-getCurrentPosition (CursorRoutingData *crd) {
+getCurrentPosition (RoutingContext *ctx) {
   ScreenDescription description;
   describeScreen(&description);
 
-  if (description.number != crd->screen.number) {
-    logRouting("screen changed: %d -> %d", crd->screen.number, description.number);
-    crd->screen.number = description.number;
+  if (description.number != ctx->screen.number) {
+    logRouting("screen changed: %d -> %d", ctx->screen.number, description.number);
+    ctx->screen.number = description.number;
     return 0;
   }
 
-  if (!crd->vertical.buffer) {
-    crd->screen.width = description.cols;
-    crd->screen.height = description.rows;
-    crd->vertical.scroll = 0;
+  if (!ctx->vertical.buffer) {
+    ctx->screen.width = description.cols;
+    ctx->screen.height = description.rows;
+    ctx->vertical.scroll = 0;
 
-    if (!(crd->vertical.buffer = malloc(ARRAY_SIZE(crd->vertical.buffer, crd->screen.width)))) {
+    if (!(ctx->vertical.buffer = malloc(ARRAY_SIZE(ctx->vertical.buffer, ctx->screen.width)))) {
       logMallocError();
       goto error;
     }
 
     logRouting("screen: num=%d cols=%d rows=%d",
-               crd->screen.number,
-               crd->screen.width, crd->screen.height);
-  } else if ((crd->screen.width != description.cols) ||
-             (crd->screen.height != description.rows)) {
+               ctx->screen.number,
+               ctx->screen.width, ctx->screen.height);
+  } else if ((ctx->screen.width != description.cols) ||
+             (ctx->screen.height != description.rows)) {
     logRouting("size changed: %dx%d -> %dx%d",
-               crd->screen.width, crd->screen.height,
+               ctx->screen.width, ctx->screen.height,
                description.cols, description.rows);
     goto error;
   }
 
-  crd->current.row = description.posy + crd->vertical.scroll;
-  crd->current.column = description.posx;
+  ctx->current.row = description.posy + ctx->vertical.scroll;
+  ctx->current.column = description.posx;
   return 1;
 
 error:
-  crd->screen.number = -1;
+  ctx->screen.number = -1;
   return 0;
 }
 
 static void
-handleVerticalScrolling (CursorRoutingData *crd, int direction) {
-  int firstRow = crd->vertical.row;
+handleVerticalScrolling (RoutingContext *ctx, int direction) {
+  int firstRow = ctx->vertical.row;
   int currentRow = firstRow;
 
   int bestRow = firstRow;
   int bestLength = 0;
 
   do {
-    ScreenCharacter buffer[crd->screen.width];
-    if (!readRow(crd, buffer, currentRow)) break;
+    ScreenCharacter buffer[ctx->screen.width];
+    if (!readRow(ctx, buffer, currentRow)) break;
 
     int length;
     {
-      int before = crd->current.column;
+      int before = ctx->current.column;
       int after = before;
 
-      while (buffer[before].text == crd->vertical.buffer[before].text)
+      while (buffer[before].text == ctx->vertical.buffer[before].text)
         if (--before < 0)
           break;
 
-      while (buffer[after].text == crd->vertical.buffer[after].text)
-        if (++after >= crd->screen.width)
+      while (buffer[after].text == ctx->vertical.buffer[after].text)
+        if (++after >= ctx->screen.width)
           break;
 
       length = after - before - 1;
@@ -203,371 +235,414 @@ handleVerticalScrolling (CursorRoutingData *crd, int direction) {
 
     if (length > bestLength) {
       bestRow = currentRow;
-      if ((bestLength = length) == crd->screen.width) break;
+      if ((bestLength = length) == ctx->screen.width) break;
     }
 
     currentRow -= direction;
-  } while ((currentRow >= 0) && (currentRow < crd->screen.height));
+  } while ((currentRow >= 0) && (currentRow < ctx->screen.height));
 
   int delta = bestRow - firstRow;
-  crd->vertical.scroll -= delta;
-  crd->current.row -= delta;
+  ctx->vertical.scroll -= delta;
+  ctx->current.row -= delta;
 }
 
-static int
-awaitCursorMotion (CursorRoutingData *crd, int direction) {
-  crd->previous.column = crd->current.column;
-  crd->previous.row = crd->current.row;
+static void
+startMotionTimeout(RoutingContext *ctx) {
+  long timeout = ctx->time.sum / ctx->time.count;
 
-  TimeValue start;
-  getMonotonicTime(&start);
-
-  int moved = 0;
-  long int timeout = crd->time.sum / crd->time.count;
-
-  while (1) {
-    asyncWait(ROUTING_POLL_INTERVAL);
-
-    TimeValue now;
-    getMonotonicTime(&now);
-    long int time = millisecondsBetween(&start, &now) + 1;
-
-    int oldy = crd->current.row;
-    int oldx = crd->current.column;
-    if (!getCurrentPosition(crd)) return 0;
-
-    if ((crd->current.row != oldy) || (crd->current.column != oldx)) {
-      logRouting("moved: [%d,%d] -> [%d,%d] (%ldms)",
-                 oldx, oldy, crd->current.column, crd->current.row, time);
-
-      if (!moved) {
-        moved = 1;
-        timeout = (time * 2) + 1;
-
-        crd->time.sum += time * 8;
-        crd->time.count += 1;
-      }
-
-      if (ROUTING_POLL_INTERVAL) {
-        start = now;
-      } else {
-        asyncWait(1);
-        getMonotonicTime(&start);
-      }
-    } else if (time > timeout) {
-      break;
-    }
+  if (ctx->timeoutAlarm) {
+    asyncCancelRequest(ctx->timeoutAlarm);
   }
 
-  handleVerticalScrolling(crd, direction);
-  return 1;
+  getMonotonicTime(&ctx->motion.start);
+  ctx->motion.timeout = timeout;
+  ctx->motion.hasMoved = 0;
+}
+
+ASYNC_ALARM_CALLBACK(handleRoutingTimeout) {
+  RoutingContext *ctx = &routingContext;
+
+  asyncDiscardHandle(ctx->timeoutAlarm);
+  ctx->timeoutAlarm = NULL;
+
+  logRouting("timeout: cursor did not move within %ldms", ctx->motion.timeout);
+
+  // Cursor didn't move - treat this as reaching the nearest position
+  handleVerticalScrolling(ctx, ctx->motion.direction);
+
+  // Evaluate the result - cursor stuck means we're as close as we can get
+  RoutingResult result = evaluateCursorMotion(ctx);
+
+  if (result == CRR_NEAR || result == CRR_FAIL) {
+    // Can't get closer or failed
+    if (ctx->current.row != ctx->target.row) {
+      completeRouting(ROUTING_STATUS_ROW);
+    } else if (ctx->current.column != ctx->target.column) {
+      completeRouting(ROUTING_STATUS_COLUMN);
+    } else {
+      completeRouting(ROUTING_STATUS_FAILURE);
+    }
+  } else {
+    // CRR_DONE - shouldn't happen in timeout, but handle it
+    ctx->state = RS_ADJUSTING;
+    processRoutingStateMachine();
+  }
 }
 
 static int
-moveCursor (CursorRoutingData *crd, const CursorDirectionEntry *direction) {
-  crd->vertical.row = crd->current.row - crd->vertical.scroll;
-  if (!readRow(crd, NULL, crd->vertical.row)) return 0;
-
-#ifdef SIGUSR1
-  sigset_t oldMask;
-  sigprocmask(SIG_BLOCK, &crd->signal.mask, &oldMask);
-#endif /* SIGUSR1 */
+moveCursor (RoutingContext *ctx, const CursorDirectionEntry *direction) {
+  ctx->vertical.row = ctx->current.row - ctx->vertical.scroll;
+  if (!readRow(ctx, NULL, ctx->vertical.row)) return 0;
 
   logRouting("move: %s", direction->name);
   insertScreenKey(direction->key);
 
-#ifdef SIGUSR1
-  sigprocmask(SIG_SETMASK, &oldMask, NULL);
-#endif /* SIGUSR1 */
-
   return 1;
 }
 
 static RoutingResult
-adjustCursorPosition (CursorRoutingData *crd, int where, int trgy, int trgx, const CursorAxisEntry *axis) {
+evaluateCursorMotion(RoutingContext *ctx) {
+  int trgy = ctx->motion.targetRow;
+  int trgx = ctx->motion.targetColumn;
+  int where = ctx->motion.where;
+  int dir = ctx->motion.direction;
+
+  if (ctx->current.row != ctx->previous.row) {
+    if (ctx->previous.row != trgy) {
+      if (((ctx->current.row - ctx->previous.row) * dir) > 0) {
+        int dif = trgy - ctx->current.row;
+        int dify = trgy - ctx->previous.row;
+        if ((dif * dify) >= 0) return CRR_DONE; // Continue moving
+        if (where > 0) {
+          if (ctx->current.row > trgy) return CRR_NEAR;
+        } else if (where < 0) {
+          if (ctx->current.row < trgy) return CRR_NEAR;
+        } else {
+          if ((dif * dif) < (dify * dify)) return CRR_NEAR;
+        }
+      }
+    }
+  } else if (ctx->current.column != ctx->previous.column) {
+    if (((ctx->current.column - ctx->previous.column) * dir) > 0) {
+      int dif = trgx - ctx->current.column;
+      int difx = trgx - ctx->previous.column;
+      if (ctx->current.row != trgy) return CRR_DONE; // Continue
+      if ((dif * difx) >= 0) return CRR_DONE; // Continue
+      if (where > 0) {
+        if (ctx->current.column > trgx) return CRR_NEAR;
+      } else if (where < 0) {
+        if (ctx->current.column < trgx) return CRR_NEAR;
+      } else {
+        if ((dif * dif) < (difx * difx)) return CRR_NEAR;
+      }
+    }
+  } else {
+    // Cursor didn't move at all
+    return CRR_NEAR;
+  }
+
+  // Getting farther - try going back
+  if (!moveCursor(ctx, ((dir > 0)? ctx->motion.axis->backward: ctx->motion.axis->forward))) {
+    return CRR_FAIL;
+  }
+
+  ctx->motion.direction = -dir;
+  ctx->state = RS_WAITING_FOR_MOTION;
+  startMotionTimeout(ctx);
+
+  // Schedule timeout alarm
+  asyncNewRelativeAlarm(&ctx->timeoutAlarm, ctx->motion.timeout,
+                        handleRoutingTimeout, NULL);
+
+  return CRR_NEAR; // Will be handled after motion
+}
+
+static void
+startCursorAdjustment(RoutingContext *ctx, int where, int trgy, int trgx,
+                      const CursorAxisEntry *axis) {
   logRouting("to: [%d,%d]", trgx, trgy);
 
-  while (1) {
-    int dify = trgy - crd->current.row;
-    int difx = (trgx < 0)? 0: (trgx - crd->current.column);
-    int dir;
+  ctx->motion.where = where;
+  ctx->motion.targetRow = trgy;
+  ctx->motion.targetColumn = trgx;
+  ctx->motion.axis = axis;
 
-    /* determine which direction the cursor needs to move in */
-    if (dify) {
-      dir = (dify > 0)? 1: -1;
-    } else if (difx) {
-      dir = (difx > 0)? 1: -1;
-    } else {
-      return CRR_DONE;
-    }
+  int dify = trgy - ctx->current.row;
+  int difx = (trgx < 0)? 0: (trgx - ctx->current.column);
+  int dir;
 
-    /* tell the cursor to move in the needed direction */
-    if (!moveCursor(crd, ((dir > 0)? axis->forward: axis->backward))) return CRR_FAIL;
-    if (!awaitCursorMotion(crd, dir)) return CRR_FAIL;
+  if (dify) {
+    dir = (dify > 0)? 1: -1;
+  } else if (difx) {
+    dir = (difx > 0)? 1: -1;
+  } else {
+    // Already at target
+    processRoutingStateMachine();
+    return;
+  }
 
-    if (crd->current.row != crd->previous.row) {
-      if (crd->previous.row != trgy) {
-        if (((crd->current.row - crd->previous.row) * dir) > 0) {
-          int dif = trgy - crd->current.row;
-          if ((dif * dify) >= 0) continue;
-          if (where > 0) {
-            if (crd->current.row > trgy) return CRR_NEAR;
-          } else if (where < 0) {
-            if (crd->current.row < trgy) return CRR_NEAR;
-          } else {
-            if ((dif * dif) < (dify * dify)) return CRR_NEAR;
-          }
-        }
+  ctx->motion.direction = dir;
+
+  if (!moveCursor(ctx, ((dir > 0)? axis->forward: axis->backward))) {
+    completeRouting(ROUTING_STATUS_FAILURE);
+    return;
+  }
+
+  ctx->previous.column = ctx->current.column;
+  ctx->previous.row = ctx->current.row;
+  ctx->state = RS_WAITING_FOR_MOTION;
+
+  startMotionTimeout(ctx);
+
+  // Schedule timeout alarm
+  asyncNewRelativeAlarm(&ctx->timeoutAlarm, ctx->motion.timeout,
+                        handleRoutingTimeout, NULL);
+}
+
+static void
+processRoutingStateMachine(void) {
+  RoutingContext *ctx = &routingContext;
+
+  switch (ctx->state) {
+    case RS_IDLE:
+      // Nothing to do
+      break;
+
+    case RS_INITIAL_POSITION:
+      if (!getCurrentPosition(ctx)) {
+        completeRouting(ROUTING_STATUS_FAILURE);
+        return;
       }
-    } else if (crd->current.column != crd->previous.column) {
-      if (((crd->current.column - crd->previous.column) * dir) > 0) {
-        int dif = trgx - crd->current.column;
-        if (crd->current.row != trgy) continue;
-        if ((dif * difx) >= 0) continue;
-        if (where > 0) {
-          if (crd->current.column > trgx) return CRR_NEAR;
-        } else if (where < 0) {
-          if (crd->current.column < trgx) return CRR_NEAR;
+
+      logRouting("from: [%d,%d]", ctx->current.column, ctx->current.row);
+
+      if (ctx->target.column < 0) {
+        // Only adjust vertical
+        ctx->phase = RP_INITIAL_VERTICAL;
+        ctx->state = RS_ADJUSTING;
+        startCursorAdjustment(ctx, 0, ctx->target.row, -1,
+                            &cursorAxisTable[CURSOR_AXIS_VERTICAL]);
+      } else {
+        // Start with vertical adjustment
+        ctx->phase = RP_INITIAL_VERTICAL;
+        ctx->state = RS_ADJUSTING;
+        startCursorAdjustment(ctx, -1, ctx->target.row, -1,
+                            &cursorAxisTable[CURSOR_AXIS_VERTICAL]);
+      }
+      break;
+
+    case RS_ADJUSTING: {
+      // Check if we reached the target
+      int dify = ctx->motion.targetRow - ctx->current.row;
+      int difx = (ctx->motion.targetColumn < 0)? 0:
+                 (ctx->motion.targetColumn - ctx->current.column);
+
+      if (!dify && !difx) {
+        // Reached exact target
+        if (ctx->phase == RP_INITIAL_VERTICAL && ctx->target.column >= 0) {
+          // Move to horizontal adjustment
+          ctx->phase = RP_INITIAL_HORIZONTAL;
+          startCursorAdjustment(ctx, 0, ctx->target.row, ctx->target.column,
+                              &cursorAxisTable[CURSOR_AXIS_HORIZONTAL]);
         } else {
-          if ((dif * dif) < (difx * difx)) return CRR_NEAR;
+          completeRouting(ROUTING_STATUS_SUCCEESS);
         }
+        return;
       }
-    } else {
-      return CRR_NEAR;
+
+      // Need to continue adjusting - inject next movement
+      int dir = ctx->motion.direction;
+      if (!moveCursor(ctx, ((dir > 0)? ctx->motion.axis->forward:
+                                       ctx->motion.axis->backward))) {
+        completeRouting(ROUTING_STATUS_FAILURE);
+        return;
+      }
+
+      ctx->previous.column = ctx->current.column;
+      ctx->previous.row = ctx->current.row;
+      ctx->state = RS_WAITING_FOR_MOTION;
+
+      startMotionTimeout(ctx);
+      asyncNewRelativeAlarm(&ctx->timeoutAlarm, ctx->motion.timeout,
+                           handleRoutingTimeout, NULL);
+      break;
     }
 
-    /* We're getting farther from our target. Before giving up, let's
-     * try going back to the previous position since it was obviously
-     * the nearest ever reached.
-     */
-    if (!moveCursor(crd, ((dir > 0)? axis->backward: axis->forward))) return CRR_FAIL;
-    return awaitCursorMotion(crd, -dir)? CRR_NEAR: CRR_FAIL;
+    case RS_WAITING_FOR_MOTION:
+      // Should not be called in this state - wait for cursor change or timeout
+      break;
+
+    case RS_COMPLETED:
+      // Already completed
+      break;
   }
 }
 
-static RoutingResult
-adjustCursorHorizontally (CursorRoutingData *crd, int where, int row, int column) {
-  return adjustCursorPosition(crd, where, row, column, &cursorAxisTable[CURSOR_AXIS_HORIZONTAL]);
-}
+static void
+completeRouting(RoutingStatus status) {
+  RoutingContext *ctx = &routingContext;
 
-static RoutingResult
-adjustCursorVertically (CursorRoutingData *crd, int where, int row) {
-  return adjustCursorPosition(crd, where, row, -1, &cursorAxisTable[CURSOR_AXIS_VERTICAL]);
-}
+  if (ctx->timeoutAlarm) {
+    asyncCancelRequest(ctx->timeoutAlarm);
+    ctx->timeoutAlarm = NULL;
+  }
 
-typedef struct {
-  int column;
-  int row;
-  int screen;
-} RoutingParameters;
-
-static RoutingStatus
-routeCursor (const RoutingParameters *parameters) {
-  CursorRoutingData crd;
-
-#ifdef SIGUSR1
-  /* Set up the signal mask. */
-  sigemptyset(&crd.signal.mask);
-  sigaddset(&crd.signal.mask, SIGUSR1);
-  sigprocmask(SIG_UNBLOCK, &crd.signal.mask, NULL);
-#endif /* SIGUSR1 */
-
-  /* initialize the routing data structure */
-  crd.screen.number = parameters->screen;
-  crd.vertical.buffer = NULL;
-  crd.time.sum = ROUTING_MAXIMUM_TIMEOUT;
-  crd.time.count = 1;
-
-  if (getCurrentPosition(&crd)) {
-    logRouting("from: [%d,%d]", crd.current.column, crd.current.row);
-
-    if (parameters->column < 0) {
-      adjustCursorVertically(&crd, 0, parameters->row);
-    } else {
-      if (adjustCursorVertically(&crd, -1, parameters->row) != CRR_FAIL) {
-        if (adjustCursorHorizontally(&crd, 0, parameters->row, parameters->column) == CRR_NEAR) {
-          if (crd.current.row < parameters->row) {
-            if (adjustCursorVertically(&crd, 1, crd.current.row+1) != CRR_FAIL) {
-              adjustCursorHorizontally(&crd, 0, parameters->row, parameters->column);
-            }
-          }
-        }
-      }
+  // Check final position
+  if (ctx->screen.number != ctx->target.screen) {
+    status = ROUTING_STATUS_FAILURE;
+  } else if (status == ROUTING_STATUS_SUCCEESS) {
+    if (ctx->current.row != ctx->target.row) {
+      status = ROUTING_STATUS_ROW;
+    } else if ((ctx->target.column >= 0) &&
+               (ctx->current.column != ctx->target.column)) {
+      status = ROUTING_STATUS_COLUMN;
     }
   }
 
-  if (crd.vertical.buffer) free(crd.vertical.buffer);
+  logRouting("completed: status=%d at [%d,%d]", status,
+             ctx->current.column, ctx->current.row);
 
-  if (crd.screen.number != parameters->screen) return ROUTING_STATUS_FAILURE;
-  if (crd.current.row != parameters->row) return ROUTING_STATUS_ROW;
-  if ((parameters->column >= 0) && (crd.current.column != parameters->column)) return ROUTING_STATUS_COLUMN;
-  return ROUTING_STATUS_SUCCEESS;
+  ctx->status = status;
+  ctx->state = RS_COMPLETED;
+
+  // Wake up the main loop to process the completion
+  brlttyInterrupt(1);
 }
 
-#ifdef SIGUSR1
-#define NOT_ROUTING 0
+static void
+cleanupRoutingContext(void) {
+  if (routingContext.vertical.buffer) {
+    free(routingContext.vertical.buffer);
+    routingContext.vertical.buffer = NULL;
+  }
 
-static pid_t routingProcess = NOT_ROUTING;
+  if (routingContext.timeoutAlarm) {
+    asyncCancelRequest(routingContext.timeoutAlarm);
+    routingContext.timeoutAlarm = NULL;
+  }
+
+  routingContext.state = RS_IDLE;
+}
+
+void
+onCursorPositionChanged(void) {
+  RoutingContext *ctx = &routingContext;
+
+  if (ctx->state != RS_WAITING_FOR_MOTION) return;
+
+  int oldX = ctx->current.column;
+  int oldY = ctx->current.row;
+
+  if (!getCurrentPosition(ctx)) {
+    completeRouting(ROUTING_STATUS_FAILURE);
+    return;
+  }
+
+  if ((ctx->current.row == oldY) && (ctx->current.column == oldX)) {
+    // Position hasn't changed yet
+    return;
+  }
+
+  // Cursor moved!
+  if (ctx->timeoutAlarm) {
+    asyncCancelRequest(ctx->timeoutAlarm);
+    ctx->timeoutAlarm = NULL;
+  }
+
+  TimeValue now;
+  getMonotonicTime(&now);
+  long int time = millisecondsBetween(&ctx->motion.start, &now) + 1;
+
+  logRouting("moved: [%d,%d] -> [%d,%d] (%ldms)",
+             oldX, oldY, ctx->current.column, ctx->current.row, time);
+
+  if (!ctx->motion.hasMoved) {
+    ctx->motion.hasMoved = 1;
+    ctx->motion.timeout = (time * 2) + 1;
+
+    ctx->time.sum += time * 8;
+    ctx->time.count += 1;
+  }
+
+  handleVerticalScrolling(ctx, ctx->motion.direction);
+
+  // Evaluate if we should continue or if we've reached near enough
+  RoutingResult result = evaluateCursorMotion(ctx);
+
+  if (result == CRR_NEAR) {
+    // Check phase and decide next action
+    if (ctx->phase == RP_INITIAL_HORIZONTAL && ctx->current.row < ctx->target.row) {
+      // Try moving down one more row and retry horizontal
+      ctx->phase = RP_RETRY_VERTICAL;
+      ctx->state = RS_ADJUSTING;
+      startCursorAdjustment(ctx, 1, ctx->current.row + 1, -1,
+                          &cursorAxisTable[CURSOR_AXIS_VERTICAL]);
+      return;
+    } else if (ctx->phase == RP_RETRY_VERTICAL) {
+      // Try horizontal again
+      ctx->phase = RP_RETRY_HORIZONTAL_FINAL;
+      ctx->state = RS_ADJUSTING;
+      startCursorAdjustment(ctx, 0, ctx->target.row, ctx->target.column,
+                          &cursorAxisTable[CURSOR_AXIS_HORIZONTAL]);
+      return;
+    }
+
+    // Can't get closer
+    if (ctx->current.row != ctx->target.row) {
+      completeRouting(ROUTING_STATUS_ROW);
+    } else {
+      completeRouting(ROUTING_STATUS_COLUMN);
+    }
+  } else if (result == CRR_FAIL) {
+    completeRouting(ROUTING_STATUS_FAILURE);
+  } else {
+    // CRR_DONE - continue adjusting
+    ctx->state = RS_ADJUSTING;
+    processRoutingStateMachine();
+  }
+}
 
 int
-isRouting (void) {
-  return routingProcess != NOT_ROUTING;
+startRouting(int column, int row, int screen) {
+  // Cancel any existing routing
+  if (routingContext.state != RS_IDLE) {
+    cleanupRoutingContext();
+  }
+
+  // Initialize context
+  routingContext.state = RS_INITIAL_POSITION;
+  routingContext.phase = RP_INITIAL_VERTICAL;
+  routingContext.target.column = column;
+  routingContext.target.row = row;
+  routingContext.target.screen = screen;
+  routingContext.screen.number = screen;
+  routingContext.vertical.buffer = NULL;
+  routingContext.time.sum = ROUTING_MAXIMUM_TIMEOUT;
+  routingContext.time.count = 1;
+  routingContext.status = ROUTING_STATUS_NONE;
+  routingContext.timeoutAlarm = NULL;
+
+  logRouting("start: target=[%d,%d] screen=%d", column, row, screen);
+
+  // Start the state machine
+  processRoutingStateMachine();
+
+  return 1;
+}
+
+int
+isRouting(void) {
+  return routingContext.state != RS_IDLE &&
+         routingContext.state != RS_COMPLETED;
 }
 
 RoutingStatus
-getRoutingStatus (int wait) {
-  if (isRouting()) {
-    int options = 0;
-    if (!wait) options |= WNOHANG;
-
-  doWait:
-    {
-      int status;
-      pid_t process = waitpid(routingProcess, &status, options);
-
-      if (process == routingProcess) {
-        routingProcess = NOT_ROUTING;
-        return WIFEXITED(status)? WEXITSTATUS(status): ROUTING_STATUS_FAILURE;
-      }
-
-      if (process == -1) {
-        if (errno == EINTR) goto doWait;
-
-        if (errno == ECHILD) {
-          routingProcess = NOT_ROUTING;
-          return ROUTING_STATUS_FAILURE;
-        }
-
-        logSystemError("waitpid");
-      }
-    }
+getRoutingStatus(int wait) {
+  if (routingContext.state == RS_COMPLETED) {
+    RoutingStatus status = routingContext.status;
+    cleanupRoutingContext();
+    return status;
   }
 
   return ROUTING_STATUS_NONE;
-}
-
-static void
-stopRouting (void) {
-  if (isRouting()) {
-    kill(routingProcess, SIGUSR1);
-    getRoutingStatus(1);
-  }
-}
-
-static void
-exitCursorRouting (void *data) {
-  stopRouting();
-}
-#else /* SIGUSR1 */
-static RoutingStatus routingStatus = ROUTING_STATUS_NONE;
-
-RoutingStatus
-getRoutingStatus (int wait) {
-  RoutingStatus status = routingStatus;
-  routingStatus = ROUTING_STATUS_NONE;
-  return status;
-}
-
-int
-isRouting (void) {
-  return 0;
-}
-#endif /* SIGUSR1 */
-
-static int
-startRoutingProcess (const RoutingParameters *parameters) {
-#ifdef SIGUSR1
-  int started = 0;
-
-  stopRouting();
-
-  switch (routingProcess = fork()) {
-    case 0: { /* child: cursor routing subprocess */
-      RoutingStatus status = ROUTING_STATUS_FAILURE;
-
-      if (!ROUTING_POLL_INTERVAL) {
-        int niceness = nice(ROUTING_PROCESS_NICENESS);
-
-        if (niceness == -1) {
-          logSystemError("nice");
-        }
-      }
-
-      if (constructRoutingScreen()) {
-        status = routeCursor(parameters);		/* terminate child process */
-        destructRoutingScreen();		/* close second thread of screen reading */
-      }
-
-      _exit(status);		/* terminate child process */
-    }
-
-    case -1: /* error: fork() failed */
-      logSystemError("fork");
-      routingProcess = NOT_ROUTING;
-      break;
-
-    default: {
-      /* parent: continue while cursor is being routed */
-
-      {
-        static int first = 1;
-
-        if (first) {
-          first = 0;
-          onProgramExit("cursor-routing", exitCursorRouting, NULL);
-        }
-      }
-
-      started = 1;
-      break;
-    }
-  }
-
-  return started;
-#else /* SIGUSR1 */
-  routingStatus = routeCursor(parameters);
-  return 1;
-#endif /* SIGUSR1 */
-}
-
-#ifdef GOT_PTHREADS
-typedef struct {
-  const RoutingParameters *const parameters;
-
-  int result;
-} RoutingThreadArgument;
-
-THREAD_FUNCTION(runRoutingThread) {
-  RoutingThreadArgument *rta = argument;
-
-  rta->result = startRoutingProcess(rta->parameters);
-  return NULL;
-}
-#endif /* GOT_PTHREADS */
-
-int
-startRouting (int column, int row, int screen) {
-  const RoutingParameters parameters = {
-    .column = column,
-    .row = row,
-    .screen = screen
-  };
-
-#ifdef GOT_PTHREADS
-  int started = 0;
-
-  RoutingThreadArgument rta = {
-    .parameters = &parameters
-  };
-
-  if (callThreadFunction("cursor-routing", runRoutingThread, &rta, NULL)) {
-    if (rta.result) {
-      started = 1;
-    }
-  }
-
-  return started;
-#else /* GOT_PTHREADS */
-  return startRoutingProcess(&parameters);
-#endif /* GOT_PTHREADS */
 }
