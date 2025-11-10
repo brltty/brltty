@@ -52,7 +52,9 @@ set -- "${commandPath}" "${@}"
 [ -n "${LD_LIBRARY_PATH}" ] && LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH="${buildRoot}/${commandSubdirectory}${LD_LIBRARY_PATH}"
 
-readonly variablePrefix="${commandName^^?}"
+variablePrefix="${commandName^^?}"
+readonly variablePrefix="${variablePrefix//-/_}"
+
 getVariable "${variablePrefix}_VALGRIND_DIRECTORY" vgDirectory
 readonly vgDirectory
 
