@@ -247,6 +247,7 @@ main (int argc, char *argv[]) {
     logMessage(LOG_ERR, "can't load screen driver.");
     exitStatus = PROG_EXIT_FATAL;
   }
+
   return exitStatus;
 }
 
@@ -254,4 +255,11 @@ main (int argc, char *argv[]) {
 
 void
 scheduleUpdateIn (const char *reason, int delay) {
+}
+
+#include "embed.h"
+
+int
+brlttyInterrupt (WaitResult waitResult) {
+  return 1;
 }
