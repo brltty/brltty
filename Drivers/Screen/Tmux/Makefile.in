@@ -20,7 +20,7 @@ DRIVER_CODE = tx
 DRIVER_NAME = Tmux
 DRIVER_USAGE = tmux terminal multiplexer
 DRIVER_VERSION =
-DRIVER_DEVELOPERS =
+DRIVER_DEVELOPERS = Nicolas Pitre <nico@fluxnic.net>
 include $(SRC_TOP)screen.mk
 
 screen.$O:

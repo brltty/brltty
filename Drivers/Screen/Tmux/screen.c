@@ -85,12 +85,16 @@ static ScreenAttributes *screenAttrs = NULL;
 static int screenAllocated = 0;
 static int currentPaneNumber = 0;
 
+/* Pane switching state */
+static int pendingPaneSwitchDirection = 0;  /* 0=none, 1=next, -1=previous */
+
 /* Expected response types */
 typedef enum {
   RESPONSE_NONE,        /* Not expecting anything */
   RESPONSE_IGNORE,      /* Ignore this response (e.g., send-keys) */
   RESPONSE_DIMENSIONS,  /* list-panes - expecting 1 line */
   RESPONSE_CONTENT,     /* capture-pane - expecting screenRows lines */
+  RESPONSE_PANE_LIST,   /* list-panes -a - list of all panes for navigation */
 } ResponseType;
 
 /* Response queue entry */
@@ -118,9 +122,11 @@ static int updateInProgress = 0;  /* Flag to prevent duplicate update sequences 
 
 /* Tmux commands */
 static const char *TMUX_CMD_ENABLE_NOTIFICATIONS =
-  "refresh-client -A pane:window-pane-changed";
+  "refresh-client -A pane:window-pane-changed,session:session-window-changed";
 static const char *TMUX_CMD_LIST_PANES =
-  "list-panes -f '#{pane_active}' -F '#{pane_width} #{pane_height} #{cursor_x} #{cursor_y} #{pane_index}'";
+  "list-panes -f '#{pane_active}' -F '#{pane_width} #{pane_height} #{cursor_x} #{cursor_y} #{pane_id}'";
+static const char *TMUX_CMD_LIST_ALL_PANES =
+  "list-panes -a -F '#{window_index} #{pane_index} #{pane_id}'";
 static const char *TMUX_CMD_CAPTURE_PANE =
   "capture-pane -e -p";
 
@@ -135,6 +141,8 @@ static int parseTmuxOutput(const char *line);
 static void clearResponseLines(void);
 static int addResponseLine(const char *line);
 static void processScreenContent(void);
+static void processPaneList(void);
+static int parsePaneId(const char *paneIdStr);
 static ScreenAttributes mapAnsiToAttribute(int code, ScreenAttributes current);
 static int parseAnsiSequence(const char **ptr, ScreenAttributes *attr);
 
@@ -762,6 +770,68 @@ processScreenContent(void) {
 }
 
 static int
+parsePaneId(const char *paneIdStr) {
+  /* Parse pane ID string (format: %N) and return the numeric part
+   * Returns -1 if parsing fails
+   */
+  if (!paneIdStr || paneIdStr[0] != '%') {
+    return -1;
+  }
+  return atoi(paneIdStr + 1);
+}
+
+static void
+processPaneList(void) {
+  /* Process list of all panes and switch to next/previous pane */
+  if (responseLineCount == 0 || pendingPaneSwitchDirection == 0) {
+    return;
+  }
+
+  int currentIndex = -1;
+  int targetIndex = -1;
+
+  /* Find current pane in the list */
+  for (int i = 0; i < responseLineCount; i++) {
+    char paneId[32];
+    int windowIdx, paneIdx;
+    if (sscanf(responseLines[i], "%d %d %31s", &windowIdx, &paneIdx, paneId) == 3) {
+      int paneNum = parsePaneId(paneId);
+      if (paneNum == currentPaneNumber) {
+        currentIndex = i;
+        break;
+      }
+    }
+  }
+
+  /* Calculate target index with wraparound */
+  if (currentIndex >= 0) {
+    if (pendingPaneSwitchDirection > 0) {
+      targetIndex = (currentIndex + 1) % responseLineCount;
+    } else {
+      targetIndex = (currentIndex - 1 + responseLineCount) % responseLineCount;
+    }
+
+    /* Parse target pane info and switch to it */
+    char paneId[32];
+    int windowIdx, paneIdx;
+    if (sscanf(responseLines[targetIndex], "%d %d %31s", &windowIdx, &paneIdx, paneId) == 3) {
+      char selectWindowCmd[64];
+      char selectPaneCmd[64];
+      snprintf(selectWindowCmd, sizeof(selectWindowCmd), "select-window -t :%d", windowIdx);
+      snprintf(selectPaneCmd, sizeof(selectPaneCmd), "select-pane -t :%d.%d", windowIdx, paneIdx);
+
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Switching to window %d pane %d (%s)",
+                 windowIdx, paneIdx, paneId);
+
+      sendTmuxCommand(selectWindowCmd, RESPONSE_IGNORE);
+      sendTmuxCommand(selectPaneCmd, RESPONSE_IGNORE);
+    }
+  }
+
+  pendingPaneSwitchDirection = 0;
+}
+
+static int
 parseTmuxOutput(const char *line) {
   /* Parse tmux control mode output
    * In control mode, output is either:
@@ -770,7 +840,7 @@ parseTmuxOutput(const char *line) {
    */
 
   logMessage(LOG_CATEGORY(SCREEN_DRIVER) | LOG_DEBUG,
-	     "parsing tmux line \"%s\" (currentType %d)", line, currentResponseType);
+             "parsing tmux line \"%s\" (currentType %d)", line, currentResponseType);
 
   if (insideBeginEnd >= 0 &&
       currentResponseType == RESPONSE_CONTENT &&
@@ -843,12 +913,18 @@ parseTmuxOutput(const char *line) {
           /* Dimensions received from list-panes - parse first line */
           if (responseLineCount == 1) {
             const char *line = responseLines[0];
-            int parsed = sscanf(line, "%d %d %d %d %d",
-                               &screenCols, &screenRows, &cursorCol, &cursorRow, &currentPaneNumber);
+            char paneId[32];
+            int parsed = sscanf(line, "%d %d %d %d %31s",
+                               &screenCols, &screenRows, &cursorCol, &cursorRow, paneId);
             if (parsed == 5) {
+              /* pane_id format is %<number> - extract the numeric part */
+              currentPaneNumber = parsePaneId(paneId);
+              if (currentPaneNumber < 0) {
+                currentPaneNumber = 0;
+              }
               logMessage(LOG_CATEGORY(SCREEN_DRIVER) | LOG_DEBUG,
-                         "list-panes: %dx%d, cursor: (%d,%d), pane: %d",
-                         screenCols, screenRows, cursorCol, cursorRow, currentPaneNumber);
+                         "list-panes: %dx%d, cursor: (%d,%d), pane: %s (number: %d)",
+                         screenCols, screenRows, cursorCol, cursorRow, paneId, currentPaneNumber);
               allocateScreenBuffer();
             } else {
               logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Failed to parse list-panes response: %s", line);
@@ -861,29 +937,48 @@ parseTmuxOutput(const char *line) {
           }
           /* Update sequence complete */
           updateInProgress = 0;
-	}
+        } else if (currentResponseType == RESPONSE_PANE_LIST) {
+          /* Received list of all panes - process and switch */
+          processPaneList();
+        }
         currentResponseType = RESPONSE_NONE;
       }
 
       /* We're done with this response */
       clearResponseLines();
-    } else if (strncmp(line, "%output", 7) == 0) {
-      /* Pane output notification - screen has changed! */
-      logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Tmux output notification: %s", line);
-      screenNeedsUpdate = 1;
+    } else if (strncmp(line, "%output ", 8) == 0) {
+      /* Pane output notification - screen has changed!
+       * Format: %output %pane_id data...
+       * Only update if it's for the current pane
+       */
+      int paneNum = parsePaneId(line + 8);
+      if (paneNum == currentPaneNumber) {
+        logMessage(LOG_CATEGORY(SCREEN_DRIVER) | LOG_DEBUG,
+                   "Tmux output notification for current pane %d", paneNum);
+        screenNeedsUpdate = 1;
+      } else {
+        logMessage(LOG_CATEGORY(SCREEN_DRIVER) | LOG_DEBUG,
+                   "Tmux output notification for other pane %d (current: %d)", paneNum, currentPaneNumber);
+      }
     } else if (strncmp(line, "%layout-change", 14) == 0) {
       /* Layout changed - screen dimensions may have changed */
-      logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Tmux layout change: %s", line);
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER) | LOG_DEBUG, "Tmux layout change: %s", line);
       screenNeedsUpdate = 1;
     } else if (strncmp(line, "%window-pane-changed", 20) == 0) {
       /* Active pane changed */
-      logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Tmux pane change: %s", line);
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER) | LOG_DEBUG, "Tmux pane change: %s", line);
+      screenNeedsUpdate = 1;
+    } else if (strncmp(line, "%session-window-changed", 23) == 0) {
+      /* Active window changed */
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER) | LOG_DEBUG, "Tmux window change: %s", line);
       screenNeedsUpdate = 1;
     } else if (strncmp(line, "%session-changed", 16) == 0) {
       /* Session changed notification */
       logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Tmux session change: %s", line);
+      screenNeedsUpdate = 1;
     } else if (strncmp(line, "%sessions-changed", 17) == 0) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Tmux sessions change: %s", line);
+      screenNeedsUpdate = 1;
     } else if (strncmp(line, "%exit", 5) == 0) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Tmux exit: %s", line);
     } else {
@@ -911,13 +1006,13 @@ ASYNC_MONITOR_CALLBACK(tmuxMonitorCallback) {
   /* Read all available data without blocking */
   do {
     bytesRead = read(tmuxStdout, tmuxReadBuffer + tmuxReadBufferUsed,
-		     sizeof(tmuxReadBuffer) - tmuxReadBufferUsed);
+                     sizeof(tmuxReadBuffer) - tmuxReadBufferUsed);
 
     /* Check for errors */
     if (bytesRead < 0) {
       if (errno == EAGAIN || errno == EWOULDBLOCK) {
         /* No more data available - this is normal for non-blocking I/O */
-	bytesRead = 0;
+        bytesRead = 0;
       } else {
         logMessage(LOG_ERR, "Error reading from tmux: %s", strerror(errno));
         return 0;
@@ -938,7 +1033,7 @@ ASYNC_MONITOR_CALLBACK(tmuxMonitorCallback) {
     tmuxReadBufferUsed = tmuxReadBuffer + tmuxReadBufferUsed + bytesRead - lineStart;
     if (tmuxReadBufferUsed >= sizeof(tmuxReadBuffer)) {
       logMessage(LOG_ERR, "Error reading from tmux: line exceeds %zu bytes",
-		 sizeof(tmuxReadBuffer));
+                 sizeof(tmuxReadBuffer));
       return 0;
     }
 
@@ -947,11 +1042,11 @@ ASYNC_MONITOR_CALLBACK(tmuxMonitorCallback) {
       memmove(tmuxReadBuffer, lineStart, tmuxReadBufferUsed);
     lineStart = tmuxReadBuffer;
   } while (bytesRead > 0);
-      
+
   if (screenNeedsUpdate)
     if (updateScreenFromTmux())
       screenNeedsUpdate = 0;
-	  
+
   return 1;
 }
 
@@ -1097,6 +1192,33 @@ getPasteMode_TmuxScreen(void) {
   return SPM_BRACKETED;
 }
 
+static int
+currentVirtualTerminal_TmuxScreen(void) {
+  /* Return the current pane number (extracted from pane_id) */
+  return currentPaneNumber;
+}
+
+static int
+switchVirtualTerminal_TmuxScreen(int vt) {
+  /* Switch to a different pane by cycling through all panes
+   * vt parameter indicates target pane number
+   * We need to query list-panes -a to find next/previous pane
+   */
+
+  if (vt > currentPaneNumber) {
+    pendingPaneSwitchDirection = 1;  /* Next */
+  } else if (vt < currentPaneNumber) {
+    pendingPaneSwitchDirection = -1;  /* Previous */
+  } else {
+    /* Already on this pane */
+    return 1;
+  }
+
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Querying pane list for switch (direction: %d)",
+             pendingPaneSwitchDirection);
+  return sendTmuxCommand(TMUX_CMD_LIST_ALL_PANES, RESPONSE_PANE_LIST);
+}
+
 static void
 scr_initialize(MainScreen *main) {
   initializeRealScreen(main);
@@ -1107,6 +1229,8 @@ scr_initialize(MainScreen *main) {
   main->base.readCharacters = readCharacters_TmuxScreen;
   main->base.insertKey = insertKey_TmuxScreen;
   main->base.getPasteMode = getPasteMode_TmuxScreen;
+  main->base.currentVirtualTerminal = currentVirtualTerminal_TmuxScreen;
+  main->base.switchVirtualTerminal = switchVirtualTerminal_TmuxScreen;
 
   main->processParameters = processParameters_TmuxScreen;
   main->releaseParameters = releaseParameters_TmuxScreen;

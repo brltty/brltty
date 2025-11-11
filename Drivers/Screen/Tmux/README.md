@@ -1,13 +1,16 @@
 # Tmux Screen Driver for BRLTTY
 
-This driver provides braille access to tmux (terminal multiplexer) sessions through BRLTTY.
+This driver provides braille access to tmux (terminal multiplexer) sessions
+through BRLTTY.
 
 ## Overview
 
-The Tmux screen driver interfaces with a running tmux session using tmux's control mode (`-C` flag). This allows BRLTTY to:
+The Tmux screen driver interfaces with a running tmux session using tmux's
+control mode (`-C` flag). This allows BRLTTY to:
 - Read the content of the active tmux pane
 - Track cursor position
 - Inject keystrokes into the tmux session
+- Navigate between panes and windows using braille display commands
 - Provide braille access to terminal applications running inside tmux
 
 ## Features
@@ -17,6 +20,8 @@ The Tmux screen driver interfaces with a running tmux session using tmux's contr
 - **Navigation**: Full keyboard input support including special keys
 - **Status aware**: Tracks cursor position and screen dimensions
 - **Color support**: Captures and translates ANSI colors and attributes
+- **Multi-pane aware**: Automatically tracks and displays the currently
+  active pane
 
 ## Usage
 
@@ -61,6 +66,26 @@ The driver supports the following parameters:
    brltty -x tx -X session=mysession,socket=/tmp/tmux-1000/default
    ```
 
+### Navigating Between Panes
+
+The driver supports BRLTTY's virtual terminal navigation commands to cycle
+through all panes across all windows:
+
+- **Next pane**: Use your braille display's "switch to next virtual terminal"
+  command
+- **Previous pane**: Use your braille display's "switch to previous virtual
+  terminal" command
+
+When you switch panes:
+- The driver queries all panes across all windows using `list-panes -a`
+- Finds your current position in the pane list
+- Cycles to the next/previous pane with wraparound
+- Automatically switches windows if the target pane is in a different window
+
+Each pane is identified by a globally unique ID (not per-window), so switching
+between windows works seamlessly. The pane list cycles with wraparound,
+so you can navigate through all panes in a loop.
+
 ## Requirements
 
 - tmux must be installed and accessible in PATH
@@ -71,16 +96,21 @@ The driver supports the following parameters:
 
 The driver:
 1. Spawns `tmux -C attach-session` to connect in control mode
-2. Communicates with tmux through stdin/stdout pipes
-3. Parses tmux control protocol messages
-4. Captures pane content using `capture-pane -e` command (with ANSI escape sequences)
-5. Parses ANSI escape sequences to extract colors and attributes
-6. Translates ANSI colors to BRLTTY's attribute system
-7. Sends keystrokes using `send-keys` command
+2. Subscribes to tmux notifications (pane changes, output, etc.)
+3. Communicates with tmux through
+   stdin/stdout pipes
+4. Parses tmux control protocol messages
+5. Queries the active pane using `list-panes -f '#{pane_active}'`
+6. Captures pane content using `capture-pane -e` command (with ANSI escape
+   sequences)
+7. Parses ANSI escape sequences to extract colors and attributes
+8. Translates ANSI colors to BRLTTY's attribute system
+9. Sends keystrokes using `send-keys` command
 
 ## Color and Attribute Support
 
-The driver captures and translates terminal colors and text attributes from tmux panes.
+The driver captures and translates terminal colors and text attributes from
+tmux panes.
 
 ### What Tmux Provides
 
@@ -119,33 +149,75 @@ BRLTTY's attribute system provides:
 
 The driver maps ANSI escape sequences to BRLTTY attributes:
 
-- **Standard colors (ESC[30-37m, ESC[40-47m)** → `SCR_COLOUR_FG_*` and `SCR_COLOUR_BG_*`
-- **Bright colors (ESC[90-97m, ESC[100-107m)** → `SCR_COLOUR_FG_*` with bright flag
+- **Standard colors (ESC[30-37m, ESC[40-47m)** → `SCR_COLOUR_FG_*` and
+  `SCR_COLOUR_BG_*`
+- **Bright colors (ESC[90-97m, ESC[100-107m)** → `SCR_COLOUR_FG_*` with
+  bright flag
 - **Bold (ESC[1m)** → Bright foreground flag
 - **Blink (ESC[5m)** → `SCR_ATTR_BLINK`
 - **256-color and RGB** → Mapped to nearest standard color
-- **Other attributes** (italic, underline, etc.) → Not mapped (BRLTTY limitation)
+- **Other attributes** (italic, underline, etc.) → Not mapped (BRLTTY
+  limitation)
 
 Attributes are tracked per character and reset when ESC[0m is encountered.
 
 ## Limitations
 
-- Currently supports only the active pane (no pane switching yet)
-- Control mode output parsing is basic
-- Screen updates may have slight delay
-- Only 8 background colors supported (BRLTTY limitation - no bright backgrounds)
-- Text attributes beyond blink (italic, underline, strikethrough) are not preserved
-- 256-color and 24-bit RGB colors are approximated to nearest 16-color equivalent
+The driver provides access to the **active pane content only**. The following
+tmux UI elements are not accessible through this driver:
+
+### What's NOT Available
+
+- **Status bar**: The tmux status line (session name, window list, time, etc.)
+  is not captured
+- **Command prompt**: When entering commands with `:` (Ctrl-b :), the prompt
+  is not visible
+- **Copy mode UI**: While in copy-mode, selection indicators and position
+  info are not shown
+- **Pane borders**: Visual separators between panes are not displayed
+- **Window list**: Cannot navigate or view the list of windows
+- **Session information**: Cannot view or switch between sessions
+
+### Workaround: Nested Tmux
+
+For full access to all tmux UI elements (status bar, command prompts, copy
+mode indicators, etc.), **run tmux inside tmux**:
+
+1. **Outer tmux** (connected to BRLTTY): Displays everything as regular
+   terminal content
+2. **Inner tmux** (your working environment): Provides window/pane management
+
+**Setup:**
+```bash
+# In your outer tmux session (connected to BRLTTY)
+tmux set-option -g prefix C-a  # Use different prefix for inner tmux
+
+# Start inner tmux
+tmux new-session
+
+# Now the outer tmux will display all UI elements from the inner tmux,
+# including status bar, command prompts, and copy mode indicators
+```
+
+**Benefits:**
+- Complete access to all tmux features and UI elements
+- Status bar, command prompts, and mode indicators are visible
+- No special driver modifications needed
+- Works with any tmux configuration
+
+**Note:** You'll need to configure different prefix keys for inner and outer
+tmux (e.g., Ctrl-a for inner, Ctrl-b for outer) to control them independently.
 
 ## Future Enhancements
 
 Potential improvements:
 - Full tmux control mode protocol implementation
-- Support for pane switching via braille commands
-- Status line integration
-- Window/session management
-- Copy mode support
 - Scrollback buffer access
+- Better integration with copy-mode and view-mode
+
+Note: For comprehensive UI access (status bar, command prompts, etc.), the
+nested tmux approach described above is recommended over complex driver
+modifications.
 
 ## Building
 
@@ -165,28 +237,12 @@ The driver code is `tx` and can be specified with `-x tx`.
 - Verify a tmux session is running: `tmux ls`
 - Check BRLTTY logs for error messages
 
-**No screen content:**
-- The driver may need a screen refresh
-- Try switching to another window and back in tmux
-- Check if tmux control mode is working: `tmux -C attach`
-
 **Keys not working:**
-- Verify the tmux session is responsive
-- Check if the pane is in a special mode (copy-mode, etc.)
+- Verify the active virtual console corresponds to the tmux session
+- Check if the pane is in a special mode (tmux prompt, copy-mode, etc.)
 
 **Colors not displaying correctly:**
 - Verify your terminal supports colors: `echo -e "\e[31mRed\e[0m"`
 - Check tmux color support: `tmux info | grep Tc`
 - Colors are approximated to BRLTTY's 16-color palette
 - Background colors are limited to 8 basic colors (no bright backgrounds)
-
-## Development
-
-The driver is located in `Drivers/Screen/Tmux/` and consists of:
-- `screen.c` - Main driver implementation
-- `Makefile.in` - Build configuration
-- `README.md` - This file
-
-## License
-
-This driver is part of BRLTTY and is licensed under the GNU Lesser General Public License (LGPL) 2.1 or later.
