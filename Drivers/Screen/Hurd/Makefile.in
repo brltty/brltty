@@ -18,7 +18,7 @@
 
 DRIVER_CODE = hd
 DRIVER_NAME = Hurd
-DRIVER_USAGE = The Hurd
+DRIVER_USAGE = The Hurd operating system
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
 include $(SRC_TOP)screen.mk

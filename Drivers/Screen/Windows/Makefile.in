@@ -18,7 +18,7 @@
 
 DRIVER_CODE = wn
 DRIVER_NAME = Windows
-DRIVER_USAGE = Microsoft Windows
+DRIVER_USAGE = Microsoft Windows operating system
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
 include $(SRC_TOP)screen.mk

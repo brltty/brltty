@@ -18,7 +18,7 @@
 
 DRIVER_CODE = pb
 DRIVER_NAME = PcBios
-DRIVER_USAGE = MS-DOS
+DRIVER_USAGE = MS-DOS operating system
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
 include $(SRC_TOP)screen.mk
