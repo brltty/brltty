@@ -136,7 +136,11 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   BRAILLE_KEY_ENTRY(Space, "Space"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(routing)
+BEGIN_KEY_NAME_TABLE(routing1)
+  KEY_GROUP_ENTRY(EU_GRP_RoutingKeys1, "RoutingKey"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(routing2)
   KEY_GROUP_ENTRY(EU_GRP_RoutingKeys1, "RoutingKey1"),
   KEY_GROUP_ENTRY(EU_GRP_RoutingKeys2, "RoutingKey2"),
 END_KEY_NAME_TABLE
@@ -145,7 +149,7 @@ BEGIN_KEY_NAME_TABLES(iris)
   KEY_NAME_TABLE(linear),
   KEY_NAME_TABLE(arrow),
   KEY_NAME_TABLE(keyboard),
-  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(routing2),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(esys_small)
@@ -153,7 +157,7 @@ BEGIN_KEY_NAME_TABLES(esys_small)
   KEY_NAME_TABLE(switch2),
   KEY_NAME_TABLE(joysticks),
   KEY_NAME_TABLE(keyboard),
-  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(routing2),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(esys_medium)
@@ -163,7 +167,7 @@ BEGIN_KEY_NAME_TABLES(esys_medium)
   KEY_NAME_TABLE(switch4),
   KEY_NAME_TABLE(joysticks),
   KEY_NAME_TABLE(keyboard),
-  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(routing2),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(esys_large)
@@ -175,27 +179,27 @@ BEGIN_KEY_NAME_TABLES(esys_large)
   KEY_NAME_TABLE(switch6),
   KEY_NAME_TABLE(joysticks),
   KEY_NAME_TABLE(keyboard),
-  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(routing2),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(esytime)
   KEY_NAME_TABLE(joysticks),
   KEY_NAME_TABLE(linear),
   KEY_NAME_TABLE(keyboard),   // For braille keyboard when not in usb-hid mode.
-  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(routing2),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(bnote)
   KEY_NAME_TABLE(keypads),
   KEY_NAME_TABLE(keyboard),   // For braille keyboard when not in usb-hid mode.
-  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(routing1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(bbook)
   KEY_NAME_TABLE(joysticks),
   KEY_NAME_TABLE(navctl),
   KEY_NAME_TABLE(keyboard),   // For braille keyboard when not in usb-hid mode.
-  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(routing1),
 END_KEY_NAME_TABLES
 
 PUBLIC_KEY_TABLE(iris)

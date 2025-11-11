@@ -17,9 +17,18 @@
 ###############################################################################
 
 note The cursor routing keys are the small, round buttons just behind the braille cells.
-note RoutingKey1 means pressing a cursor routing key once (a single click).
-note RoutingKey2 means pressing a cursor routing key twice quickly (a double click).
 
-bind RoutingKey1 ROUTE
-bind RoutingKey2 DESCCHAR
+ifKey routingKey2
+   assignGlobal routingKey1 RoutingKey1
+   assignGlobal routingKey2 RoutingKey2
 
+   note \{routingKey1} means pressing any cursor routing key once (a single click).
+   note \{routingKey2} means pressing any cursor routing key twice quickly (a double click).
+
+   bind \{routingKey2} DESCCHAR
+else
+   assignGlobal routingKey1 RoutingKey
+   note \{routingKey1} means pressing any cursor routing key.
+endIf
+
+bind \{routingKey1} ROUTE

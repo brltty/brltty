@@ -111,14 +111,15 @@ typedef struct {
   char modelCode[3];
   const char *modelName;
   unsigned char cellCount;
-  unsigned isAzerBraille:1;
-  unsigned isEuroBraille:1;
-  unsigned isIris:1;
-  unsigned isNoteBraille:1;
-  unsigned isPupiBraille:1;
-  unsigned isScriba:1;
-  unsigned hasRoutingKeys:1;
-  unsigned hasVisualDisplay:1;
+
+  unsigned char isAzerBraille:1;
+  unsigned char isEuroBraille:1;
+  unsigned char isIris:1;
+  unsigned char isNoteBraille:1;
+  unsigned char isPupiBraille:1;
+  unsigned char isScriba:1;
+  unsigned char hasRoutingKeys:1;
+  unsigned char hasVisualDisplay:1;
 } ModelEntry;
 
 static const ModelEntry modelTable[] = {

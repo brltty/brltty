@@ -63,22 +63,22 @@ bind LeftKeypadDown+RightKeypadRight ATTRVIS
 bind LeftKeypadDown+RightKeypadUp SIXDOTS+on
 bind LeftKeypadDown+RightKeypadDown SIXDOTS+off
 
-bind LeftKeypadLeft+RoutingKey1 SETLEFT
-bind LeftKeypadRight+RoutingKey1 DESCCHAR
-bind LeftKeypadDown+RoutingKey1 SWITCHVT
-bind LeftKeypadDown+LeftKeypadLeft+RoutingKey1 SETMARK
-bind LeftKeypadDown+LeftKeypadRight+RoutingKey1 GOTOMARK
+bind LeftKeypadLeft+\{routingKey1} SETLEFT
+bind LeftKeypadRight+\{routingKey1} DESCCHAR
+bind LeftKeypadDown+\{routingKey1} SWITCHVT
+bind LeftKeypadDown+LeftKeypadLeft+\{routingKey1} SETMARK
+bind LeftKeypadDown+LeftKeypadRight+\{routingKey1} GOTOMARK
 
-bind RightKeypadLeft+RoutingKey1 CLIP_NEW
-bind RightKeypadUp+RoutingKey1 CLIP_ADD
-bind RightKeypadRight+RoutingKey1 COPY_LINE
-bind RightKeypadDown+RoutingKey1 COPY_RECT
+bind RightKeypadLeft+\{routingKey1} CLIP_NEW
+bind RightKeypadUp+\{routingKey1} CLIP_ADD
+bind RightKeypadRight+\{routingKey1} COPY_LINE
+bind RightKeypadDown+\{routingKey1} COPY_RECT
 
-bind RightKeypadLeft+RightKeypadUp+RoutingKey1 PRINDENT
-bind RightKeypadLeft+RightKeypadDown+RoutingKey1 NXINDENT
+bind RightKeypadLeft+RightKeypadUp+\{routingKey1} PRINDENT
+bind RightKeypadLeft+RightKeypadDown+\{routingKey1} NXINDENT
 
-bind RightKeypadRight+RightKeypadUp+RoutingKey1 PRDIFCHAR
-bind RightKeypadRight+RightKeypadDown+RoutingKey1 NXDIFCHAR
+bind RightKeypadRight+RightKeypadUp+\{routingKey1} PRDIFCHAR
+bind RightKeypadRight+RightKeypadDown+\{routingKey1} NXDIFCHAR
 
 context menu
 bind RightKeypadUp MENU_PREV_ITEM:MENU_FIRST_ITEM

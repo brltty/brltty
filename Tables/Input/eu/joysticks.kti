@@ -46,19 +46,19 @@ bind LeftJoystickRight+RightJoystickDown HELP
 
 
 context CLIP_NEW
-bind RoutingKey1 CLIP_NEW
+bind \{routingKey1} CLIP_NEW
 
 
 context CLIP_ADD
-bind RoutingKey1 CLIP_ADD
+bind \{routingKey1} CLIP_ADD
 
 
 context COPY_RECT
-bind RoutingKey1 COPY_RECT
+bind \{routingKey1} COPY_RECT
 
 
 context COPY_LINE
-bind RoutingKey1 COPY_LINE
+bind \{routingKey1} COPY_LINE
 
 
 context default

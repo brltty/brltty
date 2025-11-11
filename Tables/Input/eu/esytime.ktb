@@ -82,17 +82,17 @@ bind LeftJoystickPress+RightJoystickRight NOOP
 bind LeftJoystickPress+RightJoystickUp NOOP
 bind LeftJoystickPress+RightJoystickDown NOOP
 
-bind LeftJoystickPress+RoutingKey1 SETLEFT
-bind LeftJoystickLeft+RoutingKey1 PRDIFCHAR
-bind LeftJoystickRight+RoutingKey1 NXDIFCHAR
-bind LeftJoystickUp+RoutingKey1 PRINDENT
-bind LeftJoystickDown+RoutingKey1 NXINDENT
+bind LeftJoystickPress+\{routingKey1} SETLEFT
+bind LeftJoystickLeft+\{routingKey1} PRDIFCHAR
+bind LeftJoystickRight+\{routingKey1} NXDIFCHAR
+bind LeftJoystickUp+\{routingKey1} PRINDENT
+bind LeftJoystickDown+\{routingKey1} NXINDENT
 
-bind RightJoystickPress+RoutingKey1 DESCCHAR
-bind RightJoystickLeft+RoutingKey1 CLIP_NEW
-bind RightJoystickUp+RoutingKey1 CLIP_ADD
-bind RightJoystickRight+RoutingKey1 COPY_LINE
-bind RightJoystickDown+RoutingKey1 COPY_RECT
+bind RightJoystickPress+\{routingKey1} DESCCHAR
+bind RightJoystickLeft+\{routingKey1} CLIP_NEW
+bind RightJoystickUp+\{routingKey1} CLIP_ADD
+bind RightJoystickRight+\{routingKey1} COPY_LINE
+bind RightJoystickDown+\{routingKey1} COPY_RECT
 
 bind L1+LeftJoystickPress TIME
 bind L1+LeftJoystickLeft CHRLT
