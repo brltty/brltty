@@ -62,12 +62,6 @@ readScreenRow (int row, int width, ScreenCharacter *buffer) {
   return readScreenRows(row, width, 1, buffer);
 }
 
-/* Routines which apply to the routing screen.
- * An extra `thread' for the cursor routing subprocess.
- * This is needed because the forked subprocess shares its parent's
- * file descriptors.  A readScreen equivalent is not needed.
- */
-
 extern const ScreenDriver *screen;
 extern const ScreenDriver noScreen;
 extern void setNoScreen (void);
