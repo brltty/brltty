@@ -117,8 +117,10 @@ static int screenNeedsUpdate = 0;
 static int updateInProgress = 0;  /* Flag to prevent duplicate update sequences */
 
 /* Tmux commands */
+static const char *TMUX_CMD_ENABLE_NOTIFICATIONS =
+  "refresh-client -A pane:window-pane-changed";
 static const char *TMUX_CMD_LIST_PANES =
-  "list-panes -F '#{pane_width} #{pane_height} #{cursor_x} #{cursor_y} #{pane_index}'";
+  "list-panes -f '#{pane_active}' -F '#{pane_width} #{pane_height} #{cursor_x} #{cursor_y} #{pane_index}'";
 static const char *TMUX_CMD_CAPTURE_PANE =
   "capture-pane -e -p";
 
@@ -434,6 +436,10 @@ construct_TmuxScreen(void) {
 
   /* Tmux sends a dummy %begin/%end block on startup - queue an IGNORE response for it */
   enqueueExpectedResponse(RESPONSE_IGNORE);
+
+  /* Enable pane change notifications */
+  sendTmuxCommand(TMUX_CMD_ENABLE_NOTIFICATIONS, RESPONSE_IGNORE);
+
   screenNeedsUpdate = 1;
   updateInProgress = 0;
 
