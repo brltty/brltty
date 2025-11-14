@@ -7,6 +7,6 @@
 "hd","Hurd","The Hurd operating system"
 "lx","Linux","Linux operating system"
 "pb","PcBios","MS-DOS operating system"
-"sc","Screen","patched screen terminal multiplexer"
+"sc","Screen","screen (patched) terminal multiplexer"
 "tx","Tmux","tmux terminal multiplexer"
 "wn","Windows","Microsoft Windows operating system"
