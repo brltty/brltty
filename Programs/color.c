@@ -30,7 +30,7 @@
  * circuitry to reduce the green component to 0x55, creating brown. This became
  * the standard for EGA/VGA backward compatibility.
  */
-static const RGBColor vgaPalette[16] = {
+static const RGBColor vgaPalette[VGA_COLOR_COUNT] = {
   /* 0 - Black */        {0x00, 0x00, 0x00},
   /* 1 - Blue */         {0x00, 0x00, 0xAA},
   /* 2 - Green */        {0x00, 0xAA, 0x00},
@@ -50,7 +50,7 @@ static const RGBColor vgaPalette[16] = {
 };
 
 const RGBColor*
-getVgaPalette(void) {
+vgaColorPalette(void) {
   return vgaPalette;
 }
 
@@ -88,7 +88,7 @@ rgbToVga(unsigned char r, unsigned char g, unsigned char b) {
                                          vgaPalette[0].b);
 
   /* Check all 16 VGA colors */
-  for (int i = 1; i < 16; i++) {
+  for (int i=1; i<VGA_COLOR_COUNT; i+=1) {
     int distance = colorDistanceSquared(r, g, b,
                                        vgaPalette[i].r,
                                        vgaPalette[i].g,
@@ -114,32 +114,30 @@ rgbColorToVga(RGBColor color) {
 }
 
 /* Color names for each VGA color code */
-static const char *vgaColorNames[16] = {
-  "Black",
-  "Blue",
-  "Green",
-  "Cyan",
-  "Red",
-  "Magenta",
-  "Brown",
-  "Light Grey",
-  "Dark Grey",
-  "Light Blue",
-  "Light Green",
-  "Yellow",
-  "Light Red",
-  "Light Magenta",
-  "Light Cyan",
-  "White"
+static const char *vgaColorNames[VGA_COLOR_COUNT] = {
+  [ 0] = "Black",
+  [ 1] = "Blue",
+  [ 2] = "Green",
+  [ 3] = "Cyan",
+  [ 4] = "Red",
+  [ 5] = "Magenta",
+  [ 6] = "Brown",
+  [ 7] = "Light Grey",
+  [ 8] = "Dark Grey",
+  [ 9] = "Light Blue",
+  [10] = "Light Green",
+  [11] = "Yellow",
+  [12] = "Light Red",
+  [13] = "Light Magenta",
+  [14] = "Light Cyan",
+  [15] = "White"
 };
 
 const char *
-getVgaColorName(int vgaColor) {
-  /* Clamp vgaColor to valid range */
-  if (vgaColor < 0) vgaColor = 0;
-  if (vgaColor > 15) vgaColor = 15;
-
-  return vgaColorNames[vgaColor];
+vgaColorName(int vga) {
+  if (vga< 0) return NULL;
+  if (vga>= VGA_COLOR_COUNT) return NULL;
+  return vgaColorNames[vga];
 }
 
 HSVColor

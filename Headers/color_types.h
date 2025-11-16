@@ -43,6 +43,7 @@ typedef struct {
  * 8=Dark Grey, 9=Light Red, 10=Light Green, 11=Yellow, 12=Light Blue,
  * 13=Light Magenta, 14=Light Cyan, 15=White
  */
+#define VGA_COLOR_COUNT 16
 
 #ifdef __cplusplus
 }

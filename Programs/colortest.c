@@ -131,10 +131,10 @@ testVGAtoRGBtoVGA (void) {
   printf("Testing that VGA colors convert to themselves...\n\n");
 
   int allPassed = 1;
-  for (int vga=0; vga<16; vga+=1) {
+  for (int vga=0; vga<VGA_COLOR_COUNT; vga+=1) {
     RGBColor rgb = vgaToRgb(vga);
     int vgaBack = rgbToVga(rgb.r, rgb.g, rgb.b);
-    const char *name = getVgaColorName(vga);
+    const char *name = vgaColorName(vga);
 
     int passed = (vga == vgaBack);
     allPassed = allPassed && passed;
@@ -154,9 +154,9 @@ describeVGAColors (void) {
   printf("\n=== VGA Color Descriptions ===\n");
   printf("Describing each VGA color...\n\n");
 
-  for (int vga=0; vga<16; vga+=1) {
+  for (int vga=0; vga<VGA_COLOR_COUNT; vga+=1) {
     RGBColor rgb = vgaToRgb(vga);
-    const char *name = getVgaColorName(vga);
+    const char *name = vgaColorName(vga);
     char description[64];
 
     rgbToColorDescription(description, sizeof(description), rgb.r, rgb.g, rgb.b);
@@ -339,7 +339,7 @@ testRGBtoVGA (void) {
     const ColorTest *test = &tests[i];
     int vga = rgbToVga(test->r, test->g, test->b);
     RGBColor vgaRgb = vgaToRgb(vga);
-    const char *vgaName = getVgaColorName(vga);
+    const char *vgaName = vgaColorName(vga);
 
     printf("%-15s RGB(%3d,%3d,%3d) -> VGA %2d (%s) RGB(%3d,%3d,%3d)\n",
            test->name, test->r, test->g, test->b,
@@ -374,7 +374,7 @@ enterInteractiveMode (void) {
       char description[64];
       HSVColor hsv = rgbToHsv(r, g, b);
       int vga = rgbToVga(r, g, b);
-      const char *vgaName = getVgaColorName(vga);
+      const char *vgaName = vgaColorName(vga);
 
       rgbToColorDescription(description, sizeof(description), r, g, b);
 
