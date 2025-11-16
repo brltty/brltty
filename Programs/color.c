@@ -455,3 +455,21 @@ ansiToRgb (int ansi) {
 
   return rgb;
 }
+
+/* Interpolate between two HSV colors */
+HSVColor
+interpolateHsvColors (HSVColor hsv1, HSVColor hsv2, float factor) {
+  HSVColor result = {
+    .h = hsv1.h + ((hsv2.h - hsv1.h) * factor),
+    .s = hsv1.s + ((hsv2.s - hsv1.s) * factor),
+    .v = hsv1.v + ((hsv2.v - hsv1.v) * factor),
+  };
+
+  return result;
+}
+
+/* Interpolate between two RGB colors using HSV */
+RGBColor
+interpolateRgbColors (RGBColor rgb1, RGBColor rgb2, float factor) {
+  return hsvColorToRgb(interpolateHsvColors(rgbColorToHsv(rgb1), rgbColorToHsv(rgb2), factor));
+}

@@ -75,6 +75,12 @@ extern const char *rgbColorToDescription (char *buffer, size_t bufferSize, RGBCo
 /* Convert ANSI 256-color code to RGB */
 extern RGBColor ansiToRgb (int ansi);
 
+/* Interpolate between two HSV colors */
+extern HSVColor interpolateHsvColors (HSVColor hsv1, HSVColor hsv2, float factor);
+
+/* Interpolate between two RGB colors using HSV */
+extern RGBColor interpolateRgbColors (RGBColor rgb1, RGBColor rgb2, float factor);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
