@@ -109,6 +109,16 @@ END_COMMAND_LINE_OPTIONS(programOptions)
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
+#define VGA_NAME_FORMAT "(%13s)"
+#define VGA_COLOR_FORMAT "VGA %2d"
+#define RGB_COLOR_FORMAT "RGB(%3d, %3d, %3d)"
+#define HSV_COLOR_FORMAT "HSV(%6.1f°, %4.2f, %4.2f)"
+
+static void
+beginTest (const char *name) {
+  printf("\n=== %s ===\n", name);
+}
+
 /* Test structure for predefined colors */
 typedef struct {
   const char *name;
@@ -121,13 +131,13 @@ typedef struct {
 /* Print a test result */
 static void
 printTestResult (const char *testName, int passed) {
-  printf("[%s] %s\n", passed ? "PASS" : "FAIL", testName);
+  printf("[%s] %s\n", passed? "PASS": "FAIL", testName);
 }
 
 /* Test VGA palette round-trip conversion */
 static void
 testVGAtoRGBtoVGA (void) {
-  printf("\n=== VGA Color Round-Trip Test ===\n");
+  beginTest("VGA -> RGB -> VGA Color Round-Trip Test");
   printf("Testing that VGA colors convert to themselves...\n\n");
 
   int allPassed = 1;
@@ -139,7 +149,7 @@ testVGAtoRGBtoVGA (void) {
     int passed = (vga == vgaBack);
     allPassed = allPassed && passed;
 
-    printf("VGA %2d (%15s): RGB(%3d,%3d,%3d) -> VGA %2d [%s]\n",
+    printf(VGA_COLOR_FORMAT " " VGA_NAME_FORMAT ": " RGB_COLOR_FORMAT " -> " VGA_COLOR_FORMAT " [%s]\n",
            vga, name, rgb.r, rgb.g, rgb.b, vgaBack,
            passed ? "OK" : "FAIL");
   }
@@ -151,7 +161,7 @@ testVGAtoRGBtoVGA (void) {
 /* Test VGA color descriptions */
 static void
 listVGAColors (void) {
-  printf("\n=== VGA Color List ===\n");
+  beginTest("VGA Color List");
   printf("Describing each VGA color...\n\n");
 
   for (int vga=0; vga<VGA_COLOR_COUNT; vga+=1) {
@@ -161,7 +171,7 @@ listVGAColors (void) {
     char description[64];
     rgbColorToDescription(description, sizeof(description), rgb);
 
-    printf("VGA %2d (%15s): RGB(%3d,%3d,%3d) -> \"%s\"\n",
+    printf(VGA_COLOR_FORMAT " " VGA_NAME_FORMAT ": " RGB_COLOR_FORMAT " -> \"%s\"\n",
            vga, name, rgb.r, rgb.g, rgb.b, description);
   }
 }
@@ -169,7 +179,7 @@ listVGAColors (void) {
 /* Test HSV conversion round-trip */
 static void
 testRGBtoHSVtoRGB (void) {
-  printf("\n=== HSV Round-Trip Test ===\n");
+  beginTest("RGB -> HSV -> RGB Color Round-Trip Test");
   printf("Testing RGB -> HSV -> RGB conversion...\n\n");
 
   static const ColorTest tests[] = {
@@ -201,7 +211,7 @@ testRGBtoHSVtoRGB (void) {
     int passed = (rDiff <= 1 && gDiff <= 1 && bDiff <= 1);
     allPassed = allPassed && passed;
 
-    printf("%-12s: RGB(%3d,%3d,%3d) -> HSV(%6.1f°,%4.2f,%4.2f) -> RGB(%3d,%3d,%3d) [%s]\n",
+    printf("%-12s: " RGB_COLOR_FORMAT " -> " HSV_COLOR_FORMAT " -> " RGB_COLOR_FORMAT " [%s]\n",
            test->name, test->r, test->g, test->b,
            hsv.h, hsv.s, hsv.v,
            rgb.r, rgb.g, rgb.b,
@@ -224,7 +234,7 @@ testRGBtoHSVtoRGB (void) {
  */
 static void
 testRGBtoHSV (void) {
-  printf("\n=== Common Color Descriptions Test ===\n");
+  beginTest("Common RGB Color Descriptions Test");
   printf("Testing recognition of common color names...\n\n");
 
   static const ColorTest tests[] = {
@@ -299,7 +309,7 @@ testRGBtoHSV (void) {
       status = "FAIL";
     }
 
-    printf("%-20s RGB(%3d,%3d,%3d) -> %-20s [%s]\n",
+    printf("%-20s " RGB_COLOR_FORMAT " -> %-20s [%s]\n",
            test->name, test->r, test->g, test->b, description, status);
 
     if (!match) {
@@ -321,7 +331,7 @@ testRGBtoHSV (void) {
 /* Test RGB to VGA conversion with various colors */
 static void
 testRGBtoVGA (void) {
-  printf("\n=== RGB to VGA Conversion Test ===\n");
+  beginTest("RGB to VGA Mapping Test");
   printf("Testing RGB colors map to nearest VGA color...\n\n");
 
   static const ColorTest tests[] = {
@@ -341,7 +351,7 @@ testRGBtoVGA (void) {
     RGBColor vgaRgb = vgaToRgb(vga);
     const char *vgaName = vgaColorName(vga);
 
-    printf("%-15s RGB(%3d,%3d,%3d) -> VGA %2d (%s) RGB(%3d,%3d,%3d)\n",
+    printf("%-15s " RGB_COLOR_FORMAT " -> " VGA_COLOR_FORMAT " (%s) " RGB_COLOR_FORMAT "\n",
            test->name, test->r, test->g, test->b,
            vga, vgaName, vgaRgb.r, vgaRgb.g, vgaRgb.b);
   }
@@ -350,7 +360,7 @@ testRGBtoVGA (void) {
 /* Interactive color description test */
 static void
 enterInteractiveMode (void) {
-  printf("\n=== Interactive Color Test ===\n");
+  beginTest("Interactive Color Test");
   printf("Enter RGB values to test color descriptions.\n");
   printf("Format: R G B (0-255 for each)\n");
   printf("Enter 'q' to quit.\n\n");
