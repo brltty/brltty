@@ -19,63 +19,44 @@
 #ifndef BRLTTY_INCLUDED_COLOR
 #define BRLTTY_INCLUDED_COLOR
 
+#include "color_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-/* RGB Color Structure */
-typedef struct {
-  unsigned char r;  /* Red component (0-255) */
-  unsigned char g;  /* Green component (0-255) */
-  unsigned char b;  /* Blue component (0-255) */
-} RGBColor;
-
-/* HSV Color Structure */
-typedef struct {
-  float h;  /* Hue (0-360 degrees) */
-  float s;  /* Saturation (0.0-1.0) */
-  float v;  /* Value/Brightness (0.0-1.0) */
-} HSVColor;
-
-/* VGA Color Codes (0-15)
- * Standard 16-color VGA palette:
- * 0=Black, 1=Red, 2=Green, 3=Brown/Yellow, 4=Blue, 5=Magenta, 6=Cyan, 7=Light Grey
- * 8=Dark Grey, 9=Light Red, 10=Light Green, 11=Yellow, 12=Light Blue,
- * 13=Light Magenta, 14=Light Cyan, 15=White
- */
-
 /* Convert VGA color code (0-15) to RGB values */
-extern RGBColor vgaToRgb(int vgaColor);
+extern RGBColor vgaToRgb (int vgaColor);
 
 /* Convert RGB color to nearest VGA color code (0-15)
  * Uses color distance calculation to find the closest match
  */
-extern int rgbToVga(unsigned char r, unsigned char g, unsigned char b);
+extern int rgbToVga (unsigned char r, unsigned char g, unsigned char b);
 
 /* Convert RGB color structure to nearest VGA color code (0-15) */
-extern int rgbColorToVga(RGBColor color);
+extern int rgbColorToVga (RGBColor color);
 
 /* Get the standard VGA palette RGB values as an array
  * Returns pointer to static array of 16 RGBColor structures
  */
-extern const RGBColor* getVgaPalette(void);
+extern const RGBColor *getVgaPalette (void);
 
 /* Convert RGB to HSV color space */
-extern HSVColor rgbToHsv(unsigned char r, unsigned char g, unsigned char b);
+extern HSVColor rgbToHsv (unsigned char r, unsigned char g, unsigned char b);
 
 /* Convert RGB color structure to HSV */
-extern HSVColor rgbColorToHsv(RGBColor color);
+extern HSVColor rgbColorToHsv (RGBColor color);
 
 /* Convert HSV to RGB color space */
-extern RGBColor hsvToRgb(float h, float s, float v);
+extern RGBColor hsvToRgb (float h, float s, float v);
 
 /* Convert HSV color structure to RGB */
-extern RGBColor hsvColorToRgb(HSVColor color);
+extern RGBColor hsvColorToRgb (HSVColor color);
 
 /* Get the color name for a VGA color code (0-15)
  * Returns a static string with the color name (e.g., "Red", "Light Blue")
  */
-extern const char *getVgaColorName(int vgaColor);
+extern const char *getVgaColorName (int vgaColor);
 
 /* Describe an RGB color as a human-readable string
  * Uses HSV analysis to provide detailed descriptions like:
@@ -83,13 +64,13 @@ extern const char *getVgaColorName(int vgaColor);
  * buffer must be at least 64 bytes
  * Returns pointer to buffer
  */
-extern const char *rgbToColorDescription(char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b);
+extern const char *rgbToColorDescription (char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b);
 
 /* Describe an RGB color structure as a human-readable string
  * buffer must be at least 64 bytes
  * Returns pointer to buffer
  */
-extern const char *rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color);
+extern const char *rgbColorToDescription (char *buffer, size_t bufferSize, RGBColor color);
 
 #ifdef __cplusplus
 }
