@@ -31,22 +31,22 @@
  * the standard for EGA/VGA backward compatibility.
  */
 static const RGBColor vgaPalette[VGA_COLOR_COUNT] = {
-  /* 0 - Black */        {0x00, 0x00, 0x00},
-  /* 1 - Blue */         {0x00, 0x00, 0xAA},
-  /* 2 - Green */        {0x00, 0xAA, 0x00},
-  /* 3 - Cyan */         {0x00, 0xAA, 0xAA},
-  /* 4 - Red */          {0xAA, 0x00, 0x00},
-  /* 5 - Magenta */      {0xAA, 0x00, 0xAA},
-  /* 6 - Brown */        {0xAA, 0x55, 0x00},  /* Hardware exception: not 0xAA for green */
-  /* 7 - Light Grey */   {0xAA, 0xAA, 0xAA},
-  /* 8 - Dark Grey */    {0x55, 0x55, 0x55},
-  /* 9 - Light Blue */   {0x55, 0x55, 0xFF},
-  /* 10 - Light Green */ {0x55, 0xFF, 0x55},
-  /* 11 - Yellow */      {0xFF, 0xFF, 0x55},
-  /* 12 - Light Red */   {0xFF, 0x55, 0x55},
-  /* 13 - Light Magenta */ {0xFF, 0x55, 0xFF},
-  /* 14 - Light Cyan */  {0x55, 0xFF, 0xFF},
-  /* 15 - White */       {0xFF, 0xFF, 0xFF}
+  /* Black */         [ 0] = {0X00, 0X00, 0X00},
+  /* Blue */          [ 1] = {0X00, 0X00, 0XAA},
+  /* Green */         [ 2] = {0X00, 0XAA, 0X00},
+  /* Cyan */          [ 3] = {0X00, 0XAA, 0XAA},
+  /* Red */           [ 4] = {0XAA, 0X00, 0X00},
+  /* Magenta */       [ 5] = {0XAA, 0X00, 0XAA},
+  /* Brown */         [ 6] = {0XAA, 0X55, 0X00}, /* Hardware exception: not 0xAA for green */
+  /* Light Grey */    [ 7] = {0XAA, 0XAA, 0XAA},
+  /* Dark Grey */     [ 8] = {0X55, 0X55, 0X55},
+  /* Light Blue */    [ 9] = {0X55, 0X55, 0XFF},
+  /* Light Green */   [10] = {0X55, 0XFF, 0X55},
+  /* Yellow */        [11] = {0X55, 0XFF, 0XFF},
+  /* Light Red */     [12] = {0XFF, 0X55, 0X55},
+  /* Light Magenta */ [13] = {0XFF, 0X55, 0XFF},
+  /* Light Cyan */    [14] = {0XFF, 0XFF, 0X55},
+  /* White */         [15] = {0XFF, 0XFF, 0XFF}
 };
 
 const RGBColor*
