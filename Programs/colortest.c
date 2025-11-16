@@ -51,7 +51,7 @@ static int opt_enterInteractiveMode;
 static int opt_performAllTests;
 
 static int opt_testVGAtoRGBtoVGA;
-static int opt_describeVGAColors;
+static int opt_listVGAColors;
 static int opt_testRGBtoHSVtoRGB;
 static int opt_testRGBtoHSV;
 static int opt_testRGBtoVGA;
@@ -81,10 +81,10 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .description = "test VGA to RGB to VGA round-trip - conflicts with requesting all tests",
   },
 
-  { .word = "describe-vga-colors",
-    .letter = 'd',
-    .setting.flag = &opt_describeVGAColors,
-    .description = "describe VGA colors - conflicts with requesting all tests",
+  { .word = "list-vga-colors",
+    .letter = 'l',
+    .setting.flag = &opt_listVGAColors,
+    .description = "list the VGA colors - conflicts with requesting all tests",
   },
 
   { .word = "rgb-hsv-rgb",
@@ -150,15 +150,15 @@ testVGAtoRGBtoVGA (void) {
 
 /* Test VGA color descriptions */
 static void
-describeVGAColors (void) {
-  printf("\n=== VGA Color Descriptions ===\n");
+listVGAColors (void) {
+  printf("\n=== VGA Color List ===\n");
   printf("Describing each VGA color...\n\n");
 
   for (int vga=0; vga<VGA_COLOR_COUNT; vga+=1) {
-    RGBColor rgb = vgaToRgb(vga);
     const char *name = vgaColorName(vga);
-    char description[64];
 
+    RGBColor rgb = vgaToRgb(vga);
+    char description[64];
     rgbColorToDescription(description, sizeof(description), rgb);
 
     printf("VGA %2d (%15s): RGB(%3d,%3d,%3d) -> \"%s\"\n",
@@ -403,8 +403,8 @@ performRequestedTests (void) {
       .perform = testVGAtoRGBtoVGA
     },
 
-    { .requested = &opt_describeVGAColors,
-      .perform = describeVGAColors
+    { .requested = &opt_listVGAColors,
+      .perform = listVGAColors
     },
 
     { .requested = &opt_testRGBtoHSVtoRGB,

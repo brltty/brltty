@@ -126,10 +126,10 @@ static const char *vgaColorNames[VGA_COLOR_COUNT] = {
   [ 8] = "Dark Grey",
   [ 9] = "Light Blue",
   [10] = "Light Green",
-  [11] = "Yellow",
+  [11] = "Light Cyan",
   [12] = "Light Red",
   [13] = "Light Magenta",
-  [14] = "Light Cyan",
+  [14] = "Yellow",
   [15] = "White"
 };
 
