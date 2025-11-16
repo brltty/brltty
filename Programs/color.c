@@ -426,3 +426,32 @@ const char *
 rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color) {
   return rgbToDescription(buffer, bufferSize, color.r, color.g, color.b);
 }
+
+/* Convert ANSI 256-color code to RGB */
+RGBColor
+ansiToRgb (int ansi) {
+  RGBColor rgb;
+
+  if (ansi < VGA_COLOR_COUNT) {
+    /* VGA color code */
+    rgb = vgaToRgb(ansi);
+  } else if (ansi < 232) {
+    /* 6x6x6 color cube */
+    int code = ansi - VGA_COLOR_COUNT;
+
+    const int multiplier = 51;
+    const int granularity = 6;
+
+    rgb.b = (code % granularity) * multiplier;
+    code /= granularity;
+
+    rgb.g = (code % granularity) * multiplier;
+    rgb.r = (code / granularity) * multiplier;
+  } else {
+    /* Grayscale */
+    unsigned int gray = 8 + ((ansi - 232) * 10);
+    rgb.r = rgb.g = rgb.b = gray;
+  }
+
+  return rgb;
+}

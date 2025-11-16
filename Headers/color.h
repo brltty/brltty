@@ -72,6 +72,9 @@ extern const char *rgbToDescription (char *buffer, size_t bufferSize, unsigned c
  */
 extern const char *rgbColorToDescription (char *buffer, size_t bufferSize, RGBColor color);
 
+/* Convert ANSI 256-color code to RGB */
+extern RGBColor ansiToRgb (int ansi);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
