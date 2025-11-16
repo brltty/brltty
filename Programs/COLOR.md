@@ -1,4 +1,4 @@
-# Color Conversion Library
+# BRLTTY Color Conversion Library
 
 This library provides comprehensive color conversion and description functions for BRLTTY.
 
@@ -55,10 +55,10 @@ The library uses the standard 16-color VGA palette following the IRGB bit patter
 | 8    | Dark Grey      | (85, 85, 85)    | 1000               |
 | 9    | Light Blue     | (85, 85, 255)   | 1001               |
 | 10   | Light Green    | (85, 255, 85)   | 1010               |
-| 11   | Yellow         | (255, 255, 85)  | 1011               |
+| 11   | Light Cyan     | (85, 255, 255)  | 1011               |
 | 12   | Light Red      | (255, 85, 85)   | 1100               |
 | 13   | Light Magenta  | (255, 85, 255)  | 1101               |
-| 14   | Light Cyan     | (85, 255, 255)  | 1110               |
+| 14   | Yellow         | (255, 255, 85)  | 1110               |
 | 15   | White          | (255, 255, 255) | 1111               |
 
 \* Brown (index 6) is a hardware exception - the IRGB pattern would produce dark yellow (170, 170, 0), but CGA monitors had special circuitry to reduce the green component to 85.
@@ -70,13 +70,13 @@ The library uses the standard 16-color VGA palette following the IRGB bit patter
 #### vgaToRgb
 
 ```c
-RGBColor vgaToRgb(int vgaColor);
+RGBColor vgaToRgb(int vga);
 ```
 
 Converts a VGA color code (0-15) to RGB values.
 
 **Parameters:**
-- `vgaColor`: VGA color code (automatically clamped to 0-15 range)
+- `vga`: VGA color code (automatically clamped to 0-15 range)
 
 **Returns:** RGBColor structure with the corresponding RGB values
 
@@ -103,7 +103,7 @@ Converts RGB color values to the nearest VGA color code using Euclidean distance
 
 **Example:**
 ```c
-int vgaColor = rgbToVga(200, 100, 50);  /* Returns closest VGA color */
+int vga = rgbToVga(200, 100, 50);  /* Returns closest VGA color */
 ```
 
 #### rgbColorToVga
@@ -117,13 +117,13 @@ Convenience wrapper for `rgbToVga()` that accepts an RGBColor structure.
 **Example:**
 ```c
 RGBColor color = {200, 100, 50};
-int vgaColor = rgbColorToVga(color);
+int vga = rgbColorToVga(color);
 ```
 
-#### getVgaPalette
+#### vgaColorPalette
 
 ```c
-const RGBColor* getVgaPalette(void);
+const RGBColor *vgaColorPalette(void);
 ```
 
 Returns a pointer to the standard VGA palette array (16 colors).
@@ -132,29 +132,29 @@ Returns a pointer to the standard VGA palette array (16 colors).
 
 **Example:**
 ```c
-const RGBColor *palette = getVgaPalette();
+const RGBColor *palette = vgaColorPalette();
 for (int i = 0; i < 16; i++) {
   printf("Color %d: R=%d G=%d B=%d\n", i,
          palette[i].r, palette[i].g, palette[i].b);
 }
 ```
 
-#### getVgaColorName
+#### vgaColorName
 
 ```c
-const char* getVgaColorName(int vgaColor);
+const char *vgaColorName(int vga);
 ```
 
 Returns the standard name for a VGA color code.
 
 **Parameters:**
-- `vgaColor`: VGA color code (automatically clamped to 0-15 range)
+- `vga`: VGA color code
 
-**Returns:** Static string with the color name (e.g., "Red", "Light Blue")
+**Returns:** Static string with the color name (e.g. "Red", "Light Blue")
 
 **Example:**
 ```c
-const char *name = getVgaColorName(12);  /* Returns "Light Blue" */
+const char *name = vgaColorName(12);  /* Returns "Light Blue" */
 ```
 
 ### HSV Color Conversion
@@ -219,21 +219,21 @@ Convenience wrapper for `hsvToRgb()` that accepts an HSVColor structure.
 
 ### Color Description
 
-#### rgbToColorDescription
+#### rgbToDescription
 
 ```c
-char* rgbToColorDescription(unsigned char r, unsigned char g, unsigned char b,
-                            char *buffer, size_t bufferSize);
+const char *rgbToDescription(char *buffer, size_t bufferSize,
+                             unsigned char r, unsigned char g, unsigned char b);
 ```
 
 Generates a human-readable description of an RGB color using HSV analysis.
 
 **Parameters:**
+- `buffer`: Output buffer (recommended minimum 64 bytes)
+- `bufferSize`: Size of the output buffer
 - `r`: Red component (0-255)
 - `g`: Green component (0-255)
 - `b`: Blue component (0-255)
-- `buffer`: Output buffer (recommended minimum 64 bytes)
-- `bufferSize`: Size of the output buffer
 
 **Returns:** Pointer to buffer containing the color description
 
@@ -288,86 +288,86 @@ Generates a human-readable description of an RGB color using HSV analysis.
 ```c
 char buffer[64];
 
-rgbToColorDescription(255, 0, 0, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 255, 0, 0);
 /* Returns: "vivid red" */
 
-rgbToColorDescription(50, 50, 150, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 50, 50, 150);
 /* Returns: "dark blue" */
 
-rgbToColorDescription(200, 150, 150, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 200, 150, 150);
 /* Returns: "light red" */
 
-rgbToColorDescription(100, 200, 150, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 100, 200, 150);
 /* Returns: "saturated cyan-green" */
 
-rgbToColorDescription(220, 220, 220, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 220, 220, 220);
 /* Returns: "light grey" */
 
-rgbToColorDescription(255, 165, 0, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 255, 165, 0);
 /* Returns: "bright vivid orange" */
 
-rgbToColorDescription(128, 0, 128, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 128, 0, 128);
 /* Returns: "dark magenta" */
 
-rgbToColorDescription(10, 10, 10, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 10, 10, 10);
 /* Returns: "black" */
 
-rgbToColorDescription(245, 245, 245, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 245, 245, 245);
 /* Returns: "white" */
 
-rgbToColorDescription(170, 85, 0, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 170, 85, 0);
 /* Returns: "brown" (VGA Brown color) */
 
-rgbToColorDescription(101, 67, 33, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 101, 67, 33);
 /* Returns: "dark brown" */
 
-rgbToColorDescription(255, 192, 203, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 255, 192, 203);
 /* Returns: "light pink" */
 
-rgbToColorDescription(255, 127, 80, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 255, 127, 80);
 /* Returns: "coral" */
 
-rgbToColorDescription(128, 128, 0, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 128, 128, 0);
 /* Returns: "olive" */
 
-rgbToColorDescription(50, 205, 50, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 50, 205, 50);
 /* Returns: "lime" */
 
-rgbToColorDescription(0, 128, 128, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 0, 128, 128);
 /* Returns: "teal" */
 
-rgbToColorDescription(64, 224, 208, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 64, 224, 208);
 /* Returns: "turquoise" */
 
-rgbToColorDescription(128, 0, 0, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 128, 0, 0);
 /* Returns: "maroon" */
 
-rgbToColorDescription(0, 0, 128, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 0, 0, 128);
 /* Returns: "navy" */
 
-rgbToColorDescription(75, 0, 130, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 75, 0, 130);
 /* Returns: "indigo" */
 
-rgbToColorDescription(230, 230, 250, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 230, 230, 250);
 /* Returns: "lavender" */
 
-rgbToColorDescription(255, 215, 0, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 255, 215, 0);
 /* Returns: "gold" */
 
-rgbToColorDescription(210, 180, 140, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 210, 180, 140);
 /* Returns: "tan" */
 
-rgbToColorDescription(245, 245, 220, buffer, sizeof(buffer));
+rgbToDescription(buffer, sizeof(buffer), 245, 245, 220);
 /* Returns: "beige" */
 ```
 
 #### rgbColorToDescription
 
 ```c
-char* rgbColorToDescription(RGBColor color, char *buffer, size_t bufferSize);
+const char *rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color);
 ```
 
-Convenience wrapper for `rgbToColorDescription()` that accepts an RGBColor structure.
+Convenience wrapper for `rgbToDescription()` that accepts an RGBColor structure.
 
 ## Usage Examples
 
@@ -398,7 +398,7 @@ void describe_ansi_color(int ansi_color) {
         r = g = b = gray;
     }
 
-    rgbToColorDescription(r, g, b, description, sizeof(description));
+    rgbToDescription(description, sizeof(description), r, g, b);
     printf("ANSI color %d: %s\n", ansi_color, description);
 }
 ```
@@ -418,7 +418,7 @@ void analyze_color(unsigned char r, unsigned char g, unsigned char b) {
     hsv = rgbToHsv(r, g, b);
 
     /* Get description */
-    rgbToColorDescription(r, g, b, description, sizeof(description));
+    rgbToDescription(description, sizeof(description), r, g, b);
 
     /* Find closest VGA color */
     vgaColor = rgbToVga(r, g, b);
@@ -426,7 +426,7 @@ void analyze_color(unsigned char r, unsigned char g, unsigned char b) {
     printf("RGB: (%d, %d, %d)\n", r, g, b);
     printf("HSV: (%.1f°, %.2f, %.2f)\n", hsv.h, hsv.s, hsv.v);
     printf("Description: %s\n", description);
-    printf("Closest VGA color: %d (%s)\n", vgaColor, getVgaColorName(vgaColor));
+    printf("Closest VGA color: %d (%s)\n", vgaColor, vgaColorName(vgaColor));
 }
 ```
 
@@ -500,7 +500,8 @@ The reverse conversion uses the standard formula:
 
 ## See Also
 
-- `Programs/color.h` - Header file with function declarations
+- `Headers/color_types.h` - Header file with type definitions
+- `Headers/color.h` - Header file with function declarations
 - `Programs/color.c` - Implementation file
 - `Programs/colortest.c` - test program
 - `Drivers/Screen/Tmux/screen.c` - Example usage in tmux driver (RGB to VGA conversion for ANSI sequences)
