@@ -75,7 +75,7 @@ extern RGBColor hsvColorToRgb(HSVColor color);
 /* Get the color name for a VGA color code (0-15)
  * Returns a static string with the color name (e.g., "Red", "Light Blue")
  */
-extern const char* getVgaColorName(int vgaColor);
+extern const char *getVgaColorName(int vgaColor);
 
 /* Describe an RGB color as a human-readable string
  * Uses HSV analysis to provide detailed descriptions like:
@@ -83,17 +83,16 @@ extern const char* getVgaColorName(int vgaColor);
  * buffer must be at least 64 bytes
  * Returns pointer to buffer
  */
-extern char* rgbToColorDescription(unsigned char r, unsigned char g, unsigned char b, char *buffer, size_t bufferSize);
+extern const char *rgbToColorDescription(char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b);
 
 /* Describe an RGB color structure as a human-readable string
  * buffer must be at least 64 bytes
  * Returns pointer to buffer
  */
-extern char* rgbColorToDescription(RGBColor color, char *buffer, size_t bufferSize);
+extern const char *rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
 #endif /* BRLTTY_INCLUDED_COLOR */
-

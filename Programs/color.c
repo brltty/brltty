@@ -114,7 +114,7 @@ rgbColorToVga(RGBColor color) {
 }
 
 /* Color names for each VGA color code */
-static const char* vgaColorNames[16] = {
+static const char *vgaColorNames[16] = {
   "Black",
   "Blue",
   "Green",
@@ -133,7 +133,7 @@ static const char* vgaColorNames[16] = {
   "White"
 };
 
-const char*
+const char *
 getVgaColorName(int vgaColor) {
   /* Clamp vgaColor to valid range */
   if (vgaColor < 0) vgaColor = 0;
@@ -242,7 +242,7 @@ hsvColorToRgb(HSVColor color) {
 }
 
 /* Helper function to get hue name */
-static const char*
+static const char *
 getHueName(float hue) {
   /* Hue ranges (degrees):
    * Red: 0-15, 345-360 (30° total, wraps around 0°)
@@ -272,8 +272,8 @@ getHueName(float hue) {
   return "red-magenta";
 }
 
-char*
-rgbToColorDescription(unsigned char r, unsigned char g, unsigned char b, char *buffer, size_t bufferSize) {
+const char *
+rgbToColorDescription(char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b) {
   HSVColor hsv = rgbToHsv(r, g, b);
 
   /* Handle special cases */
@@ -424,7 +424,7 @@ rgbToColorDescription(unsigned char r, unsigned char g, unsigned char b, char *b
   return buffer;
 }
 
-char*
-rgbColorToDescription(RGBColor color, char *buffer, size_t bufferSize) {
-  return rgbToColorDescription(color.r, color.g, color.b, buffer, bufferSize);
+const char *
+rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color) {
+  return rgbToColorDescription(buffer, bufferSize, color.r, color.g, color.b);
 }
