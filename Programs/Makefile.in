@@ -986,7 +986,7 @@ scrtest.$O:
 
 ###############################################################################
 
-COLORTEST_OBJECTS = colortest.$O color.$O
+COLORTEST_OBJECTS = colortest.$O $(PROGRAM_OBJECTS) color.$O
 
 colortest$X: $(COLORTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(COLORTEST_OBJECTS) $(LDLIBS)

@@ -37,10 +37,77 @@
  * and "lime" depending on the detection criteria used).
  */
 
+#include "prologue.h"
+
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+
+#include "log.h"
+#include "cmdline.h"
 #include "color.h"
+
+static int opt_quiet;
+static int opt_interactiveMode;
+static int opt_allTests;
+
+static int opt_testVGAtoRGBtoVGA;
+static int opt_testVGADescriptions;
+static int opt_testRGBtoHSVtoRGB;
+static int opt_testCommonColors;
+static int opt_testRGBtoVGAMapping;
+
+BEGIN_COMMAND_LINE_OPTIONS(programOptions)
+  { .word = "quiet",
+    .letter = 'q',
+    .setting.flag = &opt_quiet,
+    .description = "quiet mode - only show test results",
+  },
+
+  { .word = "interactive-mode",
+    .letter = 'i',
+    .setting.flag = &opt_interactiveMode,
+    .description = "enter interactive mode after performing the requested tests",
+  },
+
+  { .word = "all-tests",
+    .letter = 'a',
+    .setting.flag = &opt_allTests,
+    .description = "perform all of the tests",
+  },
+
+  { .word = "vga-round-trip",
+    .letter = 'v',
+    .setting.flag = &opt_testVGAtoRGBtoVGA,
+    .description = "test VGA to RGB to VGA round-trip",
+  },
+
+  { .word = "descriptions",
+    .letter = 'd',
+    .setting.flag = &opt_testVGADescriptions,
+    .description = "test VGA color descriptions",
+  },
+
+  { .word = "rgb-round-trip",
+    .letter = 'r',
+    .setting.flag = &opt_testRGBtoHSVtoRGB,
+    .description = "test RGB to HSV to RGB round-trip",
+  },
+
+  { .word = "colors",
+    .letter = 'c',
+    .setting.flag = &opt_testCommonColors,
+    .description = "test common RGB color descriptions",
+  },
+
+  { .word = "mapping",
+    .letter = 'm',
+    .setting.flag = &opt_testRGBtoVGAMapping,
+    .description = "test RGB to VGA mapping",
+  },
+END_COMMAND_LINE_OPTIONS(programOptions)
+
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+END_COMMAND_LINE_PARAMETERS(programParameters)
 
 /* Test structure for predefined colors */
 typedef struct {
@@ -59,7 +126,7 @@ printTestResult(const char *testName, int passed) {
 
 /* Test VGA palette round-trip conversion */
 static void
-testVGARoundTrip(void) {
+testVGAtoRGBtoVGA(void) {
   printf("\n=== VGA Color Round-Trip Test ===\n");
   printf("Testing that VGA colors convert to themselves...\n\n");
 
@@ -87,7 +154,7 @@ testVGADescriptions(void) {
   printf("\n=== VGA Color Descriptions ===\n");
   printf("Describing each VGA color...\n\n");
 
-  for (int vga = 0; vga < 16; vga++) {
+  for (int vga=0; vga<16; vga+=1) {
     RGBColor rgb = vgaToRgb(vga);
     const char *name = getVgaColorName(vga);
     char description[64];
@@ -101,11 +168,11 @@ testVGADescriptions(void) {
 
 /* Test HSV conversion round-trip */
 static void
-testHSVRoundTrip(void) {
+testRGBtoHSVtoRGB(void) {
   printf("\n=== HSV Round-Trip Test ===\n");
   printf("Testing RGB -> HSV -> RGB conversion...\n\n");
 
-  ColorTest tests[] = {
+  static const ColorTest tests[] = {
     {"Pure Red",     255, 0,   0,   NULL, NULL, NULL},
     {"Pure Green",   0,   255, 0,   NULL, NULL, NULL},
     {"Pure Blue",    0,   0,   255, NULL, NULL, NULL},
@@ -119,8 +186,8 @@ testHSVRoundTrip(void) {
   };
 
   int allPassed = 1;
-  for (size_t i = 0; i < sizeof(tests) / sizeof(tests[0]); i++) {
-    ColorTest *test = &tests[i];
+  for (size_t i=0; i<ARRAY_COUNT(tests); i+=1) {
+    const ColorTest *test = &tests[i];
 
     /* RGB -> HSV -> RGB */
     HSVColor hsv = rgbToHsv(test->r, test->g, test->b);
@@ -160,7 +227,7 @@ testCommonColors(void) {
   printf("\n=== Common Color Descriptions Test ===\n");
   printf("Testing recognition of common color names...\n\n");
 
-  ColorTest tests[] = {
+  static const ColorTest tests[] = {
     /* Basic colors - Note: NULL in last two fields means no alternate */
     {"Pure Red",         255, 0,   0,   "vivid red", NULL, NULL},
     /* Pure green (0,255,0) is at H=120° S=1.0 V=1.0, which matches our lime detection
@@ -208,8 +275,8 @@ testCommonColors(void) {
   int passed = 0;
   int total = sizeof(tests) / sizeof(tests[0]);
 
-  for (size_t i = 0; i < total; i++) {
-    ColorTest *test = &tests[i];
+  for (size_t i=0; i<total; i+=1) {
+    const ColorTest *test = &tests[i];
     char description[64];
 
     rgbToColorDescription(test->r, test->g, test->b, description, sizeof(description));
@@ -253,11 +320,11 @@ testCommonColors(void) {
 
 /* Test RGB to VGA conversion with various colors */
 static void
-testRGBtoVGA(void) {
+testRGBtoVGAMapping(void) {
   printf("\n=== RGB to VGA Conversion Test ===\n");
   printf("Testing RGB colors map to nearest VGA color...\n\n");
 
-  ColorTest tests[] = {
+  static const ColorTest tests[] = {
     {"Bright Red",       255, 0,   0,   NULL, NULL, NULL},  /* Should be 12 (Light Red) */
     {"Dark Red",         128, 0,   0,   NULL, NULL, NULL},  /* Should be 4 (Red) */
     {"Bright Green",     0,   255, 0,   NULL, NULL, NULL},  /* Should be 10 (Light Green) */
@@ -268,8 +335,8 @@ testRGBtoVGA(void) {
     {"Purple",           128, 0,   128, NULL, NULL, NULL},  /* Should be 5 (Magenta) */
   };
 
-  for (size_t i = 0; i < sizeof(tests) / sizeof(tests[0]); i++) {
-    ColorTest *test = &tests[i];
+  for (size_t i=0; i<ARRAY_COUNT(tests); i+=1) {
+    const ColorTest *test = &tests[i];
     int vga = rgbToVga(test->r, test->g, test->b);
     RGBColor vgaRgb = vgaToRgb(vga);
     const char *vgaName = getVgaColorName(vga);
@@ -282,7 +349,7 @@ testRGBtoVGA(void) {
 
 /* Interactive color description test */
 static void
-interactiveTest(void) {
+enterInteractiveMode(void) {
   printf("\n=== Interactive Color Test ===\n");
   printf("Enter RGB values to test color descriptions.\n");
   printf("Format: R G B (0-255 for each)\n");
@@ -323,32 +390,110 @@ interactiveTest(void) {
   }
 }
 
-/* Main test program */
-int
-main(int argc, char *argv[]) {
-  printf("==================================================\n");
-  printf("       BRLTTY Color Conversion Test Suite        \n");
-  printf("==================================================\n");
+/* perform the requested tests */
+static int
+performRequestedTests (void) {
+  typedef struct {
+    int *requested;
+    void (*perform) (void);
+  } TestEntry;
 
-  /* Run all tests */
-  testVGARoundTrip();
-  testVGADescriptions();
-  testHSVRoundTrip();
-  testCommonColors();
-  testRGBtoVGA();
+  static const TestEntry testTable[] = {
+    { .requested = &opt_testVGAtoRGBtoVGA,
+      .perform = testVGAtoRGBtoVGA
+    },
 
-  /* Interactive mode if requested */
-  if (argc > 1 && strcmp(argv[1], "-i") == 0) {
-    interactiveTest();
-  } else {
-    printf("\n");
-    printf("Run with '-i' flag for interactive mode.\n");
+    { .requested = &opt_testVGADescriptions,
+      .perform = testVGADescriptions
+    },
+
+    { .requested = &opt_testRGBtoHSVtoRGB,
+      .perform = testRGBtoHSVtoRGB
+    },
+
+    { .requested = &opt_testCommonColors,
+      .perform = testCommonColors
+    },
+
+    { .requested = &opt_testRGBtoVGAMapping,
+      .perform = testRGBtoVGAMapping
+    },
+  };
+
+  const size_t testCount = ARRAY_COUNT(testTable);
+  int testRequested = 0;
+
+  for (int i=0; i<testCount; i+=1) {
+    const TestEntry *test = &testTable[i];
+
+    if (*test->requested) {
+      if (opt_allTests) {
+        logMessage(LOG_ERR, "conflicting test options");
+        return 0;
+      }
+
+      testRequested = 1;
+      break;
+    }
   }
 
-  printf("\n");
-  printf("==================================================\n");
-  printf("                Tests Complete                    \n");
-  printf("==================================================\n");
+  if (!testRequested) {
+    if (opt_allTests || !opt_interactiveMode) {
+      for (int i=0; i<testCount; i+=1) {
+        const TestEntry *test = &testTable[i];
+        *test->requested = 1;
+      }
+    }
+  }
 
-  return 0;
+  for (int i=0; i<testCount; i+=1) {
+    const TestEntry *test = &testTable[i];
+    if (*test->requested) test->perform();
+  }
+
+  return 1;
+}
+
+/* Main test program */
+int
+main (int argc, char *argv[]) {
+  {
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptions,
+      .parameters = &programParameters,
+      .applicationName = "colortest",
+
+      .usage = {
+        .purpose = "Test the color conversion and description functions.",
+      }
+    };
+
+    PROCESS_COMMAND_LINE(descriptor, argc, argv);
+  }
+
+  if (!opt_quiet) {
+    printf("==================================================\n");
+    printf("       BRLTTY Color Conversion Test Suite        \n");
+    printf("==================================================\n");
+  }
+
+  /* Run the requested tests */
+  if (!performRequestedTests()) return PROG_EXIT_SYNTAX;
+
+  /* Interactive mode if requested */
+  if (opt_interactiveMode) {
+    enterInteractiveMode();
+  } else if (!opt_quiet) {
+    printf("\n");
+    printf("Run with the -i flag for interactive mode.\n");
+  }
+
+  if (!opt_quiet) {
+    printf("\n");
+    printf("==================================================\n");
+    printf("                Tests Complete                    \n");
+    printf("==================================================\n");
+  }
+
+  return PROG_EXIT_SUCCESS;
 }
