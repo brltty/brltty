@@ -42,10 +42,10 @@ static const RGBColor vgaPalette[VGA_COLOR_COUNT] = {
   /* Dark Grey */     [ 8] = {0X55, 0X55, 0X55},
   /* Light Blue */    [ 9] = {0X55, 0X55, 0XFF},
   /* Light Green */   [10] = {0X55, 0XFF, 0X55},
-  /* Yellow */        [11] = {0X55, 0XFF, 0XFF},
+  /* Light Cyan */    [11] = {0X55, 0XFF, 0XFF},
   /* Light Red */     [12] = {0XFF, 0X55, 0X55},
   /* Light Magenta */ [13] = {0XFF, 0X55, 0XFF},
-  /* Light Cyan */    [14] = {0XFF, 0XFF, 0X55},
+  /* Yellow */        [14] = {0XFF, 0XFF, 0X55},
   /* White */         [15] = {0XFF, 0XFF, 0XFF}
 };
 
