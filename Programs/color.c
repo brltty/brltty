@@ -55,12 +55,12 @@ vgaColorPalette(void) {
 }
 
 RGBColor
-vgaToRgb(int vgaColor) {
+vgaToRgb(int vga) {
   /* Clamp vgaColor to valid range */
-  if (vgaColor < 0) vgaColor = 0;
-  if (vgaColor > 15) vgaColor = 15;
+  if (vga < 0) vga = 0;
+  if (vga >= VGA_COLOR_COUNT) vga = VGA_COLOR_COUNT - 1;
 
-  return vgaPalette[vgaColor];
+  return vgaPalette[vga];
 }
 
 /* Calculate squared Euclidean distance between two colors in RGB space
@@ -271,7 +271,7 @@ getHueName(float hue) {
 }
 
 const char *
-rgbToColorDescription(char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b) {
+rgbToDescription(char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b) {
   HSVColor hsv = rgbToHsv(r, g, b);
 
   /* Handle special cases */
@@ -424,5 +424,5 @@ rgbToColorDescription(char *buffer, size_t bufferSize, unsigned char r, unsigned
 
 const char *
 rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color) {
-  return rgbToColorDescription(buffer, bufferSize, color.r, color.g, color.b);
+  return rgbToDescription(buffer, bufferSize, color.r, color.g, color.b);
 }

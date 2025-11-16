@@ -26,7 +26,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* Convert VGA color code (0-15) to RGB values */
-extern RGBColor vgaToRgb (int vgaColor);
+extern RGBColor vgaToRgb (int vga);
 
 /* Convert RGB color to nearest VGA color code (0-15)
  * Uses color distance calculation to find the closest match
@@ -64,7 +64,7 @@ extern const char *vgaColorName (int vga);
  * buffer must be at least 64 bytes
  * Returns pointer to buffer
  */
-extern const char *rgbToColorDescription (char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b);
+extern const char *rgbToDescription (char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b);
 
 /* Describe an RGB color structure as a human-readable string
  * buffer must be at least 64 bytes

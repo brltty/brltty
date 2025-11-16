@@ -159,7 +159,7 @@ describeVGAColors (void) {
     const char *name = vgaColorName(vga);
     char description[64];
 
-    rgbToColorDescription(description, sizeof(description), rgb.r, rgb.g, rgb.b);
+    rgbColorToDescription(description, sizeof(description), rgb);
 
     printf("VGA %2d (%15s): RGB(%3d,%3d,%3d) -> \"%s\"\n",
            vga, name, rgb.r, rgb.g, rgb.b, description);
@@ -279,7 +279,7 @@ testRGBtoHSV (void) {
     const ColorTest *test = &tests[i];
     char description[64];
 
-    rgbToColorDescription(description, sizeof(description), test->r, test->g, test->b);
+    rgbToDescription(description, sizeof(description), test->r, test->g, test->b);
 
     /* Check if result matches expected or alternate description */
     int matchExpected = (strcmp(description, test->expectedDescription) == 0);
@@ -376,7 +376,7 @@ enterInteractiveMode (void) {
       int vga = rgbToVga(r, g, b);
       const char *vgaName = vgaColorName(vga);
 
-      rgbToColorDescription(description, sizeof(description), r, g, b);
+      rgbToDescription(description, sizeof(description), r, g, b);
 
       printf("\n");
       printf("  RGB: (%d, %d, %d)\n", r, g, b);
