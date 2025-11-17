@@ -46,7 +46,16 @@
 #include "cmdline.h"
 #include "color.h"
 
-static int opt_quiet;
+typedef enum {
+   OPTQ_INFO,
+   OPTQ_PASS,
+   OPTQ_WARN,
+   OPTQ_FAIL,
+   OPTQ_RESULT,
+   OPTQ_STATUS,
+} OptQuietness;
+
+static int opt_quietness;
 static int opt_enterInteractiveMode;
 static int opt_performAllTests;
 
@@ -59,8 +68,9 @@ static int opt_testRGBtoVGA;
 BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "quiet",
     .letter = 'q',
-    .setting.flag = &opt_quiet,
-    .description = "quiet mode - only show test results",
+    .setting.flag = &opt_quietness,
+    .flags = OPT_Extend,
+    .description = "reduce verbosity - this option is cumulative",
   },
 
   { .word = "interactive-mode",
@@ -116,7 +126,18 @@ END_COMMAND_LINE_PARAMETERS(programParameters)
 
 static void
 beginTest (const char *name) {
-  printf("\n=== %s ===\n", name);
+  printf("=== %s ===\n", name);
+}
+
+static void
+endTest (const char *name, int count, int passed) {
+  if (opt_quietness <= OPTQ_RESULT) {
+    printf("Passed %d/%d tests\n", passed, count);
+  }
+
+  if (opt_quietness <= OPTQ_STATUS) {
+    printf("[%s] %s\n", (passed? "PASS": "FAIL"), name);
+  }
 }
 
 /* Test structure for predefined colors */
@@ -128,59 +149,62 @@ typedef struct {
   const char *alternateReason;       /* Reason why alternate is acceptable */
 } ColorTest;
 
-/* Print a test result */
-static void
-printTestResult (const char *testName, int passed) {
-  printf("[%s] %s\n", passed? "PASS": "FAIL", testName);
-}
-
 /* Test VGA palette round-trip conversion */
 static void
-testVGAtoRGBtoVGA (void) {
-  beginTest("VGA -> RGB -> VGA Color Round-Trip Test");
-  printf("Testing that VGA colors convert to themselves...\n\n");
-
-  int allPassed = 1;
-  for (int vga=0; vga<VGA_COLOR_COUNT; vga+=1) {
-    RGBColor rgb = vgaToRgb(vga);
-    int vgaBack = rgbToVga(rgb.r, rgb.g, rgb.b);
-    const char *name = vgaColorName(vga);
-
-    int passed = (vga == vgaBack);
-    allPassed = allPassed && passed;
-
-    printf(VGA_COLOR_FORMAT " " VGA_NAME_FORMAT ": " RGB_COLOR_FORMAT " -> " VGA_COLOR_FORMAT " [%s]\n",
-           vga, name, rgb.r, rgb.g, rgb.b, vgaBack,
-           passed ? "OK" : "FAIL");
+testVGAtoRGBtoVGA (const char *testName) {
+  if (opt_quietness <= OPTQ_INFO) {
+    printf("Testing that VGA colors convert to themselves...\n\n");
   }
 
-  printf("\n");
-  printTestResult("VGA Round-Trip Conversion", allPassed);
-}
+  const int testCount = VGA_COLOR_COUNT;
+  int passCount = 0;
 
-/* Test VGA color descriptions */
-static void
-listVGAColors (void) {
-  beginTest("VGA Color List");
-  printf("Describing each VGA color...\n\n");
-
-  for (int vga=0; vga<VGA_COLOR_COUNT; vga+=1) {
+  for (int vga=0; vga<testCount; vga+=1) {
     const char *name = vgaColorName(vga);
 
     RGBColor rgb = vgaToRgb(vga);
-    char description[64];
-    rgbColorToDescription(description, sizeof(description), rgb);
+    int vgaBack = rgbColorToVga(rgb);
 
-    printf(VGA_COLOR_FORMAT " " VGA_NAME_FORMAT ": " RGB_COLOR_FORMAT " -> \"%s\"\n",
-           vga, name, rgb.r, rgb.g, rgb.b, description);
+    int passed = vga == vgaBack;
+    if (passed) passCount += 1;
+
+    if (opt_quietness <= (passed? OPTQ_PASS: OPTQ_FAIL)) {
+      printf(VGA_COLOR_FORMAT " " VGA_NAME_FORMAT ": " RGB_COLOR_FORMAT " -> " VGA_COLOR_FORMAT " [%s]\n",
+             vga, name, rgb.r, rgb.g, rgb.b, vgaBack,
+             (passed? "OK": "FAIL"));
+    }
+  }
+
+  endTest(testName, testCount, passCount);
+}
+
+/* List VGA colors */
+static void
+listVGAColors (const char *testName) {
+  if (opt_quietness <= OPTQ_INFO) {
+    printf("Describing each VGA color...\n\n");
+  }
+
+  if (opt_quietness <= OPTQ_PASS) {
+    for (int vga=0; vga<VGA_COLOR_COUNT; vga+=1) {
+      const char *name = vgaColorName(vga);
+
+      RGBColor rgb = vgaToRgb(vga);
+      char description[64];
+      rgbColorToDescription(description, sizeof(description), rgb);
+
+      printf(VGA_COLOR_FORMAT " " VGA_NAME_FORMAT ": " RGB_COLOR_FORMAT " -> \"%s\"\n",
+             vga, name, rgb.r, rgb.g, rgb.b, description);
+    }
   }
 }
 
-/* Test HSV conversion round-trip */
+/* Test RGB conversion round-trip */
 static void
-testRGBtoHSVtoRGB (void) {
-  beginTest("RGB -> HSV -> RGB Color Round-Trip Test");
-  printf("Testing RGB -> HSV -> RGB conversion...\n\n");
+testRGBtoHSVtoRGB (const char *testName) {
+  if (opt_quietness <= OPTQ_INFO) {
+    printf("Testing RGB -> HSV -> RGB conversion...\n\n");
+  }
 
   static const ColorTest tests[] = {
     {"Pure Red",     255, 0,   0,   NULL, NULL, NULL},
@@ -195,31 +219,34 @@ testRGBtoHSVtoRGB (void) {
     {"Orange",       255, 165, 0,   NULL, NULL, NULL},
   };
 
-  int allPassed = 1;
-  for (int i=0; i<ARRAY_COUNT(tests); i+=1) {
+  const int testCount = ARRAY_COUNT(tests);
+  int passCount = 0;
+
+  for (int i=0; i<testCount; i+=1) {
     const ColorTest *test = &tests[i];
 
     /* RGB -> HSV -> RGB */
     HSVColor hsv = rgbToHsv(test->r, test->g, test->b);
-    RGBColor rgb = hsvToRgb(hsv.h, hsv.s, hsv.v);
+    RGBColor rgb = hsvColorToRgb(hsv);
 
     /* Allow small rounding errors (±1) */
     int rDiff = abs((int)rgb.r - (int)test->r);
     int gDiff = abs((int)rgb.g - (int)test->g);
     int bDiff = abs((int)rgb.b - (int)test->b);
 
-    int passed = (rDiff <= 1 && gDiff <= 1 && bDiff <= 1);
-    allPassed = allPassed && passed;
+    int passed = (rDiff <= 1) && (gDiff <= 1) && (bDiff <= 1);
+    if (passed) passCount += 1;
 
-    printf("%-12s: " RGB_COLOR_FORMAT " -> " HSV_COLOR_FORMAT " -> " RGB_COLOR_FORMAT " [%s]\n",
-           test->name, test->r, test->g, test->b,
-           hsv.h, hsv.s, hsv.v,
-           rgb.r, rgb.g, rgb.b,
-           passed ? "OK" : "FAIL");
+    if (opt_quietness <= (passed? OPTQ_PASS: OPTQ_FAIL)) {
+      printf("%-12s: " RGB_COLOR_FORMAT " -> " HSV_COLOR_FORMAT " -> " RGB_COLOR_FORMAT " [%s]\n",
+             test->name, test->r, test->g, test->b,
+             hsv.h, hsv.s, hsv.v,
+             rgb.r, rgb.g, rgb.b,
+             (passed? "OK": "FAIL"));
+    }
   }
 
-  printf("\n");
-  printTestResult("HSV Round-Trip Conversion", allPassed);
+  endTest(testName, testCount, passCount);
 }
 
 /* Test common color descriptions
@@ -233,9 +260,10 @@ testRGBtoHSVtoRGB (void) {
  * commonly recognized color names.
  */
 static void
-testRGBtoHSV (void) {
-  beginTest("Common RGB Color Descriptions Test");
-  printf("Testing recognition of common color names...\n\n");
+testRGBtoHSV (const char *testName) {
+  if (opt_quietness <= OPTQ_INFO) {
+    printf("Testing recognition of common color names...\n\n");
+  }
 
   static const ColorTest tests[] = {
     /* Basic colors - Note: NULL in last two fields means no alternate */
@@ -282,57 +310,63 @@ testRGBtoHSV (void) {
     {"Light Green",      144, 238, 144, "light green", NULL, NULL},
   };
 
-  const int total = ARRAY_COUNT(tests);
-  int passed = 0;
+  const int testCount = ARRAY_COUNT(tests);
+  int passCount = 0;
 
-  for (int i=0; i<total; i+=1) {
+  for (int i=0; i<testCount; i+=1) {
     const ColorTest *test = &tests[i];
-    char description[64];
 
+    char description[64];
     rgbToDescription(description, sizeof(description), test->r, test->g, test->b);
 
     /* Check if result matches expected or alternate description */
-    int matchExpected = (strcmp(description, test->expectedDescription) == 0);
-    int matchAlternate = (test->alternateDescription != NULL &&
-                          strcmp(description, test->alternateDescription) == 0);
-    int match = matchExpected || matchAlternate;
+    int matchExpected = strcmp(description, test->expectedDescription) == 0;
+    int matchAlternate = test->alternateDescription && (strcmp(description, test->alternateDescription) == 0);
 
-    if (match) passed++;
+    int passed = matchExpected || matchAlternate;
+    if (passed) passCount += 1;
 
     /* Determine status display */
+    int quietnessLevel;
     const char *status;
+
     if (matchExpected) {
+      quietnessLevel = OPTQ_PASS;
       status = "OK";
     } else if (matchAlternate) {
+      quietnessLevel = OPTQ_WARN;
       status = "OK (alternate)";
     } else {
+      quietnessLevel = OPTQ_FAIL;
       status = "FAIL";
     }
 
-    printf("%-20s " RGB_COLOR_FORMAT " -> %-20s [%s]\n",
-           test->name, test->r, test->g, test->b, description, status);
+    if (opt_quietness <= quietnessLevel) {
+      printf("%-20s " RGB_COLOR_FORMAT " -> %-20s [%s]\n",
+             test->name, test->r, test->g, test->b, description, status);
 
-    if (!match) {
-      printf("  Expected: \"%s\"\n", test->expectedDescription);
-      if (test->alternateDescription) {
-        printf("  Alternate: \"%s\"\n", test->alternateDescription);
+      if (!passed) {
+        printf("  Expected: \"%s\"\n", test->expectedDescription);
+
+        if (test->alternateDescription) {
+          printf("  Alternate: \"%s\"\n", test->alternateDescription);
+        }
+      } else if (matchAlternate) {
+        /* Show why alternate was accepted */
+        printf("  Note: %s\n", test->alternateReason);
       }
-    } else if (matchAlternate) {
-      /* Show why alternate was accepted */
-      printf("  Note: %s\n", test->alternateReason);
     }
   }
 
-  printf("\n");
-  printf("Passed %d/%d tests\n", passed, total);
-  printTestResult("Common Color Descriptions", passed == total);
+  endTest(testName, testCount, passCount);
 }
 
-/* Test RGB to VGA conversion with various colors */
+/* Test RGB to VGA mapping with various colors */
 static void
-testRGBtoVGA (void) {
-  beginTest("RGB to VGA Mapping Test");
-  printf("Testing RGB colors map to nearest VGA color...\n\n");
+testRGBtoVGA (const char *testName) {
+  if (opt_quietness <= OPTQ_INFO) {
+    printf("Testing RGB colors map to nearest VGA color...\n\n");
+  }
 
   static const ColorTest tests[] = {
     {"Bright Red",       255, 0,   0,   NULL, NULL, NULL},  /* Should be 12 (Light Red) */
@@ -345,15 +379,17 @@ testRGBtoVGA (void) {
     {"Purple",           128, 0,   128, NULL, NULL, NULL},  /* Should be 5 (Magenta) */
   };
 
-  for (int i=0; i<ARRAY_COUNT(tests); i+=1) {
-    const ColorTest *test = &tests[i];
-    int vga = rgbToVga(test->r, test->g, test->b);
-    RGBColor vgaRgb = vgaToRgb(vga);
-    const char *vgaName = vgaColorName(vga);
+  if (opt_quietness <= OPTQ_PASS) {
+    for (int i=0; i<ARRAY_COUNT(tests); i+=1) {
+      const ColorTest *test = &tests[i];
+      int vga = rgbToVga(test->r, test->g, test->b);
+      RGBColor rgb = vgaToRgb(vga);
+      const char *color = vgaColorName(vga);
 
-    printf("%-15s " RGB_COLOR_FORMAT " -> " VGA_COLOR_FORMAT " (%s) " RGB_COLOR_FORMAT "\n",
-           test->name, test->r, test->g, test->b,
-           vga, vgaName, vgaRgb.r, vgaRgb.g, vgaRgb.b);
+      printf("%-15s " RGB_COLOR_FORMAT " -> " VGA_COLOR_FORMAT " (%s) " RGB_COLOR_FORMAT "\n",
+             test->name, test->r, test->g, test->b,
+             vga, color, rgb.r, rgb.g, rgb.b);
+    }
   }
 }
 
@@ -405,28 +441,34 @@ static ProgramExitStatus
 performRequestedTests (void) {
   typedef struct {
     int *requested;
-    void (*perform) (void);
+    void (*perform) (const char *testName);
+    const char *name;
   } TestEntry;
 
   static const TestEntry testTable[] = {
     { .requested = &opt_testVGAtoRGBtoVGA,
-      .perform = testVGAtoRGBtoVGA
+      .perform = testVGAtoRGBtoVGA,
+      .name = "VGA -> RGB -> VGA Color Round-Trip Test",
     },
 
     { .requested = &opt_listVGAColors,
-      .perform = listVGAColors
+      .perform = listVGAColors,
+      .name = "VGA Color List",
     },
 
     { .requested = &opt_testRGBtoHSVtoRGB,
-      .perform = testRGBtoHSVtoRGB
+      .perform = testRGBtoHSVtoRGB,
+      .name = "RGB -> HSV -> RGB Color Round-Trip Test",
     },
 
     { .requested = &opt_testRGBtoHSV,
-      .perform = testRGBtoHSV
+      .perform = testRGBtoHSV,
+      .name = "Common RGB Color Descriptions Test",
     },
 
     { .requested = &opt_testRGBtoVGA,
-      .perform = testRGBtoVGA
+      .perform = testRGBtoVGA,
+      .name = "RGB to VGA Mapping Test",
     },
   };
 
@@ -458,7 +500,12 @@ performRequestedTests (void) {
 
   for (int i=0; i<testCount; i+=1) {
     const TestEntry *test = &testTable[i];
-    if (*test->requested) test->perform();
+
+    if (*test->requested) {
+      beginTest(test->name);
+      test->perform(test->name);
+      printf("\n");
+    }
   }
 
   return PROG_EXIT_SUCCESS;
@@ -481,10 +528,11 @@ main (int argc, char *argv[]) {
     PROCESS_COMMAND_LINE(descriptor, argc, argv);
   }
 
-  if (!opt_quiet) {
+  if (opt_quietness <= OPTQ_INFO) {
     printf("==================================================\n");
     printf("       BRLTTY Color Conversion Test Suite        \n");
     printf("==================================================\n");
+    printf("\n");
   }
 
   /* Perform the requested tests */
@@ -496,13 +544,11 @@ main (int argc, char *argv[]) {
   /* Interactive mode if requested */
   if (opt_enterInteractiveMode) {
     enterInteractiveMode();
-  } else if (!opt_quiet) {
-    printf("\n");
-    printf("Run with the -i flag for interactive mode.\n");
+  } else if (opt_quietness <= OPTQ_INFO) {
+    printf("Run with the -i flag for interactive mode.\n\n");
   }
 
-  if (!opt_quiet) {
-    printf("\n");
+  if (opt_quietness <= OPTQ_INFO) {
     printf("==================================================\n");
     printf("                Tests Complete                    \n");
     printf("==================================================\n");
