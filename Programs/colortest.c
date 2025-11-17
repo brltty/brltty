@@ -123,7 +123,7 @@ END_COMMAND_LINE_PARAMETERS(programParameters)
 #define VGA_NAME_FORMAT "(%13s)"
 #define VGA_COLOR_FORMAT "VGA %2d"
 #define RGB_COLOR_FORMAT "RGB(%3d, %3d, %3d)"
-#define HSV_COLOR_FORMAT "HSV(%6.1f°, %4.2f, %4.2f)"
+#define HSV_COLOR_FORMAT "HSV(%5.1f°, %3.0f%%, %3.0f%%)"
 
 static void
 putCheckForError (void) {
@@ -278,7 +278,7 @@ testRGBtoHSVtoRGB (const char *testName) {
     if (opt_quietness <= (passed? OPTQ_PASS: OPTQ_FAIL)) {
       putf("%-12s: " RGB_COLOR_FORMAT " -> " HSV_COLOR_FORMAT " -> " RGB_COLOR_FORMAT " [%s]\n",
            test->name, test->r, test->g, test->b,
-           hsv.h, hsv.s, hsv.v,
+           hsv.h, hsv.s*100.0, hsv.v*100.0,
            rgb.r, rgb.g, rgb.b,
            (passed? "OK": "FAIL"));
     }
