@@ -125,18 +125,26 @@ END_COMMAND_LINE_PARAMETERS(programParameters)
 #define HSV_COLOR_FORMAT "HSV(%6.1f°, %4.2f, %4.2f)"
 
 static void
-beginTest (const char *name) {
+showTestHeader (const char *name) {
   printf("=== %s ===\n", name);
 }
 
 static void
-endTest (const char *name, int count, int passed) {
-  if (opt_quietness <= OPTQ_RESULT) {
-    printf("Passed %d/%d tests\n", passed, count);
+showTestResult (const char *name, int count, int passed) {
+  const char *status;
+
+  if (passed < count) {
+    status = "FAIL";
+
+    if (opt_quietness <= OPTQ_RESULT) {
+      printf("%d/%d tests failed\n", (count - passed), count);
+    }
+  } else {
+    status = "PASS";
   }
 
   if (opt_quietness <= OPTQ_STATUS) {
-    printf("[%s] %s\n", (passed? "PASS": "FAIL"), name);
+    printf("[%s] %s\n", status, name);
   }
 }
 
@@ -175,7 +183,7 @@ testVGAtoRGBtoVGA (const char *testName) {
     }
   }
 
-  endTest(testName, testCount, passCount);
+  showTestResult(testName, testCount, passCount);
 }
 
 /* List VGA colors */
@@ -246,7 +254,7 @@ testRGBtoHSVtoRGB (const char *testName) {
     }
   }
 
-  endTest(testName, testCount, passCount);
+  showTestResult(testName, testCount, passCount);
 }
 
 /* Test common color descriptions
@@ -268,11 +276,13 @@ testRGBtoHSV (const char *testName) {
   static const ColorTest tests[] = {
     /* Basic colors - Note: NULL in last two fields means no alternate */
     {"Pure Red",         255, 0,   0,   "vivid red", NULL, NULL},
+
     /* Pure green (0,255,0) is at H=120° S=1.0 V=1.0, which matches our lime detection
      * criteria (H 90-135°, V>0.75, S>0.75). Both names are technically correct.
      * Note: CSS "Lime" is rgb(0,255,0), this is also tested here. */
     {"Pure Green/Lime",  0,   255, 0,   "vivid green", "lime",
      "H=120° matches lime criteria (bright saturated yellow-green)"},
+
     {"Pure Blue",        0,   0,   255, "vivid blue", NULL, NULL},
     {"White",            255, 255, 255, "white", NULL, NULL},
     {"Black",            0,   0,   0,   "black", NULL, NULL},
@@ -302,10 +312,12 @@ testRGBtoHSV (const char *testName) {
 
     /* Compound descriptions */
     {"Dark Blue",        0,   0,   139, "navy", NULL, NULL},
+
     /* Light blue (173,216,230) has H=197° which is in the cyan range (180-210°).
      * "light cyan" is actually more accurate than "light blue" based on HSV analysis. */
     {"Light Blue",       173, 216, 230, "light blue", "light cyan",
      "H=197° is in cyan range; HSV analysis gives more accurate result"},
+
     {"Dark Green",       0,   100, 0,   "dark green", NULL, NULL},
     {"Light Green",      144, 238, 144, "light green", NULL, NULL},
   };
@@ -358,7 +370,7 @@ testRGBtoHSV (const char *testName) {
     }
   }
 
-  endTest(testName, testCount, passCount);
+  showTestResult(testName, testCount, passCount);
 }
 
 /* Test RGB to VGA mapping with various colors */
@@ -396,7 +408,7 @@ testRGBtoVGA (const char *testName) {
 /* Interactive color description test */
 static void
 enterInteractiveMode (void) {
-  beginTest("Interactive Color Test");
+  showTestHeader("Interactive Color Test");
   printf("Enter RGB values to test color descriptions.\n");
   printf("Format: R G B (0-255 for each)\n");
   printf("Enter 'q' to quit.\n\n");
@@ -502,7 +514,7 @@ performRequestedTests (void) {
     const TestEntry *test = &testTable[i];
 
     if (*test->requested) {
-      beginTest(test->name);
+      showTestHeader(test->name);
       test->perform(test->name);
       printf("\n");
     }
