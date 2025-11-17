@@ -60,13 +60,13 @@ static int opt_enterInteractiveMode;
 static int opt_performAllTests;
 
 static int opt_testVGAtoRGBtoVGA;
-static int opt_listVGAColors;
+static int opt_testVGAColors;
 static int opt_testRGBtoHSVtoRGB;
-static int opt_testRGBtoHSV;
+static int opt_testColorRecognition;
 static int opt_testRGBtoVGA;
 
 BEGIN_COMMAND_LINE_OPTIONS(programOptions)
-  { .word = "quiet",
+  { .word = "quieter",
     .letter = 'q',
     .setting.flag = &opt_quietness,
     .flags = OPT_Extend,
@@ -85,7 +85,7 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .description = "perform all of the tests - conflicts with requesting specific tests",
   },
 
-  { .word = "vga-rgb-vga",
+  { .word = "vga-roundtrip",
     .letter = 'v',
     .setting.flag = &opt_testVGAtoRGBtoVGA,
     .description = "test VGA to RGB to VGA round-trip - conflicts with requesting all tests",
@@ -93,26 +93,26 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
 
   { .word = "list-vga-colors",
     .letter = 'l',
-    .setting.flag = &opt_listVGAColors,
-    .description = "list the VGA colors - conflicts with requesting all tests",
+    .setting.flag = &opt_testVGAColors,
+    .description = "list VGA color descriptions - conflicts with requesting all tests",
   },
 
-  { .word = "rgb-hsv-rgb",
+  { .word = "rgb-roundtrip",
     .letter = 'r',
     .setting.flag = &opt_testRGBtoHSVtoRGB,
     .description = "test RGB to HSV to RGB round-trip - conflicts with requesting all tests",
   },
 
-  { .word = "common-colors",
+  { .word = "color-recognition",
     .letter = 'c',
-    .setting.flag = &opt_testRGBtoHSV,
-    .description = "test common RGB colors - conflicts with requesting all tests",
+    .setting.flag = &opt_testColorRecognition,
+    .description = "test recognition of common colors - conflicts with requesting all tests",
   },
 
-  { .word = "mapping",
+  { .word = "mappings",
     .letter = 'm',
     .setting.flag = &opt_testRGBtoVGA,
-    .description = "test RGB to VGA color mapping - conflicts with requesting all tests",
+    .description = "show some RGB to nearest VGA mappings - conflicts with requesting all tests",
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
@@ -126,26 +126,24 @@ END_COMMAND_LINE_PARAMETERS(programParameters)
 
 static void
 showTestHeader (const char *name) {
-  if (opt_quietness <= OPTQ_TEST) {
-    printf("=== %s ===\n", name);
-  }
+  printf("=== %s ===\n", name);
 }
 
 static int
-showTestResult (const char *name, int count, int passed) {
-  int result = passed == count;
+showTestResult (const char *name, int count, int passes) {
+  int hasPassed = passes == count;
 
-  if (!result) {
+  if (!hasPassed) {
     if (opt_quietness <= OPTQ_RESULT) {
-      printf("%d/%d tests failed\n", (count - passed), count);
+      printf("%d/%d tests failed\n", (count - passes), count);
     }
   }
 
   if (opt_quietness <= OPTQ_TEST) {
-    printf("[%s] %s\n", (result? "PASS": "FAIL"), name);
+    printf("[%s] %s\n", (hasPassed? "PASS": "FAIL"), name);
   }
 
-  return result;
+  return hasPassed;
 }
 
 /* Test structure for predefined colors */
@@ -160,10 +158,6 @@ typedef struct {
 /* Test VGA palette round-trip conversion */
 static int
 testVGAtoRGBtoVGA (const char *testName) {
-  if (opt_quietness <= OPTQ_INFO) {
-    printf("Testing that VGA colors convert to themselves...\n\n");
-  }
-
   const int testCount = VGA_COLOR_COUNT;
   int passCount = 0;
 
@@ -188,11 +182,7 @@ testVGAtoRGBtoVGA (const char *testName) {
 
 /* List VGA colors */
 static int
-listVGAColors (const char *testName) {
-  if (opt_quietness <= OPTQ_INFO) {
-    printf("Describing each VGA color...\n\n");
-  }
-
+testVGAColors (const char *testName) {
   if (opt_quietness <= OPTQ_PASS) {
     for (int vga=0; vga<VGA_COLOR_COUNT; vga+=1) {
       const char *name = vgaColorName(vga);
@@ -212,10 +202,6 @@ listVGAColors (const char *testName) {
 /* Test RGB conversion round-trip */
 static int
 testRGBtoHSVtoRGB (const char *testName) {
-  if (opt_quietness <= OPTQ_INFO) {
-    printf("Testing RGB -> HSV -> RGB conversion...\n\n");
-  }
-
   static const ColorTest tests[] = {
     {"Pure Red",     255, 0,   0,   NULL, NULL, NULL},
     {"Pure Green",   0,   255, 0,   NULL, NULL, NULL},
@@ -270,11 +256,7 @@ testRGBtoHSVtoRGB (const char *testName) {
  * commonly recognized color names.
  */
 static int
-testRGBtoHSV (const char *testName) {
-  if (opt_quietness <= OPTQ_INFO) {
-    printf("Testing recognition of common color names...\n\n");
-  }
-
+testColorRecognition (const char *testName) {
   static const ColorTest tests[] = {
     /* Basic colors - Note: NULL in last two fields means no alternate */
     {"Pure Red",         255, 0,   0,   "vivid red", NULL, NULL},
@@ -378,10 +360,6 @@ testRGBtoHSV (const char *testName) {
 /* Test RGB to VGA mapping with various colors */
 static int
 testRGBtoVGA (const char *testName) {
-  if (opt_quietness <= OPTQ_INFO) {
-    printf("Testing RGB colors map to nearest VGA color...\n\n");
-  }
-
   static const ColorTest tests[] = {
     {"Bright Red",       255, 0,   0,   NULL, NULL, NULL},  /* Should be 12 (Light Red) */
     {"Dark Red",         128, 0,   0,   NULL, NULL, NULL},  /* Should be 4 (Red) */
@@ -454,32 +432,38 @@ enterInteractiveMode (void) {
 
 typedef struct {
   const char *name;
+  const char *summary;
   int *requested;
   int (*perform) (const char *testName);
 } RequestableTest;
 
 static const RequestableTest requetableTestTable[] = {
-  { .name = "VGA -> RGB -> VGA Color Round-Trip Test",
+  { .name = "VGA to RGB to VGA Round-Trip Test",
+    .summary = "Verify the successful conversion of each VGA color to RGB and then back to VGA",
     .requested = &opt_testVGAtoRGBtoVGA,
     .perform = testVGAtoRGBtoVGA,
   },
 
-  { .name = "VGA Color List",
-    .requested = &opt_listVGAColors,
-    .perform = listVGAColors,
+  { .name = "VGA Color Listing",
+    .summary = "List the names and HSV descriptions of each VGA color",
+    .requested = &opt_testVGAColors,
+    .perform = testVGAColors,
   },
 
-  { .name = "RGB -> HSV -> RGB Color Round-Trip Test",
+  { .name = "RGB to HSV to RGB Round-Trip Test",
+    .summary = "Verify the successful conversion of some RGB colors to HSV and then back to RGB",
     .requested = &opt_testRGBtoHSVtoRGB,
     .perform = testRGBtoHSVtoRGB,
   },
 
-  { .name = "Common RGB Color Descriptions Test",
-    .requested = &opt_testRGBtoHSV,
-    .perform = testRGBtoHSV,
+  { .name = "Common Color Recognition Test",
+    .summary = "Verify the recognition of some common colors",
+    .requested = &opt_testColorRecognition,
+    .perform = testColorRecognition,
   },
 
-  { .name = "RGB to VGA Mapping Test",
+  { .name = "RGB to Nearest VGA Mappings",
+    .summary = "Show how some common colors are mapped to their nearest VGA colors",
     .requested = &opt_testRGBtoVGA,
     .perform = testRGBtoVGA,
   },
@@ -488,7 +472,7 @@ static const RequestableTest requetableTestTable[] = {
 static const size_t requetableTestCount = ARRAY_COUNT(requetableTestTable);
 
 /* Audit the test options */
-static ProgramExitStatus
+static int
 auditTestOptions (void) {
   int testRequested = 0;
 
@@ -498,7 +482,7 @@ auditTestOptions (void) {
     if (*test->requested) {
       if (opt_performAllTests) {
         logMessage(LOG_ERR, "conflicting test options");
-        return PROG_EXIT_SYNTAX;
+        return 0;
       }
 
       testRequested = 1;
@@ -515,7 +499,7 @@ auditTestOptions (void) {
     }
   }
 
-  return PROG_EXIT_SUCCESS;
+  return 1;
 }
 
 /* perform the requested tests */
@@ -527,8 +511,19 @@ performRequestedTests (void) {
     const RequestableTest *test = &requetableTestTable[i];
 
     if (*test->requested) {
-      showTestHeader(test->name);
-      if (!test->perform(test->name)) allPassed = 0;
+      if (opt_quietness <= OPTQ_TEST) {
+        showTestHeader(test->name);
+      }
+
+      if (test->summary) {
+        if (opt_quietness <= OPTQ_INFO) {
+          printf("%s...\n\n", test->summary);
+        }
+      }
+
+      if (!test->perform(test->name)) {
+        allPassed = 0;
+      }
 
       if (opt_quietness <= OPTQ_TEST) {
         printf("\n");
@@ -556,9 +551,8 @@ main (int argc, char *argv[]) {
     PROCESS_COMMAND_LINE(descriptor, argc, argv);
   }
 
-  {
-    ProgramExitStatus status = auditTestOptions();
-    if (status != PROG_EXIT_SUCCESS) return status;
+  if (!auditTestOptions()) {
+    return PROG_EXIT_SYNTAX;
   }
 
   if (opt_quietness <= OPTQ_INFO) {
