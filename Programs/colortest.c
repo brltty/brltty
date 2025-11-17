@@ -40,6 +40,7 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 
 #include "log.h"
@@ -60,7 +61,7 @@ static int opt_enterInteractiveMode;
 static int opt_performAllTests;
 
 static int opt_testVGAtoRGBtoVGA;
-static int opt_testVGAColors;
+static int opt_testVGADescriptions;
 static int opt_testRGBtoHSVtoRGB;
 static int opt_testColorRecognition;
 static int opt_testRGBtoVGA;
@@ -91,9 +92,9 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .description = "test VGA to RGB to VGA round-trip - conflicts with requesting all tests",
   },
 
-  { .word = "list-vga-colors",
-    .letter = 'l',
-    .setting.flag = &opt_testVGAColors,
+  { .word = "vga-descriptions",
+    .letter = 'd',
+    .setting.flag = &opt_testVGADescriptions,
     .description = "list VGA color descriptions - conflicts with requesting all tests",
   },
 
@@ -109,7 +110,7 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .description = "test recognition of common colors - conflicts with requesting all tests",
   },
 
-  { .word = "mappings",
+  { .word = "vga-mappings",
     .letter = 'm',
     .setting.flag = &opt_testRGBtoVGA,
     .description = "show some RGB to nearest VGA mappings - conflicts with requesting all tests",
@@ -125,22 +126,63 @@ END_COMMAND_LINE_PARAMETERS(programParameters)
 #define HSV_COLOR_FORMAT "HSV(%6.1f°, %4.2f, %4.2f)"
 
 static void
-showTestHeader (const char *name) {
-  printf("=== %s ===\n", name);
+putCheckForError (void) {
+  if (ferror(stdout)) {
+    logSystemError("standard output write");
+    exit(PROG_EXIT_FATAL);
+  }
+}
+
+static void
+putf (const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  vprintf(format, args);
+  va_end(args);
+  putCheckForError();
+}
+
+static void
+putNotice (const char *notice) {
+  size_t dividerWidth = 50;
+  size_t noticeLength = strlen(notice);
+  unsigned int noticeIndent;
+
+  if (noticeLength > dividerWidth) {
+    dividerWidth = noticeLength;
+    noticeIndent = 0;
+  } else {
+    noticeIndent = (dividerWidth - noticeLength) / 2;
+  }
+
+  char divider[dividerWidth + 1];
+  memset(divider, '=', dividerWidth);
+  divider[dividerWidth] = 0;
+
+  char indent[noticeIndent + 1];
+  memset(indent, ' ', noticeIndent);
+  indent[noticeIndent] = 0;
+
+  putf("%s\n%s%s\n%s\n", divider, indent, notice, divider);
+}
+
+static void
+putTestHeader (const char *name) {
+  putf("=== %s ===\n", name);
 }
 
 static int
-showTestResult (const char *name, int count, int passes) {
+putTestResult (const char *name, int count, int passes) {
   int hasPassed = passes == count;
 
   if (!hasPassed) {
     if (opt_quietness <= OPTQ_RESULT) {
-      printf("%d/%d tests failed\n", (count - passes), count);
+      putf("%d/%d tests failed\n", (count - passes), count);
     }
   }
 
   if (opt_quietness <= OPTQ_TEST) {
-    printf("[%s] %s\n", (hasPassed? "PASS": "FAIL"), name);
+    putf("[%s] %s\n", (hasPassed? "PASS": "FAIL"), name);
   }
 
   return hasPassed;
@@ -171,18 +213,18 @@ testVGAtoRGBtoVGA (const char *testName) {
     if (passed) passCount += 1;
 
     if (opt_quietness <= (passed? OPTQ_PASS: OPTQ_FAIL)) {
-      printf(VGA_COLOR_FORMAT " " VGA_NAME_FORMAT ": " RGB_COLOR_FORMAT " -> " VGA_COLOR_FORMAT " [%s]\n",
-             vga, name, rgb.r, rgb.g, rgb.b, vgaBack,
-             (passed? "OK": "FAIL"));
+      putf(VGA_COLOR_FORMAT " " VGA_NAME_FORMAT ": " RGB_COLOR_FORMAT " -> " VGA_COLOR_FORMAT " [%s]\n",
+           vga, name, rgb.r, rgb.g, rgb.b, vgaBack,
+           (passed? "OK": "FAIL"));
     }
   }
 
-  return showTestResult(testName, testCount, passCount);
+  return putTestResult(testName, testCount, passCount);
 }
 
 /* List VGA colors */
 static int
-testVGAColors (const char *testName) {
+testVGADescriptions (const char *testName) {
   if (opt_quietness <= OPTQ_PASS) {
     for (int vga=0; vga<VGA_COLOR_COUNT; vga+=1) {
       const char *name = vgaColorName(vga);
@@ -191,8 +233,8 @@ testVGAColors (const char *testName) {
       char description[64];
       rgbColorToDescription(description, sizeof(description), rgb);
 
-      printf(VGA_COLOR_FORMAT " " VGA_NAME_FORMAT ": " RGB_COLOR_FORMAT " -> \"%s\"\n",
-             vga, name, rgb.r, rgb.g, rgb.b, description);
+      putf(VGA_COLOR_FORMAT " " VGA_NAME_FORMAT ": " RGB_COLOR_FORMAT " -> \"%s\"\n",
+           vga, name, rgb.r, rgb.g, rgb.b, description);
     }
   }
 
@@ -234,18 +276,18 @@ testRGBtoHSVtoRGB (const char *testName) {
     if (passed) passCount += 1;
 
     if (opt_quietness <= (passed? OPTQ_PASS: OPTQ_FAIL)) {
-      printf("%-12s: " RGB_COLOR_FORMAT " -> " HSV_COLOR_FORMAT " -> " RGB_COLOR_FORMAT " [%s]\n",
-             test->name, test->r, test->g, test->b,
-             hsv.h, hsv.s, hsv.v,
-             rgb.r, rgb.g, rgb.b,
-             (passed? "OK": "FAIL"));
+      putf("%-12s: " RGB_COLOR_FORMAT " -> " HSV_COLOR_FORMAT " -> " RGB_COLOR_FORMAT " [%s]\n",
+           test->name, test->r, test->g, test->b,
+           hsv.h, hsv.s, hsv.v,
+           rgb.r, rgb.g, rgb.b,
+           (passed? "OK": "FAIL"));
     }
   }
 
-  return showTestResult(testName, testCount, passCount);
+  return putTestResult(testName, testCount, passCount);
 }
 
-/* Test common color descriptions
+/* Test color recognition
  *
  * Color Reference: Most test colors are taken from the CSS/HTML Named Colors
  * specification (W3C CSS Color Module Level 3):
@@ -338,23 +380,23 @@ testColorRecognition (const char *testName) {
     }
 
     if (opt_quietness <= quietnessLevel) {
-      printf("%-20s " RGB_COLOR_FORMAT " -> %-20s [%s]\n",
-             test->name, test->r, test->g, test->b, description, status);
+      putf("%-20s " RGB_COLOR_FORMAT " -> %-20s [%s]\n",
+           test->name, test->r, test->g, test->b, description, status);
 
       if (!passed) {
-        printf("  Expected: \"%s\"\n", test->expectedDescription);
+        putf("  Expected: \"%s\"\n", test->expectedDescription);
 
         if (test->alternateDescription) {
-          printf("  Alternate: \"%s\"\n", test->alternateDescription);
+          putf("  Alternate: \"%s\"\n", test->alternateDescription);
         }
       } else if (matchAlternate) {
         /* Show why alternate was accepted */
-        printf("  Note: %s\n", test->alternateReason);
+        putf("  Note: %s\n", test->alternateReason);
       }
     }
   }
 
-  return showTestResult(testName, testCount, passCount);
+  return putTestResult(testName, testCount, passCount);
 }
 
 /* Test RGB to VGA mapping with various colors */
@@ -378,9 +420,9 @@ testRGBtoVGA (const char *testName) {
       RGBColor rgb = vgaToRgb(vga);
       const char *color = vgaColorName(vga);
 
-      printf("%-15s " RGB_COLOR_FORMAT " -> " VGA_COLOR_FORMAT " (%s) " RGB_COLOR_FORMAT "\n",
-             test->name, test->r, test->g, test->b,
-             vga, color, rgb.r, rgb.g, rgb.b);
+      putf("%-15s " RGB_COLOR_FORMAT " -> " VGA_COLOR_FORMAT " (%s) " RGB_COLOR_FORMAT "\n",
+           test->name, test->r, test->g, test->b,
+           vga, color, rgb.r, rgb.g, rgb.b);
     }
   }
 
@@ -390,15 +432,16 @@ testRGBtoVGA (const char *testName) {
 /* Interactive color description test */
 static void
 enterInteractiveMode (void) {
-  showTestHeader("Interactive Color Test");
-  printf("Enter RGB values to test color descriptions.\n");
-  printf("Format: R G B (0-255 for each)\n");
-  printf("Enter 'q' to quit.\n\n");
+  putTestHeader("Interactive Color Test");
+  putf("Enter RGB values to test color descriptions.\n");
+  putf("Format: R G B (0-255 for each)\n");
+  putf("Enter 'q' to quit.\n\n");
 
   char line[256];
   while (1) {
-    printf("RGB> ");
+    putf("RGB> ");
     fflush(stdout);
+    putCheckForError();
 
     if (!fgets(line, sizeof(line), stdin)) break;
 
@@ -407,7 +450,7 @@ enterInteractiveMode (void) {
     int r, g, b;
     if (sscanf(line, "%d %d %d", &r, &g, &b) == 3) {
       if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
-        printf("Error: RGB values must be 0-255\n");
+        putf("Error: RGB values must be 0-255\n");
         continue;
       }
 
@@ -418,14 +461,14 @@ enterInteractiveMode (void) {
 
       rgbToDescription(description, sizeof(description), r, g, b);
 
-      printf("\n");
-      printf("  RGB: (%d, %d, %d)\n", r, g, b);
-      printf("  HSV: (%.1f°, %.2f, %.2f)\n", hsv.h, hsv.s, hsv.v);
-      printf("  Description: %s\n", description);
-      printf("  Nearest VGA: %d (%s)\n", vga, vgaName);
-      printf("\n");
+      putf("\n");
+      putf("  RGB: (%d, %d, %d)\n", r, g, b);
+      putf("  HSV: (%.1f°, %.2f, %.2f)\n", hsv.h, hsv.s, hsv.v);
+      putf("  Description: %s\n", description);
+      putf("  Nearest VGA: %d (%s)\n", vga, vgaName);
+      putf("\n");
     } else {
-      printf("Error: Invalid format. Use: R G B\n");
+      putf("Error: Invalid format. Use: R G B\n");
     }
   }
 }
@@ -444,10 +487,10 @@ static const RequestableTest requetableTestTable[] = {
     .perform = testVGAtoRGBtoVGA,
   },
 
-  { .name = "VGA Color Listing",
-    .summary = "List the names and HSV descriptions of each VGA color",
-    .requested = &opt_testVGAColors,
-    .perform = testVGAColors,
+  { .name = "VGA Color Descriptions",
+    .summary = "List the name and HSV description of each VGA color",
+    .requested = &opt_testVGADescriptions,
+    .perform = testVGADescriptions,
   },
 
   { .name = "RGB to HSV to RGB Round-Trip Test",
@@ -456,7 +499,7 @@ static const RequestableTest requetableTestTable[] = {
     .perform = testRGBtoHSVtoRGB,
   },
 
-  { .name = "Common Color Recognition Test",
+  { .name = "Color Recognition Test",
     .summary = "Verify the recognition of some common colors",
     .requested = &opt_testColorRecognition,
     .perform = testColorRecognition,
@@ -512,12 +555,12 @@ performRequestedTests (void) {
 
     if (*test->requested) {
       if (opt_quietness <= OPTQ_TEST) {
-        showTestHeader(test->name);
+        putTestHeader(test->name);
       }
 
       if (test->summary) {
         if (opt_quietness <= OPTQ_INFO) {
-          printf("%s...\n\n", test->summary);
+          putf("%s...\n\n", test->summary);
         }
       }
 
@@ -526,7 +569,7 @@ performRequestedTests (void) {
       }
 
       if (opt_quietness <= OPTQ_TEST) {
-        printf("\n");
+        putf("\n");
       }
     }
   }
@@ -556,10 +599,8 @@ main (int argc, char *argv[]) {
   }
 
   if (opt_quietness <= OPTQ_INFO) {
-    printf("==================================================\n");
-    printf("       BRLTTY Color Conversion Test Suite        \n");
-    printf("==================================================\n");
-    printf("\n");
+    putNotice("BRLTTY Color Conversion Test Suite");
+    putf("\n");
   }
 
   int allTestsPassed = performRequestedTests();
@@ -568,13 +609,11 @@ main (int argc, char *argv[]) {
   if (opt_enterInteractiveMode) {
     enterInteractiveMode();
   } else if (opt_quietness <= OPTQ_INFO) {
-    printf("Run with the -i flag for interactive mode.\n\n");
+    putf("Run with the -i flag for interactive mode.\n\n");
   }
 
   if (opt_quietness <= OPTQ_INFO) {
-    printf("==================================================\n");
-    printf("                Tests Complete                    \n");
-    printf("==================================================\n");
+    putNotice("Tests Complete");
   }
 
   return allTestsPassed? PROG_EXIT_SUCCESS: PROG_EXIT_SEMANTIC;
