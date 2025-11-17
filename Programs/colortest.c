@@ -52,7 +52,7 @@ typedef enum {
    OPTQ_WARN,
    OPTQ_FAIL,
    OPTQ_RESULT,
-   OPTQ_STATUS,
+   OPTQ_TEST,
 } OptQuietness;
 
 static int opt_quietness;
@@ -126,26 +126,26 @@ END_COMMAND_LINE_PARAMETERS(programParameters)
 
 static void
 showTestHeader (const char *name) {
-  printf("=== %s ===\n", name);
+  if (opt_quietness <= OPTQ_TEST) {
+    printf("=== %s ===\n", name);
+  }
 }
 
-static void
+static int
 showTestResult (const char *name, int count, int passed) {
-  const char *status;
+  int result = passed == count;
 
-  if (passed < count) {
-    status = "FAIL";
-
+  if (!result) {
     if (opt_quietness <= OPTQ_RESULT) {
       printf("%d/%d tests failed\n", (count - passed), count);
     }
-  } else {
-    status = "PASS";
   }
 
-  if (opt_quietness <= OPTQ_STATUS) {
-    printf("[%s] %s\n", status, name);
+  if (opt_quietness <= OPTQ_TEST) {
+    printf("[%s] %s\n", (result? "PASS": "FAIL"), name);
   }
+
+  return result;
 }
 
 /* Test structure for predefined colors */
@@ -158,7 +158,7 @@ typedef struct {
 } ColorTest;
 
 /* Test VGA palette round-trip conversion */
-static void
+static int
 testVGAtoRGBtoVGA (const char *testName) {
   if (opt_quietness <= OPTQ_INFO) {
     printf("Testing that VGA colors convert to themselves...\n\n");
@@ -183,11 +183,11 @@ testVGAtoRGBtoVGA (const char *testName) {
     }
   }
 
-  showTestResult(testName, testCount, passCount);
+  return showTestResult(testName, testCount, passCount);
 }
 
 /* List VGA colors */
-static void
+static int
 listVGAColors (const char *testName) {
   if (opt_quietness <= OPTQ_INFO) {
     printf("Describing each VGA color...\n\n");
@@ -205,10 +205,12 @@ listVGAColors (const char *testName) {
              vga, name, rgb.r, rgb.g, rgb.b, description);
     }
   }
+
+  return 1;
 }
 
 /* Test RGB conversion round-trip */
-static void
+static int
 testRGBtoHSVtoRGB (const char *testName) {
   if (opt_quietness <= OPTQ_INFO) {
     printf("Testing RGB -> HSV -> RGB conversion...\n\n");
@@ -254,7 +256,7 @@ testRGBtoHSVtoRGB (const char *testName) {
     }
   }
 
-  showTestResult(testName, testCount, passCount);
+  return showTestResult(testName, testCount, passCount);
 }
 
 /* Test common color descriptions
@@ -267,7 +269,7 @@ testRGBtoHSVtoRGB (const char *testName) {
  * color system. Using standard colors ensures our detection algorithms work with
  * commonly recognized color names.
  */
-static void
+static int
 testRGBtoHSV (const char *testName) {
   if (opt_quietness <= OPTQ_INFO) {
     printf("Testing recognition of common color names...\n\n");
@@ -370,11 +372,11 @@ testRGBtoHSV (const char *testName) {
     }
   }
 
-  showTestResult(testName, testCount, passCount);
+  return showTestResult(testName, testCount, passCount);
 }
 
 /* Test RGB to VGA mapping with various colors */
-static void
+static int
 testRGBtoVGA (const char *testName) {
   if (opt_quietness <= OPTQ_INFO) {
     printf("Testing RGB colors map to nearest VGA color...\n\n");
@@ -403,6 +405,8 @@ testRGBtoVGA (const char *testName) {
              vga, color, rgb.r, rgb.g, rgb.b);
     }
   }
+
+  return 1;
 }
 
 /* Interactive color description test */
@@ -448,47 +452,48 @@ enterInteractiveMode (void) {
   }
 }
 
-/* perform the requested tests */
+typedef struct {
+  const char *name;
+  int *requested;
+  int (*perform) (const char *testName);
+} RequestableTest;
+
+static const RequestableTest requetableTestTable[] = {
+  { .name = "VGA -> RGB -> VGA Color Round-Trip Test",
+    .requested = &opt_testVGAtoRGBtoVGA,
+    .perform = testVGAtoRGBtoVGA,
+  },
+
+  { .name = "VGA Color List",
+    .requested = &opt_listVGAColors,
+    .perform = listVGAColors,
+  },
+
+  { .name = "RGB -> HSV -> RGB Color Round-Trip Test",
+    .requested = &opt_testRGBtoHSVtoRGB,
+    .perform = testRGBtoHSVtoRGB,
+  },
+
+  { .name = "Common RGB Color Descriptions Test",
+    .requested = &opt_testRGBtoHSV,
+    .perform = testRGBtoHSV,
+  },
+
+  { .name = "RGB to VGA Mapping Test",
+    .requested = &opt_testRGBtoVGA,
+    .perform = testRGBtoVGA,
+  },
+};
+
+static const size_t requetableTestCount = ARRAY_COUNT(requetableTestTable);
+
+/* Audit the test options */
 static ProgramExitStatus
-performRequestedTests (void) {
-  typedef struct {
-    int *requested;
-    void (*perform) (const char *testName);
-    const char *name;
-  } TestEntry;
-
-  static const TestEntry testTable[] = {
-    { .requested = &opt_testVGAtoRGBtoVGA,
-      .perform = testVGAtoRGBtoVGA,
-      .name = "VGA -> RGB -> VGA Color Round-Trip Test",
-    },
-
-    { .requested = &opt_listVGAColors,
-      .perform = listVGAColors,
-      .name = "VGA Color List",
-    },
-
-    { .requested = &opt_testRGBtoHSVtoRGB,
-      .perform = testRGBtoHSVtoRGB,
-      .name = "RGB -> HSV -> RGB Color Round-Trip Test",
-    },
-
-    { .requested = &opt_testRGBtoHSV,
-      .perform = testRGBtoHSV,
-      .name = "Common RGB Color Descriptions Test",
-    },
-
-    { .requested = &opt_testRGBtoVGA,
-      .perform = testRGBtoVGA,
-      .name = "RGB to VGA Mapping Test",
-    },
-  };
-
-  const size_t testCount = ARRAY_COUNT(testTable);
+auditTestOptions (void) {
   int testRequested = 0;
 
-  for (int i=0; i<testCount; i+=1) {
-    const TestEntry *test = &testTable[i];
+  for (int i=0; i<requetableTestCount; i+=1) {
+    const RequestableTest *test = &requetableTestTable[i];
 
     if (*test->requested) {
       if (opt_performAllTests) {
@@ -503,24 +508,35 @@ performRequestedTests (void) {
 
   if (!testRequested) {
     if (opt_performAllTests || !opt_enterInteractiveMode) {
-      for (int i=0; i<testCount; i+=1) {
-        const TestEntry *test = &testTable[i];
+      for (int i=0; i<requetableTestCount; i+=1) {
+        const RequestableTest *test = &requetableTestTable[i];
         *test->requested = 1;
       }
     }
   }
 
-  for (int i=0; i<testCount; i+=1) {
-    const TestEntry *test = &testTable[i];
+  return PROG_EXIT_SUCCESS;
+}
+
+/* perform the requested tests */
+static int
+performRequestedTests (void) {
+  int allPassed = 1;
+
+  for (int i=0; i<requetableTestCount; i+=1) {
+    const RequestableTest *test = &requetableTestTable[i];
 
     if (*test->requested) {
       showTestHeader(test->name);
-      test->perform(test->name);
-      printf("\n");
+      if (!test->perform(test->name)) allPassed = 0;
+
+      if (opt_quietness <= OPTQ_TEST) {
+        printf("\n");
+      }
     }
   }
 
-  return PROG_EXIT_SUCCESS;
+  return allPassed;
 }
 
 /* Main test program */
@@ -540,6 +556,11 @@ main (int argc, char *argv[]) {
     PROCESS_COMMAND_LINE(descriptor, argc, argv);
   }
 
+  {
+    ProgramExitStatus status = auditTestOptions();
+    if (status != PROG_EXIT_SUCCESS) return status;
+  }
+
   if (opt_quietness <= OPTQ_INFO) {
     printf("==================================================\n");
     printf("       BRLTTY Color Conversion Test Suite        \n");
@@ -547,11 +568,7 @@ main (int argc, char *argv[]) {
     printf("\n");
   }
 
-  /* Perform the requested tests */
-  {
-    ProgramExitStatus status = performRequestedTests();
-    if (status != PROG_EXIT_SUCCESS) return status;
-  }
+  int allTestsPassed = performRequestedTests();
 
   /* Interactive mode if requested */
   if (opt_enterInteractiveMode) {
@@ -566,5 +583,5 @@ main (int argc, char *argv[]) {
     printf("==================================================\n");
   }
 
-  return PROG_EXIT_SUCCESS;
+  return allTestsPassed? PROG_EXIT_SUCCESS: PROG_EXIT_SEMANTIC;
 }
