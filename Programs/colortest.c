@@ -633,23 +633,33 @@ ansiHandler (Queue *arguments) {
 
 typedef struct {
   const char *name;
+  const char *syntax;
   void (*handler) (Queue *arguments);
 } ColorSpace;
 
+static void
+putColorSpaceSyntax (const ColorSpace *cs) {
+  putf("\nThe %s syntax is %s.\n", cs->name, cs->syntax);
+}
+
 static const ColorSpace colorSpaces[] = {
   { .name = "rgb",
+    .syntax = "red, green, blue (each within the range 0-255)",
     .handler = rgbHandler,
   },
 
   { .name = "hsv",
+    .syntax = "hue (degrees), saturation (percentage), value (percentage)",
     .handler = hsvHandler,
   },
 
   { .name = "vga",
+    .syntax = "an integer within the range 0-15",
     .handler = vgaHandler,
   },
 
   { .name = "ansi",
+    .syntax = "an integer within the range 0-255",
     .handler = ansiHandler,
   },
 };
@@ -660,9 +670,28 @@ enterInteractiveMode (void) {
   const ColorSpace *currentColorSpace = colorSpaces;
 
   putTestHeader("Interactive Color Test");
-  putf("Enter RGB values to test color descriptions.\n");
-  putf("Format: R G B (0-255 for each)\n");
-  putf("Enter 'q' to quit.\n\n");
+  putf("Use the \"quit\" command to exit this mode.\n");
+
+  {
+    putf("The supported color spaces are");
+    int last = ARRAY_COUNT(colorSpaces) - 1;
+
+    for (int i=0; i<=last; i+=1) {
+      const ColorSpace *cs = &colorSpaces[i];
+
+      if (i > 0) putf(",");
+      if (i == last) putf(" and");
+      putf(" %s", cs->name);
+      if (cs == currentColorSpace) putf(" (the default)");
+    }
+
+    putf(".\n");
+  }
+
+  putf("To switch to another color space, enter its name with no additional arguments.\n");
+  putf("If additional arguments follow the name then that color space is used.\n");
+  putf("If only numeric arguments are specified then the current color space is used.\n");
+  putColorSpaceSyntax(currentColorSpace);
 
   Queue *arguments = newQueue(NULL, NULL);
   char *line = NULL;
@@ -700,6 +729,7 @@ enterInteractiveMode (void) {
         if (isAbbreviation(cs->name, command)) {
           if (getQueueSize(arguments) == 0) {
             currentColorSpace = cs;
+            putColorSpaceSyntax(currentColorSpace);
           } else {
             cs->handler(arguments);
           }
