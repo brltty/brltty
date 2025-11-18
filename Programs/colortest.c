@@ -42,10 +42,14 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "log.h"
 #include "cmdline.h"
 #include "color.h"
+#include "parse.h"
+#include "file.h"
+#include "queue.h"
 
 typedef enum {
    OPTQ_INFO,
@@ -460,33 +464,262 @@ showRGB (unsigned char r, unsigned char g, unsigned char b) {
   showColor(rgb, rgbColorToHsv(rgb));
 }
 
+static void
+showHSV (float h, float s, float v) {
+  HSVColor hsv = {.h=h, .s=s, .v=v};
+  showColor(hsvColorToRgb(hsv), hsv);
+}
+
+static const char *
+getArgument (Queue *arguments, const char *name) {
+  const char *argument = dequeueItem(arguments);
+
+  if (!argument) {
+    putf("missing %s\n", name);
+  }
+
+  return argument;
+}
+
+static int
+noMoreArguments (Queue *arguments) {
+  const char *argument = dequeueItem(arguments);
+  if (!argument) return 1;
+
+  putf("too many arguments: %s\n", argument);
+  return 0;
+}
+
+static int
+validateColorComponent (int *component, const char *argument, const char *name) {
+  static const int minimum = 0;
+  static const int maximum = UINT8_MAX;
+  if (validateInteger(component, argument, &minimum, &maximum)) return 1;
+
+  putf(
+    "invalid %s component: %s (must be an integer >= %d and <= %d)\n",
+    name, argument, minimum, maximum
+  );
+
+  return 0;
+}
+
+static int
+validateAngle (float *angle, const char *argument, const char *name) {
+  static const float minimum = 0.0;
+  static const float maximum = 360.0;
+
+  if (validateFloat(angle, argument, &minimum, &maximum)) {
+    if (*angle != maximum) {
+      return 1;
+    }
+  }
+
+  putf(
+    "invalid %s angle: %s (must be a floating-point number >= %g and < %g)\n",
+    name, argument, minimum, maximum
+  );
+
+  return 0;
+}
+
+static int
+validatePercentage (float *value, const char *argument, const char *name) {
+  static const float minimum = 0.0;
+  static const float maximum = 100.0;
+
+  if (validateFloat(value, argument, &minimum, &maximum)) {
+    *value /= 100.0;
+    return 1;
+  }
+
+  putf(
+    "invalid %s percentage: %s (must be a floating-point number >= %g and <= %g)\n",
+    name, argument, minimum, maximum
+  );
+
+  return 0;
+}
+
+static void
+rgbHandler (Queue *arguments) {
+  const char *red, *green, *blue;
+  int r, g, b;
+
+  if ((red = getArgument(arguments, "red component"))) {
+    if ((green = getArgument(arguments, "green component"))) {
+      if ((blue = getArgument(arguments, "blue component"))) {
+        if (noMoreArguments(arguments)) {
+          if (validateColorComponent(&r, red, "red")) {
+            if (validateColorComponent(&g, green, "green")) {
+              if (validateColorComponent(&b, blue, "blue")) {
+                showRGB(r, g, b);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+static void
+hsvHandler (Queue *arguments) {
+  const char *hue, *saturation, *value;
+  float h, s, v;
+
+  if ((hue = getArgument(arguments, "hue angle"))) {
+    if ((saturation = getArgument(arguments, "saturation percentage"))) {
+      if ((value = getArgument(arguments, "value percentage"))) {
+        if (noMoreArguments(arguments)) {
+          if (validateAngle(&h, hue, "hue")) {
+            if (validatePercentage(&s, saturation, "saturation")) {
+              if (validatePercentage(&v, value, "value")) {
+                showHSV(h, s, v);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+static void
+vgaHandler (Queue *arguments) {
+  const char *argument = getArgument(arguments, "VGA color number");
+
+  if (argument) {
+    if (noMoreArguments(arguments)) {
+      static const int minimum = 0;
+      static const int maximum = VGA_COLOR_COUNT - 1;
+      int vga;
+
+      if (validateInteger(&vga, argument, &minimum, &maximum)) {
+        RGBColor rgb = vgaToRgb(vga);
+        showRGB(rgb.r, rgb.g, rgb.b);
+      } else {
+        putf(
+          "invalid VGA color number: %s (must be an integer >= %d and <= %d)\n",
+          argument, minimum, maximum
+        );
+      }
+    }
+  }
+}
+
+static void
+ansiHandler (Queue *arguments) {
+  const char *argument = getArgument(arguments, "ANSI color number");
+
+  if (argument) {
+    if (noMoreArguments(arguments)) {
+      static const int minimum = 0;
+      static const int maximum = UINT8_MAX;
+      int ansi;
+
+      if (validateInteger(&ansi, argument, &minimum, &maximum)) {
+        RGBColor rgb = ansiToRgb(ansi);
+        showRGB(rgb.r, rgb.g, rgb.b);
+      } else {
+        putf(
+          "invalid ANSI color number: %s (must be an integer >= %d and <= %d)\n",
+          argument, minimum, maximum
+        );
+      }
+    }
+  }
+}
+
+typedef struct {
+  const char *name;
+  void (*handler) (Queue *arguments);
+} ColorSpace;
+
+static const ColorSpace colorSpaces[] = {
+  { .name = "rgb",
+    .handler = rgbHandler,
+  },
+
+  { .name = "hsv",
+    .handler = hsvHandler,
+  },
+
+  { .name = "vga",
+    .handler = vgaHandler,
+  },
+
+  { .name = "ansi",
+    .handler = ansiHandler,
+  },
+};
+
 /* Interactive color description test */
 static void
 enterInteractiveMode (void) {
+  const ColorSpace *currentColorSpace = colorSpaces;
+
   putTestHeader("Interactive Color Test");
   putf("Enter RGB values to test color descriptions.\n");
   putf("Format: R G B (0-255 for each)\n");
   putf("Enter 'q' to quit.\n\n");
 
-  char line[256];
+  Queue *arguments = newQueue(NULL, NULL);
+  char *line = NULL;
+  size_t lineSize = 0;
+
   while (1) {
-    putf("RGB> ");
+    putf("%s> ", currentColorSpace->name);
     flushOutput();
 
-    if (!fgets(line, sizeof(line), stdin)) break;
-    if (line[0] == 'q' || line[0] == 'Q') break;
-    int r, g, b;
-
-    if (sscanf(line, "%d %d %d", &r, &g, &b) != 3) {
-      putf("Error: Invalid format - use: R G B\n");
-    } else if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
-      putf("Error: RGB values must be 0-255\n");
-    } else {
+    if (!readLine(stdin, &line, &lineSize, NULL)) {
       putf("\n");
-      showRGB(r, g, b);
-      putf("\n");
+      break;
     }
+
+    {
+      deleteElements(arguments);
+
+      const char *delimiters = " ";
+      char *string = line;
+      char *argument;
+
+      while ((argument = strtok(string, delimiters))) {
+        enqueueItem(arguments, argument);
+        string = NULL;
+      }
+    }
+
+    if (getQueueSize(arguments) > 0) {
+      char *command = dequeueItem(arguments);
+      if (isAbbreviation("quit", command)) break;
+
+      for (int i=0; i<ARRAY_COUNT(colorSpaces); i+=1) {
+        const ColorSpace *cs = &colorSpaces[i];
+
+        if (isAbbreviation(cs->name, command)) {
+          if (getQueueSize(arguments) == 0) {
+            currentColorSpace = cs;
+          } else {
+            cs->handler(arguments);
+          }
+
+          goto COMMAND_DONE;
+        }
+      }
+
+      if (isdigit(command[0])) {
+        prequeueItem(arguments, command);
+        currentColorSpace->handler(arguments);
+      } else {
+        putf("unrecognized command\n");
+      }
+    }
+  COMMAND_DONE:
   }
+
+  if (line) free(line);
+  deallocateQueue(arguments);
 }
 
 typedef struct {

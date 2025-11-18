@@ -212,6 +212,13 @@ enqueueItem (Queue *queue, void *item) {
   return element;
 }
 
+Element *
+prequeueItem (Queue *queue, void *item) {
+  Element *element = enqueueItem(queue, item);
+  if (!queue->compareItems) queue->head = element;
+  return element;
+}
+
 void
 requeueElement (Element *element) {
   unlinkElement(element);
@@ -379,7 +386,7 @@ getElementByIndex (const Queue *queue, unsigned int index, int fromTail) {
     return element;
   }
 
-  return 0;
+  return NULL;
 }
 
 Element *

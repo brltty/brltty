@@ -48,6 +48,8 @@ extern Element *getStackHead (const Queue *queue);
 extern Element *getStackElement (const Queue *queue, unsigned int index);
 
 extern Element *enqueueItem (Queue *queue, void *item);
+extern Element *prequeueItem (Queue *queue, void *item);
+
 extern void *dequeueItem (Queue *queue);
 extern int deleteItem (Queue *queue, void *item);
 
