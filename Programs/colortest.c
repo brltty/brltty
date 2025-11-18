@@ -639,17 +639,17 @@ typedef struct {
 
 static void
 putColorSpaceSyntax (const ColorSpace *cs) {
-  putf("\nThe %s syntax is %s.\n", cs->name, cs->syntax);
+  putf("\nThe %s syntax is: %s\n", cs->name, cs->syntax);
 }
 
 static const ColorSpace colorSpaces[] = {
   { .name = "rgb",
-    .syntax = "red, green, blue (each within the range 0-255)",
+    .syntax = "red green blue (each within the range 0-255)",
     .handler = rgbHandler,
   },
 
   { .name = "hsv",
-    .syntax = "hue (degrees), saturation (percentage), value (percentage)",
+    .syntax = "hue (an angle) saturation (a percentage) value (a percentage)",
     .handler = hsvHandler,
   },
 
@@ -721,7 +721,11 @@ enterInteractiveMode (void) {
 
     if (getQueueSize(arguments) > 0) {
       char *command = dequeueItem(arguments);
-      if (isAbbreviation("quit", command)) break;
+
+      if (isAbbreviation("quit", command)) {
+        if (noMoreArguments(arguments)) break;
+        continue;
+      }
 
       for (int i=0; i<ARRAY_COUNT(colorSpaces); i+=1) {
         const ColorSpace *cs = &colorSpaces[i];
