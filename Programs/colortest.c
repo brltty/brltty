@@ -126,11 +126,17 @@ END_COMMAND_LINE_PARAMETERS(programParameters)
 #define HSV_COLOR_FORMAT "HSV(%5.1f°, %3.0f%%, %3.0f%%)"
 
 static void
-putCheckForError (void) {
+checkForOutputError (void) {
   if (ferror(stdout)) {
     logSystemError("standard output write");
     exit(PROG_EXIT_FATAL);
   }
+}
+
+static void
+flushOutput (void) {
+  fflush(stdout);
+  checkForOutputError();
 }
 
 static void
@@ -139,20 +145,23 @@ putf (const char *format, ...) {
   va_start(args, format);
   vprintf(format, args);
   va_end(args);
-  putCheckForError();
+  checkForOutputError();
 }
 
 static void
 putNotice (const char *notice) {
   size_t dividerWidth = 50;
-  size_t noticeLength = strlen(notice);
   unsigned int noticeIndent;
 
-  if (noticeLength > dividerWidth) {
-    dividerWidth = noticeLength;
-    noticeIndent = 0;
-  } else {
-    noticeIndent = (dividerWidth - noticeLength) / 2;
+  {
+    size_t noticeLength = strlen(notice);
+
+    if (noticeLength > dividerWidth) {
+      dividerWidth = noticeLength;
+      noticeIndent = 0;
+    } else {
+      noticeIndent = (dividerWidth - noticeLength) / 2;
+    }
   }
 
   char divider[dividerWidth + 1];
@@ -429,6 +438,28 @@ testRGBtoVGA (const char *testName) {
   return 1;
 }
 
+static void
+showColor (RGBColor rgb, HSVColor hsv) {
+  const char *indent = "  ";
+
+  putf("%sRGB: (%d, %d, %d)\n", indent, rgb.r, rgb.g, rgb.b);
+  putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", indent, hsv.h, hsv.s*100.0, hsv.v*100.0);
+
+  char description[64];
+  rgbColorToDescription(description, sizeof(description), rgb);
+  putf("%sDescription: %s\n", indent, description);
+
+  int vga = rgbToVga(rgb.r, rgb.g, rgb.b);
+  const char *name = vgaColorName(vga);
+  putf("%sNearest VGA: %d \"%s\"\n", indent, vga, name);
+}
+
+static void
+showRGB (unsigned char r, unsigned char g, unsigned char b) {
+  RGBColor rgb = {.r=r, .g=g, .b=b};
+  showColor(rgb, rgbColorToHsv(rgb));
+}
+
 /* Interactive color description test */
 static void
 enterInteractiveMode (void) {
@@ -440,35 +471,20 @@ enterInteractiveMode (void) {
   char line[256];
   while (1) {
     putf("RGB> ");
-    fflush(stdout);
-    putCheckForError();
+    flushOutput();
 
     if (!fgets(line, sizeof(line), stdin)) break;
-
     if (line[0] == 'q' || line[0] == 'Q') break;
-
     int r, g, b;
-    if (sscanf(line, "%d %d %d", &r, &g, &b) == 3) {
-      if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
-        putf("Error: RGB values must be 0-255\n");
-        continue;
-      }
 
-      char description[64];
-      HSVColor hsv = rgbToHsv(r, g, b);
-      int vga = rgbToVga(r, g, b);
-      const char *vgaName = vgaColorName(vga);
-
-      rgbToDescription(description, sizeof(description), r, g, b);
-
-      putf("\n");
-      putf("  RGB: (%d, %d, %d)\n", r, g, b);
-      putf("  HSV: (%.1f°, %.2f, %.2f)\n", hsv.h, hsv.s, hsv.v);
-      putf("  Description: %s\n", description);
-      putf("  Nearest VGA: %d (%s)\n", vga, vgaName);
-      putf("\n");
+    if (sscanf(line, "%d %d %d", &r, &g, &b) != 3) {
+      putf("Error: Invalid format - use: R G B\n");
+    } else if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
+      putf("Error: RGB values must be 0-255\n");
     } else {
-      putf("Error: Invalid format. Use: R G B\n");
+      putf("\n");
+      showRGB(r, g, b);
+      putf("\n");
     }
   }
 }
