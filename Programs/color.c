@@ -271,9 +271,7 @@ getHueName(float hue) {
 }
 
 const char *
-rgbToDescription(char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b) {
-  HSVColor hsv = rgbToHsv(r, g, b);
-
+hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
   /* Handle special cases */
   if (hsv.v < 0.08f) {
     snprintf(buffer, bufferSize, "black");
@@ -420,6 +418,17 @@ rgbToDescription(char *buffer, size_t bufferSize, unsigned char r, unsigned char
            brightnessModifier, saturationModifier, hueName);
 
   return buffer;
+}
+
+const char *
+hsvToDescription(char *buffer, size_t bufferSize, float h, float s, float v) {
+  HSVColor hsv = {.h=h, .s=s, .v=v};
+  return hsvColorToDescription(buffer, bufferSize, hsv);
+}
+
+const char *
+rgbToDescription(char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b) {
+  return hsvColorToDescription(buffer, bufferSize, rgbToHsv(r, g, b));
 }
 
 const char *

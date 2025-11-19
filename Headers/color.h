@@ -72,6 +72,18 @@ extern const char *rgbToDescription (char *buffer, size_t bufferSize, unsigned c
  */
 extern const char *rgbColorToDescription (char *buffer, size_t bufferSize, RGBColor color);
 
+/* Describe an HSV color as a human-readable string
+ * buffer must be at least 64 bytes
+ * Returns pointer to buffer
+ */
+extern const char *hsvToDescription(char *buffer, size_t bufferSize, float h, float s, float v);
+
+/* Describe an HSV color structure as a human-readable string
+ * buffer must be at least 64 bytes
+ * Returns pointer to buffer
+ */
+extern const char *hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv);
+
 /* Convert ANSI 256-color code to RGB */
 extern RGBColor ansiToRgb (int ansi);
 

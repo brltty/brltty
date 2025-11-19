@@ -450,13 +450,17 @@ showColor (RGBColor rgb, HSVColor hsv) {
   putf("%sRGB: (%d, %d, %d)\n", indent, rgb.r, rgb.g, rgb.b);
   putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", indent, hsv.h, hsv.s*100.0, hsv.v*100.0);
 
-  char description[64];
-  rgbColorToDescription(description, sizeof(description), rgb);
-  putf("%sDescription: %s\n", indent, description);
+  {
+    char description[64];
+    hsvColorToDescription(description, sizeof(description), hsv);
+    putf("%sDescription: %s\n", indent, description);
+  }
 
-  int vga = rgbToVga(rgb.r, rgb.g, rgb.b);
-  const char *name = vgaColorName(vga);
-  putf("%sNearest VGA: %d \"%s\"\n", indent, vga, name);
+  {
+    int vga = rgbToVga(rgb.r, rgb.g, rgb.b);
+    const char *name = vgaColorName(vga);
+    putf("%sNearest VGA: %d \"%s\"\n", indent, vga, name);
+  }
 }
 
 static void
@@ -644,22 +648,22 @@ putColorSpaceSyntax (const ColorSpace *cs) {
 }
 
 static const ColorSpace colorSpaces[] = {
-  { .name = "rgb",
+  { .name = "RGB",
     .syntax = "red green blue (each within the range 0-255)",
     .handler = rgbHandler,
   },
 
-  { .name = "hsv",
+  { .name = "HSV",
     .syntax = "hue (an angle) saturation (a percentage) value (a percentage)",
     .handler = hsvHandler,
   },
 
-  { .name = "vga",
+  { .name = "VGA",
     .syntax = "an integer within the range 0-15",
     .handler = vgaHandler,
   },
 
-  { .name = "ansi",
+  { .name = "ANSI",
     .syntax = "an integer within the range 0-255",
     .handler = ansiHandler,
   },
