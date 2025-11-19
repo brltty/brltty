@@ -188,17 +188,35 @@ rgbColorToHsv(RGBColor color) {
   return rgbToHsv(color.r, color.g, color.b);
 }
 
+void
+hsvNormalize(float *h, float *s, float *v) {
+  if (h) {
+    while (*h < 0.0f) *h += 360.0f;
+    while (*h >= 360.0f) *h -= 360.0f;
+  }
+
+  if (s) {
+    if (*s < 0.0f) *s = 0.0f;
+    if (*s > 1.0f) *s = 1.0f;
+  }
+
+  if (v) {
+    if (*v < 0.0f) *v = 0.0f;
+    if (*v > 1.0f) *v = 1.0f;
+  }
+}
+
+void
+hsvColorNormalize(HSVColor *hsv) {
+  hsvNormalize(&hsv->h, &hsv->s, &hsv->v);
+}
+
 RGBColor
 hsvToRgb(float h, float s, float v) {
   RGBColor rgb;
 
   /* Clamp inputs */
-  while (h < 0.0f) h += 360.0f;
-  while (h >= 360.0f) h -= 360.0f;
-  if (s < 0.0f) s = 0.0f;
-  if (s > 1.0f) s = 1.0f;
-  if (v < 0.0f) v = 0.0f;
-  if (v > 1.0f) v = 1.0f;
+  hsvNormalize(&h, &s, &v);
 
   if (s == 0.0f) {
     /* Achromatic (grey) */
@@ -256,22 +274,31 @@ getHueName(float hue) {
    * Magenta: 285-315
    * Red-Magenta: 315-345
    */
-  if (hue < 15.0f || hue >= 345.0f) return "red";
-  if (hue < 45.0f) return "orange";
-  if (hue < 75.0f) return "yellow";
-  if (hue < 105.0f) return "yellow-green";
-  if (hue < 135.0f) return "green";
-  if (hue < 165.0f) return "cyan-green";
-  if (hue < 195.0f) return "cyan";
-  if (hue < 225.0f) return "blue-cyan";
-  if (hue < 255.0f) return "blue";
-  if (hue < 285.0f) return "violet";
-  if (hue < 315.0f) return "magenta";
-  return "red-magenta";
+
+  static const char *const hueNames[] = {
+    "red",
+    "orange",
+    "yellow",
+    "yellow-green",
+    "green",
+    "cyan-green",
+    "cyan",
+    "blue-cyan",
+    "blue",
+    "violet",
+    "magenta",
+    "red-magenta",
+  };
+
+  hue += 15.0f;
+  hsvNormalize(&hue, NULL, NULL);
+  return hueNames[(int)hue / 30];
 }
 
 const char *
 hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
+  hsvNormalize(&hsv.h, &hsv.s, &hsv.v);
+
   /* Handle special cases */
   if (hsv.v < 0.08f) {
     snprintf(buffer, bufferSize, "black");
@@ -467,7 +494,7 @@ ansiToRgb (int ansi) {
 
 /* Interpolate between two HSV colors */
 HSVColor
-interpolateHsvColors (HSVColor hsv1, HSVColor hsv2, float factor) {
+hsvColorInterpolate (HSVColor hsv1, HSVColor hsv2, float factor) {
   HSVColor result = {
     .h = hsv1.h + ((hsv2.h - hsv1.h) * factor),
     .s = hsv1.s + ((hsv2.s - hsv1.s) * factor),
@@ -479,6 +506,6 @@ interpolateHsvColors (HSVColor hsv1, HSVColor hsv2, float factor) {
 
 /* Interpolate between two RGB colors using HSV */
 RGBColor
-interpolateRgbColors (RGBColor rgb1, RGBColor rgb2, float factor) {
-  return hsvColorToRgb(interpolateHsvColors(rgbColorToHsv(rgb1), rgbColorToHsv(rgb2), factor));
+rgbColorInterpolate (RGBColor rgb1, RGBColor rgb2, float factor) {
+  return hsvColorToRgb(hsvColorInterpolate(rgbColorToHsv(rgb1), rgbColorToHsv(rgb2), factor));
 }

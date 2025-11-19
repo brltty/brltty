@@ -47,6 +47,12 @@ extern HSVColor rgbToHsv (unsigned char r, unsigned char g, unsigned char b);
 /* Convert RGB color structure to HSV */
 extern HSVColor rgbColorToHsv (RGBColor color);
 
+/* Ensure that HSV components are within their respective ranges */
+extern void hsvNormalize (float *h, float *s, float *v);
+
+/* Ensure that HSV color structure fields are within their respective ranges */
+extern void hsvColorNormalize(HSVColor *hsv);
+
 /* Convert HSV to RGB color space */
 extern RGBColor hsvToRgb (float h, float s, float v);
 
@@ -88,10 +94,10 @@ extern const char *hsvColorToDescription(char *buffer, size_t bufferSize, HSVCol
 extern RGBColor ansiToRgb (int ansi);
 
 /* Interpolate between two HSV colors */
-extern HSVColor interpolateHsvColors (HSVColor hsv1, HSVColor hsv2, float factor);
+extern HSVColor hsvColorInterpolate (HSVColor hsv1, HSVColor hsv2, float factor);
 
 /* Interpolate between two RGB colors using HSV */
-extern RGBColor interpolateRgbColors (RGBColor rgb1, RGBColor rgb2, float factor);
+extern RGBColor rgbColorInterpolate (RGBColor rgb1, RGBColor rgb2, float factor);
 
 #ifdef __cplusplus
 }
