@@ -298,7 +298,7 @@ testRGBtoHSVtoRGB (const char *testName) {
     if (opt_quietness <= (passed? OPTQ_PASS: OPTQ_FAIL)) {
       putf("%-12s: " RGB_COLOR_FORMAT " -> " HSV_COLOR_FORMAT " -> " RGB_COLOR_FORMAT " [%s]\n",
            test->name, test->r, test->g, test->b,
-           hsv.h, hsv.s*100.0, hsv.v*100.0,
+           hsv.h, hsv.s*100.0f, hsv.v*100.0f,
            rgb.r, rgb.g, rgb.b,
            (passed? "OK": "FAIL"));
     }
@@ -454,7 +454,7 @@ static const char colorIndent[] = "  ";
 static void
 showColor (RGBColor rgb, HSVColor hsv) {
   putf("%sRGB: (%d, %d, %d)\n", colorIndent, rgb.r, rgb.g, rgb.b);
-  putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", colorIndent, hsv.h, hsv.s*100.0, hsv.v*100.0);
+  putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", colorIndent, hsv.h, hsv.s*100.0f, hsv.v*100.0f);
 
   {
     char description[64];
@@ -559,14 +559,15 @@ parseIntensity (int *intensity, const char *argument, const char *name) {
 
 static int
 parseAngle (float *angle, const char *argument, const char *name) {
-  return parseFloat(angle, argument, 0.0, 360.0, 0, name);
+  return parseFloat(angle, argument, 0.0f, 360.0f, 0, name);
 }
 
 static int
 parsePercentage (float *value, const char *argument, const char *name) {
-  if (!parseFloat(value, argument, 0, 100, 1, name)) return 0;
+  const float maximum = 100.0f;
+  if (!parseFloat(value, argument, 0.0f, maximum, 1, name)) return 0;
 
-  *value /= 100.0;
+  *value /= maximum;
   return 1;
 }
 
