@@ -528,6 +528,22 @@ parseInteger (int *value, const char *argument, int minimum, int maximum, const 
 }
 
 static int
+parseFloat (float *value, const char *argument, float minimum, float maximum, int inclusive, const char *name) {
+  if (validateFloat(value, argument, &minimum, &maximum)) {
+    if (inclusive || (*value < maximum)) {
+      return 1;
+    }
+  }
+
+  logMessage(LOG_WARNING,
+    "invalid %s: %s (must be a real number >= %g and %s %g)",
+    name, argument, minimum, (inclusive? "<=": "<"), maximum
+  );
+
+  return 0;
+}
+
+static int
 parseIntensity (int *intensity, const char *argument, const char *name) {
   static const int minimum = 0;
   static const int maximum = UINT8_MAX;
@@ -543,39 +559,15 @@ parseIntensity (int *intensity, const char *argument, const char *name) {
 
 static int
 parseAngle (float *angle, const char *argument, const char *name) {
-  static const float minimum = 0.0;
-  static const float maximum = 360.0;
-
-  if (validateFloat(angle, argument, &minimum, &maximum)) {
-    if (*angle != maximum) {
-      return 1;
-    }
-  }
-
-  logMessage(LOG_WARNING,
-    "invalid %s angle: %s (must be a real number >= %g and < %g)",
-    name, argument, minimum, maximum
-  );
-
-  return 0;
+  return parseFloat(angle, argument, 0.0, 360.0, 0, name);
 }
 
 static int
 parsePercentage (float *value, const char *argument, const char *name) {
-  static const float minimum = 0.0;
-  static const float maximum = 100.0;
+  if (!parseFloat(value, argument, 0, 100, 1, name)) return 0;
 
-  if (validateFloat(value, argument, &minimum, &maximum)) {
-    *value /= 100.0;
-    return 1;
-  }
-
-  logMessage(LOG_WARNING,
-    "invalid %s percentage: %s (must be a real number >= %g and <= %g)",
-    name, argument, minimum, maximum
-  );
-
-  return 0;
+  *value /= 100.0;
+  return 1;
 }
 
 static void
@@ -611,17 +603,26 @@ rgbHandler (Queue *arguments) {
 
 static void
 hsvHandler (Queue *arguments) {
-  const char *hue, *saturation, *value;
-  float h, s, v;
+  const char *hueName = "hue angle";
+  const char *hueArgument;
+  float hueAngle;
 
-  if ((hue = getNextArgument(arguments, "hue angle"))) {
-    if ((saturation = getNextArgument(arguments, "saturation percentage"))) {
-      if ((value = getNextArgument(arguments, "value percentage"))) {
+  const char *saturationName = "saturation percentage";
+  const char *saturationArgument;
+  float saturationLevel;
+
+  const char *valueName = "value percentage";
+  const char *valueArgument;
+  float valueLevel;
+
+  if ((hueArgument = getNextArgument(arguments, hueName))) {
+    if ((saturationArgument = getNextArgument(arguments, saturationName))) {
+      if ((valueArgument = getNextArgument(arguments, valueName))) {
         if (noMoreArguments(arguments)) {
-          if (parseAngle(&h, hue, "hue")) {
-            if (parsePercentage(&s, saturation, "saturation")) {
-              if (parsePercentage(&v, value, "value")) {
-                showHSV(h, s, v);
+          if (parseAngle(&hueAngle, hueArgument, hueName)) {
+            if (parsePercentage(&saturationLevel, saturationArgument, saturationName)) {
+              if (parsePercentage(&valueLevel, valueArgument, valueName)) {
+                showHSV(hueAngle, saturationLevel, valueLevel);
               }
             }
           }
