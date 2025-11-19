@@ -449,23 +449,23 @@ testRGBtoVGA (const char *testName) {
   return 1;
 }
 
+static const char colorIndent[] = "  ";
+
 static void
 showColor (RGBColor rgb, HSVColor hsv) {
-  const char *indent = "  ";
-
-  putf("%sRGB: (%d, %d, %d)\n", indent, rgb.r, rgb.g, rgb.b);
-  putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", indent, hsv.h, hsv.s*100.0, hsv.v*100.0);
+  putf("%sRGB: (%d, %d, %d)\n", colorIndent, rgb.r, rgb.g, rgb.b);
+  putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", colorIndent, hsv.h, hsv.s*100.0, hsv.v*100.0);
 
   {
     char description[64];
     hsvColorToDescription(description, sizeof(description), hsv);
-    putf("%sDescription: %s\n", indent, description);
+    putf("%sColor: %s\n", colorIndent, description);
   }
 
   {
     int vga = rgbToVga(rgb.r, rgb.g, rgb.b);
     const char *name = vgaColorName(vga);
-    putf("%sNearest VGA: %d \"%s\"\n", indent, vga, name);
+    putf("%sNearest VGA: %d \"%s\"\n", colorIndent, vga, name);
   }
 }
 
@@ -481,8 +481,22 @@ showHSV (float h, float s, float v) {
   showColor(hsvColorToRgb(hsv), hsv);
 }
 
+static void
+showVGA (int vga) {
+  putf("%sVGA: %d\n", colorIndent, vga);
+  RGBColor rgb = vgaToRgb(vga);
+  showRGB(rgb.r, rgb.g, rgb.b);
+}
+
+static void
+showANSI (int ansi) {
+  putf("%sANSI: %d\n", colorIndent, ansi);
+  RGBColor rgb = ansiToRgb(ansi);
+  showRGB(rgb.r, rgb.g, rgb.b);
+}
+
 static const char *
-getArgument (Queue *arguments, const char *name) {
+getNextArgument (Queue *arguments, const char *name) {
   const char *argument = dequeueItem(arguments);
 
   if (!argument) {
@@ -502,13 +516,11 @@ noMoreArguments (Queue *arguments) {
 }
 
 static int
-validateColorComponent (int *component, const char *argument, const char *name) {
-  static const int minimum = 0;
-  static const int maximum = UINT8_MAX;
-  if (validateInteger(component, argument, &minimum, &maximum)) return 1;
+parseInteger (int *value, const char *argument, int minimum, int maximum, const char *name) {
+  if (validateInteger(value, argument, &minimum, &maximum)) return 1;
 
   logMessage(LOG_WARNING,
-    "invalid %s component: %s (must be an integer >= %d and <= %d)",
+    "invalid %s: %s (must be an integer >= %d and <= %d)",
     name, argument, minimum, maximum
   );
 
@@ -516,7 +528,21 @@ validateColorComponent (int *component, const char *argument, const char *name) 
 }
 
 static int
-validateAngle (float *angle, const char *argument, const char *name) {
+parseIntensity (int *intensity, const char *argument, const char *name) {
+  static const int minimum = 0;
+  static const int maximum = UINT8_MAX;
+  if (validateInteger(intensity, argument, &minimum, &maximum)) return 1;
+
+  logMessage(LOG_WARNING,
+    "invalid %s: %s (must be an integer >= %d and <= %d)",
+    name, argument, minimum, maximum
+  );
+
+  return 0;
+}
+
+static int
+parseAngle (float *angle, const char *argument, const char *name) {
   static const float minimum = 0.0;
   static const float maximum = 360.0;
 
@@ -535,7 +561,7 @@ validateAngle (float *angle, const char *argument, const char *name) {
 }
 
 static int
-validatePercentage (float *value, const char *argument, const char *name) {
+parsePercentage (float *value, const char *argument, const char *name) {
   static const float minimum = 0.0;
   static const float maximum = 100.0;
 
@@ -554,17 +580,26 @@ validatePercentage (float *value, const char *argument, const char *name) {
 
 static void
 rgbHandler (Queue *arguments) {
-  const char *red, *green, *blue;
-  int r, g, b;
+  const char *redName = "red intensity";
+  const char *redArgument;
+  int redIntensity;
 
-  if ((red = getArgument(arguments, "red component"))) {
-    if ((green = getArgument(arguments, "green component"))) {
-      if ((blue = getArgument(arguments, "blue component"))) {
+  const char *greenName = "green intensity";
+  const char *greenArgument;
+  int greenIntensity;
+
+  const char *blueName = "blue intensity";
+  const char *blueArgument;
+  int blueIntensity;
+
+  if ((redArgument = getNextArgument(arguments, redName))) {
+    if ((greenArgument = getNextArgument(arguments, greenName))) {
+      if ((blueArgument = getNextArgument(arguments, blueName))) {
         if (noMoreArguments(arguments)) {
-          if (validateColorComponent(&r, red, "red")) {
-            if (validateColorComponent(&g, green, "green")) {
-              if (validateColorComponent(&b, blue, "blue")) {
-                showRGB(r, g, b);
+          if (parseIntensity(&redIntensity, redArgument, redName)) {
+            if (parseIntensity(&greenIntensity, greenArgument, greenName)) {
+              if (parseIntensity(&blueIntensity, blueArgument, blueName)) {
+                showRGB(redIntensity, greenIntensity, blueIntensity);
               }
             }
           }
@@ -579,13 +614,13 @@ hsvHandler (Queue *arguments) {
   const char *hue, *saturation, *value;
   float h, s, v;
 
-  if ((hue = getArgument(arguments, "hue angle"))) {
-    if ((saturation = getArgument(arguments, "saturation percentage"))) {
-      if ((value = getArgument(arguments, "value percentage"))) {
+  if ((hue = getNextArgument(arguments, "hue angle"))) {
+    if ((saturation = getNextArgument(arguments, "saturation percentage"))) {
+      if ((value = getNextArgument(arguments, "value percentage"))) {
         if (noMoreArguments(arguments)) {
-          if (validateAngle(&h, hue, "hue")) {
-            if (validatePercentage(&s, saturation, "saturation")) {
-              if (validatePercentage(&v, value, "value")) {
+          if (parseAngle(&h, hue, "hue")) {
+            if (parsePercentage(&s, saturation, "saturation")) {
+              if (parsePercentage(&v, value, "value")) {
                 showHSV(h, s, v);
               }
             }
@@ -598,22 +633,15 @@ hsvHandler (Queue *arguments) {
 
 static void
 vgaHandler (Queue *arguments) {
-  const char *argument = getArgument(arguments, "VGA color number");
+  const char *vgaName = "VGA color number";
+  const char *vgaArgument = getNextArgument(arguments, vgaName);
 
-  if (argument) {
+  if (vgaArgument) {
     if (noMoreArguments(arguments)) {
-      static const int minimum = 0;
-      static const int maximum = VGA_COLOR_COUNT - 1;
-      int vga;
+      int vgaColor;
 
-      if (validateInteger(&vga, argument, &minimum, &maximum)) {
-        RGBColor rgb = vgaToRgb(vga);
-        showRGB(rgb.r, rgb.g, rgb.b);
-      } else {
-        logMessage(LOG_WARNING,
-          "invalid VGA color number: %s (must be an integer >= %d and <= %d)",
-          argument, minimum, maximum
-        );
+      if (parseInteger(&vgaColor, vgaArgument, 0, (VGA_COLOR_COUNT - 1), vgaName)) {
+        showVGA(vgaColor);
       }
     }
   }
@@ -621,22 +649,15 @@ vgaHandler (Queue *arguments) {
 
 static void
 ansiHandler (Queue *arguments) {
-  const char *argument = getArgument(arguments, "ANSI color number");
+  const char *ansiName = "ANSI color number";
+  const char *ansiArgument = getNextArgument(arguments, ansiName);
 
-  if (argument) {
+  if (ansiArgument) {
     if (noMoreArguments(arguments)) {
-      static const int minimum = 0;
-      static const int maximum = UINT8_MAX;
-      int ansi;
+      int ansiColor;
 
-      if (validateInteger(&ansi, argument, &minimum, &maximum)) {
-        RGBColor rgb = ansiToRgb(ansi);
-        showRGB(rgb.r, rgb.g, rgb.b);
-      } else {
-        logMessage(LOG_WARNING,
-          "invalid ANSI color number: %s (must be an integer >= %d and <= %d)",
-          argument, minimum, maximum
-        );
+      if (parseInteger(&ansiColor, ansiArgument, 0, UINT8_MAX, ansiName)) {
+        showANSI(ansiColor);
       }
     }
   }
@@ -646,14 +667,14 @@ typedef struct {
   const char *name;
   const char *syntax;
   void (*handler) (Queue *arguments);
-} ColorSpace;
+} ColorModel;
 
 static void
-putColorSpaceSyntax (const ColorSpace *cs) {
-  putf("\n%s color syntax: %s\n", cs->name, cs->syntax);
+putColorModelSyntax (const ColorModel *model) {
+  putf("\n%s color syntax: %s\n", model->name, model->syntax);
 }
 
-static const ColorSpace colorSpaces[] = {
+static const ColorModel colorModels[] = {
   { .name = "RGB",
     .syntax = "red green blue (all integers within the range 0-255)",
     .handler = rgbHandler,
@@ -679,41 +700,41 @@ static const ColorSpace colorSpaces[] = {
 static void
 enterInteractiveMode (void) {
   pushLogPrefix("ERROR");
-  putTestHeader("Interactive Color Test");
+  const ColorModel *currentColorModel = colorModels;
 
-  const ColorSpace *currentColorSpace = colorSpaces;
+  putTestHeader("Interactive Color Test");
+  putf("Commands are not case-sensitive and may be abbreviated.\n");
 
   #define QUIT_COMMAND "quit"
   putf("Use the \"" QUIT_COMMAND "\" command to exit this mode.\n");
-  putf("Commands are not case-sensitive and may be abbreviated.\n");
 
   {
-    putf("The supported color spaces are");
-    int last = ARRAY_COUNT(colorSpaces) - 1;
+    putf("The supported color models are:");
+    int last = ARRAY_COUNT(colorModels) - 1;
 
     for (int i=0; i<=last; i+=1) {
-      const ColorSpace *cs = &colorSpaces[i];
+      const ColorModel *model = &colorModels[i];
 
       if (i > 0) putf(",");
       if (i == last) putf(" and");
-      putf(" %s", cs->name);
-      if (cs == currentColorSpace) putf(" (the default)");
+      putf(" %s", model->name);
+      if (model == currentColorModel) putf(" (the default)");
     }
 
     putf(".\n");
   }
 
-  putf("To switch to another color space, enter its name with no additional arguments.\n");
-  putf("If additional arguments follow the name then that color space is used.\n");
-  putf("If only numeric arguments are specified then the current color space is used.\n");
-  putColorSpaceSyntax(currentColorSpace);
+  putf("To switch to another color model, enter its name with no additional arguments.\n");
+  putf("If additional arguments follow the name then that color model is used.\n");
+  putf("If only numeric arguments are specified then the current color model is used.\n");
+  putColorModelSyntax(currentColorModel);
 
   Queue *arguments = newQueue(NULL, NULL);
   char *line = NULL;
   size_t lineSize = 0;
 
   while (1) {
-    putf("%s> ", currentColorSpace->name);
+    putf("%s> ", currentColorModel->name);
     flushOutput();
 
     if (!readLine(stdin, &line, &lineSize, NULL)) {
@@ -742,15 +763,15 @@ enterInteractiveMode (void) {
         continue;
       }
 
-      for (int i=0; i<ARRAY_COUNT(colorSpaces); i+=1) {
-        const ColorSpace *cs = &colorSpaces[i];
+      for (int i=0; i<ARRAY_COUNT(colorModels); i+=1) {
+        const ColorModel *model = &colorModels[i];
 
-        if (isAbbreviation(cs->name, command)) {
+        if (isAbbreviation(model->name, command)) {
           if (getQueueSize(arguments) == 0) {
-            currentColorSpace = cs;
-            putColorSpaceSyntax(currentColorSpace);
+            currentColorModel = model;
+            putColorModelSyntax(currentColorModel);
           } else {
-            cs->handler(arguments);
+            model->handler(arguments);
           }
 
           goto COMMAND_DONE;
@@ -759,7 +780,7 @@ enterInteractiveMode (void) {
 
       if (isdigit(command[0])) {
         prequeueItem(arguments, command);
-        currentColorSpace->handler(arguments);
+        currentColorModel->handler(arguments);
       } else {
         logMessage(LOG_WARNING, "unrecognized command");
       }

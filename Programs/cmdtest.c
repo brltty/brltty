@@ -76,6 +76,23 @@ BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
   },
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
+static
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+  "Unspecified text options, list options, and optional parameters",
+  "are set to an empty string (\"\").",
+  "Unspecified flag options are set to false (0).",
+  "Unspecified counter options are set to zero (0).",
+  "Items within a list are separated from one another by a comma (,).",
+END_COMMAND_LINE_NOTES
+
+static
+BEGIN_COMMAND_LINE_NOTES(additionalNotes)
+  "One or more additional notes blocks may be specifid.",
+  "See brltty-tune.c and tune_builder.[ch] for a practical example -",
+  "the notes within brltty-tune are for the command itself",
+  "whereas those within tune_builder describe how to write a tune.",
+END_COMMAND_LINE_NOTES
+
 int
 main (int argc, char *argv[]) {
   int logLevel = LOG_NOTICE;
@@ -93,7 +110,8 @@ main (int argc, char *argv[]) {
       .applicationName = "cmdtest",
 
       .usage = {
-        .purpose = "Test the command line parser.",
+        .purpose = "Test, as well as demonstrate how to use, the command line parser.",
+        .notes = COMMAND_LINE_NOTES(programNotes, additionalNotes),
       }
     };
 
