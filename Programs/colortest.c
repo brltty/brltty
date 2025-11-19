@@ -124,6 +124,12 @@ END_COMMAND_LINE_OPTIONS(programOptions)
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
+static
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+  "The -a option may not be combined with any option that requests a specific test.",
+  "If neither -a is specified nor any specific test is requested then, unless -i has been specified, all of the tests are performed.",
+END_COMMAND_LINE_NOTES
+
 #define VGA_NAME_FORMAT "(%13s)"
 #define VGA_COLOR_FORMAT "VGA %2d"
 #define RGB_COLOR_FORMAT "RGB(%3d, %3d, %3d)"
@@ -644,12 +650,12 @@ typedef struct {
 
 static void
 putColorSpaceSyntax (const ColorSpace *cs) {
-  putf("\nThe %s syntax is: %s\n", cs->name, cs->syntax);
+  putf("\n%s color syntax: %s\n", cs->name, cs->syntax);
 }
 
 static const ColorSpace colorSpaces[] = {
   { .name = "RGB",
-    .syntax = "red green blue (each within the range 0-255)",
+    .syntax = "red green blue (all integers within the range 0-255)",
     .handler = rgbHandler,
   },
 
@@ -673,10 +679,13 @@ static const ColorSpace colorSpaces[] = {
 static void
 enterInteractiveMode (void) {
   pushLogPrefix("ERROR");
+  putTestHeader("Interactive Color Test");
+
   const ColorSpace *currentColorSpace = colorSpaces;
 
-  putTestHeader("Interactive Color Test");
-  putf("Use the \"quit\" command to exit this mode.\n");
+  #define QUIT_COMMAND "quit"
+  putf("Use the \"" QUIT_COMMAND "\" command to exit this mode.\n");
+  putf("Commands are not case-sensitive and may be abbreviated.\n");
 
   {
     putf("The supported color spaces are");
@@ -728,7 +737,7 @@ enterInteractiveMode (void) {
     if (getQueueSize(arguments) > 0) {
       char *command = dequeueItem(arguments);
 
-      if (isAbbreviation("quit", command)) {
+      if (isAbbreviation(QUIT_COMMAND, command)) {
         if (noMoreArguments(arguments)) break;
         continue;
       }
@@ -878,6 +887,7 @@ main (int argc, char *argv[]) {
 
       .usage = {
         .purpose = "Test the color conversion and description functions.",
+        .notes = COMMAND_LINE_NOTES(programNotes),
       }
     };
 
