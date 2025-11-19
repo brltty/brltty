@@ -143,6 +143,7 @@ flushOutput (void) {
   checkForOutputError();
 }
 
+static void putf (const char *format, ...) PRINTF(1, 2);
 static void
 putf (const char *format, ...) {
   va_list args;
@@ -475,7 +476,7 @@ getArgument (Queue *arguments, const char *name) {
   const char *argument = dequeueItem(arguments);
 
   if (!argument) {
-    putf("missing %s\n", name);
+    logMessage(LOG_WARNING, "missing %s", name);
   }
 
   return argument;
@@ -486,7 +487,7 @@ noMoreArguments (Queue *arguments) {
   const char *argument = dequeueItem(arguments);
   if (!argument) return 1;
 
-  putf("too many arguments: %s\n", argument);
+  logMessage(LOG_WARNING, "too many arguments: %s", argument);
   return 0;
 }
 
@@ -496,8 +497,8 @@ validateColorComponent (int *component, const char *argument, const char *name) 
   static const int maximum = UINT8_MAX;
   if (validateInteger(component, argument, &minimum, &maximum)) return 1;
 
-  putf(
-    "invalid %s component: %s (must be an integer >= %d and <= %d)\n",
+  logMessage(LOG_WARNING,
+    "invalid %s component: %s (must be an integer >= %d and <= %d)",
     name, argument, minimum, maximum
   );
 
@@ -515,8 +516,8 @@ validateAngle (float *angle, const char *argument, const char *name) {
     }
   }
 
-  putf(
-    "invalid %s angle: %s (must be a floating-point number >= %g and < %g)\n",
+  logMessage(LOG_WARNING,
+    "invalid %s angle: %s (must be a real number >= %g and < %g)",
     name, argument, minimum, maximum
   );
 
@@ -533,8 +534,8 @@ validatePercentage (float *value, const char *argument, const char *name) {
     return 1;
   }
 
-  putf(
-    "invalid %s percentage: %s (must be a floating-point number >= %g and <= %g)\n",
+  logMessage(LOG_WARNING,
+    "invalid %s percentage: %s (must be a real number >= %g and <= %g)",
     name, argument, minimum, maximum
   );
 
@@ -599,8 +600,8 @@ vgaHandler (Queue *arguments) {
         RGBColor rgb = vgaToRgb(vga);
         showRGB(rgb.r, rgb.g, rgb.b);
       } else {
-        putf(
-          "invalid VGA color number: %s (must be an integer >= %d and <= %d)\n",
+        logMessage(LOG_WARNING,
+          "invalid VGA color number: %s (must be an integer >= %d and <= %d)",
           argument, minimum, maximum
         );
       }
@@ -622,8 +623,8 @@ ansiHandler (Queue *arguments) {
         RGBColor rgb = ansiToRgb(ansi);
         showRGB(rgb.r, rgb.g, rgb.b);
       } else {
-        putf(
-          "invalid ANSI color number: %s (must be an integer >= %d and <= %d)\n",
+        logMessage(LOG_WARNING,
+          "invalid ANSI color number: %s (must be an integer >= %d and <= %d)",
           argument, minimum, maximum
         );
       }
@@ -667,6 +668,7 @@ static const ColorSpace colorSpaces[] = {
 /* Interactive color description test */
 static void
 enterInteractiveMode (void) {
+  pushLogPrefix("ERROR");
   const ColorSpace *currentColorSpace = colorSpaces;
 
   putTestHeader("Interactive Color Test");
@@ -746,7 +748,7 @@ enterInteractiveMode (void) {
         prequeueItem(arguments, command);
         currentColorSpace->handler(arguments);
       } else {
-        putf("unrecognized command\n");
+        logMessage(LOG_WARNING, "unrecognized command");
       }
     }
   COMMAND_DONE:
@@ -754,6 +756,7 @@ enterInteractiveMode (void) {
 
   if (line) free(line);
   deallocateQueue(arguments);
+  popLogPrefix();
 }
 
 typedef struct {
