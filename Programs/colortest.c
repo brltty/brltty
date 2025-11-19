@@ -558,12 +558,12 @@ parseIntensity (int *intensity, const char *argument, const char *name) {
 }
 
 static int
-parseAngle (float *angle, const char *argument, const char *name) {
-  return parseFloat(angle, argument, 0.0f, 360.0f, 0, name);
+parseDegrees (float *degrees, const char *argument, const char *name) {
+  return parseFloat(degrees, argument, 0.0f, 360.0f, 0, name);
 }
 
 static int
-parsePercentage (float *value, const char *argument, const char *name) {
+parsePercent (float *value, const char *argument, const char *name) {
   const float maximum = 100.0f;
   if (!parseFloat(value, argument, 0.0f, maximum, 1, name)) return 0;
 
@@ -608,11 +608,11 @@ hsvHandler (Queue *arguments) {
   const char *hueArgument;
   float hueAngle;
 
-  const char *saturationName = "saturation percentage";
+  const char *saturationName = "saturation percent";
   const char *saturationArgument;
   float saturationLevel;
 
-  const char *valueName = "value percentage";
+  const char *valueName = "value percent";
   const char *valueArgument;
   float valueLevel;
 
@@ -620,9 +620,9 @@ hsvHandler (Queue *arguments) {
     if ((saturationArgument = getNextArgument(arguments, saturationName))) {
       if ((valueArgument = getNextArgument(arguments, valueName))) {
         if (noMoreArguments(arguments)) {
-          if (parseAngle(&hueAngle, hueArgument, hueName)) {
-            if (parsePercentage(&saturationLevel, saturationArgument, saturationName)) {
-              if (parsePercentage(&valueLevel, valueArgument, valueName)) {
+          if (parseDegrees(&hueAngle, hueArgument, hueName)) {
+            if (parsePercent(&saturationLevel, saturationArgument, saturationName)) {
+              if (parsePercent(&valueLevel, valueArgument, valueName)) {
                 showHSV(hueAngle, saturationLevel, valueLevel);
               }
             }
@@ -673,7 +673,7 @@ typedef struct {
 
 static void
 putColorModelSyntax (const ColorModel *model) {
-  putf("\n%s color syntax: %s\n", model->name, model->syntax);
+  putf("\n%s color model syntax: %s\n", model->name, model->syntax);
 }
 
 static const ColorModel colorModels[] = {
@@ -683,7 +683,7 @@ static const ColorModel colorModels[] = {
   },
 
   { .name = "HSV",
-    .syntax = "hue (an angle) saturation (a percentage) value (a percentage)",
+    .syntax = "hue (degrees) saturation (percent) value (percent)",
     .handler = hsvHandler,
   },
 
