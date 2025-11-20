@@ -276,18 +276,18 @@ getHueName(float hue) {
    */
 
   static const char *const hueNames[] = {
-    "red",
-    "orange",
-    "yellow",
-    "yellow-green",
-    "green",
-    "cyan-green",
-    "cyan",
-    "blue-cyan",
-    "blue",
-    "violet",
-    "magenta",
-    "red-magenta",
+    /*   0° */ "red",
+    /*  30° */ "orange",
+    /*  60° */ "yellow",
+    /*  90° */ "yellow-green",
+    /* 120° */ "green",
+    /* 150° */ "cyan-green",
+    /* 180° */ "cyan",
+    /* 210° */ "blue-cyan",
+    /* 240° */ "blue",
+    /* 270° */ "violet",
+    /* 300° */ "magenta",
+    /* 330° */ "red-magenta",
   };
 
   hue += 15.0f;
