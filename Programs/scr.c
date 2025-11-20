@@ -30,6 +30,7 @@
 #include "log.h"
 #include "unicode.h"
 #include "scr.h"
+#include "scr_utils.h"
 #include "scr_real.h"
 #include "driver.h"
 
@@ -109,10 +110,12 @@ readScreen (short left, short top, short width, short height, ScreenCharacter *b
     .height = height,
   };
 
+  unsigned int count = box.width * box.height;
+  clearScreenCharacters(buffer, count);
   if (!currentScreen->readCharacters(&box, buffer)) return 0;
 
   ScreenCharacter *character = buffer;
-  const ScreenCharacter *end = character + (box.width * box.height);
+  const ScreenCharacter *end = character + count;
 
   while (character < end) {
     uint32_t text = character->text;

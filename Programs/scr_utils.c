@@ -29,8 +29,10 @@ setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count)
 
 void
 setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attributes, size_t count) {
+  const ScreenColor color = {.vgaAttributes = attributes};
+
   while (count > 0) {
-    characters[--count].color.vgaAttributes = attributes;
+    characters[--count].color = color;
   }
 }
 

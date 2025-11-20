@@ -2075,6 +2075,7 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 
       for (unsigned int row=0; row<box->height; row+=1) {
         ScreenCharacter characters[size->columns];
+        clearScreenCharacters(characters, size->columns);
         if (!readScreenRow(box->top+row, size->columns, characters, NULL)) return 0;
 
         memcpy(buffer, &characters[box->left],

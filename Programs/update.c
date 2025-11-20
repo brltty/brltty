@@ -27,6 +27,7 @@
 #include "report.h"
 #include "strfmt.h"
 #include "update.h"
+#include "color.h"
 #include "async_handle.h"
 #include "async_alarm.h"
 #include "timing.h"
@@ -170,7 +171,18 @@ static void
 translateScreenCharacter_attributes (
   const ScreenCharacter *character, unsigned char *cell, wchar_t *text
 ) {
-  *text = UNICODE_BRAILLE_ROW | (*cell = convertAttributesToDots(attributesTable, character->color.vgaAttributes));
+  unsigned char attributes;
+
+  if (character->color.color) {
+    int foreground = rgbColorToVga(character->color.foreground);
+    int background = rgbColorToVga(character->color.background) & ~VGA_BIT_BRIGHT;
+    if (character->color.isBlinking) background |= VGA_BIT_BRIGHT;
+    attributes = (background << 4) | foreground;
+  } else {
+    attributes = character->color.vgaAttributes;
+  }
+
+  *text = UNICODE_BRAILLE_ROW | (*cell = convertAttributesToDots(attributesTable, attributes));
 }
 
 static void
