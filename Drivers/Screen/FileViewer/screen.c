@@ -410,7 +410,7 @@ readCharacters_FileViewerScreen (const ScreenBox *box, ScreenCharacter *buffer) 
 
       for (unsigned int column=from; column<to; column+=1) {
         target->text = (column < line->length)? fileCharacters[line->offset + column]: WC_C(' ');
-        target->attributes = SCR_COLOUR_DEFAULT;
+        target->color.vgaAttributes = SCR_COLOUR_DEFAULT;
         target += 1;
       }
     }

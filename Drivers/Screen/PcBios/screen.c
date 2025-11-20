@@ -69,7 +69,7 @@ readCharacters_PcBiosScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   for (row=box->top; row<box->top+box->height; ++row)
     for (col=box->left; col<box->left+box->width; ++col) {
       buffer->text = _farnspeekb(offset + row*description.cols*2 + col*2);
-      buffer->attributes = _farnspeekb(offset + row*description.cols*2 + col*2 + 1);
+      buffer->color.vgaAttributes = _farnspeekb(offset + row*description.cols*2 + col*2 + 1);
       buffer++;
     }
   return 1;

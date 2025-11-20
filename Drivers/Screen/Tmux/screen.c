@@ -195,7 +195,7 @@ static ScreenAttributes
 mapAnsiToAttribute(int code, ScreenAttributes current) {
   /* Process a single ANSI SGR (Select Graphic Rendition) parameter */
   if (code == 0) {
-    /* Reset all attributes */
+    /* Reset all VGA attributes */
     return SCR_COLOUR_DEFAULT;
   } else if (code == 1) {
     /* Bold - set bright flag on foreground */
@@ -242,7 +242,7 @@ parseAnsiSequence(const char **ptr, ScreenAttributes *attr) {
   /* Parse an ANSI escape sequence: ESC[...m
    * Returns 1 if a sequence was parsed, 0 otherwise
    * Updates *ptr to point past the sequence
-   * Updates *attr with new attributes */
+   * Updates *attr with new VGA attributes */
 
   const char *p = *ptr;
 
@@ -1108,7 +1108,7 @@ readCharacters_TmuxScreen(const ScreenBox *box, ScreenCharacter *buffer) {
       int bufferIndex = row * box->width + col;
 
       buffer[bufferIndex].text = screenContent[screenIndex];
-      buffer[bufferIndex].attributes = screenAttrs[screenIndex];
+      buffer[bufferIndex].color.vgaAttributes = screenAttrs[screenIndex];
     }
   }
 

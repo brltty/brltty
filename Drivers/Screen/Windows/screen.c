@@ -295,14 +295,14 @@ readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 
     for (x=0, xx=0; x<box->width && xx < read; x++, xx++) {
       int i;
-      buffer[y*box->width+x].attributes = bufAttr[xx];
+      buffer[y*box->width+x].color.vgaAttributes = bufAttr[xx];
       for (i = 1; i < getCharacterWidth(buffer[y*box->width+x].text); i++) {
 	x++;
-        buffer[y*box->width+x].attributes = bufAttr[xx];
+        buffer[y*box->width+x].color.vgaAttributes = bufAttr[xx];
       }
     }
     for ( ; x < box->width; x++)
-      buffer[y*box->width+x].attributes = 0;
+      buffer[y*box->width+x].color.vgaAttributes = 0;
   }
 
   free(buf);

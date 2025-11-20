@@ -30,7 +30,7 @@ setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count)
 void
 setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attributes, size_t count) {
   while (count > 0) {
-    characters[--count].attributes = attributes;
+    characters[--count].color.vgaAttributes = attributes;
   }
 }
 

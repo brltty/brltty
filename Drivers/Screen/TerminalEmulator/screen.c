@@ -467,7 +467,7 @@ describe_TerminalEmulatorScreen (ScreenDescription *description) {
 }
 
 static void
-setScreenAttribute (ScreenAttributes *attributes, ScreenAttributes attribute, unsigned char level, int bright) {
+setScreenAttribute (unsigned char *attributes, ScreenAttributes attribute, unsigned char level, int bright) {
   if (level >= 0X20) {
     *attributes |= attribute;
     if (bright && (level >= 0XD0)) *attributes |= SCR_ATTR_FG_BRIGHT;
@@ -494,7 +494,7 @@ readCharacters_TerminalEmulatorScreen (const ScreenBox *box, ScreenCharacter *bu
         target->text = source->text;
 
         {
-          ScreenAttributes *attributes = &target->attributes;
+          unsigned char *attributes = &target->color.vgaAttributes;
           *attributes = 0;
           if (source->blink) *attributes |= SCR_ATTR_BLINK;
 

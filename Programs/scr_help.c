@@ -252,7 +252,7 @@ readCharacters_HelpScreen (const ScreenBox *box, ScreenCharacter *buffer) {
             character->text = WC_C(' ');
           }
 
-          character->attributes = SCR_COLOUR_DEFAULT;
+          character->color.vgaAttributes = SCR_COLOUR_DEFAULT;
           character += 1;
         }
       }

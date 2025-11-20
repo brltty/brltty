@@ -151,7 +151,7 @@ translateScreenCharacter_text (
   }
 
   if (prefs.showAttributes) {
-    overlayAttributesUnderline(cell, character->attributes);
+    overlayAttributesUnderline(cell, character->color.vgaAttributes);
   }
 
   {
@@ -170,7 +170,7 @@ static void
 translateScreenCharacter_attributes (
   const ScreenCharacter *character, unsigned char *cell, wchar_t *text
 ) {
-  *text = UNICODE_BRAILLE_ROW | (*cell = convertAttributesToDots(attributesTable, character->attributes));
+  *text = UNICODE_BRAILLE_ROW | (*cell = convertAttributesToDots(attributesTable, character->color.vgaAttributes));
 }
 
 static void
@@ -358,7 +358,7 @@ contractScreenRow (BrailleRowDescriptor *brd, unsigned int screenRow, unsigned c
         attributes = 0;
       }
 
-      attributes |= inputCharacters[inputOffset].attributes;
+      attributes |= inputCharacters[inputOffset].color.vgaAttributes;
     }
 
     while (outputOffset < outputLength) {

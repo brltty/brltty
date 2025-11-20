@@ -176,7 +176,7 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
       /* LRGB */ strtext("white")
     };
 
-    unsigned char attributes = character.attributes;
+    unsigned char attributes = character.color.vgaAttributes;
     const char *foreground = gettext(colours[attributes & SCR_MASK_FG]);
     const char *background = gettext(colours[(attributes & SCR_MASK_BG) >> 4]);
 
@@ -186,7 +186,7 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
     STR_PRINTF(gettext("%1$s on %2$s"), foreground, background);
   }
 
-  if (character.attributes & SCR_ATTR_BLINK) {
+  if (character.color.vgaAttributes & SCR_ATTR_BLINK) {
     STR_PRINTF(" %s", gettext("blinking"));
   }
 STR_END_FORMATTER

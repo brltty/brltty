@@ -1042,7 +1042,7 @@ sayScreenCharacters (const ScreenCharacter *characters, size_t count, SayOptions
 
       while (character < end) {
         *text++ = character->text;
-        *attributes++ = character->attributes;
+        *attributes++ = character->color.vgaAttributes;
         character += 1;
       }
 
@@ -1079,7 +1079,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
     }
   } else if (count == 1) {
     wchar_t character = characters[0].text;
-    unsigned char attributes = characters[0].attributes;
+    unsigned char attributes = characters[0].color.vgaAttributes;
     const char *prefix = NULL;
 
     if (iswupper(character)) {
@@ -1130,7 +1130,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
 
     while (character < end) {
       *text++ = character->text;
-      *attributes++ = character->attributes;
+      *attributes++ = character->color.vgaAttributes;
 
       *text++ = WC_C(' ');
       *attributes++ = SCR_COLOUR_DEFAULT;
@@ -1234,7 +1234,7 @@ isSameAttributes (
   const ScreenCharacter *character1,
   const ScreenCharacter *character2
 ) {
-  return character1->attributes == character2->attributes;
+  return character1->color.vgaAttributes == character2->color.vgaAttributes;
 }
 
 int

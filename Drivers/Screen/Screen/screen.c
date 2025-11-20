@@ -193,7 +193,7 @@ readCharacters_ScreenScreen (const ScreenBox *box, ScreenCharacter *buffer) {
         wint_t wc = convertCharToWchar(*text++);
         if (wc == WEOF) wc = L'?';
         character->text = wc;
-        character->attributes = *attributes++;
+        character->color.vgaAttributes = *attributes++;
         character++;
       }
       text += increment;

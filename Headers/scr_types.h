@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_SCR_TYPES
 #define BRLTTY_INCLUDED_SCR_TYPES
 
+#include "color_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -66,8 +68,22 @@ typedef enum {
 } ScreenAttributes;
 
 typedef struct {
+  unsigned char vgaAttributes;
+
+  RGBColor foreground;
+  RGBColor background;
+
+  unsigned char color:1;
+  unsigned char isBlinking:1;
+  unsigned char isBold:1;
+  unsigned char isItalic:1;
+  unsigned char hasUnderline:1;
+  unsigned char hasStrikeThrough:1;
+} ScreenColor;
+
+typedef struct {
   wchar_t text;
-  ScreenAttributes attributes;
+  ScreenColor color;
 } ScreenCharacter;
 
 typedef enum {

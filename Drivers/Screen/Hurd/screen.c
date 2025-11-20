@@ -232,7 +232,7 @@ readCharacters_HurdScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 #endif
       buffer->text = text;
       attr = screenDisplay[(row%lines)*description.cols+col].attr;
-      buffer->attributes = attr.fgcol | (attr.bgcol << 4)
+      buffer->color.vgaAttributes = attr.fgcol | (attr.bgcol << 4)
 	| (attr.intensity == CONS_ATTR_INTENSITY_BOLD?SCR_ATTR_FG_BRIGHT:0)
 	| (attr.blinking?SCR_ATTR_BLINK:0);
       buffer++;

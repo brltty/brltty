@@ -1471,7 +1471,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
 
       if (wc != WEOF) {
         if (character) {
-          character->attributes = ((*vga & unshiftedAttributesMask) |
+          character->color.vgaAttributes = ((*vga & unshiftedAttributesMask) |
                                    ((*vga & shiftedAttributesMask) >> 1)) >> 8;
 
           character->text = wc;
@@ -1493,7 +1493,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
       if (column < size) {
         if (character) {
           character->text = wc;
-          character->attributes = SCR_COLOUR_DEFAULT;
+          character->color.vgaAttributes = SCR_COLOUR_DEFAULT;
           character += 1;
         }
 
@@ -1507,7 +1507,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
     if (character) {
       static const ScreenCharacter pad = {
         .text = WC_C(' '),
-        .attributes = SCR_COLOUR_DEFAULT
+        .color.vgaAttributes = SCR_COLOUR_DEFAULT
       };
 
       *character++ = pad;
