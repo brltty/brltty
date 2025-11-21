@@ -130,6 +130,17 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "If neither -a is specified nor any specific test is requested then, unless -i has been specified, all of the tests are performed.",
 END_COMMAND_LINE_NOTES
 
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "colortest",
+  .options = &programOptions,
+  .parameters = &programParameters,
+
+  .usage = {
+    .purpose = "Test the color conversion and description functions.",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 #define VGA_NAME_FORMAT "(%13s)"
 #define VGA_COLOR_FORMAT "VGA %2d"
 #define RGB_COLOR_FORMAT "RGB(%3d, %3d, %3d)"
@@ -902,20 +913,7 @@ performRequestedTests (void) {
 /* Main test program */
 int
 main (int argc, char *argv[]) {
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .parameters = &programParameters,
-      .applicationName = "colortest",
-
-      .usage = {
-        .purpose = "Test the color conversion and description functions.",
-        .notes = COMMAND_LINE_NOTES(programNotes),
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   if (!auditTestOptions()) {
     return PROG_EXIT_SYNTAX;

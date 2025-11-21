@@ -188,6 +188,20 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-ttb",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Check/edit a text (computer braille) table, or convert it from one format to another."),
+    .parameters = "input-table [output-table]",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static const BrlDotTable dotsInternal = {
   BRL_DOT_1, BRL_DOT_2, BRL_DOT_3, BRL_DOT_4,
   BRL_DOT_5, BRL_DOT_6, BRL_DOT_7, BRL_DOT_8
@@ -2503,21 +2517,9 @@ editTable (void) {
 
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   ProgramExitStatus exitStatus;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "brltty-ttb",
-
-      .usage = {
-        .purpose = strtext("Check/edit a text (computer braille) table, or convert it from one format to another."),
-        .parameters = "input-table [output-table]",
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   if (argc == 0) {
     logMessage(LOG_ERR, "missing input table");

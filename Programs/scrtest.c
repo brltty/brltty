@@ -84,6 +84,20 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "scrtest",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Test a screen driver."),
+    .parameters = "[parameter=value ...]",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static int
 setRegion (
   int *offsetValue, const char *offsetOption, const char *offsetName,
@@ -126,22 +140,10 @@ setRegion (
 
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   ProgramExitStatus exitStatus;
   void *driverObject;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "scrtest",
-
-      .usage = {
-        .purpose = strtext("Test a screen driver."),
-        .parameters = "[parameter=value ...]",
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   if ((screen = loadScreenDriver(opt_screenDriver, &driverObject, opt_driversDirectory))) {
     const char *const *parameterNames = getScreenParameters(screen);

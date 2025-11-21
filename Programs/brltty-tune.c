@@ -92,6 +92,17 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "Each specified file contains a different tune.",
 END_COMMAND_LINE_NOTES
 
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-tune",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Compose a tune with the tune builder and play it with the tone generator."),
+    .parameters = "commands ... | -f [{file | -} ...]",
+    .notes = COMMAND_LINE_NOTES(programNotes, tuneBuilderNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static void
 beginTuneStream (const char *name, void *data) {
   TuneBuilder *tb = data;
@@ -150,20 +161,7 @@ DATA_OPERANDS_PROCESSOR(processTuneLine) {
 
 int
 main (int argc, char *argv[]) {
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "brltty-tune",
-
-      .usage = {
-        .purpose = strtext("Compose a tune with the tune builder and play it with the tone generator."),
-        .parameters = "commands ... | -f [{file | -} ...]",
-        .notes = COMMAND_LINE_NOTES(programNotes, tuneBuilderNotes),
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   resetPreferences();
   if (!parseTuneDevice(opt_tuneDevice)) return PROG_EXIT_SYNTAX;

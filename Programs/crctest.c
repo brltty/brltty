@@ -108,6 +108,20 @@ END_COMMAND_LINE_OPTIONS(programOptions)
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "crctest",
+  .options = &programOptions,
+  .parameters = &programParameters,
+
+  .usage = {
+    .purpose = strtext("Test supported CRC (Cyclic Redundancy Check) checksum algorithms."),
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static int
 validateOptions (void) {
   return 1;
@@ -115,19 +129,7 @@ validateOptions (void) {
 
 int
 main (int argc, char *argv[]) {
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .parameters = &programParameters,
-      .applicationName = "crctest",
-
-      .usage = {
-        .purpose = strtext("Test supported CRC (Cyclic Redundancy Check) checksum algorithms."),
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   if (!validateOptions()) return PROG_EXIT_SYNTAX;
 

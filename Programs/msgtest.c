@@ -66,6 +66,20 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "msgtest",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Test message localization using the message catalog reader."),
+    .parameters = "action [argument ...]",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static int
 noOutputErrorYet (void) {
   if (!ferror(outputStream)) return 1;
@@ -240,21 +254,9 @@ beginAction (char ***argv, int *argc) {
 
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   outputStream = stdout;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "msgtest",
-
-      .usage = {
-        .purpose = strtext("Test message localization using the message catalog reader."),
-        .parameters = "action [argument ...]",
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   if (!argc) {
     logMessage(LOG_ERR, "missing action");

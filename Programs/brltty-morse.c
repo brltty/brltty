@@ -108,6 +108,20 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
 #endif /* HAVE_MIDI_SUPPORT */
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-morse",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Translate text into Morse Code tones."),
+    .parameters = "text ... | -f [{file | -} ...]",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static
 DATA_OPERANDS_PROCESSOR(processMorseLine) {
   MorseObject *morse = data;
@@ -128,19 +142,7 @@ exitMorseObject (void *data) {
 
 int
 main (int argc, char *argv[]) {
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "brltty-morse",
-
-      .usage = {
-        .purpose = strtext("Translate text into Morse Code tones."),
-        .parameters = "text ... | -f [{file | -} ...]",
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   resetPreferences();
   if (!parseTuneDevice(opt_tuneDevice)) return PROG_EXIT_SYNTAX;

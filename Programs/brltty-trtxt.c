@@ -81,6 +81,20 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-trtxt",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Translate one binary braille representation to another."),
+    .parameters = "[{input-file | -} ...]",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static TextTable *inputTable;
 static TextTable *outputTable;
 
@@ -229,21 +243,9 @@ getTable (TextTable **table, const char *name) {
 
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "brltty-trtxt",
-
-      .usage = {
-        .purpose = strtext("Translate one binary braille representation to another."),
-        .parameters = "[{input-file | -} ...]",
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   if (getTable(&inputTable, opt_inputTable)) {
     if (getTable(&outputTable, opt_outputTable)) {

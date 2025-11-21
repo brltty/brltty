@@ -120,6 +120,20 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-pty",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Run a shell or terminal manager within a pty (virtual terminal) and export its screen via a shared memory segment so that brltty can read it via its Terminal Emulator screen driver."),
+    .parameters = "[command [arg ...]]",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static void writeDriverDirective (const char *format, ...) PRINTF(1, 2);
 
 static void
@@ -407,21 +421,9 @@ runParent (pid_t child) {
 
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   int exitStatus = PROG_EXIT_FATAL;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "brltty-pty",
-
-      .usage = {
-        .purpose = strtext("Run a shell or terminal manager within a pty (virtual terminal) and export its screen via a shared memory segment so that brltty can read it via its Terminal Emulator screen driver."),
-        .parameters = "[command [arg ...]]",
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   ptySetLogTerminalInput(opt_logInput);
   ptySetLogTerminalOutput(opt_logOutput);

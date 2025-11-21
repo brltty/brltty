@@ -129,6 +129,20 @@ END_COMMAND_LINE_OPTIONS(programOptions)
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "apitest",
+  .options = &programOptions,
+  .parameters = &programParameters,
+
+  .usage = {
+    .purpose = strtext("Test BrlAPI functions."),
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static void showDisplaySize(void)
 {
   unsigned int x, y;
@@ -473,22 +487,10 @@ static void exerciseThreads(void)
 
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
   brlapi_fileDescriptor fd;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .parameters = &programParameters,
-      .applicationName = "apitest",
-
-      .usage = {
-        .purpose = strtext("Test BrlAPI functions."),
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   settings.host = opt_host;
   settings.auth = opt_auth;

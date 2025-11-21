@@ -37,22 +37,25 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-atb",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Check an attributes table."),
+    .parameters = "attributes-table",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "brltty-atb",
-
-      .usage = {
-        .purpose = strtext("Check an attributes table."),
-        .parameters = "attributes-table",
-      }
-    };
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   if (argc) {
     const char *tableName = (argc--, *argv++);

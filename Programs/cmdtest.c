@@ -93,30 +93,27 @@ BEGIN_COMMAND_LINE_NOTES(additionalNotes)
   "whereas those within tune_builder describe how to write a tune.",
 END_COMMAND_LINE_NOTES
 
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "cmdtest",
+  .options = &programOptions,
+  .parameters = &programParameters,
+
+  .extraParameters = {
+     .name = "extra",
+     .description = "zero or more additional parameters",
+  },
+
+  .usage = {
+    .purpose = "Test, as well as demonstrate how to use, the command line parser.",
+    .notes = COMMAND_LINE_NOTES(programNotes, additionalNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   int logLevel = LOG_NOTICE;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .parameters = &programParameters,
-
-      .extraParameters = {
-         .name = "extra",
-         .description = "zero or more additional parameters",
-      },
-
-      .applicationName = "cmdtest",
-
-      .usage = {
-        .purpose = "Test, as well as demonstrate how to use, the command line parser.",
-        .notes = COMMAND_LINE_NOTES(programNotes, additionalNotes),
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   logMessage(logLevel, "Flag: %s", (flagOption? fkpTrueFalse.on: fkpTrueFalse.off));
   logMessage(logLevel, "Counter: %d", counterOption);

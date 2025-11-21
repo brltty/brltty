@@ -30,6 +30,20 @@
 BEGIN_COMMAND_LINE_OPTIONS(programOptions)
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-lsinc",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("List the paths to a data file and those which it recursively includes."),
+    .parameters = "file ...",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static void
 noMemory (void) {
   fprintf(stderr, "%s: insufficient memory\n", programName);
@@ -84,21 +98,9 @@ static DATA_OPERANDS_PROCESSOR(processOperands) {
 
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   ProgramExitStatus exitStatus;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "brltty-lsinc",
-
-      .usage = {
-        .purpose = strtext("List the paths to a data file and those which it recursively includes."),
-        .parameters = "file ...",
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   if (argc == 0) {
     logMessage(LOG_ERR, "missing file");

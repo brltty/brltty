@@ -220,6 +220,17 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "The first byte is the report number - specify 00 for no report number.",
 END_COMMAND_LINE_NOTES
 
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-hid",
+  .options = &programOptions,
+  .parameters = &programParameters,
+
+  .usage = {
+    .purpose = strtext("Find HID devices, list report descriptors, read/write reports/features, or monitor input from a HID device."),
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static FILE *outputStream;
 static int outputError;
 
@@ -1059,20 +1070,7 @@ performActions (HidDevice *device) {
 
 int
 main (int argc, char *argv[]) {
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .parameters = &programParameters,
-      .applicationName = "brltty-hid",
-
-      .usage = {
-        .purpose = strtext("Find HID devices, list report descriptors, read/write reports/features, or monitor input from a HID device."),
-        .notes = COMMAND_LINE_NOTES(programNotes),
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   outputStream = stdout;
   outputError = 0;

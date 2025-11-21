@@ -80,6 +80,20 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "spktest",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Test a speech driver."),
+    .parameters = "[driver [parameter=value ...]]",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static int
 say (SpeechSynthesizer *spk, const char *string) {
   if (!sayString(spk, string, 0)) return 0;
@@ -97,29 +111,16 @@ sayLine (const LineHandlerParameters *parameters) {
 
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   ProgramExitStatus exitStatus;
   SpeechSynthesizer spk;
-
 
   const char *driver = NULL;
   void *object;
 
   int speechVolume = SPK_VOLUME_DEFAULT;
   int speechRate = SPK_RATE_DEFAULT;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "spktest",
-
-      .usage = {
-        .purpose = strtext("Test a speech driver."),
-        .parameters = "[driver [parameter=value ...]]",
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   if (opt_speechVolume && *opt_speechVolume) {
     static const int minimum = 0;

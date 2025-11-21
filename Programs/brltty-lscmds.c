@@ -33,6 +33,20 @@ END_COMMAND_LINE_OPTIONS(programOptions)
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-lscmds",
+  .options = &programOptions,
+  .parameters = &programParameters,
+
+  .usage = {
+    .purpose = strtext("Write a brltty command reference in reStructuredText."),
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static void
 writeCharacter (char character) {
   putc(character, stdout);
@@ -248,19 +262,7 @@ putCommandIndex (void) {
 
 int
 main (int argc, char *argv[]) {
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .parameters = &programParameters,
-      .applicationName = "brltty-lscmds",
-
-      .usage = {
-        .purpose = strtext("Write a brltty command reference in reStructuredText."),
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   writeHeader("The BRLTTY Command Reference");
   writeString(".. contents::\n\n");

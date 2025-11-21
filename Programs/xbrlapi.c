@@ -148,6 +148,20 @@ END_COMMAND_LINE_OPTIONS(programOptions)
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "xbrlapi",
+  .options = &programOptions,
+  .parameters = &programParameters,
+
+  .usage = {
+    .purpose = strtext("Augment an X session by supporting input typed on the braille device, showing the title of the focused window on the braille display, and switching braille focus to it."),
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 /******************************************************************************
  * error handling
  */
@@ -1188,19 +1202,7 @@ static void term_handler(int foo) {
 
 int
 main (int argc, char *argv[]) {
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .parameters = &programParameters,
-      .applicationName = "xbrlapi",
-
-      .usage = {
-        .purpose = strtext("Augment an X session by supporting input typed on the braille device, showing the title of the focused window on the braille display, and switching braille focus to it."),
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   signal(SIGTERM,term_handler);
   signal(SIGINT,term_handler);

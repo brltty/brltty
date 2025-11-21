@@ -127,6 +127,11 @@ typedef struct {
   const CommandLineUsage usage;
 } CommandLineDescriptor;
 
+#define BEGIN_COMMAND_LINE_DESCRIPTOR(name) \
+static const CommandLineDescriptor name = {
+
+#define END_COMMAND_LINE_DESCRIPTOR };
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

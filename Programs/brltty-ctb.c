@@ -98,6 +98,20 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-ctb",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Check/validate a contraction (literary braille) table, or translate text into contracted braille."),
+    .parameters = "[{input-file | -} ...]",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static wchar_t *inputBuffer;
 static size_t inputSize;
 static size_t inputLength;
@@ -432,6 +446,8 @@ static DATA_OPERANDS_PROCESSOR(processInputLine) {
 
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
 
   verificationTablePath = NULL;
@@ -440,20 +456,6 @@ main (int argc, char *argv[]) {
 
   resetPreferences();
   prefs.expandCurrentWord = 0;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "brltty-ctb",
-
-      .usage = {
-        .purpose = strtext("Check/validate a contraction (literary braille) table, or translate text into contracted braille."),
-        .parameters = "[{input-file | -} ...]",
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   inputBuffer = NULL;
   inputSize = 0;

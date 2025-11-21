@@ -84,26 +84,27 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltest",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Test a braille driver."),
+    .parameters = "[driver [parameter=value ...]]",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 int
 main (int argc, char *argv[]) {
-  ProgramExitStatus exitStatus;
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
+  ProgramExitStatus exitStatus;
   const char *driver = NULL;
   void *object;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "brltest",
-
-      .usage = {
-        .purpose = strtext("Test a braille driver."),
-        .parameters = "[driver [parameter=value ...]]",
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   if (argc) {
     driver = *argv++, --argc;

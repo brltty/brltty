@@ -818,6 +818,24 @@ END_COMMAND_LINE_OPTIONS(programOptions)
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty",
+  .options = &programOptions,
+  .parameters = &programParameters,
+
+  .configurationFile = &opt_configurationFile,
+  .doEnvironmentVariables = &opt_environmentVariables,
+  .doBootParameters = &opt_bootParameters,
+
+  .usage = {
+    .purpose = strtext("Screen reader for those who use a braille device."),
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 int
 changeLogLevel (const char *operand) {
   int ok = 1;
@@ -894,21 +912,7 @@ establishPrivileges (void) {
 ProgramExitStatus
 brlttyPrepare (int argc, char *argv[]) {
   {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .parameters = &programParameters,
-
-      .applicationName = "brltty",
-      .configurationFile = &opt_configurationFile,
-      .doEnvironmentVariables = &opt_environmentVariables,
-      .doBootParameters = &opt_bootParameters,
-
-      .usage = {
-        .purpose = strtext("Screen reader for those who use a braille device."),
-      }
-    };
-
-    ProgramExitStatus exitStatus = processCommandLine(&descriptor, &argc, &argv);
+    ProgramExitStatus exitStatus = processCommandLine(&programDescriptor, &argc, &argv);
 
     switch (exitStatus) {
       case PROG_EXIT_SYNTAX:

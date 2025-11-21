@@ -69,6 +69,17 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "  \\\\  literal backslasha  ",
 END_COMMAND_LINE_NOTES
 
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-cldr",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("List the characters defined within a CLDR (Common Locale Data Repository Project) annotations file."),
+    .parameters = "input-file",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static void
 onFormatError (void) {
   exit(PROG_EXIT_SYNTAX);
@@ -228,20 +239,7 @@ CLDR_ANNOTATION_HANDLER(handleAnnotation) {
 
 int
 main (int argc, char *argv[]) {
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "brltty-cldr",
-
-      .usage = {
-        .purpose = strtext("List the characters defined within a CLDR (Common Locale Data Repository Project) annotations file."),
-        .parameters = "input-file",
-        .notes = COMMAND_LINE_NOTES(programNotes),
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   if (argc < 1) {
     logMessage(LOG_ERR, "missing annotations file name");

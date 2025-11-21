@@ -38,6 +38,20 @@
 BEGIN_COMMAND_LINE_OPTIONS(programOptions)
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "tbl2hex",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Write the hexadecimal array representation of a compiled table."),
+    .parameters = "table-file",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 typedef struct {
   void *object;
   const unsigned char *bytes;
@@ -203,21 +217,10 @@ outputError:
 
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   ProgramExitStatus exitStatus;
   char *path;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "tbl2hex",
-
-      .usage = {
-        .purpose = strtext("Write the hexadecimal array representation of a compiled table."),
-        .parameters = "table-file",
-      }
-    };
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   if (argc == 0) {
     logMessage(LOG_ERR, "missing table file.");

@@ -91,6 +91,20 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-ktb",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("check a key table, list the key naems it can use, or write the key bindings it defines in useful formats."),
+    .parameters = "table-name",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static void *driverObject;
 
 typedef struct {
@@ -280,21 +294,9 @@ static const KeyTableListMethods rstMethods = {
 
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "brltty-ktb",
-
-      .usage = {
-        .purpose = strtext("check a key table, list the key naems it can use, or write the key bindings it defines in useful formats."),
-        .parameters = "table-name",
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   driverObject = NULL;
 

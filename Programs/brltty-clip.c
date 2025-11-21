@@ -68,6 +68,20 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_NOTES(programNotes)
+END_COMMAND_LINE_NOTES
+
+BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
+  .applicationName = "brltty-clip",
+  .options = &programOptions,
+
+  .usage = {
+    .purpose = strtext("Manage brltty's clipboard from the command line."),
+    .parameters = "[{input-file | -} ...]",
+    .notes = COMMAND_LINE_NOTES(programNotes),
+  }
+END_COMMAND_LINE_DESCRIPTOR
+
 static const brlapi_param_t apiParameter = BRLAPI_PARAM_CLIPBOARD_CONTENT;
 static const brlapi_param_subparam_t apiSubparam = 0;
 static const brlapi_param_flags_t apiFlags = BRLAPI_PARAMF_GLOBAL;
@@ -143,21 +157,9 @@ static DATA_OPERANDS_PROCESSOR(processInputLine) {
 
 int
 main (int argc, char *argv[]) {
+  PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
+
   ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
-
-  {
-    const CommandLineDescriptor descriptor = {
-      .options = &programOptions,
-      .applicationName = "brltty-clip",
-
-      .usage = {
-        .purpose = strtext("Manage brltty's clipboard from the command line."),
-        .parameters = "[{input-file | -} ...]",
-      }
-    };
-
-    PROCESS_COMMAND_LINE(descriptor, argc, argv);
-  }
 
   brlapi_connectionSettings_t settings = {
     .host = opt_apiHost,
