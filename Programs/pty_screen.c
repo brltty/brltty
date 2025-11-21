@@ -216,6 +216,7 @@ setCharacter (unsigned int row, unsigned int column, const ScreenSegmentCharacte
 
   if (attributes & A_BLINK) character.blink = 1;
   if (attributes & A_UNDERLINE) character.underline = 1;
+  if (attributes & A_BOLD) character.bold = 1;
 
   {
     ScreenSegmentCharacter *location = getScreenCharacter(segmentHeader, row, column, end);

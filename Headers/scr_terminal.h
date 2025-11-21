@@ -50,6 +50,7 @@ typedef struct {
 
   unsigned char blink:1;
   unsigned char underline:1;
+  unsigned char bold:1;
 } ScreenSegmentCharacter;
 
 typedef struct {
