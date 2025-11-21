@@ -76,7 +76,6 @@ BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
   },
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
-static
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "Unspecified text options, list options, and optional parameters",
   "are set to an empty string (\"\").",
@@ -85,7 +84,6 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "Items within a list are separated from one another by a comma (,).",
 END_COMMAND_LINE_NOTES
 
-static
 BEGIN_COMMAND_LINE_NOTES(additionalNotes)
   "One or more additional notes blocks may be specifid.",
   "See brltty-tune.c and tune_builder.[ch] for a practical example -",

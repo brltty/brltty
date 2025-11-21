@@ -85,7 +85,6 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
 #endif /* HAVE_MIDI_SUPPORT */
 END_COMMAND_LINE_OPTIONS(programOptions)
 
-static
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "If the tune is specified on the command line then each argument contains a command group.",
   "If it's read from a file then each line contains a command group.",

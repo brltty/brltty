@@ -100,7 +100,8 @@ static const CommandLineParameters name = { \
 };
 
 #define DECLARE_COMMAND_LINE_NOTES(name) const char *const name[]
-#define BEGIN_COMMAND_LINE_NOTES(name) DECLARE_COMMAND_LINE_NOTES(name) = {
+#define START_COMMAND_LINE_NOTES(name) DECLARE_COMMAND_LINE_NOTES(name) = {
+#define BEGIN_COMMAND_LINE_NOTES(name) static START_COMMAND_LINE_NOTES(name)
 #define END_COMMAND_LINE_NOTES NULL};
 #define COMMAND_LINE_NOTES(...) (const char *const *const []){__VA_ARGS__, NULL}
 

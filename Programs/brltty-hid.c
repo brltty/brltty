@@ -212,7 +212,6 @@ END_COMMAND_LINE_OPTIONS(programOptions)
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
-static
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "When writing a report or feature, the bytes don't need to be, but can be, separated from one another by whitespace.",
   "Each byte is either two hexadecimal digits or zero or more braille dot numbers within [square brackets].",

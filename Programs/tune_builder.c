@@ -681,7 +681,7 @@ destroyTuneBuilder (TuneBuilder *tb) {
   free(tb);
 }
 
-BEGIN_COMMAND_LINE_NOTES(tuneBuilderNotes)
+START_COMMAND_LINE_NOTES(tuneBuilderNotes)
   "A command group is zero or more commands separated from one another by whitespace.",
   "A number sign [#] at the beginning or after whitespace begins a comment.",
   "",

@@ -124,7 +124,6 @@ END_COMMAND_LINE_OPTIONS(programOptions)
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
-static
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "The -a option may not be combined with any option that requests a specific test.",
   "If neither -a is specified nor any specific test is requested then, unless -i has been specified, all of the tests are performed.",

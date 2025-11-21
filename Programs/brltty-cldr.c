@@ -43,7 +43,6 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
-static
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "The output format is printf-like -",
   "arbitrary text which may contain",
