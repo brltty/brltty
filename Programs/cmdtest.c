@@ -82,6 +82,12 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "Unspecified flag options are set to false (0).",
   "Unspecified counter options are set to zero (0).",
   "Items within a list are separated from one another by a comma (,).",
+  "",
+  "A sequence of unindented lines are formatted into a paragraph,",
+  "with a single space being inserted between them.",
+  "  Indented and empty lines aren't formatted and interrupt paragraph formatting.",
+  "The lines within a paragraph are wrapped at word boundaries",
+  "with the maximum length of each being the width of the screen.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_NOTES(additionalNotes)

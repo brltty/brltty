@@ -611,7 +611,7 @@ showHelp (
   {
     const char *const *const *notes = usage->notes;
 
-    if (notes && *notes) {
+    if (notes && *notes && **notes) {
       if (!putNewline(stream)) return 0;
       if (!putFormattedLines(stream, notes, line, width)) return 0;
     }
