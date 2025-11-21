@@ -106,26 +106,22 @@ static const CommandLineParameters name = { \
 #define COMMAND_LINE_NOTES(...) (const char *const *const []){__VA_ARGS__, NULL}
 
 typedef struct {
+  const char *applicationName;
   const char *purpose;
-  const char *parameters;
-  const char *const *const *notes;
-} CommandLineUsage;
+  const char *oldParameters;
 
-typedef struct {
   const CommandLineOptions *options;
   const CommandLineParameters *parameters;
+  const char *const *const *notes;
 
   struct {
     const char *name;
     const char *description;
   } extraParameters;
 
-  const char *applicationName;
   char **configurationFile;
   int *doEnvironmentVariables;
   int *doBootParameters;
-
-  const CommandLineUsage usage;
 } CommandLineDescriptor;
 
 #define BEGIN_COMMAND_LINE_DESCRIPTOR(name) \

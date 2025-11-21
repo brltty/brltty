@@ -42,13 +42,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty-atb",
-  .options = &programOptions,
+  .purpose = strtext("Check an attributes table."),
+  .oldParameters = "attributes-table",
 
-  .usage = {
-    .purpose = strtext("Check an attributes table."),
-    .parameters = "attributes-table",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 int

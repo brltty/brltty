@@ -96,13 +96,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty-ktb",
-  .options = &programOptions,
+  .purpose = strtext("check a key table, list the key naems it can use, or write the key bindings it defines in useful formats."),
+  .oldParameters = "table-name",
 
-  .usage = {
-    .purpose = strtext("check a key table, list the key naems it can use, or write the key bindings it defines in useful formats."),
-    .parameters = "table-name",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static void *driverObject;

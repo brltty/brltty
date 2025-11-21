@@ -70,13 +70,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty-cldr",
-  .options = &programOptions,
+  .purpose = strtext("List the characters defined within a CLDR (Common Locale Data Repository Project) annotations file."),
+  .oldParameters = "input-file",
 
-  .usage = {
-    .purpose = strtext("List the characters defined within a CLDR (Common Locale Data Repository Project) annotations file."),
-    .parameters = "input-file",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static void

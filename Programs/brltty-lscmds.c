@@ -38,13 +38,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty-lscmds",
+  .purpose = strtext("Write a brltty command reference in reStructuredText."),
+
   .options = &programOptions,
   .parameters = &programParameters,
-
-  .usage = {
-    .purpose = strtext("Write a brltty command reference in reStructuredText."),
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static void

@@ -93,13 +93,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty-tune",
-  .options = &programOptions,
+  .purpose = strtext("Compose a tune with the tune builder and play it with the tone generator."),
+  .oldParameters = "commands ... | -f [{file | -} ...]",
 
-  .usage = {
-    .purpose = strtext("Compose a tune with the tune builder and play it with the tone generator."),
-    .parameters = "commands ... | -f [{file | -} ...]",
-    .notes = COMMAND_LINE_NOTES(programNotes, tuneBuilderNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes, tuneBuilderNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static void

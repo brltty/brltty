@@ -73,13 +73,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty-clip",
-  .options = &programOptions,
+  .purpose = strtext("Manage brltty's clipboard from the command line."),
+  .oldParameters = "[{input-file | -} ...]",
 
-  .usage = {
-    .purpose = strtext("Manage brltty's clipboard from the command line."),
-    .parameters = "[{input-file | -} ...]",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static const brlapi_param_t apiParameter = BRLAPI_PARAM_CLIPBOARD_CONTENT;

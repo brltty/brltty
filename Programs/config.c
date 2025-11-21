@@ -823,17 +823,15 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty",
+  .purpose = strtext("Screen reader for those who use a braille device."),
+
   .options = &programOptions,
   .parameters = &programParameters,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 
   .configurationFile = &opt_configurationFile,
   .doEnvironmentVariables = &opt_environmentVariables,
   .doBootParameters = &opt_bootParameters,
-
-  .usage = {
-    .purpose = strtext("Screen reader for those who use a braille device."),
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
 END_COMMAND_LINE_DESCRIPTOR
 
 int

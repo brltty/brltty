@@ -113,13 +113,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty-morse",
-  .options = &programOptions,
+  .purpose = strtext("Translate text into Morse Code tones."),
+  .oldParameters = "text ... | -f [{file | -} ...]",
 
-  .usage = {
-    .purpose = strtext("Translate text into Morse Code tones."),
-    .parameters = "text ... | -f [{file | -} ...]",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static

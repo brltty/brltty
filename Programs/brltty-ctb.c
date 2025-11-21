@@ -103,13 +103,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty-ctb",
-  .options = &programOptions,
+  .purpose = strtext("Check/validate a contraction (literary braille) table, or translate text into contracted braille."),
+  .oldParameters = "[{input-file | -} ...]",
 
-  .usage = {
-    .purpose = strtext("Check/validate a contraction (literary braille) table, or translate text into contracted braille."),
-    .parameters = "[{input-file | -} ...]",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static wchar_t *inputBuffer;

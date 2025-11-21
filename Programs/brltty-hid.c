@@ -221,13 +221,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty-hid",
+  .purpose = strtext("Find HID devices, list report descriptors, read/write reports/features, or monitor input from a HID device."),
+
   .options = &programOptions,
   .parameters = &programParameters,
-
-  .usage = {
-    .purpose = strtext("Find HID devices, list report descriptors, read/write reports/features, or monitor input from a HID device."),
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static FILE *outputStream;

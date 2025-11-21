@@ -294,7 +294,7 @@ showParameterSyntax (
       depth -= 1;
     }
   } else {
-    const char *parameters = descriptor->usage.parameters;
+    const char *parameters = descriptor->oldParameters;
 
     if (parameters) {
       if (!putByte(stream, ' ')) return 0;
@@ -589,14 +589,13 @@ showHelp (
   const OptionProcessingData *opd
 ) {
   FILE *stream = stdout;
-  const CommandLineUsage *usage = &descriptor->usage;
 
   size_t width = UINT16_MAX;
   getConsoleSize(&width, NULL);
   char line[width+1];
 
   {
-    const char *purpose = getTranslatedText(usage->purpose);
+    const char *purpose = getTranslatedText(descriptor->purpose);
 
     if (purpose && *purpose) {
       if (!putWrappedText(stream, purpose, line, 0, width)) return 0;
@@ -609,7 +608,7 @@ showHelp (
   if (!showOptions(stream, line, width, opd)) return 0;
 
   {
-    const char *const *const *notes = usage->notes;
+    const char *const *const *notes = descriptor->notes;
 
     if (notes && *notes && **notes) {
       if (!putNewline(stream)) return 0;

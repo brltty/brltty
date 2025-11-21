@@ -131,13 +131,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "colortest",
+  .purpose = "Test the color conversion and description functions.",
+
   .options = &programOptions,
   .parameters = &programParameters,
-
-  .usage = {
-    .purpose = "Test the color conversion and description functions.",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 #define VGA_NAME_FORMAT "(%13s)"

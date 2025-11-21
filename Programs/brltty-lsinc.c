@@ -35,13 +35,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty-lsinc",
-  .options = &programOptions,
+  .purpose = strtext("List the paths to a data file and those which it recursively includes."),
+  .oldParameters = "file ...",
 
-  .usage = {
-    .purpose = strtext("List the paths to a data file and those which it recursively includes."),
-    .parameters = "file ...",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static void

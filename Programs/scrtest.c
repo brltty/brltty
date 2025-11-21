@@ -89,13 +89,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "scrtest",
-  .options = &programOptions,
+  .purpose = strtext("Test a screen driver."),
+  .oldParameters = "[parameter=value ...]",
 
-  .usage = {
-    .purpose = strtext("Test a screen driver."),
-    .parameters = "[parameter=value ...]",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static int

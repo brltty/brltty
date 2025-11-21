@@ -134,13 +134,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "apitest",
+  .purpose = strtext("Test BrlAPI functions."),
+
   .options = &programOptions,
   .parameters = &programParameters,
-
-  .usage = {
-    .purpose = strtext("Test BrlAPI functions."),
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static void showDisplaySize(void)

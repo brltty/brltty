@@ -89,13 +89,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltest",
-  .options = &programOptions,
+  .purpose = strtext("Test a braille driver."),
+  .oldParameters = "[driver [parameter=value ...]]",
 
-  .usage = {
-    .purpose = strtext("Test a braille driver."),
-    .parameters = "[driver [parameter=value ...]]",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 int

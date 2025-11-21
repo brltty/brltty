@@ -71,13 +71,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "msgtest",
-  .options = &programOptions,
+  .purpose = strtext("Test message localization using the message catalog reader."),
+  .oldParameters = "action [argument ...]",
 
-  .usage = {
-    .purpose = strtext("Test message localization using the message catalog reader."),
-    .parameters = "action [argument ...]",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static int

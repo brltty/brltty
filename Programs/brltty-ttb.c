@@ -193,13 +193,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty-ttb",
-  .options = &programOptions,
+  .purpose = strtext("Check/edit a text (computer braille) table, or convert it from one format to another."),
+  .oldParameters = "input-table [output-table]",
 
-  .usage = {
-    .purpose = strtext("Check/edit a text (computer braille) table, or convert it from one format to another."),
-    .parameters = "input-table [output-table]",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static const BrlDotTable dotsInternal = {

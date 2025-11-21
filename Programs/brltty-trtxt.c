@@ -86,13 +86,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "brltty-trtxt",
-  .options = &programOptions,
+  .purpose = strtext("Translate one binary braille representation to another."),
+  .oldParameters = "[{input-file | -} ...]",
 
-  .usage = {
-    .purpose = strtext("Translate one binary braille representation to another."),
-    .parameters = "[{input-file | -} ...]",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 static TextTable *inputTable;

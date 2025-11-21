@@ -43,13 +43,11 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "tbl2hex",
-  .options = &programOptions,
+  .purpose = strtext("Write the hexadecimal array representation of a compiled table."),
+  .oldParameters = "table-file",
 
-  .usage = {
-    .purpose = strtext("Write the hexadecimal array representation of a compiled table."),
-    .parameters = "table-file",
-    .notes = COMMAND_LINE_NOTES(programNotes),
-  }
+  .options = &programOptions,
+  .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
 typedef struct {

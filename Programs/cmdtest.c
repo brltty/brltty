@@ -99,18 +99,16 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .applicationName = "cmdtest",
+  .purpose = "Test, as well as demonstrate how to use, the command line parser.",
+
   .options = &programOptions,
   .parameters = &programParameters,
+  .notes = COMMAND_LINE_NOTES(programNotes, additionalNotes),
 
   .extraParameters = {
      .name = "extra",
      .description = "zero or more additional parameters",
   },
-
-  .usage = {
-    .purpose = "Test, as well as demonstrate how to use, the command line parser.",
-    .notes = COMMAND_LINE_NOTES(programNotes, additionalNotes),
-  }
 END_COMMAND_LINE_DESCRIPTOR
 
 int
