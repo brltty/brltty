@@ -822,7 +822,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "brltty",
+  .name = "brltty",
   .purpose = strtext("Screen reader for those who use a braille device."),
 
   .options = &programOptions,

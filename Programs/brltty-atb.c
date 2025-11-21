@@ -41,7 +41,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "brltty-atb",
+  .name = "brltty-atb",
   .purpose = strtext("Check an attributes table."),
   .oldParameters = "attributes-table",
 

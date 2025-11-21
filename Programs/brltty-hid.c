@@ -220,7 +220,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "brltty-hid",
+  .name = "brltty-hid",
   .purpose = strtext("Find HID devices, list report descriptors, read/write reports/features, or monitor input from a HID device."),
 
   .options = &programOptions,

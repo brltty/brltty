@@ -88,7 +88,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "scrtest",
+  .name = "scrtest",
   .purpose = strtext("Test a screen driver."),
   .oldParameters = "[parameter=value ...]",
 

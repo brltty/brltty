@@ -70,7 +70,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "msgtest",
+  .name = "msgtest",
   .purpose = strtext("Test message localization using the message catalog reader."),
   .oldParameters = "action [argument ...]",
 

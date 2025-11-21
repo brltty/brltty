@@ -133,7 +133,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "apitest",
+  .name = "apitest",
   .purpose = strtext("Test BrlAPI functions."),
 
   .options = &programOptions,

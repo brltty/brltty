@@ -130,7 +130,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "colortest",
+  .name = "colortest",
   .purpose = "Test the color conversion and description functions.",
 
   .options = &programOptions,

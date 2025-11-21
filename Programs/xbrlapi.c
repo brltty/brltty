@@ -152,7 +152,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "xbrlapi",
+  .name = "xbrlapi",
   .purpose = strtext("Augment an X session by supporting input typed on the braille device, showing the title of the focused window on the braille display, and switching braille focus to it."),
 
   .options = &programOptions,

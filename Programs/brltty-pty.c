@@ -124,7 +124,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "brltty-pty",
+  .name = "brltty-pty",
   .purpose = strtext("Run a shell or terminal manager within a pty (virtual terminal) and export its screen via a shared memory segment so that brltty can read it via its Terminal Emulator screen driver."),
   .oldParameters = "[command [arg ...]]",
 

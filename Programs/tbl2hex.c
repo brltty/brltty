@@ -42,7 +42,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "tbl2hex",
+  .name = "tbl2hex",
   .purpose = strtext("Write the hexadecimal array representation of a compiled table."),
   .oldParameters = "table-file",
 

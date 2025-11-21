@@ -85,7 +85,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "brltty-trtxt",
+  .name = "brltty-trtxt",
   .purpose = strtext("Translate one binary braille representation to another."),
   .oldParameters = "[{input-file | -} ...]",
 

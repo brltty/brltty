@@ -98,7 +98,7 @@ BEGIN_COMMAND_LINE_NOTES(additionalNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "cmdtest",
+  .name = "cmdtest",
   .purpose = "Test, as well as demonstrate how to use, the command line parser.",
 
   .options = &programOptions,

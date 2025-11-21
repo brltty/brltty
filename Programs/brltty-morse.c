@@ -112,7 +112,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "brltty-morse",
+  .name = "brltty-morse",
   .purpose = strtext("Translate text into Morse Code tones."),
   .oldParameters = "text ... | -f [{file | -} ...]",
 

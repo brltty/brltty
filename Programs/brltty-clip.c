@@ -72,7 +72,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "brltty-clip",
+  .name = "brltty-clip",
   .purpose = strtext("Manage brltty's clipboard from the command line."),
   .oldParameters = "[{input-file | -} ...]",
 

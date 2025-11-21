@@ -192,7 +192,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "brltty-ttb",
+  .name = "brltty-ttb",
   .purpose = strtext("Check/edit a text (computer braille) table, or convert it from one format to another."),
   .oldParameters = "input-table [output-table]",
 

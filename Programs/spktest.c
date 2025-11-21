@@ -84,7 +84,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "spktest",
+  .name = "spktest",
   .purpose = strtext("Test a speech driver."),
   .oldParameters = "[driver [parameter=value ...]]",
 

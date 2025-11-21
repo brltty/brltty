@@ -112,7 +112,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "crctest",
+  .name = "crctest",
   .purpose = strtext("Test supported CRC (Cyclic Redundancy Check) checksum algorithms."),
 
   .options = &programOptions,

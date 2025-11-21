@@ -102,7 +102,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "brltty-ctb",
+  .name = "brltty-ctb",
   .purpose = strtext("Check/validate a contraction (literary braille) table, or translate text into contracted braille."),
   .oldParameters = "[{input-file | -} ...]",
 

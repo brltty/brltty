@@ -106,7 +106,7 @@ static const CommandLineParameters name = { \
 #define COMMAND_LINE_NOTES(...) (const char *const *const []){__VA_ARGS__, NULL}
 
 typedef struct {
-  const char *applicationName;
+  const char *name;
   const char *purpose;
   const char *oldParameters;
 

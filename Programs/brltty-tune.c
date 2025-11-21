@@ -92,7 +92,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .applicationName = "brltty-tune",
+  .name = "brltty-tune",
   .purpose = strtext("Compose a tune with the tune builder and play it with the tone generator."),
   .oldParameters = "commands ... | -f [{file | -} ...]",
 

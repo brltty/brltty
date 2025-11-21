@@ -1539,11 +1539,11 @@ processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount,
   }
 
   if (cld.doBootParameters && *cld.doBootParameters) {
-    processBootParameters(&opd, cld.applicationName);
+    processBootParameters(&opd, cld.name);
   }
 
   if (cld.doEnvironmentVariables && *cld.doEnvironmentVariables) {
-    processEnvironmentVariables(&opd, cld.applicationName);
+    processEnvironmentVariables(&opd, cld.name);
   }
 
   processInternalSettings(&opd, 0);
