@@ -146,16 +146,15 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
         for (int i=0; i<length; i+=1) name[i] = tolower(name[i]);
       }
 
-      STR_PRINTF(" %s: ", name);
+      STR_PRINTF("%s: ", name);
     }
   }
 
   {
     uint32_t text = character.text;
-    STR_PRINTF("U+%04" PRIX32 " (%" PRIu32 "):", text, text);
+    STR_PRINTF("U+%04" PRIX32 " (%" PRIu32 "): ", text, text);
   }
 
-  STR_PRINTF(" ");
   const ScreenColor *color = &character.color;
   const char *on = " on ";
 
