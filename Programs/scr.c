@@ -33,6 +33,7 @@
 #include "scr_utils.h"
 #include "scr_real.h"
 #include "driver.h"
+#include "color.h"
 
 MainScreen mainScreen;
 BaseScreen *currentScreen = NULL;
@@ -152,6 +153,19 @@ readScreenText (short left, short top, short width, short height, wchar_t *buffe
   }
 
   return 1;
+}
+
+unsigned char
+getScreenColorAttributes (const ScreenColor *color) {
+  if (!color->usingRGB) return color->vgaAttributes;
+
+  int foreground = rgbColorToVga(color->foreground);
+  int background = rgbColorToVga(color->background);
+
+  background &= ~VGA_BIT_BRIGHT;
+  if (color->isBlinking) background |= VGA_BIT_BRIGHT;
+
+  return (background << 4) | foreground;
 }
 
 int

@@ -73,7 +73,7 @@ typedef struct {
   RGBColor foreground;
   RGBColor background;
 
-  unsigned char color:1;
+  unsigned char usingRGB:1;
   unsigned char isBlinking:1;
   unsigned char isBold:1;
   unsigned char isItalic:1;
