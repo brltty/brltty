@@ -25,6 +25,7 @@
 #include "log.h"
 #include "strfmt.h"
 #include "alert.h"
+#include "color.h"
 #include "brl_cmds.h"
 #include "unicode.h"
 #include "ascii.h"
@@ -154,40 +155,30 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
     STR_PRINTF("U+%04" PRIX32 " (%" PRIu32 "):", text, text);
   }
 
-  {
-    STR_PRINTF(" ");
+  STR_PRINTF(" ");
+  const ScreenColor *color = &character.color;
+  const char *on = " on ";
 
-    static const char *const colours[] = {
-      /*      */ strtext("black"),
-      /*    B */ strtext("blue"),
-      /*   G  */ strtext("green"),
-      /*   GB */ strtext("cyan"),
-      /*  R   */ strtext("red"),
-      /*  R B */ strtext("magenta"),
-      /*  RG  */ strtext("brown"),
-      /*  RGB */ strtext("light grey"),
-      /* L    */ strtext("dark grey"),
-      /* L  B */ strtext("light blue"),
-      /* L G  */ strtext("light green"),
-      /* L GB */ strtext("light cyan"),
-      /* LR   */ strtext("light red"),
-      /* LR B */ strtext("light magenta"),
-      /* LRG  */ strtext("yellow"),
-      /* LRGB */ strtext("white")
-    };
+  if (color->usingRGB) {
+    char foreground[64];
+    rgbColorToDescription(foreground, sizeof(foreground), color->foreground);
 
-    unsigned char attributes = character.color.vgaAttributes;
-    const char *foreground = gettext(colours[attributes & SCR_MASK_FG]);
-    const char *background = gettext(colours[(attributes & SCR_MASK_BG) >> 4]);
+    char background[64];
+    rgbColorToDescription(background, sizeof(background), color->background);
 
-    // xgettext: This phrase describes the colour of a character on the screen.
-    // xgettext: %1$s is the (already translated) foreground colour.
-    // xgettext: %2$s is the (already translated) background colour.
-    STR_PRINTF(gettext("%1$s on %2$s"), foreground, background);
-  }
+    STR_PRINTF("%s%s%s", foreground, on, background);
+    if (color->isBlinking) STR_PRINTF(" blink");
+    if (color->isBold) STR_PRINTF(" bold");
+    if (color->isItalic) STR_PRINTF(" italic");
+    if (color->hasUnderline) STR_PRINTF(" underline");
+    if (color->hasStrikeThrough) STR_PRINTF(" strike");
+  } else {
+    unsigned char attributes = color->vgaAttributes;
+    const char *foreground = vgaColorName(attributes & SCR_MASK_FG);
+    const char *background = vgaColorName((attributes & SCR_MASK_BG) >> 4);
 
-  if (character.color.vgaAttributes & SCR_ATTR_BLINK) {
-    STR_PRINTF(" %s", gettext("blinking"));
+    STR_PRINTF("%s%s%s", foreground, on, background);
+    if (attributes & SCR_ATTR_BLINK) STR_PRINTF(" blink");
   }
 STR_END_FORMATTER
 
