@@ -466,14 +466,6 @@ describe_TerminalEmulatorScreen (ScreenDescription *description) {
   }
 }
 
-static void
-setScreenAttribute (unsigned char *attributes, ScreenAttributes attribute, unsigned char level, int bright) {
-  if (level >= 0X20) {
-    *attributes |= attribute;
-    if (bright && (level >= 0XD0)) *attributes |= SCR_ATTR_FG_BRIGHT;
-  }
-}
-
 static int
 readCharacters_TerminalEmulatorScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   ScreenSegmentHeader *segment = getSegment();
@@ -494,17 +486,19 @@ readCharacters_TerminalEmulatorScreen (const ScreenBox *box, ScreenCharacter *bu
         target->text = source->text;
 
         {
-          unsigned char *attributes = &target->color.vgaAttributes;
-          *attributes = 0;
-          if (source->blink) *attributes |= SCR_ATTR_BLINK;
+          ScreenColor *color = &target->color;
+          color->usingRGB = 1;
 
-          setScreenAttribute(attributes, SCR_ATTR_FG_RED,   source->foreground.red,   1);
-          setScreenAttribute(attributes, SCR_ATTR_FG_GREEN, source->foreground.green, 1);
-          setScreenAttribute(attributes, SCR_ATTR_FG_BLUE,  source->foreground.blue,  1);
+          color->foreground.r = source->foreground.red;
+          color->foreground.g = source->foreground.green;
+          color->foreground.b = source->foreground.blue;
 
-          setScreenAttribute(attributes, SCR_ATTR_BG_RED,   source->background.red,   0);
-          setScreenAttribute(attributes, SCR_ATTR_BG_GREEN, source->background.green, 0);
-          setScreenAttribute(attributes, SCR_ATTR_BG_BLUE,  source->background.blue,  0);
+          color->background.r = source->background.red;
+          color->background.g = source->background.green;
+          color->background.b = source->background.blue;
+
+          if (source->blink) color->isBlinking = 1;
+          if (source->underline) color->hasUnderline = 1;
         }
 
         source += 1;
