@@ -151,7 +151,7 @@ translateScreenCharacter_text (
   }
 
   if (prefs.showAttributes) {
-    overlayAttributesUnderline(cell, character->color.vgaAttributes);
+    overlayAttributesUnderline(cell, getScreenColorAttributes(&character->color));
   }
 
   {
@@ -362,7 +362,7 @@ contractScreenRow (BrailleRowDescriptor *brd, unsigned int screenRow, unsigned c
         attributes = 0;
       }
 
-      attributes |= inputCharacters[inputOffset].color.vgaAttributes;
+      attributes |= getScreenColorAttributes(&inputCharacters[inputOffset].color);
     }
 
     while (outputOffset < outputLength) {
