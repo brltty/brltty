@@ -28,16 +28,19 @@ setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count)
 }
 
 void
-setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attributes, size_t count) {
-  const ScreenColor color = {.vgaAttributes = attributes};
-
+setScreenCharacterColor (ScreenCharacter *characters, const ScreenColor *color, size_t count) {
   while (count > 0) {
-    characters[--count].color = color;
+    characters[--count].color = *color;
   }
 }
 
+const ScreenCharacter defaultScreenCharacter = {
+  .text = WC_C(' '),
+  .color.vgaAttributes = SCR_COLOUR_DEFAULT,
+};
+
 void
 clearScreenCharacters (ScreenCharacter *characters, size_t count) {
-  setScreenCharacterText(characters, WC_C(' '), count);
-  setScreenCharacterAttributes(characters, SCR_COLOUR_DEFAULT, count);
+  setScreenCharacterText(characters, defaultScreenCharacter.text, count);
+  setScreenCharacterColor(characters, &defaultScreenCharacter.color, count);
 }

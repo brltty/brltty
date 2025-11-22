@@ -1504,15 +1504,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
   }
 
   while (column < size) {
-    if (character) {
-      static const ScreenCharacter pad = {
-        .text = WC_C(' '),
-        .color.vgaAttributes = SCR_COLOUR_DEFAULT
-      };
-
-      *character++ = pad;
-    }
-
+    if (character) *character++ = defaultScreenCharacter;
     if (offsets) offsets[column] = size - 1;
     column += 1;
   }
