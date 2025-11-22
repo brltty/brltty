@@ -292,9 +292,7 @@ readCharacters_MenuScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 
       for (unsigned int column=0; column<box->width; column+=1) {
         unsigned int index = column + box->left;
-
         character->text = (index < rmi->length)? rmi->text[index]: WC_C(' ');
-        character->color.vgaAttributes = SCR_COLOUR_DEFAULT;
         character += 1;
       }
     }
