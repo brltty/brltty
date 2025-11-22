@@ -498,8 +498,8 @@ readCharacters_TerminalEmulatorScreen (const ScreenBox *box, ScreenCharacter *bu
           color->background.b = source->background.blue;
 
           if (source->blink) color->isBlinking = 1;
+          if (source->italic) color->isItalic = 1;
           if (source->underline) color->hasUnderline = 1;
-          if (source->bold) color->isBold = 1;
         }
 
         source += 1;

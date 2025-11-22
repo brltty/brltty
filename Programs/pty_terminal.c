@@ -514,6 +514,14 @@ performBracketAction_m (unsigned char byte) {
         ptyAddAttributes(A_REVERSE);
         continue;
 
+      case 8:
+        logOutputAction("rev", "conceal mode on");
+        continue;
+
+      case 9:
+        logOutputAction("rev", "strikethrough on");
+        continue;
+
       case 22:
         logOutputAction("normal", "bold/dim off");
         ptyRemoveAttributes(A_BOLD | A_DIM);
@@ -537,6 +545,14 @@ performBracketAction_m (unsigned char byte) {
       case 27:
         logOutputAction("unrev", "reverse video off");
         ptyRemoveAttributes(A_REVERSE);
+        continue;
+
+      case 28:
+        logOutputAction("unrev", "conceal mode off");
+        continue;
+
+      case 29:
+        logOutputAction("unrev", "strikethrough off");
         continue;
     }
 
