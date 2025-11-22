@@ -45,6 +45,7 @@
 #include <locale.h>
 
 #include "log.h"
+#include "color.h"
 #include "parse.h"
 #include "async_handle.h"
 #include "async_io.h"
@@ -81,7 +82,7 @@ static int screenCols = 80;
 static int cursorRow = 0;
 static int cursorCol = 0;
 static wchar_t *screenContent = NULL;
-static ScreenAttributes *screenAttrs = NULL;
+static ScreenColor *screenColors = NULL;
 static int screenAllocated = 0;
 static int currentPaneNumber = 0;
 
@@ -143,102 +144,105 @@ static int addResponseLine(const char *line);
 static void processScreenContent(void);
 static void processPaneList(void);
 static int parsePaneId(const char *paneIdStr);
-static ScreenAttributes mapAnsiToAttribute(int code, ScreenAttributes current);
-static int parseAnsiSequence(const char **ptr, ScreenAttributes *attr);
+static void updateScreenColor(int code, ScreenColor *color);
+static int parseAnsiSequence(const char **ptr, ScreenColor *color);
 
 /* Async callback */
 static ASYNC_MONITOR_CALLBACK(tmuxMonitorCallback);
 
-/* ANSI Color Mapping */
-static ScreenAttributes
-mapAnsiForegroundColor(int color) {
-  /* Map ANSI color codes (0-15) to BRLTTY foreground colors */
-  switch (color) {
-    case 0: return SCR_COLOUR_FG_BLACK;
-    case 1: return SCR_COLOUR_FG_RED;
-    case 2: return SCR_COLOUR_FG_GREEN;
-    case 3: return SCR_COLOUR_FG_BROWN;
-    case 4: return SCR_COLOUR_FG_BLUE;
-    case 5: return SCR_COLOUR_FG_MAGENTA;
-    case 6: return SCR_COLOUR_FG_CYAN;
-    case 7: return SCR_COLOUR_FG_LIGHT_GREY;
-    case 8: return SCR_COLOUR_FG_DARK_GREY;
-    case 9: return SCR_COLOUR_FG_LIGHT_RED;
-    case 10: return SCR_COLOUR_FG_LIGHT_GREEN;
-    case 11: return SCR_COLOUR_FG_YELLOW;
-    case 12: return SCR_COLOUR_FG_LIGHT_BLUE;
-    case 13: return SCR_COLOUR_FG_LIGHT_MAGENTA;
-    case 14: return SCR_COLOUR_FG_LIGHT_CYAN;
-    case 15: return SCR_COLOUR_FG_WHITE;
-    default: return SCR_COLOUR_FG_LIGHT_GREY;
-  }
-}
+static ScreenCharacter defaultCharacter;
 
-static ScreenAttributes
-mapAnsiBackgroundColor(int color) {
-  /* Map ANSI color codes (0-7) to BRLTTY background colors
-   * Note: BRLTTY only supports 8 background colors (no bright backgrounds) */
-  switch (color % 8) {
-    case 0: return SCR_COLOUR_BG_BLACK;
-    case 1: return SCR_COLOUR_BG_RED;
-    case 2: return SCR_COLOUR_BG_GREEN;
-    case 3: return SCR_COLOUR_BG_BROWN;
-    case 4: return SCR_COLOUR_BG_BLUE;
-    case 5: return SCR_COLOUR_BG_MAGENTA;
-    case 6: return SCR_COLOUR_BG_CYAN;
-    case 7: return SCR_COLOUR_BG_LIGHT_GREY;
-    default: return SCR_COLOUR_BG_BLACK;
-  }
-}
-
-static ScreenAttributes
-mapAnsiToAttribute(int code, ScreenAttributes current) {
+static void
+updateScreenColor(int code, ScreenColor *color) {
   /* Process a single ANSI SGR (Select Graphic Rendition) parameter */
+
   if (code == 0) {
-    /* Reset all VGA attributes */
-    return SCR_COLOUR_DEFAULT;
-  } else if (code == 1) {
-    /* Bold - set bright flag on foreground */
-    return current | SCR_ATTR_FG_BRIGHT;
-  } else if (code == 5 || code == 6) {
-    /* Blink (slow or fast) */
-    return current | SCR_ATTR_BLINK;
-  } else if (code == 22) {
-    /* Normal intensity - clear bright flag */
-    return current & ~SCR_ATTR_FG_BRIGHT;
-  } else if (code == 25) {
-    /* Blink off */
-    return current & ~SCR_ATTR_BLINK;
-  } else if (code >= 30 && code <= 37) {
-    /* Standard foreground colors - preserve bright flag */
-    ScreenAttributes fg = mapAnsiForegroundColor(code - 30);
-    return (current & ~(SCR_MASK_FG & ~SCR_ATTR_FG_BRIGHT)) | fg;
-  } else if (code == 39) {
-    /* Default foreground */
-    return (current & ~SCR_MASK_FG) | SCR_COLOUR_FG_LIGHT_GREY;
-  } else if (code >= 40 && code <= 47) {
-    /* Standard background colors */
-    ScreenAttributes bg = mapAnsiBackgroundColor(code - 40);
-    return (current & ~SCR_MASK_BG) | bg;
-  } else if (code == 49) {
-    /* Default background */
-    return (current & ~SCR_MASK_BG) | SCR_COLOUR_BG_BLACK;
-  } else if (code >= 90 && code <= 97) {
-    /* Bright foreground colors */
-    ScreenAttributes fg = mapAnsiForegroundColor(code - 90 + 8);
-    return (current & ~SCR_MASK_FG) | fg;
-  } else if (code >= 100 && code <= 107) {
-    /* Bright background colors - map to standard (BRLTTY limitation) */
-    ScreenAttributes bg = mapAnsiBackgroundColor(code - 100);
-    return (current & ~SCR_MASK_BG) | bg;
+    /* Reset the screen color */
+    *color = defaultCharacter.color;
+    return;
   }
 
-  /* Ignore other codes (italic, underline, etc. - not supported by BRLTTY) */
-  return current;
+  if (code == 1) {
+    /* Bold on */
+    color->isBold = 1;
+    return;
+  }
+
+  if (code == 4) {
+    /* Underline on */
+    color->hasUnderline = 1;
+    return;
+  }
+
+  if (code == 5 || code == 6) {
+    /* Blink (slow or fast) on */
+    color->isBlinking = 1;
+    return;
+  }
+
+  if (code == 9) {
+    /* Strike Through on */
+    color->hasStrikeThrough = 1;
+    return;
+  }
+
+  if (code == 22) {
+    /* Normal intensity */
+    color->isBold = 0;
+    return;
+  }
+
+  if (code == 25) {
+    /* Blink off */
+    color->isBlinking = 0;
+    return;
+  }
+
+  if (code == 29) {
+    /* Strike Through off */
+    color->hasStrikeThrough = 0;
+    return;
+  }
+
+  if ((code >= 30) && (code <= 37)) {
+    /* Standard foreground colors */
+    color->foreground = vgaToRgb(code-30);
+    return;
+  }
+
+  if (code == 39) {
+    /* Default foreground color */
+    color->foreground = vgaToRgb(VGA_BIT_RED | VGA_BIT_GREEN | VGA_BIT_BLUE);
+    return;
+  }
+
+  if ((code >= 40) && (code <= 47)) {
+    /* Standard background colors */
+    color->background = vgaToRgb(code-40);
+    return;
+  }
+
+  if (code == 49) {
+    /* Default background color */
+    color->background = vgaToRgb(0);
+    return;
+  }
+
+  if ((code >= 90) && (code <= 97)) {
+    /* Bright foreground colors */
+    color->foreground = vgaToRgb((code - 90) | VGA_BIT_BRIGHT);
+    return;
+  }
+
+  if ((code >= 100) && (code <= 107)) {
+    /* Bright background colors */
+    color->background = vgaToRgb((code - 100) | VGA_BIT_BRIGHT);
+    return;
+  }
 }
 
 static int
-parseAnsiSequence(const char **ptr, ScreenAttributes *attr) {
+parseAnsiSequence(const char **ptr, ScreenColor *color) {
   /* Parse an ANSI escape sequence: ESC[...m
    * Returns 1 if a sequence was parsed, 0 otherwise
    * Updates *ptr to point past the sequence
@@ -296,62 +300,32 @@ parseAnsiSequence(const char **ptr, ScreenAttributes *attr) {
     /* Handle 256-color and RGB sequences */
     if (code == 38 && i + 2 < paramCount && params[i + 1] == 5) {
       /* 256-color foreground: ESC[38;5;Nm */
-      int color = params[i + 2];
-      /* Map to 16-color palette (approximate) */
-      if (color < 16) {
-        *attr = (*attr & ~SCR_MASK_FG) | mapAnsiForegroundColor(color);
-      } else if (color < 232) {
-        /* 216-color cube - approximate to nearest 16-color */
-        int idx = color - 16;
-        int r = (idx / 36) > 2 ? 1 : 0;
-        int g = ((idx / 6) % 6) > 2 ? 1 : 0;
-        int b = (idx % 6) > 2 ? 1 : 0;
-        int bright = ((idx / 36) > 4 || ((idx / 6) % 6) > 4 || (idx % 6) > 4) ? 1 : 0;
-        int c = r * 4 + g * 2 + b;
-        *attr = (*attr & ~SCR_MASK_FG) | mapAnsiForegroundColor(c + (bright ? 8 : 0));
-      } else {
-        /* Grayscale - approximate */
-        int gray = color - 232;
-        *attr = (*attr & ~SCR_MASK_FG) | mapAnsiForegroundColor(gray < 12 ? 0 : (gray < 24 ? 8 : 15));
-      }
+      color->foreground = ansiToRgb(params[i + 2]);
       i += 2;
       continue;
     } else if (code == 48 && i + 2 < paramCount && params[i + 1] == 5) {
       /* 256-color background: ESC[48;5;Nm */
-      int color = params[i + 2];
-      if (color < 16) {
-        *attr = (*attr & ~SCR_MASK_BG) | mapAnsiBackgroundColor(color);
-      } else if (color < 232) {
-        int idx = color - 16;
-        int r = (idx / 36) > 2 ? 1 : 0;
-        int g = ((idx / 6) % 6) > 2 ? 1 : 0;
-        int b = (idx % 6) > 2 ? 1 : 0;
-        int c = r * 4 + g * 2 + b;
-        *attr = (*attr & ~SCR_MASK_BG) | mapAnsiBackgroundColor(c);
-      } else {
-        int gray = color - 232;
-        *attr = (*attr & ~SCR_MASK_BG) | mapAnsiBackgroundColor(gray < 12 ? 0 : 7);
-      }
+      color->background = ansiToRgb(params[i + 2]);
       i += 2;
       continue;
-    } else if ((code == 38 || code == 48) && i + 4 < paramCount && params[i + 1] == 2) {
-      /* RGB color: ESC[38;2;R;G;Bm or ESC[48;2;R;G;Bm */
-      int r = params[i + 2] > 127 ? 1 : 0;
-      int g = params[i + 3] > 127 ? 1 : 0;
-      int b = params[i + 4] > 127 ? 1 : 0;
-      int bright = (params[i + 2] > 192 || params[i + 3] > 192 || params[i + 4] > 192) ? 1 : 0;
-      int c = r * 4 + g * 2 + b;
-      if (code == 38) {
-        *attr = (*attr & ~SCR_MASK_FG) | mapAnsiForegroundColor(c + (bright ? 8 : 0));
-      } else {
-        *attr = (*attr & ~SCR_MASK_BG) | mapAnsiBackgroundColor(c);
-      }
+    } else if (code == 38 && i + 4 < paramCount && params[i + 1] == 2) {
+      /* foreground RGB color: ESC[38;2;R;G;Bm or ESC[48;2;R;G;Bm */
+      color->foreground.r = params[i + 2];
+      color->foreground.g = params[i + 3];
+      color->foreground.b = params[i + 4];
+      i += 4;
+      continue;
+    } else if (code == 48 && i + 4 < paramCount && params[i + 1] == 2) {
+      /* background RGB color: ESC[38;2;R;G;Bm or ESC[48;2;R;G;Bm */
+      color->background.r = params[i + 2];
+      color->background.g = params[i + 3];
+      color->background.b = params[i + 4];
       i += 4;
       continue;
     }
 
     /* Standard SGR parameter */
-    *attr = mapAnsiToAttribute(code, *attr);
+    updateScreenColor(code, color);
   }
 
   *ptr = p;
@@ -383,23 +357,23 @@ allocateScreenBuffer(void) {
 
   if (screenAllocated) {
     wchar_t *newContent = realloc(screenContent, size * sizeof(wchar_t));
-    ScreenAttributes *newAttrs = realloc(screenAttrs, size * sizeof(ScreenAttributes));
+    ScreenColor *newColors = realloc(screenColors, size * sizeof(ScreenColor));
 
-    if (!newContent || !newAttrs) {
+    if (!newContent || !newColors) {
       logMessage(LOG_ERR, "Failed to reallocate screen buffer");
       return 0;
     }
 
     screenContent = newContent;
-    screenAttrs = newAttrs;
+    screenColors = newColors;
   } else {
     screenContent = malloc(size * sizeof(wchar_t));
-    screenAttrs = malloc(size * sizeof(ScreenAttributes));
+    screenColors = malloc(size * sizeof(ScreenColor));
 
-    if (!screenContent || !screenAttrs) {
+    if (!screenContent || !screenColors) {
       logMessage(LOG_ERR, "Failed to allocate screen buffer");
       if (screenContent) free(screenContent);
-      if (screenAttrs) free(screenAttrs);
+      if (screenColors) free(screenColors);
       return 0;
     }
 
@@ -408,8 +382,8 @@ allocateScreenBuffer(void) {
 
   /* Clear the buffer */
   for (size_t i = 0; i < size; i++) {
-    screenContent[i] = L' ';
-    screenAttrs[i] = SCR_COLOUR_DEFAULT;
+    screenContent[i] = defaultCharacter.text;
+    screenColors[i] = defaultCharacter.color;
   }
 
   return 1;
@@ -419,9 +393,9 @@ static void
 freeScreenBuffer(void) {
   if (screenAllocated) {
     free(screenContent);
-    free(screenAttrs);
+    free(screenColors);
     screenContent = NULL;
-    screenAttrs = NULL;
+    screenColors = NULL;
     screenAllocated = 0;
   }
 }
@@ -429,6 +403,18 @@ freeScreenBuffer(void) {
 static int
 construct_TmuxScreen(void) {
   logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Constructing Tmux screen driver");
+
+  defaultCharacter = defaultScreenCharacter;
+  {
+    ScreenColor *color = &defaultCharacter.color;
+
+    if (!color->usingRGB) {
+      unsigned char attributes = color->vgaAttributes;
+      color->usingRGB = 1;
+      color->foreground = vgaToRgb((attributes & SCR_MASK_FG) >> 0);
+      color->background = vgaToRgb((attributes & SCR_MASK_BG) >> 4);
+    }
+  }
 
   /* Set locale for wide character support */
   setlocale(LC_ALL, "");
@@ -719,13 +705,13 @@ processScreenContent(void) {
   for (int i = 0; i < responseLineCount && row < screenRows; i++) {
     const char *line = responseLines[i];
     int col = 0;
-    ScreenAttributes currentAttr = SCR_COLOUR_DEFAULT;
+    ScreenColor currentColor = defaultCharacter.color;
 
     /* Convert line to wide characters and fill buffer, parsing ANSI sequences */
     for (const char *p = line; *p && col < screenCols; ) {
       /* Check for ANSI escape sequence */
-      if (parseAnsiSequence(&p, &currentAttr)) {
-        /* Sequence parsed, currentAttr updated, continue */
+      if (parseAnsiSequence(&p, &currentColor)) {
+        /* Sequence parsed, currentColor updated, continue */
         continue;
       }
 
@@ -741,7 +727,7 @@ processScreenContent(void) {
 
       int index = row * screenCols + col;
       screenContent[index] = wc;
-      screenAttrs[index] = currentAttr;
+      screenColors[index] = currentColor;
 
       p += bytes;
       col++;
@@ -750,8 +736,8 @@ processScreenContent(void) {
     /* Fill remaining columns with spaces */
     for (; col < screenCols; col++) {
       int index = row * screenCols + col;
-      screenContent[index] = L' ';
-      screenAttrs[index] = SCR_COLOUR_DEFAULT;
+      screenContent[index] = defaultCharacter.text;
+      screenColors[index] = defaultCharacter.color;
     }
 
     row++;
@@ -761,8 +747,8 @@ processScreenContent(void) {
   for (; row < screenRows; row++) {
     for (int col = 0; col < screenCols; col++) {
       int index = row * screenCols + col;
-      screenContent[index] = L' ';
-      screenAttrs[index] = SCR_COLOUR_DEFAULT;
+      screenContent[index] = defaultCharacter.text;
+      screenColors[index] = defaultCharacter.color;
     }
   }
 
@@ -1108,7 +1094,7 @@ readCharacters_TmuxScreen(const ScreenBox *box, ScreenCharacter *buffer) {
       int bufferIndex = row * box->width + col;
 
       buffer[bufferIndex].text = screenContent[screenIndex];
-      buffer[bufferIndex].color.vgaAttributes = screenAttrs[screenIndex];
+      buffer[bufferIndex].color = screenColors[screenIndex];
     }
   }
 
