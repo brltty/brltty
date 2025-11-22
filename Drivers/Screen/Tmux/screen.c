@@ -295,27 +295,33 @@ parseAnsiSequence(const char **ptr, ScreenColor *color) {
 
   /* Apply all parameters */
   for (int i = 0; i < paramCount; i++) {
+    /* Handle 256-color and RGB sequences */
     int code = params[i];
 
-    /* Handle 256-color and RGB sequences */
     if (code == 38 && i + 2 < paramCount && params[i + 1] == 5) {
       /* 256-color foreground: ESC[38;5;Nm */
       color->foreground = ansiToRgb(params[i + 2]);
       i += 2;
       continue;
-    } else if (code == 48 && i + 2 < paramCount && params[i + 1] == 5) {
+    }
+
+    if (code == 48 && i + 2 < paramCount && params[i + 1] == 5) {
       /* 256-color background: ESC[48;5;Nm */
       color->background = ansiToRgb(params[i + 2]);
       i += 2;
       continue;
-    } else if (code == 38 && i + 4 < paramCount && params[i + 1] == 2) {
+    }
+
+    if (code == 38 && i + 4 < paramCount && params[i + 1] == 2) {
       /* foreground RGB color: ESC[38;2;R;G;Bm or ESC[48;2;R;G;Bm */
       color->foreground.r = params[i + 2];
       color->foreground.g = params[i + 3];
       color->foreground.b = params[i + 4];
       i += 4;
       continue;
-    } else if (code == 48 && i + 4 < paramCount && params[i + 1] == 2) {
+    }
+
+    if (code == 48 && i + 4 < paramCount && params[i + 1] == 2) {
       /* background RGB color: ESC[38;2;R;G;Bm or ESC[48;2;R;G;Bm */
       color->background.r = params[i + 2];
       color->background.g = params[i + 3];
