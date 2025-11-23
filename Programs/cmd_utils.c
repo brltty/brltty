@@ -157,6 +157,8 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
 
   const ScreenColor *color = &character.color;
   const char *on = " on ";
+  const char *propertyNames[8];
+  unsigned int propertyCount = 0;
 
   if (color->usingRGB) {
     ColorDescriptionBuffer foreground;
@@ -166,18 +168,29 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
     rgbColorToDescription(background, sizeof(background), color->background);
 
     STR_PRINTF("%s%s%s", foreground, on, background);
-    if (color->isBlinking) STR_PRINTF(" blink");
-    if (color->isBold) STR_PRINTF(" bold");
-    if (color->isItalic) STR_PRINTF(" italic");
-    if (color->hasUnderline) STR_PRINTF(" underline");
-    if (color->hasStrikeThrough) STR_PRINTF(" strike");
+    if (color->isBlinking) propertyNames[propertyCount++] = "blink";
+    if (color->isBold) propertyNames[propertyCount++] = "bold";
+    if (color->isItalic) propertyNames[propertyCount++] = "italic";
+    if (color->hasUnderline) propertyNames[propertyCount++] = "underline";
+    if (color->hasStrikeThrough) propertyNames[propertyCount++] = "strike";
   } else {
     unsigned char attributes = color->vgaAttributes;
     const char *foreground = vgaColorName(vgaGetForegroundColor(attributes));
     const char *background = vgaColorName(vgaGetBackgroundColor(attributes));
 
     STR_PRINTF("%s%s%s", foreground, on, background);
-    if (attributes & VGA_BIT_BLINK) STR_PRINTF(" blink");
+    if (attributes & VGA_BIT_BLINK) propertyNames[propertyCount++] = "blink";
+  }
+
+  if (propertyCount > 0) {
+    const char *delimiter = " (";
+
+    for (unsigned int i=0; i<propertyCount; i+=1) {
+      STR_PRINTF("%s%s", delimiter, propertyNames[i]);
+      delimiter = ", ";
+    }
+
+    STR_PRINTF(")");
   }
 STR_END_FORMATTER
 
