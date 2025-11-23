@@ -463,7 +463,7 @@ rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color) {
   return rgbToDescription(buffer, bufferSize, color.r, color.g, color.b);
 }
 
-/* Standard ANSI colors: basic (0 to 7) and bright (8 to 15 */
+/* Standard ANSI colors: basic (0 to 7) and bright (8 to 15) */
 static const RGBColor ansiPalette[16] = {
   /* Black */          [ 0] = {0X00, 0X00, 0X00},
   /* Red */            [ 1] = {0XAA, 0X00, 0X00},
@@ -491,7 +491,7 @@ ansiToRgb (unsigned int code) {
   if (code < 16) {
     /* Standard ANSI colors */
     rgb = ansiPalette[code];
-  } else if (code < 232 - 16) {
+  } else if (code < 232) {
     /* 6x6x6 color cube */
     code -= 16;
 
