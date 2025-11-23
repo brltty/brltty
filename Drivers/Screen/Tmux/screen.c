@@ -205,37 +205,37 @@ updateScreenColor(int code, ScreenColor *color) {
 
   if ((code >= 30) && (code <= 37)) {
     /* Standard foreground colors */
-    color->foreground = vgaToRgb(code-30);
+    color->foreground = ansiToRgb(code - 30);
     return;
   }
 
   if (code == 39) {
     /* Default foreground color */
-    color->foreground = vgaToRgb(VGA_BIT_RED | VGA_BIT_GREEN | VGA_BIT_BLUE);
+    color->foreground = ansiToRgb(7);
     return;
   }
 
   if ((code >= 40) && (code <= 47)) {
     /* Standard background colors */
-    color->background = vgaToRgb(code-40);
+    color->background = ansiToRgb(code - 40);
     return;
   }
 
   if (code == 49) {
     /* Default background color */
-    color->background = vgaToRgb(0);
+    color->background = ansiToRgb(0);
     return;
   }
 
   if ((code >= 90) && (code <= 97)) {
     /* Bright foreground colors */
-    color->foreground = vgaToRgb((code - 90) | VGA_BIT_BRIGHT);
+    color->foreground = ansiToRgb(code - 90 + 8);
     return;
   }
 
   if ((code >= 100) && (code <= 107)) {
     /* Bright background colors */
-    color->background = vgaToRgb((code - 100) | VGA_BIT_BRIGHT);
+    color->background = ansiToRgb(code - 100 + 8);
     return;
   }
 }

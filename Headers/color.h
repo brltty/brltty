@@ -91,7 +91,7 @@ extern const char *hsvToDescription(char *buffer, size_t bufferSize, float h, fl
 extern const char *hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv);
 
 /* Convert ANSI 256-color code to RGB */
-extern RGBColor ansiToRgb (int ansi);
+extern RGBColor ansiToRgb (unsigned int code);
 
 /* Interpolate between two HSV colors */
 extern HSVColor hsvColorInterpolate (HSVColor hsv1, HSVColor hsv2, float factor);

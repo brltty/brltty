@@ -463,17 +463,37 @@ rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color) {
   return rgbToDescription(buffer, bufferSize, color.r, color.g, color.b);
 }
 
+/* Standard ANSI colors: basic (0 to 7) and bright (8 to 15 */
+static const RGBColor ansiPalette[16] = {
+  /* Black */          [ 0] = {0X00, 0X00, 0X00},
+  /* Red */            [ 1] = {0XAA, 0X00, 0X00},
+  /* Green */          [ 2] = {0X00, 0XAA, 0X00},
+  /* Yellow */         [ 3] = {0XAA, 0XAA, 0X00},
+  /* Blue */           [ 4] = {0X00, 0X00, 0XAA},
+  /* Magenta */        [ 5] = {0XAA, 0X00, 0XAA},
+  /* Cyan */           [ 6] = {0X00, 0XAA, 0XAA},
+  /* White */          [ 7] = {0XAA, 0XAA, 0XAA},
+  /* Bright Black */   [ 8] = {0X55, 0X55, 0X55},
+  /* Bright Red */     [ 9] = {0XFF, 0X55, 0X55},
+  /* Bright Green */   [10] = {0X55, 0XFF, 0X55},
+  /* Bright Yellow */  [11] = {0XFF, 0XFF, 0X55},
+  /* Bright Blue */    [12] = {0X55, 0X55, 0XFF},
+  /* Bright Magenta */ [13] = {0XFF, 0X55, 0XFF},
+  /* Bright Cyan */    [14] = {0X55, 0XFF, 0XFF},
+  /* Bright White */   [15] = {0XFF, 0XFF, 0XFF}
+};
+
 /* Convert ANSI 256-color code to RGB */
 RGBColor
-ansiToRgb (int ansi) {
+ansiToRgb (unsigned int code) {
   RGBColor rgb;
 
-  if (ansi < VGA_COLOR_COUNT) {
-    /* VGA color code */
-    rgb = vgaToRgb(ansi);
-  } else if (ansi < 232) {
+  if (code < 16) {
+    /* Standard ANSI colors */
+    rgb = ansiPalette[code];
+  } else if (code < 232 - 16) {
     /* 6x6x6 color cube */
-    int code = ansi - VGA_COLOR_COUNT;
+    code -= 16;
 
     const int multiplier = 51;
     const int granularity = 6;
@@ -485,7 +505,7 @@ ansiToRgb (int ansi) {
     rgb.r = (code / granularity) * multiplier;
   } else {
     /* Grayscale */
-    unsigned int gray = 8 + ((ansi - 232) * 10);
+    unsigned int gray = 8 + ((code - 232) * 10);
     rgb.r = rgb.g = rgb.b = gray;
   }
 
