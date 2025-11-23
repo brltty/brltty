@@ -50,6 +50,8 @@ typedef struct {
 #define VGA_BIT_RED    0X4
 #define VGA_BIT_BRIGHT 0X8
 
+typedef char ColorDescriptionBuffer[64];
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

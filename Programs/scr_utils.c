@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include "scr_utils.h"
+#include "color.h"
 
 const ScreenCharacter defaultScreenCharacter = {
   .text = WC_C(' '),

@@ -258,7 +258,7 @@ testVGADescriptions (const char *testName) {
       const char *name = vgaColorName(vga);
 
       RGBColor rgb = vgaToRgb(vga);
-      char description[64];
+      ColorDescriptionBuffer description;
       rgbColorToDescription(description, sizeof(description), rgb);
 
       putf(VGA_COLOR_FORMAT " " VGA_NAME_FORMAT ": " RGB_COLOR_FORMAT " -> \"%s\"\n",
@@ -382,7 +382,7 @@ testColorRecognition (const char *testName) {
   for (int i=0; i<testCount; i+=1) {
     const ColorTest *test = &tests[i];
 
-    char description[64];
+    ColorDescriptionBuffer description;
     rgbToDescription(description, sizeof(description), test->r, test->g, test->b);
 
     /* Check if result matches expected or alternate description */
@@ -465,7 +465,7 @@ showColor (RGBColor rgb, HSVColor hsv) {
   putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", colorIndent, hsv.h, hsv.s*100.0f, hsv.v*100.0f);
 
   {
-    char description[64];
+    ColorDescriptionBuffer description;
     hsvColorToDescription(description, sizeof(description), hsv);
     putf("%sColor: %s\n", colorIndent, description);
   }

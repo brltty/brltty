@@ -159,10 +159,10 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
   const char *on = " on ";
 
   if (color->usingRGB) {
-    char foreground[64];
+    ColorDescriptionBuffer foreground;
     rgbColorToDescription(foreground, sizeof(foreground), color->foreground);
 
-    char background[64];
+    ColorDescriptionBuffer background;
     rgbColorToDescription(background, sizeof(background), color->background);
 
     STR_PRINTF("%s%s%s", foreground, on, background);
