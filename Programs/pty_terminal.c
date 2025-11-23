@@ -495,8 +495,8 @@ performBracketAction_m (unsigned char byte) {
         continue;
 
       case 3:
-        logOutputAction("smso", "standout on");
-        ptyAddAttributes(A_STANDOUT);
+        logOutputAction("sitm", "italic on");
+        ptyAddAttributes(A_ITALIC);
         continue;
 
       case 4:
@@ -505,7 +505,12 @@ performBracketAction_m (unsigned char byte) {
         continue;
 
       case 5:
-        logOutputAction("blink", "blink on");
+        logOutputAction("smbl", "slow blink on");
+        ptyAddAttributes(A_BLINK);
+        continue;
+
+      case 6:
+        logOutputAction("smfbl", "fast blink on");
         ptyAddAttributes(A_BLINK);
         continue;
 
@@ -515,11 +520,11 @@ performBracketAction_m (unsigned char byte) {
         continue;
 
       case 8:
-        logOutputAction("rev", "conceal mode on");
+        logOutputAction("smxon", "conceal on");
         continue;
 
       case 9:
-        logOutputAction("rev", "strikethrough on");
+        logOutputAction("smstrike", "strikethrough on");
         continue;
 
       case 22:
@@ -528,8 +533,8 @@ performBracketAction_m (unsigned char byte) {
         continue;
 
       case 23:
-        logOutputAction("rmso", "standout off");
-        ptyRemoveAttributes(A_STANDOUT);
+        logOutputAction("ritm", "italic off");
+        ptyRemoveAttributes(A_ITALIC);
         continue;
 
       case 24:
@@ -538,7 +543,7 @@ performBracketAction_m (unsigned char byte) {
         continue;
 
       case 25:
-        logOutputAction("unblink", "blink off");
+        logOutputAction("rmbl", "slow/fast blink off");
         ptyRemoveAttributes(A_BLINK);
         continue;
 
@@ -548,11 +553,11 @@ performBracketAction_m (unsigned char byte) {
         continue;
 
       case 28:
-        logOutputAction("unrev", "conceal mode off");
+        logOutputAction("rmxon", "conceal off");
         continue;
 
       case 29:
-        logOutputAction("unrev", "strikethrough off");
+        logOutputAction("rmstrike", "strikethrough off");
         continue;
     }
 
