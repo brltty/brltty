@@ -204,6 +204,12 @@ rgbToVgaFast(unsigned char r, unsigned char g, unsigned char b, int noBrightBit)
   return vgaColor;
 }
 
+/* Wrapper for rgbToVgaFast(() */
+int
+rgbColorToVgaFast (RGBColor rgb, int noBrightBit) {
+  return rgbToVgaFast(rgb.r, rgb.g, rgb.b, noBrightBit);
+}
+
 int
 rgbToVga(unsigned char r, unsigned char g, unsigned char b, int noBrightBit) {
   /* Find the closest VGA color by minimum Euclidean distance in RGB space

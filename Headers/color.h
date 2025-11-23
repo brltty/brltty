@@ -40,6 +40,9 @@ extern int rgbToVga (unsigned char r, unsigned char g, unsigned char b, int noBr
  */
 extern int rgbToVgaFast (unsigned char r, unsigned char g, unsigned char b, int noBrightBit);
 
+/* Wrapper for rgbToVgaFast(() */
+extern int rgbColorToVgaFast (RGBColor rgb, int noBrightBit);
+
 /* Convert RGB color structure to nearest VGA color code (0-15) */
 extern int rgbColorToVga (RGBColor color, int noBrightBit);
 
