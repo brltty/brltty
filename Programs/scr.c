@@ -159,12 +159,9 @@ unsigned char
 getScreenColorAttributes (const ScreenColor *color) {
   if (!color->usingRGB) return color->vgaAttributes;
 
-  int foreground = rgbColorToVga(color->foreground);
-  int background = rgbColorToVga(color->background);
-
-  background &= ~VGA_BIT_BRIGHT;
+  int foreground = rgbColorToVga(color->foreground, 0);
+  int background = rgbColorToVga(color->background, 1);
   if (color->isBlinking) background |= VGA_BIT_BRIGHT;
-
   return (background << 4) | foreground;
 }
 

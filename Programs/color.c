@@ -84,7 +84,7 @@ colorDistanceSquared(unsigned char r1, unsigned char g1, unsigned char b1,
 }
 
 int
-rgbToVga(unsigned char r, unsigned char g, unsigned char b) {
+rgbToVga(unsigned char r, unsigned char g, unsigned char b, int noBrightBit) {
   /* Find the closest VGA color by minimum Euclidean distance in RGB space
    * This is similar to the approximation used in the tmux driver but more accurate
    */
@@ -94,8 +94,11 @@ rgbToVga(unsigned char r, unsigned char g, unsigned char b) {
                                          vgaPalette[0].g,
                                          vgaPalette[0].b);
 
-  /* Check all 16 VGA colors */
-  for (int i=1; i<VGA_COLOR_COUNT; i+=1) {
+  /* Check all of the VGA colors */
+  int count = VGA_COLOR_COUNT;
+  if (noBrightBit) count >>= 1;
+
+  for (int i=1; i<count; i+=1) {
     int distance = colorDistanceSquared(r, g, b,
                                        vgaPalette[i].r,
                                        vgaPalette[i].g,
@@ -116,8 +119,8 @@ rgbToVga(unsigned char r, unsigned char g, unsigned char b) {
 }
 
 int
-rgbColorToVga(RGBColor color) {
-  return rgbToVga(color.r, color.g, color.b);
+rgbColorToVga(RGBColor color, int noBrightBit) {
+  return rgbToVga(color.r, color.g, color.b, noBrightBit);
 }
 
 /* Color names for each VGA color code */

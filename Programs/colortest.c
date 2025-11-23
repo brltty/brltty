@@ -235,7 +235,7 @@ testVGAtoRGBtoVGA (const char *testName) {
     const char *name = vgaColorName(vga);
 
     RGBColor rgb = vgaToRgb(vga);
-    int vgaBack = rgbColorToVga(rgb);
+    int vgaBack = rgbColorToVga(rgb, 0);
 
     int passed = vga == vgaBack;
     if (passed) passCount += 1;
@@ -444,7 +444,7 @@ testRGBtoVGA (const char *testName) {
   if (opt_quietness <= OPTQ_PASS) {
     for (int i=0; i<ARRAY_COUNT(tests); i+=1) {
       const ColorTest *test = &tests[i];
-      int vga = rgbToVga(test->r, test->g, test->b);
+      int vga = rgbToVga(test->r, test->g, test->b, 0);
       RGBColor rgb = vgaToRgb(vga);
       const char *color = vgaColorName(vga);
 
@@ -471,7 +471,7 @@ showColor (RGBColor rgb, HSVColor hsv) {
   }
 
   {
-    int vga = rgbToVga(rgb.r, rgb.g, rgb.b);
+    int vga = rgbToVga(rgb.r, rgb.g, rgb.b, 0);
     const char *name = vgaColorName(vga);
     putf("%sNearest VGA: %d \"%s\"\n", colorIndent, vga, name);
   }

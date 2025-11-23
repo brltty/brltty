@@ -31,10 +31,10 @@ extern RGBColor vgaToRgb (int vga);
 /* Convert RGB color to nearest VGA color code (0-15)
  * Uses color distance calculation to find the closest match
  */
-extern int rgbToVga (unsigned char r, unsigned char g, unsigned char b);
+extern int rgbToVga (unsigned char r, unsigned char g, unsigned char b, int noBrightBit);
 
 /* Convert RGB color structure to nearest VGA color code (0-15) */
-extern int rgbColorToVga (RGBColor color);
+extern int rgbColorToVga (RGBColor color, int noBrightBit);
 
 /* Get the standard VGA palette RGB values as an array
  * Returns pointer to static array of 16 RGBColor structures
