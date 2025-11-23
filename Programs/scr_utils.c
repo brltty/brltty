@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "scr_utils.h"
 #include "color.h"
 
@@ -30,9 +32,24 @@ void
 toRGBScreenColor (ScreenColor *color) {
   if (!color->usingRGB) {
     unsigned char attributes = color->vgaAttributes;
+    memset(color, 0, sizeof(*color));
+    color->usingRGB = 1;
+
     color->foreground = vgaToRgb(vgaGetForegroundColor(attributes));
     color->background = vgaToRgb(vgaGetBackgroundColor(attributes));
-    color->usingRGB = 1;
+    if (attributes & VGA_BIT_BLINK) color->isBlinking = 1;
+  }
+}
+
+void
+toVGAScreenColor (ScreenColor *color) {
+  if (color->usingRGB) {
+    int foreground = rgbColorToVga(color->foreground, 0);
+    int background = rgbColorToVga(color->background, 1);
+    if (color->isBlinking) background |= VGA_BIT_BRIGHT;
+
+    memset(color, 0, sizeof(*color));
+    color->vgaAttributes = foreground | (background << 4);
   }
 }
 

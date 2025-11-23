@@ -25,11 +25,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern const ScreenCharacter defaultScreenCharacter;
+extern void toRGBScreenColor (ScreenColor *color);
+extern void toVGAScreenColor (ScreenColor *color);
+
 extern void clearScreenCharacters (ScreenCharacter *characters, size_t count);
 extern void setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count);
 extern void setScreenCharacterColor (ScreenCharacter *characters, const ScreenColor *color, size_t count);
-extern const ScreenCharacter defaultScreenCharacter;
-extern void toRGBScreenColor (ScreenColor *color);
 
 #ifdef __cplusplus
 }
