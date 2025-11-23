@@ -20,6 +20,21 @@
 
 #include "scr_utils.h"
 
+const ScreenCharacter defaultScreenCharacter = {
+  .text = WC_C(' '),
+  .color.vgaAttributes = VGA_COLOR_DEFAULT,
+};
+
+void
+toRGBScreenColor (ScreenColor *color) {
+  if (!color->usingRGB) {
+    unsigned char attributes = color->vgaAttributes;
+    color->foreground = vgaToRgb(vgaGetForegroundColor(attributes));
+    color->background = vgaToRgb(vgaGetBackgroundColor(attributes));
+    color->usingRGB = 1;
+  }
+}
+
 void
 setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count) {
   while (count > 0) {
@@ -33,11 +48,6 @@ setScreenCharacterColor (ScreenCharacter *characters, const ScreenColor *color, 
     characters[--count].color = *color;
   }
 }
-
-const ScreenCharacter defaultScreenCharacter = {
-  .text = WC_C(' '),
-  .color.vgaAttributes = VGA_COLOR_DEFAULT,
-};
 
 void
 clearScreenCharacters (ScreenCharacter *characters, size_t count) {

@@ -173,8 +173,8 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
     if (color->hasStrikeThrough) STR_PRINTF(" strike");
   } else {
     unsigned char attributes = color->vgaAttributes;
-    const char *foreground = vgaColorName((attributes & VGA_MASK_FG) >> 0);
-    const char *background = vgaColorName((attributes & VGA_MASK_BG) >> 4);
+    const char *foreground = vgaColorName(vgaGetForegroundColor(attributes));
+    const char *background = vgaColorName(vgaGetBackgroundColor(attributes));
 
     STR_PRINTF("%s%s%s", foreground, on, background);
     if (attributes & VGA_BIT_BLINK) STR_PRINTF(" blink");

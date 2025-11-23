@@ -59,7 +59,6 @@ typedef enum {
 } ScreenParameters;
 
 #define SCRPARMS "session", "socket"
-
 #include "scr_driver.h"
 
 /* Parameters */
@@ -411,16 +410,7 @@ construct_TmuxScreen(void) {
   logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Constructing Tmux screen driver");
 
   defaultCharacter = defaultScreenCharacter;
-  {
-    ScreenColor *color = &defaultCharacter.color;
-
-    if (!color->usingRGB) {
-      unsigned char attributes = color->vgaAttributes;
-      color->usingRGB = 1;
-      color->foreground = vgaToRgb((attributes & VGA_MASK_FG) >> 0);
-      color->background = vgaToRgb((attributes & VGA_MASK_BG) >> 4);
-    }
-  }
+  toRGBScreenColor(&defaultCharacter.color);
 
   /* Set locale for wide character support */
   setlocale(LC_ALL, "");

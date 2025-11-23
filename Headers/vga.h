@@ -65,6 +65,16 @@ typedef enum {
   VGA_COLOR_DEFAULT = VGA_COLOR_FG_LIGHT_GREY | VGA_COLOR_BG_BLACK
 } VGAAttributes;
 
+static inline unsigned char
+vgaGetForegroundColor (unsigned char attributes) {
+  return (attributes & VGA_MASK_FG) >> 0;
+}
+
+static inline unsigned char
+vgaGetBackgroundColor (unsigned char attributes) {
+  return (attributes & VGA_MASK_BG) >> 4;
+}
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
