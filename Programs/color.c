@@ -74,13 +74,15 @@ vgaToRgb(int vga) {
  * We use squared distance to avoid expensive sqrt() operation
  */
 static int
-colorDistanceSquared(unsigned char r1, unsigned char g1, unsigned char b1,
-                    unsigned char r2, unsigned char g2, unsigned char b2) {
+colorDistanceSquared(
+  unsigned char r1, unsigned char g1, unsigned char b1,
+  unsigned char r2, unsigned char g2, unsigned char b2
+) {
   int dr = (int)r1 - (int)r2;
   int dg = (int)g1 - (int)g2;
   int db = (int)b1 - (int)b2;
 
-  return dr * dr + dg * dg + db * db;
+  return (dr * dr) + (dg * dg) + (db * db);
 }
 
 int
@@ -432,13 +434,13 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
   const char *brightnessModifier = "";
   if (hsv.v < 0.2f) {
     /* Almost black, very little light */
-    brightnessModifier = "Very Dark";
+    brightnessModifier = "Faded";
   } else if (hsv.v < 0.4f) {
     /* Low light, shades are deep */
     brightnessModifier = "Dark";
   } else if (hsv.v > 0.8f) {
     /* Almost white, very bright and clear */
-    brightnessModifier = "Very Light";
+    brightnessModifier = "Bright";
   } else if (hsv.v > 0.6f) {
     /* High light level, easily visible */
     brightnessModifier = "Light";
@@ -449,23 +451,26 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
 
   /* Determine saturation modifier */
   const char *saturationModifier = "";
-  if (hsv.s < 0.2f) {
+  if (hsv.s < 0.1f) {
     /* Very little color, mostly grey */
     saturationModifier = "Pale";
+  } else if (hsv.s < 0.2f) {
+    /* Minimum color presence, almost indistinguishable from grey */
+    saturationModifier = "Faint";
   } else if (hsv.s < 0.4f) {
-    /* Low color intensity, not very vibrant */
+    /* Low color presence, muted and lacking vibrancy */
     saturationModifier = "Dull";
   } else if (hsv.s > 0.95f) {
-    /* Almost pure color, has exceptional vividness and clarity */
+    /* Maximum color presence, pure and striking */
     saturationModifier = "Intense";
   } else if (hsv.s > 0.8f) {
-    /* Very intense color, bold and striking */
+    /* Strong color presence, full-bodied and vivid */
     saturationModifier = "Rich";
   } else if (hsv.s > 0.6f) {
-    /* Strong color presence, noticeable and vivid */
+    /* High color presence, noticeable and lively */
     saturationModifier = "Vibrant";
   } else {
-    /* Moderate color, gentle and not overpowering */
+    /* Moderate color presence, gentle and not overpowering */
   //saturationModifier = "Soft";
   }
 
