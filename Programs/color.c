@@ -85,6 +85,125 @@ colorDistanceSquared(
   return (dr * dr) + (dg * dg) + (db * db);
 }
 
+/* Quantize an RGB component to the nearest VGA intensity level
+ * VGA has 4 intensity levels: 0x00 (0), 0x55 (85), 0xAA (170), 0xFF (255)
+ * Midpoints for rounding:
+ *   0-42    -> 0x00 (closer to 0 than to 85)
+ *   43-127  -> 0x55 (closer to 85 than to 0 or 170)
+ *   128-212 -> 0xAA (closer to 170 than to 85 or 255)
+ *   213-255 -> 0xFF (closer to 255 than to 170)
+ */
+static inline unsigned char
+quantizeComponent(unsigned char value) {
+  /* Simple threshold-based quantization */
+  if (value < 43) {
+    return CI_OFF;  /* 0x00 */
+  } else if (value < 128) {
+    return CI_DIM;  /* 0x55 */
+  } else if (value < 213) {
+    return CI_REG;  /* 0xAA */
+  } else {
+    return CI_MAX;  /* 0xFF */
+  }
+}
+
+/* Fast RGB to VGA conversion using bit-based quantization
+ * This is significantly faster than distance-based search for most cases
+ * by exploiting the regular pattern of VGA color intensities
+ */
+int
+rgbToVgaFast(unsigned char r, unsigned char g, unsigned char b, int noBrightBit) {
+  /* Quantize each component to nearest VGA intensity */
+  unsigned char qr = quantizeComponent(r);
+  unsigned char qg = quantizeComponent(g);
+  unsigned char qb = quantizeComponent(b);
+
+  /* Special case: Brown (color 6)
+   * Brown is {0xAA, 0x55, 0x00} - a hardware quirk
+   * Must check this before general bright color processing
+   */
+  if (!noBrightBit && qr == CI_REG && qg == CI_DIM && qb == CI_OFF) {
+    return 6;  /* Brown */
+  }
+
+  /* VGA color encoding uses IRGB pattern:
+   * bit 0 (1) = Blue
+   * bit 1 (2) = Green
+   * bit 2 (4) = Red
+   * bit 3 (8) = Intensity/Brightness
+   *
+   * VGA palette structure:
+   * Colors 0-7 (no bright bit): Use OFF (0x00) or REG (0xAA) for color components
+   * Colors 8-15 (bright bit set): Use DIM (0x55) as base, MAX (0xFF) for color
+   *   Exception: Color 8 (Dark Grey) uses DIM (0x55) for all components
+   */
+
+  int vgaColor = 0;
+
+  /* Decide if this should be a bright color (colors 8-15)
+   * Use the brightness bit if any component is DIM or MAX
+   */
+  int useBrightBit = 0;
+  if (!noBrightBit) {
+    if (qr == CI_DIM || qr == CI_MAX ||
+        qg == CI_DIM || qg == CI_MAX ||
+        qb == CI_DIM || qb == CI_MAX) {
+      useBrightBit = 1;
+      vgaColor |= VGA_BIT_BRIGHT;
+    }
+  }
+
+  /* Set the RGB color bits based on the intensity levels */
+  if (useBrightBit) {
+    /* Bright colors (8-15): Color bits set if component is MAX */
+    if (qr == CI_MAX) vgaColor |= VGA_BIT_RED;
+    if (qg == CI_MAX) vgaColor |= VGA_BIT_GREEN;
+    if (qb == CI_MAX) vgaColor |= VGA_BIT_BLUE;
+  } else {
+    /* Dark colors (0-7): Color bits set if component is REG or higher */
+    if (qr >= CI_REG) vgaColor |= VGA_BIT_RED;
+    if (qg >= CI_REG) vgaColor |= VGA_BIT_GREEN;
+    if (qb >= CI_REG) vgaColor |= VGA_BIT_BLUE;
+  }
+
+  /* If the quantized color matches the input exactly, we can return immediately */
+  RGBColor result = vgaPalette[vgaColor];
+  if (result.r == r && result.g == g && result.b == b) {
+    return vgaColor;
+  }
+
+  /* For ambiguous cases (e.g., pure colors that could be dark or bright),
+   * check both possibilities and pick the closer one
+   */
+  if (useBrightBit && (qr == CI_MAX || qg == CI_MAX || qb == CI_MAX)) {
+    /* Check if there's only one MAX component and others are OFF
+     * e.g., (255, 0, 0) could be Red (4) or Light Red (12)
+     */
+    int maxCount = (qr == CI_MAX ? 1 : 0) + (qg == CI_MAX ? 1 : 0) + (qb == CI_MAX ? 1 : 0);
+    int offCount = (qr == CI_OFF ? 1 : 0) + (qg == CI_OFF ? 1 : 0) + (qb == CI_OFF ? 1 : 0);
+
+    if (maxCount >= 1 && offCount >= 1) {
+      /* Compare distance to both bright and dark versions */
+      int darkColor = vgaColor & ~VGA_BIT_BRIGHT;
+      if (darkColor < VGA_COLOR_COUNT) {
+        int distBright = colorDistanceSquared(r, g, b,
+                                             vgaPalette[vgaColor].r,
+                                             vgaPalette[vgaColor].g,
+                                             vgaPalette[vgaColor].b);
+        int distDark = colorDistanceSquared(r, g, b,
+                                           vgaPalette[darkColor].r,
+                                           vgaPalette[darkColor].g,
+                                           vgaPalette[darkColor].b);
+        if (distDark < distBright) {
+          return darkColor;
+        }
+      }
+    }
+  }
+
+  return vgaColor;
+}
+
 int
 rgbToVga(unsigned char r, unsigned char g, unsigned char b, int noBrightBit) {
   /* Find the closest VGA color by minimum Euclidean distance in RGB space

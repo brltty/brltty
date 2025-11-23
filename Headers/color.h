@@ -33,6 +33,13 @@ extern RGBColor vgaToRgb (int vga);
  */
 extern int rgbToVga (unsigned char r, unsigned char g, unsigned char b, int noBrightBit);
 
+/* Convert RGB color to nearest VGA color code (0-15) - optimized version
+ * Uses bit-based quantization for faster conversion
+ * This is significantly faster than rgbToVga() but may produce slightly
+ * different results in edge cases due to quantization vs distance calculation
+ */
+extern int rgbToVgaFast (unsigned char r, unsigned char g, unsigned char b, int noBrightBit);
+
 /* Convert RGB color structure to nearest VGA color code (0-15) */
 extern int rgbColorToVga (RGBColor color, int noBrightBit);
 
