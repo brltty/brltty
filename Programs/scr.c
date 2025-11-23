@@ -157,12 +157,9 @@ readScreenText (short left, short top, short width, short height, wchar_t *buffe
 
 unsigned char
 getScreenColorAttributes (const ScreenColor *color) {
-  if (!color->usingRGB) return color->vgaAttributes;
-
-  int foreground = rgbColorToVga(color->foreground, 0);
-  int background = rgbColorToVga(color->background, 1);
-  if (color->isBlinking) background |= VGA_BIT_BRIGHT;
-  return (background << 4) | foreground;
+  ScreenColor c = *color;
+  toVGAScreenColor(&c);
+  return c.vgaAttributes;
 }
 
 int

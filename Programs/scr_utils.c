@@ -29,6 +29,22 @@ const ScreenCharacter defaultScreenCharacter = {
 };
 
 void
+toVGAScreenColor (ScreenColor *color) {
+  if (color->usingRGB) {
+    int foreground = rgbColorToVga(color->foreground, 0);
+    int background = rgbColorToVga(color->background, 1);
+    unsigned char attributes = (foreground << VGA_SHIFT_FG)
+                             | (background << VGA_SHIFT_BG);
+
+    if (color->isBlinking) attributes |= VGA_BIT_BLINK;
+    if (color->isBold) attributes |= VGA_BIT_FG_BRIGHT;
+
+    memset(color, 0, sizeof(*color));
+    color->vgaAttributes = attributes;
+  }
+}
+
+void
 toRGBScreenColor (ScreenColor *color) {
   if (!color->usingRGB) {
     unsigned char attributes = color->vgaAttributes;
@@ -42,26 +58,14 @@ toRGBScreenColor (ScreenColor *color) {
 }
 
 void
-toVGAScreenColor (ScreenColor *color) {
-  if (color->usingRGB) {
-    int foreground = rgbColorToVga(color->foreground, 0);
-    int background = rgbColorToVga(color->background, 1);
-    if (color->isBlinking) background |= VGA_BIT_BRIGHT;
-
-    memset(color, 0, sizeof(*color));
-    color->vgaAttributes = foreground | (background << 4);
-  }
-}
-
-void
-setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count) {
+setScreenCharacterText (ScreenCharacter *characters, size_t count, wchar_t text) {
   while (count > 0) {
     characters[--count].text = text;
   }
 }
 
 void
-setScreenCharacterColor (ScreenCharacter *characters, const ScreenColor *color, size_t count) {
+setScreenCharacterColor (ScreenCharacter *characters, size_t count, const ScreenColor *color) {
   while (count > 0) {
     characters[--count].color = *color;
   }
@@ -69,6 +73,6 @@ setScreenCharacterColor (ScreenCharacter *characters, const ScreenColor *color, 
 
 void
 clearScreenCharacters (ScreenCharacter *characters, size_t count) {
-  setScreenCharacterText(characters, defaultScreenCharacter.text, count);
-  setScreenCharacterColor(characters, &defaultScreenCharacter.color, count);
+  setScreenCharacterText(characters, count, defaultScreenCharacter.text);
+  setScreenCharacterColor(characters, count, &defaultScreenCharacter.color);
 }
