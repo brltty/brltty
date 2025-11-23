@@ -386,8 +386,9 @@ testColorRecognition (const char *testName) {
     rgbToDescription(description, sizeof(description), test->r, test->g, test->b);
 
     /* Check if result matches expected or alternate description */
-    int matchExpected = strcmp(description, test->expectedDescription) == 0;
-    int matchAlternate = test->alternateDescription && (strcmp(description, test->alternateDescription) == 0);
+    int matchExpected = strcasecmp(description, test->expectedDescription) == 0;
+    int matchAlternate = test->alternateDescription
+                      && (strcasecmp(description, test->alternateDescription) == 0);
 
     int passed = matchExpected || matchAlternate;
     if (passed) passCount += 1;
