@@ -36,7 +36,7 @@ setScreenCharacterColor (ScreenCharacter *characters, const ScreenColor *color, 
 
 const ScreenCharacter defaultScreenCharacter = {
   .text = WC_C(' '),
-  .color.vgaAttributes = SCR_COLOUR_DEFAULT,
+  .color.vgaAttributes = VGA_COLOR_DEFAULT,
 };
 
 void

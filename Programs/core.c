@@ -1110,7 +1110,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
       textBuffer[length++] = character;
 
       unsigned char attributesBuffer[length];
-      memset(attributesBuffer, SCR_COLOUR_DEFAULT, length);
+      memset(attributesBuffer, VGA_COLOR_DEFAULT, length);
       attributesBuffer[length-1] = attributes;
 
       sayWideCharacters(&spk, textBuffer, attributesBuffer, length, sayOptions);
@@ -1133,7 +1133,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
       *attributes++ = character->color.vgaAttributes;
 
       *text++ = WC_C(' ');
-      *attributes++ = SCR_COLOUR_DEFAULT;
+      *attributes++ = VGA_COLOR_DEFAULT;
 
       character += 1;
     }

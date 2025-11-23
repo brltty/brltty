@@ -417,8 +417,8 @@ construct_TmuxScreen(void) {
     if (!color->usingRGB) {
       unsigned char attributes = color->vgaAttributes;
       color->usingRGB = 1;
-      color->foreground = vgaToRgb((attributes & SCR_MASK_FG) >> 0);
-      color->background = vgaToRgb((attributes & SCR_MASK_BG) >> 4);
+      color->foreground = vgaToRgb((attributes & VGA_MASK_FG) >> 0);
+      color->background = vgaToRgb((attributes & VGA_MASK_BG) >> 4);
     }
   }
 

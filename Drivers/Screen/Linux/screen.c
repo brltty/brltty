@@ -1493,7 +1493,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
       if (column < size) {
         if (character) {
           character->text = wc;
-          character->color.vgaAttributes = SCR_COLOUR_DEFAULT;
+          character->color.vgaAttributes = VGA_COLOR_DEFAULT;
           character += 1;
         }
 

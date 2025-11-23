@@ -28,7 +28,7 @@
 #include "tune_builder.h"
 #include "ascii.h"
 #include "utf8.h"
-#include "scr_types.h"
+#include "vga.h"
 #include "core.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -45,7 +45,7 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
 
   while (from < bufferEnd) {
     SayOptions options = 0;
-    unsigned char colour = SCR_COLOUR_DEFAULT;
+    unsigned char color = VGA_COLOR_DEFAULT;
     int dontSpeak = 0;
     int asTune = 0;
 
@@ -63,7 +63,7 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
           break;
 
         case 'c':
-          if (from < bufferEnd) colour = *from++;
+          if (from < bufferEnd) color = *from++;
           break;
 
         case 'd':
@@ -131,7 +131,7 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
       } else if (!dontSpeak) {
         size_t attributesCount = countUtf8Characters(text);
         unsigned char attributes[attributesCount + 1];
-        memset(attributes, colour, attributesCount);
+        memset(attributes, color, attributesCount);
 
         sayUtf8Characters(
           &spk, text, attributes,

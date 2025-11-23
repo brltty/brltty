@@ -52,17 +52,17 @@ overlayAttributesUnderline (unsigned char *cell, unsigned char attributes) {
   unsigned char dots;
 
   switch (attributes) {
-    case SCR_COLOUR_FG_DARK_GREY | SCR_COLOUR_BG_BLACK:
-    case SCR_COLOUR_FG_LIGHT_GREY | SCR_COLOUR_BG_BLACK:
-    case SCR_COLOUR_FG_LIGHT_GREY | SCR_COLOUR_BG_BLUE:
-    case SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_CYAN:
+    case VGA_COLOR_FG_DARK_GREY | VGA_COLOR_BG_BLACK:
+    case VGA_COLOR_FG_LIGHT_GREY | VGA_COLOR_BG_BLACK:
+    case VGA_COLOR_FG_LIGHT_GREY | VGA_COLOR_BG_BLUE:
+    case VGA_COLOR_FG_BLACK | VGA_COLOR_BG_CYAN:
       return;
 
-    case SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_LIGHT_GREY:
+    case VGA_COLOR_FG_BLACK | VGA_COLOR_BG_LIGHT_GREY:
       dots = BRL_DOT_7 | BRL_DOT_8;
       break;
 
-    case SCR_COLOUR_FG_WHITE | SCR_COLOUR_BG_BLACK:
+    case VGA_COLOR_FG_WHITE | VGA_COLOR_BG_BLACK:
     default:
       dots = BRL_DOT_8;
       break;

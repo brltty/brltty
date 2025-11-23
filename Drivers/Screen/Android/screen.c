@@ -252,7 +252,7 @@ getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jcharArray jCharacte
         if (target == targetEnd) break;
 
         target->text = *source;
-        target->color.vgaAttributes = SCR_COLOUR_DEFAULT;
+        target->color.vgaAttributes = VGA_COLOR_DEFAULT;
 
         target += 1;
         source += 1;
@@ -288,7 +288,7 @@ getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jcharArray jCharacte
       const ScreenCharacter *targetEnd = characters + to;
 
       while (target < targetEnd) {
-        target->color.vgaAttributes = SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_LIGHT_GREY;
+        target->color.vgaAttributes = VGA_COLOR_FG_BLACK | VGA_COLOR_BG_LIGHT_GREY;
         target += 1;
       }
     }
