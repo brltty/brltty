@@ -159,8 +159,8 @@ unsigned char
 getScreenColorAttributes (const ScreenColor *color) {
   if (!color->usingRGB) return color->vgaAttributes;
 
-  unsigned char attributes = (rgbColorToVgaFast(color->foreground, 1) << VGA_SHIFT_FG)
-                           | (rgbColorToVgaFast(color->background, 0) << VGA_SHIFT_BG);
+  unsigned char attributes = (rgbColorToVgaFast(color->foreground, 0) << VGA_SHIFT_FG)
+                           | (rgbColorToVgaFast(color->background, 1) << VGA_SHIFT_BG);
 
   if (color->isBlinking) attributes |= VGA_BIT_BLINK;
   if (color->isBold) attributes |= VGA_BIT_FG_BRIGHT;
