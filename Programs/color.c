@@ -19,6 +19,13 @@
 #include <stdio.h>
 #include "color.h"
 
+typedef enum {
+  CI_OFF = 0X00,
+  CI_DIM = 0X55,
+  CI_REG = 0XAA,
+  CI_MAX = 0XFF,
+} ColorIntensity;
+
 /* Standard VGA 16-color palette in RGB values
  * These are the standard colors used by VGA text mode and many terminal emulators
  *
@@ -31,22 +38,22 @@
  * the standard for EGA/VGA backward compatibility.
  */
 static const RGBColor vgaPalette[VGA_COLOR_COUNT] = {
-  /* Black */         [ 0] = {0X00, 0X00, 0X00},
-  /* Blue */          [ 1] = {0X00, 0X00, 0XAA},
-  /* Green */         [ 2] = {0X00, 0XAA, 0X00},
-  /* Cyan */          [ 3] = {0X00, 0XAA, 0XAA},
-  /* Red */           [ 4] = {0XAA, 0X00, 0X00},
-  /* Magenta */       [ 5] = {0XAA, 0X00, 0XAA},
-  /* Brown */         [ 6] = {0XAA, 0X55, 0X00}, /* Hardware exception: not 0xAA for green */
-  /* Light Grey */    [ 7] = {0XAA, 0XAA, 0XAA},
-  /* Dark Grey */     [ 8] = {0X55, 0X55, 0X55},
-  /* Light Blue */    [ 9] = {0X55, 0X55, 0XFF},
-  /* Light Green */   [10] = {0X55, 0XFF, 0X55},
-  /* Light Cyan */    [11] = {0X55, 0XFF, 0XFF},
-  /* Light Red */     [12] = {0XFF, 0X55, 0X55},
-  /* Light Magenta */ [13] = {0XFF, 0X55, 0XFF},
-  /* Yellow */        [14] = {0XFF, 0XFF, 0X55},
-  /* White */         [15] = {0XFF, 0XFF, 0XFF}
+  /* Black */         [ 0] = {CI_OFF, CI_OFF, CI_OFF},
+  /* Blue */          [ 1] = {CI_OFF, CI_OFF, CI_REG},
+  /* Green */         [ 2] = {CI_OFF, CI_REG, CI_OFF},
+  /* Cyan */          [ 3] = {CI_OFF, CI_REG, CI_REG},
+  /* Red */           [ 4] = {CI_REG, CI_OFF, CI_OFF},
+  /* Magenta */       [ 5] = {CI_REG, CI_OFF, CI_REG},
+  /* Brown */         [ 6] = {CI_REG, CI_DIM, CI_OFF}, /* Hardware exception: not CI_REG for green */
+  /* Light Grey */    [ 7] = {CI_REG, CI_REG, CI_REG},
+  /* Dark Grey */     [ 8] = {CI_DIM, CI_DIM, CI_DIM},
+  /* Light Blue */    [ 9] = {CI_DIM, CI_DIM, CI_MAX},
+  /* Light Green */   [10] = {CI_DIM, CI_MAX, CI_DIM},
+  /* Light Cyan */    [11] = {CI_DIM, CI_MAX, CI_MAX},
+  /* Light Red */     [12] = {CI_MAX, CI_DIM, CI_DIM},
+  /* Light Magenta */ [13] = {CI_MAX, CI_DIM, CI_MAX},
+  /* Yellow */        [14] = {CI_MAX, CI_MAX, CI_DIM},
+  /* White */         [15] = {CI_MAX, CI_MAX, CI_MAX}
 };
 
 const RGBColor*
@@ -465,22 +472,22 @@ rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color) {
 
 /* Standard ANSI colors: basic (0 to 7) and bright (8 to 15) */
 static const RGBColor ansiPalette[16] = {
-  /* Black */          [ 0] = {0X00, 0X00, 0X00},
-  /* Red */            [ 1] = {0XAA, 0X00, 0X00},
-  /* Green */          [ 2] = {0X00, 0XAA, 0X00},
-  /* Yellow */         [ 3] = {0XAA, 0XAA, 0X00},
-  /* Blue */           [ 4] = {0X00, 0X00, 0XAA},
-  /* Magenta */        [ 5] = {0XAA, 0X00, 0XAA},
-  /* Cyan */           [ 6] = {0X00, 0XAA, 0XAA},
-  /* White */          [ 7] = {0XAA, 0XAA, 0XAA},
-  /* Bright Black */   [ 8] = {0X55, 0X55, 0X55},
-  /* Bright Red */     [ 9] = {0XFF, 0X55, 0X55},
-  /* Bright Green */   [10] = {0X55, 0XFF, 0X55},
-  /* Bright Yellow */  [11] = {0XFF, 0XFF, 0X55},
-  /* Bright Blue */    [12] = {0X55, 0X55, 0XFF},
-  /* Bright Magenta */ [13] = {0XFF, 0X55, 0XFF},
-  /* Bright Cyan */    [14] = {0X55, 0XFF, 0XFF},
-  /* Bright White */   [15] = {0XFF, 0XFF, 0XFF}
+  /* Black */          [ 0] = {CI_OFF, CI_OFF, CI_OFF},
+  /* Red */            [ 1] = {CI_REG, CI_OFF, CI_OFF},
+  /* Green */          [ 2] = {CI_OFF, CI_REG, CI_OFF},
+  /* Yellow */         [ 3] = {CI_REG, CI_REG, CI_OFF},
+  /* Blue */           [ 4] = {CI_OFF, CI_OFF, CI_REG},
+  /* Magenta */        [ 5] = {CI_REG, CI_OFF, CI_REG},
+  /* Cyan */           [ 6] = {CI_OFF, CI_REG, CI_REG},
+  /* White */          [ 7] = {CI_REG, CI_REG, CI_REG},
+  /* Bright Black */   [ 8] = {CI_DIM, CI_DIM, CI_DIM},
+  /* Bright Red */     [ 9] = {CI_MAX, CI_DIM, CI_DIM},
+  /* Bright Green */   [10] = {CI_DIM, CI_MAX, CI_DIM},
+  /* Bright Yellow */  [11] = {CI_MAX, CI_MAX, CI_DIM},
+  /* Bright Blue */    [12] = {CI_DIM, CI_DIM, CI_MAX},
+  /* Bright Magenta */ [13] = {CI_MAX, CI_DIM, CI_MAX},
+  /* Bright Cyan */    [14] = {CI_DIM, CI_MAX, CI_MAX},
+  /* Bright White */   [15] = {CI_MAX, CI_MAX, CI_MAX}
 };
 
 /* Convert ANSI 256-color code to RGB */
