@@ -766,7 +766,7 @@ enterInteractiveMode (void) {
       }
     }
 
-    if (getQueueSize(arguments) > 0) {
+    if (!isEmptyQueue(arguments)) {
       char *command = dequeueItem(arguments);
 
       if (isAbbreviation(QUIT_COMMAND, command)) {
@@ -778,7 +778,7 @@ enterInteractiveMode (void) {
         const ColorModel *model = &colorModels[i];
 
         if (isAbbreviation(model->name, command)) {
-          if (getQueueSize(arguments) == 0) {
+          if (isEmptyQueue(arguments)) {
             currentColorModel = model;
             putColorModelSyntax(currentColorModel);
           } else {

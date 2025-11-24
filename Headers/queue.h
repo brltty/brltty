@@ -38,6 +38,8 @@ extern Queue *getProgramQueue (
 );
 
 extern int getQueueSize (const Queue *queue);
+extern int isEmptyQueue (const Queue *queue);
+
 extern void *getQueueData (const Queue *queue);
 extern void *setQueueData (Queue *queue, void *data);
 

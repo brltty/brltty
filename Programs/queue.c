@@ -339,6 +339,11 @@ getQueueSize (const Queue *queue) {
   return queue->size;
 }
 
+int
+isEmptyQueue (const Queue *queue) {
+  return queue->size == 0;
+}
+
 void *
 getQueueData (const Queue *queue) {
   return queue->data;
