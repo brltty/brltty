@@ -584,7 +584,7 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
     saturationModifier = "Faint";
   } else if (hsv.s < 0.4f) {
     /* Low color presence, muted and lacking vibrancy */
-    saturationModifier = "Dull";
+    saturationModifier = "Soft";
   } else if (hsv.s > 0.98f) {
     /* Absolute color presence, vivid and unaltered */
     saturationModifier = "Pure";
@@ -599,7 +599,7 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
     saturationModifier = "Vibrant";
   } else {
     /* Moderate color presence, gentle and not overpowering */
-  //saturationModifier = "Soft";
+  //saturationModifier = "Moderate";
   }
 
   /* Combine modifiers and hue name */

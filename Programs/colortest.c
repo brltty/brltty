@@ -369,11 +369,11 @@ testColorRecognition (const char *testName) {
 
     /* Light blue (173,216,230) has H=197° which is in the cyan range (180-210°).
      * "light cyan" is actually more accurate than "light blue" based on HSV analysis. */
-    {"Light Blue",       173, 216, 230, "light blue", "bright dull cyan",
+    {"Light Blue",       173, 216, 230, "light blue", "bright soft cyan",
      "H=197° is in cyan range; HSV analysis gives more accurate result"},
 
     {"Dark Green",       0,   100, 0,   "dark pure green", NULL, NULL},
-    {"Light Green",      144, 238, 144, "bright dull green", NULL, NULL},
+    {"Light Green",      144, 238, 144, "bright soft green", NULL, NULL},
   };
 
   const int testCount = ARRAY_COUNT(tests);
