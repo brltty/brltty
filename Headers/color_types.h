@@ -39,8 +39,8 @@ typedef struct {
 
 /* VGA Color Codes (0-15)
  * Standard 16-color VGA palette:
- * 0=Black, 1=Red, 2=Green, 3=Brown/Yellow, 4=Blue, 5=Magenta, 6=Cyan, 7=Light Grey
- * 8=Dark Grey, 9=Light Red, 10=Light Green, 11=Yellow, 12=Light Blue,
+ * 0=Black, 1=Red, 2=Green, 3=Brown/Yellow, 4=Blue, 5=Magenta, 6=Cyan, 7=Light Gray
+ * 8=Dark Gray, 9=Light Red, 10=Light Green, 11=Yellow, 12=Light Blue,
  * 13=Light Magenta, 14=Light Cyan, 15=White
  */
 

@@ -136,7 +136,7 @@ Tmux's `capture-pane -e` command outputs ANSI escape sequences that include:
 BRLTTY's attribute system provides:
 
 **Foreground Colors (16 colors):**
-- 8 basic colors: black, blue, green, cyan, red, magenta, brown, light grey
+- 8 basic colors: Black, Blue, Green, Cyan, Red, Magenta, Brown, Light Gray
 - 8 bright variants using the bright/intensity flag
 
 **Background Colors (8 colors):**

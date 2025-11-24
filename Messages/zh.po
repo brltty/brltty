@@ -2619,7 +2619,7 @@ msgstr "循環 Upper 相黏輸入設定 (下一個, 開, 關)"
 
 #. L
 #: Programs/cmd_utils.c:152
-msgid "dark grey"
+msgid "dark gray"
 msgstr "暗灰"
 
 #. xgettext: This is the description of the SAY_LOWER command.
@@ -3186,7 +3186,7 @@ msgstr "淡率"
 
 #. RGB
 #: Programs/cmd_utils.c:151
-msgid "light grey"
+msgid "light gray"
 msgstr "淡灰"
 
 #. LR B

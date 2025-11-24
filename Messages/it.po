@@ -2448,7 +2448,7 @@ msgstr ""
 
 #. L
 #: Programs/cmd_utils.c:152
-msgid "dark grey"
+msgid "dark gray"
 msgstr "grigio scuro"
 
 #: Programs/cmds.auto.h:483
@@ -2928,7 +2928,7 @@ msgstr ""
 
 #. RGB
 #: Programs/cmd_utils.c:151
-msgid "light grey"
+msgid "light gray"
 msgstr ""
 
 #. LR B

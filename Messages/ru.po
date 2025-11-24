@@ -2432,7 +2432,7 @@ msgstr "цикличное  залипание/разлипание верхне
 
 #. L
 #: Programs/cmd_utils.c:152
-msgid "dark grey"
+msgid "dark gray"
 msgstr "тёмно-серый"
 
 #: Programs/cmds.auto.h:483
@@ -2912,7 +2912,7 @@ msgstr "светло-зелёный"
 
 #. RGB
 #: Programs/cmd_utils.c:151
-msgid "light grey"
+msgid "light gray"
 msgstr "светло-серый"
 
 #. LR B

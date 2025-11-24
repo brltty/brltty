@@ -52,13 +52,13 @@ overlayAttributesUnderline (unsigned char *cell, unsigned char attributes) {
   unsigned char dots;
 
   switch (attributes) {
-    case VGA_COLOR_FG_DARK_GREY | VGA_COLOR_BG_BLACK:
-    case VGA_COLOR_FG_LIGHT_GREY | VGA_COLOR_BG_BLACK:
-    case VGA_COLOR_FG_LIGHT_GREY | VGA_COLOR_BG_BLUE:
+    case VGA_COLOR_FG_DARK_GRAY | VGA_COLOR_BG_BLACK:
+    case VGA_COLOR_FG_LIGHT_GRAY | VGA_COLOR_BG_BLACK:
+    case VGA_COLOR_FG_LIGHT_GRAY | VGA_COLOR_BG_BLUE:
     case VGA_COLOR_FG_BLACK | VGA_COLOR_BG_CYAN:
       return;
 
-    case VGA_COLOR_FG_BLACK | VGA_COLOR_BG_LIGHT_GREY:
+    case VGA_COLOR_FG_BLACK | VGA_COLOR_BG_LIGHT_GRAY:
       dots = BRL_DOT_7 | BRL_DOT_8;
       break;
 

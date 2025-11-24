@@ -2634,7 +2634,7 @@ msgstr "دورة معدل الإدخال العلوي اللاصق (التالي
 
 #. L
 #: Programs/cmd_utils.c:152
-msgid "dark grey"
+msgid "dark gray"
 msgstr "رمادي غامق"
 
 #. xgettext: This is the description of the SAY_LOWER command.
@@ -3201,7 +3201,7 @@ msgstr "أخضر فاتح"
 
 #. RGB
 #: Programs/cmd_utils.c:151
-msgid "light grey"
+msgid "light gray"
 msgstr "رمادي فاتح"
 
 #. LR B

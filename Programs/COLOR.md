@@ -51,8 +51,8 @@ The library uses the standard 16-color VGA palette following the IRGB bit patter
 | 4    | Red            | (170, 0, 0)     | 0100               |
 | 5    | Magenta        | (170, 0, 170)   | 0101               |
 | 6    | Brown          | (170, 85, 0)    | 0110*              |
-| 7    | Light Grey     | (170, 170, 170) | 0111               |
-| 8    | Dark Grey      | (85, 85, 85)    | 1000               |
+| 7    | Light Gray     | (170, 170, 170) | 0111               |
+| 8    | Dark Gray      | (85, 85, 85)    | 1000               |
 | 9    | Light Blue     | (85, 85, 255)   | 1001               |
 | 10   | Light Green    | (85, 255, 85)   | 1010               |
 | 11   | Light Cyan     | (85, 255, 255)  | 1011               |
@@ -241,7 +241,7 @@ Generates a human-readable description of an RGB color using HSV analysis.
 
 1. **Special Cases:**
    - Very dark colors (V < 0.08) → "black"
-   - Low saturation (S < 0.08) → shades of grey based on value
+   - Low saturation (S < 0.08) → shades of gray based on value
    - **Common named colors** (checked before generic hue names):
      - **Brown**: Orange/yellow hues (15-90°) with low brightness (V < 0.7) and moderate saturation (S > 0.3) → "brown" or "dark brown"
      - **Tan/Beige**: Desaturated orange (15-75°) with high brightness (V > 0.6, S < 0.35) → "tan" or "beige"
@@ -301,7 +301,7 @@ rgbToDescription(buffer, sizeof(buffer), 100, 200, 150);
 /* Returns: "saturated cyan-green" */
 
 rgbToDescription(buffer, sizeof(buffer), 220, 220, 220);
-/* Returns: "light grey" */
+/* Returns: "light gray" */
 
 rgbToDescription(buffer, sizeof(buffer), 255, 165, 0);
 /* Returns: "bright vivid orange" */

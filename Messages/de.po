@@ -2945,7 +2945,7 @@ msgstr "Einrastfunktion der Feststelltaste umschalten (ändern, ein, aus)"
 
 #. L
 #: Programs/cmd_utils.c:168
-msgid "dark grey"
+msgid "dark gray"
 msgstr "Dunkelgrau"
 
 #. xgettext: This is the description of the SAY_LOWER command.
@@ -3543,7 +3543,7 @@ msgstr "Hellgrün"
 
 #. RGB
 #: Programs/cmd_utils.c:167
-msgid "light grey"
+msgid "light gray"
 msgstr "Hellgrau"
 
 #. LR B

@@ -45,8 +45,8 @@ static const RGBColor vgaPalette[VGA_COLOR_COUNT] = {
   /* Red */           [ 4] = {CI_REG, CI_OFF, CI_OFF},
   /* Magenta */       [ 5] = {CI_REG, CI_OFF, CI_REG},
   /* Brown */         [ 6] = {CI_REG, CI_DIM, CI_OFF}, /* Hardware exception: not CI_REG for green */
-  /* Light Grey */    [ 7] = {CI_REG, CI_REG, CI_REG},
-  /* Dark Grey */     [ 8] = {CI_DIM, CI_DIM, CI_DIM},
+  /* Light Gray */    [ 7] = {CI_REG, CI_REG, CI_REG},
+  /* Dark Gray */     [ 8] = {CI_DIM, CI_DIM, CI_DIM},
   /* Light Blue */    [ 9] = {CI_DIM, CI_DIM, CI_MAX},
   /* Light Green */   [10] = {CI_DIM, CI_MAX, CI_DIM},
   /* Light Cyan */    [11] = {CI_DIM, CI_MAX, CI_MAX},
@@ -135,7 +135,7 @@ rgbToVgaFast(unsigned char r, unsigned char g, unsigned char b, int noBrightBit)
    * VGA palette structure:
    * Colors 0-7 (no bright bit): Use OFF (0x00) or REG (0xAA) for color components
    * Colors 8-15 (bright bit set): Use DIM (0x55) as base, MAX (0xFF) for color
-   *   Exception: Color 8 (Dark Grey) uses DIM (0x55) for all components
+   *   Exception: Color 8 (Dark Gray) uses DIM (0x55) for all components
    */
 
   int vgaColor = 0;
@@ -259,8 +259,8 @@ static const char *vgaColorNames[VGA_COLOR_COUNT] = {
   [ 4] = "Red",
   [ 5] = "Magenta",
   [ 6] = "Brown",
-  [ 7] = "Light Grey",
-  [ 8] = "Dark Grey",
+  [ 7] = "Light Gray",
+  [ 8] = "Dark Gray",
   [ 9] = "Light Blue",
   [10] = "Light Green",
   [11] = "Light Cyan",
@@ -356,7 +356,7 @@ hsvToRgb(float h, float s, float v) {
   hsvNormalize(&h, &s, &v);
 
   if (s == 0.0f) {
-    /* Achromatic (grey) */
+    /* Achromatic (gray) */
     rgb.r = rgb.g = rgb.b = (unsigned char)(v * 255.0f + 0.5f);
     return rgb;
   }
@@ -443,15 +443,15 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
   }
 
   if (hsv.s < 0.08f) {
-    /* Achromatic - shades of grey */
+    /* Achromatic - shades of gray */
     if (hsv.v > 0.92f) {
       snprintf(buffer, bufferSize, "White");
     } else if (hsv.v > 0.65f) {
-      snprintf(buffer, bufferSize, "Light Grey");
+      snprintf(buffer, bufferSize, "Light Gray");
     } else if (hsv.v > 0.35f) {
-      snprintf(buffer, bufferSize, "Grey");
+      snprintf(buffer, bufferSize, "Gray");
     } else {
-      snprintf(buffer, bufferSize, "Dark Grey");
+      snprintf(buffer, bufferSize, "Dark Gray");
     }
     return buffer;
   }
@@ -577,10 +577,10 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
   /* Determine saturation modifier */
   const char *saturationModifier = "";
   if (hsv.s < 0.1f) {
-    /* Very little color, mostly grey */
+    /* Very little color, mostly gray */
     saturationModifier = "Pale";
   } else if (hsv.s < 0.2f) {
-    /* Minimum color presence, almost indistinguishable from grey */
+    /* Minimum color presence, almost indistinguishable from gray */
     saturationModifier = "Faint";
   } else if (hsv.s < 0.4f) {
     /* Low color presence, muted and lacking vibrancy */

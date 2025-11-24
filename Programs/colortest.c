@@ -278,7 +278,7 @@ testRGBtoHSVtoRGB (const char *testName) {
     {"Pure Blue",    0,   0,   255, NULL, NULL, NULL},
     {"White",        255, 255, 255, NULL, NULL, NULL},
     {"Black",        0,   0,   0,   NULL, NULL, NULL},
-    {"Grey",         128, 128, 128, NULL, NULL, NULL},
+    {"Gray",         128, 128, 128, NULL, NULL, NULL},
     {"Yellow",       255, 255, 0,   NULL, NULL, NULL},
     {"Cyan",         0,   255, 255, NULL, NULL, NULL},
     {"Magenta",      255, 0,   255, NULL, NULL, NULL},
@@ -341,10 +341,10 @@ testColorRecognition (const char *testName) {
     {"White",            255, 255, 255, "white", NULL, NULL},
     {"Black",            0,   0,   0,   "black", NULL, NULL},
 
-    /* Greys */
-    {"Light Grey",       200, 200, 200, "light grey", NULL, NULL},
-    {"Medium Grey",      128, 128, 128, "grey", NULL, NULL},
-    {"Dark Grey",        64,  64,  64,  "dark grey", NULL, NULL},
+    /* Grays */
+    {"Light Gray",       200, 200, 200, "light gray", NULL, NULL},
+    {"Medium Gray",      128, 128, 128, "gray", NULL, NULL},
+    {"Dark Gray",        64,  64,  64,  "dark gray", NULL, NULL},
 
     /* Named colors - CSS/HTML color standard */
     {"Brown",            170, 85,  0,   "brown", NULL, NULL},  /* VGA Brown RGB values */

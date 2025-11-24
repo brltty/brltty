@@ -2828,7 +2828,7 @@ msgstr ""
 
 #. L
 #: Programs/cmd_utils.c:168
-msgid "dark grey"
+msgid "dark gray"
 msgstr "მუქი ნაცრისფერი"
 
 #. xgettext: This is the description of the SAY_LOWER command.
@@ -3425,7 +3425,7 @@ msgstr "ღია მწვანე"
 
 #. RGB
 #: Programs/cmd_utils.c:167
-msgid "light grey"
+msgid "light gray"
 msgstr "ღია ნაცრისფერი"
 
 #. LR B
