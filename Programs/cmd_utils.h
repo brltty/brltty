@@ -19,8 +19,6 @@
 #ifndef BRLTTY_INCLUDED_CMD_UTILS
 #define BRLTTY_INCLUDED_CMD_UTILS
 
-#include "scr_types.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -30,8 +28,6 @@ extern void alertLineSkipped (unsigned int *count);
 extern int isTextOffset (int arg, int *row, int *first, int *last, int relaxed);
 
 extern int getCharacterCoordinates (int arg, int *row, int *first, int *last, int relaxed);
-
-extern int getScreenCharacter (ScreenCharacter *character, int column, int row);
 
 #ifdef __cplusplus
 }

@@ -27,7 +27,7 @@
 #include "cmd_miscellaneous.h"
 #include "cmd_utils.h"
 #include "brl_cmds.h"
-#include "scr_types.h"
+#include "scr.h"
 #include "scr_special.h"
 #include "color.h"
 #include "unicode.h"
@@ -201,7 +201,7 @@ STR_END_FORMATTER
 static void
 showCharacterDescription (int column, int row) {
   ScreenCharacter character;
-  getScreenCharacter(&character, column, row);
+  readScreenCharacter(column, row, &character);
 
   char description[0X80];
   STR_BEGIN(description, sizeof(description));
@@ -233,7 +233,7 @@ showCharacterDescription (int column, int row) {
 static void
 showColorDescription (int column, int row) {
   ScreenCharacter character;
-  getScreenCharacter(&character, column, row);
+  readScreenCharacter(column, row, &character);
   const ScreenColor *color = &character.color;
 
   char description[0X80];

@@ -219,7 +219,7 @@ getPhoneticWord (wchar_t character) {
 static void
 sayPhoneticPhrase (int column, int row) {
   ScreenCharacter character;
-  getScreenCharacter(&character, column, row);
+  readScreenCharacter(column, row, &character);
   wchar_t text = character.text;
 
   char description[0X50];

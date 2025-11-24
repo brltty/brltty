@@ -65,6 +65,11 @@ readScreenRow (int row, int width, ScreenCharacter *buffer) {
   return readScreenRows(row, width, 1, buffer);
 }
 
+static inline int
+readScreenCharacter (int column, int row, ScreenCharacter *character) {
+  return readScreen(column, row, 1, 1, character);
+}
+
 extern const ScreenDriver *screen;
 extern const ScreenDriver noScreen;
 extern void setNoScreen (void);

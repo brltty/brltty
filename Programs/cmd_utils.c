@@ -20,7 +20,6 @@
 
 #include "alert.h"
 #include "brl_cmds.h"
-#include "scr.h"
 #include "core.h"
 
 void
@@ -116,9 +115,4 @@ getCharacterCoordinates (int arg, int *row, int *first, int *last, int relaxed) 
   }
 
   return 1;
-}
-
-int
-getScreenCharacter (ScreenCharacter *character, int column, int row) {
-  return readScreen(column, row, 1, 1, character);
 }
