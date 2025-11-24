@@ -22,7 +22,7 @@ include braille.kti
 
 bind !Star CONTEXT+alt1
 bind !Sharp CONTEXT+alt2
-bind !RoutingKey ROUTE
+bind !RoutingKey ROUTE:COLOR
 
 bind !Up KEY_CURSOR_UP
 bind !Left KEY_CURSOR_LEFT

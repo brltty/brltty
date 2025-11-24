@@ -18,7 +18,7 @@
 
 title HandyTech Modular
 
-bind RoutingKey ROUTE
+bind RoutingKey ROUTE:COLOR
 bind RoutingKey+!RoutingKey CLIP_COPY
 
 bind Left+RoutingKey PRINDENT

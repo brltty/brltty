@@ -29,6 +29,7 @@ static const CommandListEntry commandList_modes[] = {
   { .code = BRL_CMD_DISPMD },
   { .code = BRL_CMD_FREEZE },
   { .code = BRL_CMD_BLK(DESCCHAR) },
+  { .code = BRL_CMD_BLK(COLOR) },
   { .code = BRL_CMD_TIME },
   { .code = BRL_CMD_INDICATORS },
   { .code = BRL_CMD_BLK(CONTEXT) },

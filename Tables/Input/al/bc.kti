@@ -57,7 +57,7 @@ bind ETouchRightRear LNEND
 bind ETouchLeftFront CHRLT
 bind ETouchRightFront CHRRT
 
-bind RoutingKey1 ROUTE
+bind RoutingKey1 ROUTE:COLOR
 
 bind ETouchLeftRear+ETouchLeftFront+RoutingKey1 DESCCHAR
 bind RoutingKey1+!RoutingKey1 CLIP_COPY

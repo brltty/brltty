@@ -27,7 +27,7 @@ note The left/right ends of the right rocker are named K6 and K7.
 # Default Bindings #
 ####################
 
-bind !RoutingKey ROUTE
+bind !RoutingKey ROUTE:COLOR
 
 bind K1 FWINLT
 bind K8 FWINRT

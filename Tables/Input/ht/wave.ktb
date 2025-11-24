@@ -21,7 +21,7 @@ title HandyTech Braille Wave
 bind Left FWINLT
 bind Right FWINRT
 
-bind RoutingKey ROUTE
+bind RoutingKey ROUTE:COLOR
 bind RoutingKey+!RoutingKey CLIP_COPY
 
 bind Left+RoutingKey PRINDENT

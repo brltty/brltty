@@ -28,7 +28,7 @@ bind Forward FWINRT
 bind Escape CSRTRK
 bind Escape+Backward BACK
 bind Escape+Forward DISPMD
-bind Enter ROUTE
+bind Enter ROUTE:COLOR
 bind Enter+Backward LNUP
 bind Enter+Forward LNDN
 bind Escape+Enter PREFMENU

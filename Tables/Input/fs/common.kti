@@ -57,7 +57,7 @@ bind LeftSelector+!Left\{navKeyType}Down ATTRDN
 bind RightSelector+!Left\{navKeyType}Up PRSEARCH
 bind RightSelector+!Left\{navKeyType}Down NXSEARCH
 
-bind RoutingKey ROUTE
+bind RoutingKey ROUTE:COLOR
 bind Left\{navKeyType}Press+RoutingKey SETLEFT
 bind Right\{navKeyType}Press+RoutingKey DESCCHAR
 

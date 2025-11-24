@@ -103,7 +103,7 @@ assign toggleKeys B8+K2
 assign toggleCommand ATTRVIS
 include ../toggle.kti
 
-bind RoutingKey ROUTE
+bind RoutingKey ROUTE:COLOR
 
 bind B7+RoutingKey CLIP_NEW
 bind B3+RoutingKey CLIP_ADD

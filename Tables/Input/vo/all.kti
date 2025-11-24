@@ -22,7 +22,7 @@
 
 bind Thumb1+Thumb4 TIME
 
-bind RoutingKey ROUTE
+bind RoutingKey ROUTE:COLOR
 
 bind Thumb1 FWINLT
 bind Thumb4 FWINRT

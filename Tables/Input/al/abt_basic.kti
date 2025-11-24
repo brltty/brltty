@@ -49,7 +49,7 @@ bind Prog+Home+!Up PRPROMPT
 bind Home+Cursor CSRTRK
 bind Cursor RETURN
 
-bind !RoutingKey1 ROUTE
+bind !RoutingKey1 ROUTE:COLOR
 bind Prog+Home+!RoutingKey1 DESCCHAR
 bind Home+Cursor+!RoutingKey1 SETLEFT
 

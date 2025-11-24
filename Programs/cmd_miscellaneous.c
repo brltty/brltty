@@ -19,14 +19,19 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
 #include "strfmt.h"
 #include "cmd_queue.h"
 #include "cmd_miscellaneous.h"
 #include "cmd_utils.h"
 #include "brl_cmds.h"
-#include "prefs.h"
+#include "scr_types.h"
 #include "scr_special.h"
+#include "color.h"
+#include "unicode.h"
+#include "prefs.h"
 #include "message.h"
 #include "alert.h"
 #include "core.h"
@@ -152,6 +157,105 @@ showTime (const TimeFormattingData *fmt) {
   message(NULL, buffer, MSG_SILENT);
 }
 
+static
+STR_BEGIN_FORMATTER(formatScreenColor, const ScreenColor *color)
+  const char *on = " on ";
+
+  const char *styleNames[8];
+  unsigned int styleCount = 0;
+
+  if (color->usingRGB) {
+    ColorDescriptionBuffer foreground;
+    rgbColorToDescription(foreground, sizeof(foreground), color->foreground);
+
+    ColorDescriptionBuffer background;
+    rgbColorToDescription(background, sizeof(background), color->background);
+
+    STR_PRINTF("%s%s%s", foreground, on, background);
+    if (color->isBlinking) styleNames[styleCount++] = "blink";
+    if (color->isBold) styleNames[styleCount++] = "bold";
+    if (color->isItalic) styleNames[styleCount++] = "italic";
+    if (color->hasUnderline) styleNames[styleCount++] = "underline";
+    if (color->hasStrikeThrough) styleNames[styleCount++] = "strike";
+  } else {
+    unsigned char attributes = color->vgaAttributes;
+    const char *foreground = vgaColorName(vgaGetForegroundColor(attributes));
+    const char *background = vgaColorName(vgaGetBackgroundColor(attributes));
+
+    STR_PRINTF("%s%s%s", foreground, on, background);
+    if (attributes & VGA_BIT_BLINK) styleNames[styleCount++] = "blink";
+  }
+
+  if (styleCount > 0) {
+    const char *delimiter = " (";
+
+    for (unsigned int i=0; i<styleCount; i+=1) {
+      STR_PRINTF("%s%s", delimiter, styleNames[i]);
+      delimiter = ", ";
+    }
+
+    STR_PRINTF(")");
+  }
+STR_END_FORMATTER
+
+static void
+showCharacterDescription (int column, int row) {
+  ScreenCharacter character;
+  getScreenCharacter(&character, column, row);
+
+  char description[0X80];
+  STR_BEGIN(description, sizeof(description));
+
+  {
+    char name[0X40];
+
+    if (getCharacterName(character.text, name, sizeof(name))) {
+      {
+        size_t length = strlen(name);
+        for (int i=0; i<length; i+=1) name[i] = tolower(name[i]);
+      }
+
+      STR_PRINTF("%s: ", name);
+    }
+  }
+
+  {
+    uint32_t text = character.text;
+    STR_PRINTF("U+%04" PRIX32 " (%" PRIu32 "): ", text, text);
+  }
+
+  STR_FORMAT(formatScreenColor, &character.color);
+
+  STR_END;
+  message(NULL, description, 0);
+}
+
+static void
+showColorDescription (int column, int row) {
+  ScreenCharacter character;
+  getScreenCharacter(&character, column, row);
+  const ScreenColor *color = &character.color;
+
+  char description[0X80];
+  STR_BEGIN(description, sizeof(description));
+
+  STR_FORMAT(formatScreenColor, color);
+  STR_PRINTF(": ");
+
+  if (color->usingRGB) {
+    STR_PRINTF(
+      "%02X%02X%02X/%02X%02X%02X",
+      color->foreground.r, color->foreground.g, color->foreground.b,
+      color->background.r, color->background.g, color->background.b
+    );
+  } else {
+    STR_PRINTF("%02X", color->vgaAttributes);
+  }
+
+  STR_END;
+  message(NULL, description, 0);
+}
+
 static int
 handleMiscellaneousCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
@@ -247,11 +351,19 @@ handleMiscellaneousCommands (int command, void *data) {
           int column, row;
 
           if (getCharacterCoordinates(arg, &row, &column, NULL, 0)) {
-            char description[0X80];
-            STR_BEGIN(description, sizeof(description));
-            STR_FORMAT(formatCharacterDescription, column, row);
-            STR_END;
-            message(NULL, description, 0);
+            showCharacterDescription(column, row);
+          } else {
+            alert(ALERT_COMMAND_REJECTED);
+          }
+
+          break;
+        }
+
+        case BRL_CMD_BLK(COLOR): {
+          int column, row;
+
+          if (getCharacterCoordinates(arg, &row, &column, NULL, 0)) {
+            showColorDescription(column, row);
           } else {
             alert(ALERT_COMMAND_REJECTED);
           }

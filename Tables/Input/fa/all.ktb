@@ -112,7 +112,7 @@ bind K8+K5 SPKHOME
 bind K8+K4 SAY_ABOVE
 bind K8+K6 SAY_BELOW
 
-bind RoutingKey ROUTE
+bind RoutingKey ROUTE:COLOR
 bind RoutingKey+RoutingKey CLIP_COPY
 
 bind F1+RoutingKey CLIP_NEW

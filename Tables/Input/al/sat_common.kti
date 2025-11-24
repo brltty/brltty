@@ -54,7 +54,7 @@ bind Home+!Right LNEND
 bind Cursor+!Left FWINLTSKIP
 bind Cursor+!Right FWINRTSKIP
 
-bind RoutingKey1 ROUTE
+bind RoutingKey1 ROUTE:COLOR
 bind RoutingKey2 DESCCHAR
 
 bind RoutingKey1+!RoutingKey1 CLIP_COPY

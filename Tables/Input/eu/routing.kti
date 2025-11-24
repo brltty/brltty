@@ -31,4 +31,4 @@ else
    note \{routingKey1} means pressing any cursor routing key.
 endIf
 
-bind \{routingKey1} ROUTE
+bind \{routingKey1} ROUTE:COLOR

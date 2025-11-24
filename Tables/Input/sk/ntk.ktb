@@ -62,7 +62,7 @@ bind LeftJoystickPress+RightJoystickDown PREFMENU
 bind LeftJoystickPress+RightJoystickLeft PREFLOAD
 bind LeftJoystickPress+RightJoystickRight PREFSAVE
 
-bind RoutingKey ROUTE
+bind RoutingKey ROUTE:COLOR
 bind LeftButton+RoutingKey SETLEFT
 bind RightButton+RoutingKey DESCCHAR
 

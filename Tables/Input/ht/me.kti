@@ -22,7 +22,7 @@ bind Left FWINLT
 bind Right FWINRT
 include rockers.kti
 
-bind RoutingKey ROUTE
+bind RoutingKey ROUTE:COLOR
 bind RoutingKey+!RoutingKey CLIP_COPY
 
 bind Left+RoutingKey PRINDENT
