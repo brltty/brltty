@@ -563,10 +563,10 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
   } else if (hsv.v < 0.4f) {
     /* Low light, shades are deep */
     brightnessModifier = "Dark";
-  } else if (hsv.v > 0.8f) {
+  } else if (hsv.v > 0.85f) {
     /* Almost white, very bright and clear */
     brightnessModifier = "Bright";
-  } else if (hsv.v > 0.6f) {
+  } else if (hsv.v > 0.7f) {
     /* High light level, easily visible */
     brightnessModifier = "Light";
   } else {
@@ -585,9 +585,12 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
   } else if (hsv.s < 0.4f) {
     /* Low color presence, muted and lacking vibrancy */
     saturationModifier = "Dull";
+  } else if (hsv.s > 0.98f) {
+    /* Absolute color presence, vivid and unaltered */
+    saturationModifier = "Pure";
   } else if (hsv.s > 0.95f) {
     /* Maximum color presence, pure and striking */
-    saturationModifier = "Intense";
+    saturationModifier = "Full";
   } else if (hsv.s > 0.8f) {
     /* Strong color presence, full-bodied and vivid */
     saturationModifier = "Rich";

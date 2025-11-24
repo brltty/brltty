@@ -329,7 +329,7 @@ static int
 testColorRecognition (const char *testName) {
   static const ColorTest tests[] = {
     /* Basic colors - Note: NULL in last two fields means no alternate */
-    {"Pure Red",         255, 0,   0,   "bright intense red", NULL, NULL},
+    {"Pure Red",         255, 0,   0,   "bright pure red", NULL, NULL},
 
     /* Pure green (0,255,0) is at H=120° S=1.0 V=1.0, which matches our lime detection
      * criteria (H 90-135°, V>0.75, S>0.75). Both names are technically correct.
@@ -337,7 +337,7 @@ testColorRecognition (const char *testName) {
     {"Pure Green/Lime",  0,   255, 0,   "vivid green", "lime",
      "H=120° matches lime criteria (bright saturated yellow-green)"},
 
-    {"Pure Blue",        0,   0,   255, "bright intense blue", NULL, NULL},
+    {"Pure Blue",        0,   0,   255, "bright pure blue", NULL, NULL},
     {"White",            255, 255, 255, "white", NULL, NULL},
     {"Black",            0,   0,   0,   "black", NULL, NULL},
 
@@ -372,7 +372,7 @@ testColorRecognition (const char *testName) {
     {"Light Blue",       173, 216, 230, "light blue", "bright dull cyan",
      "H=197° is in cyan range; HSV analysis gives more accurate result"},
 
-    {"Dark Green",       0,   100, 0,   "dark intense green", NULL, NULL},
+    {"Dark Green",       0,   100, 0,   "dark pure green", NULL, NULL},
     {"Light Green",      144, 238, 144, "bright dull green", NULL, NULL},
   };
 
