@@ -169,6 +169,11 @@ getScreenColorAttributes (const ScreenColor *color) {
   return attributes;
 }
 
+int
+sameScreenColors (const ScreenColor *color1, const ScreenColor *color2) {
+  return memcmp(color1, color2, sizeof(*color1)) == 0;
+}
+
 STR_BEGIN_FORMATTER(formatScreenColor, const ScreenColor *color)
   const char *on = " on ";
 

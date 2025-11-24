@@ -39,6 +39,7 @@ extern int readScreen (short left, short top, short width, short height, ScreenC
 extern int readScreenText (short left, short top, short width, short height, wchar_t *buffer);
 
 extern unsigned char getScreenColorAttributes (const ScreenColor *color);
+extern int sameScreenColors (const ScreenColor *color1, const ScreenColor *color2);
 extern STR_DECLARE_FORMATTER(formatScreenColor, const ScreenColor *color);
 
 extern int insertScreenKey (ScreenKey key);

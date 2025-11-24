@@ -1234,9 +1234,7 @@ isSameScreenColor (
   const ScreenCharacter *character1,
   const ScreenCharacter *character2
 ) {
-  const ScreenColor *color1 = &character1->color;
-  const ScreenColor *color2 = &character2->color;
-  return memcmp(color1, color2, sizeof(*color1)) == 0;
+  return sameScreenColors(&character1->color, &character2->color);
 }
 
 int
