@@ -65,7 +65,7 @@ extern int isSameText (
   const ScreenCharacter *character2
 );
 
-extern int isSameAttributes (
+extern int isSameScreenColor (
   const ScreenCharacter *character1,
   const ScreenCharacter *character2
 );

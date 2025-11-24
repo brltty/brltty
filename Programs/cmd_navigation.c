@@ -63,7 +63,7 @@ toDifferentLine (
     ScreenCharacter characters1[width];
     unsigned int skipped = 0;
 
-    if ((isSameCharacter == isSameText) && ses->displayMode) isSameCharacter = isSameAttributes;
+    if ((isSameCharacter == isSameText) && ses->displayMode) isSameCharacter = isSameScreenColor;
     readScreen(from, ses->winy, width, 1, characters1);
 
     do {
@@ -372,10 +372,10 @@ handleNavigationCommands (int command, void *data) {
       break;
 
     case BRL_CMD_ATTRUP:
-      upDifferentLine(isSameAttributes);
+      upDifferentLine(isSameScreenColor);
       break;
     case BRL_CMD_ATTRDN:
-      downDifferentLine(isSameAttributes);
+      downDifferentLine(isSameScreenColor);
       break;
 
     case BRL_CMD_PRPGRPH: {

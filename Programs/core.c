@@ -1042,7 +1042,7 @@ sayScreenCharacters (const ScreenCharacter *characters, size_t count, SayOptions
 
       while (character < end) {
         *text++ = character->text;
-        *attributes++ = character->color.vgaAttributes;
+        *attributes++ = getScreenColorAttributes(&character->color);
         character += 1;
       }
 
@@ -1079,7 +1079,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
     }
   } else if (count == 1) {
     wchar_t character = characters[0].text;
-    unsigned char attributes = characters[0].color.vgaAttributes;
+    unsigned char attributes = getScreenColorAttributes(&characters[0].color);
     const char *prefix = NULL;
 
     if (iswupper(character)) {
@@ -1130,7 +1130,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
 
     while (character < end) {
       *text++ = character->text;
-      *attributes++ = character->color.vgaAttributes;
+      *attributes++ = getScreenColorAttributes(&character->color);
 
       *text++ = WC_C(' ');
       *attributes++ = VGA_COLOR_DEFAULT;
@@ -1230,11 +1230,13 @@ isSameText (
 }
 
 int
-isSameAttributes (
+isSameScreenColor (
   const ScreenCharacter *character1,
   const ScreenCharacter *character2
 ) {
-  return character1->color.vgaAttributes == character2->color.vgaAttributes;
+  const ScreenColor *color1 = &character1->color;
+  const ScreenColor *color2 = &character2->color;
+  return memcmp(color1, color2, sizeof(*color1)) == 0;
 }
 
 int
@@ -1242,7 +1244,7 @@ isSameCharacter (
   const ScreenCharacter *character1,
   const ScreenCharacter *character2
 ) {
-  return isSameText(character1, character2) && isSameAttributes(character1, character2);
+  return isSameText(character1, character2) && isSameScreenColor(character1, character2);
 }
 
 int
