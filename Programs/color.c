@@ -577,28 +577,28 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
   /* Determine saturation modifier */
   const char *saturationModifier = "";
   if (hsv.s < 0.1f) {
-    /* Very little color, mostly gray */
+    /* Minimal color presence, almost indistinguishable from gray */
     saturationModifier = "Pale";
   } else if (hsv.s < 0.2f) {
-    /* Minimum color presence, almost indistinguishable from gray */
+    /* Subdued color presence, subtle and muted */
     saturationModifier = "Faint";
   } else if (hsv.s < 0.4f) {
-    /* Low color presence, muted and lacking vibrancy */
+    /* Low color presence, mild and gentle */
     saturationModifier = "Soft";
-  } else if (hsv.s > 0.98f) {
-    /* Absolute color presence, vivid and unaltered */
-    saturationModifier = "Pure";
   } else if (hsv.s > 0.95f) {
-    /* Maximum color presence, pure and striking */
+    /* Absolute color presence, pristine and minimally altered */
+    saturationModifier = "Pure";
+  } else if (hsv.s > 0.85f) {
+    /* Intense color presence, bold and striking */
     saturationModifier = "Full";
-  } else if (hsv.s > 0.8f) {
-    /* Strong color presence, full-bodied and vivid */
+  } else if (hsv.s > 0.7f) {
+    /* Strong color presence, vivid and full-bodied */
     saturationModifier = "Rich";
-  } else if (hsv.s > 0.6f) {
+  } else if (hsv.s > 0.5f) {
     /* High color presence, noticeable and lively */
     saturationModifier = "Vibrant";
   } else {
-    /* Moderate color presence, gentle and not overpowering */
+    /* Balanced color presence, clearly visible and well-defined */
   //saturationModifier = "Moderate";
   }
 
