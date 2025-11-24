@@ -136,69 +136,76 @@ rgbToVgaFast(unsigned char r, unsigned char g, unsigned char b, int noBrightBit)
    * Colors 0-7 (no bright bit): Use OFF (0x00) or REG (0xAA) for color components
    * Colors 8-15 (bright bit set): Use DIM (0x55) as base, MAX (0xFF) for color
    *   Exception: Color 8 (Dark Gray) uses DIM (0x55) for all components
+   *
+   * Bit patterns:
+   * CI_OFF = 0x00 = 0b00000000
+   * CI_DIM = 0x55 = 0b01010101
+   * CI_REG = 0xAA = 0b10101010
+   * CI_MAX = 0xFF = 0b11111111
+   *
+   * Key insight: CI_DIM and CI_MAX share the 0x55 bit pattern, while
+   * CI_OFF and CI_REG do not. We can detect bright colors (DIM or MAX)
+   * using: (qr | qg | qb) & CI_DIM
    */
 
   int vgaColor = 0;
 
   /* Decide if this should be a bright color (colors 8-15)
    * Use the brightness bit if any component is DIM or MAX
+   * Bit trick: OR all components and check if they share bits with CI_DIM (0x55)
    */
-  int useBrightBit = 0;
-  if (!noBrightBit) {
-    if (qr == CI_DIM || qr == CI_MAX ||
-        qg == CI_DIM || qg == CI_MAX ||
-        qb == CI_DIM || qb == CI_MAX) {
-      useBrightBit = 1;
-      vgaColor |= VGA_BIT_BRIGHT;
-    }
-  }
+  if (!noBrightBit && ((qr | qg | qb) & CI_DIM)) {
+    vgaColor = VGA_BIT_BRIGHT;
 
-  /* Set the RGB color bits based on the intensity levels */
-  if (useBrightBit) {
-    /* Bright colors (8-15): Color bits set if component is MAX */
-    if (qr == CI_MAX) vgaColor |= VGA_BIT_RED;
-    if (qg == CI_MAX) vgaColor |= VGA_BIT_GREEN;
-    if (qb == CI_MAX) vgaColor |= VGA_BIT_BLUE;
-  } else {
-    /* Dark colors (0-7): Color bits set if component is REG or higher */
-    if (qr >= CI_REG) vgaColor |= VGA_BIT_RED;
-    if (qg >= CI_REG) vgaColor |= VGA_BIT_GREEN;
-    if (qb >= CI_REG) vgaColor |= VGA_BIT_BLUE;
-  }
-
-  /* If the quantized color matches the input exactly, we can return immediately */
-  RGBColor result = vgaPalette[vgaColor];
-  if (result.r == r && result.g == g && result.b == b) {
-    return vgaColor;
-  }
-
-  /* For ambiguous cases (e.g., pure colors that could be dark or bright),
-   * check both possibilities and pick the closer one
-   */
-  if (useBrightBit && (qr == CI_MAX || qg == CI_MAX || qb == CI_MAX)) {
-    /* Check if there's only one MAX component and others are OFF
-     * e.g., (255, 0, 0) could be Red (4) or Light Red (12)
+    /* Bright colors (8-15): Color bits set if component is MAX
+     * Use bit trick: qr & (qr << 1) is non-zero only for CI_MAX (0xFF)
+     * CI_MAX (0xFF) & (0xFE) = 0xFE (non-zero)
+     * CI_DIM (0x55) & (0xAA) = 0x00 (zero)
      */
-    int maxCount = (qr == CI_MAX ? 1 : 0) + (qg == CI_MAX ? 1 : 0) + (qb == CI_MAX ? 1 : 0);
-    int offCount = (qr == CI_OFF ? 1 : 0) + (qg == CI_OFF ? 1 : 0) + (qb == CI_OFF ? 1 : 0);
+    unsigned char qr_max = qr & (qr << 1);
+    unsigned char qg_max = qg & (qg << 1);
+    unsigned char qb_max = qb & (qb << 1);
 
-    if (maxCount >= 1 && offCount >= 1) {
-      /* Compare distance to both bright and dark versions */
+    /* Set color bits using bit shift trick instead of conditionals */
+    vgaColor |= (qr_max >> 7) * VGA_BIT_RED;
+    vgaColor |= (qg_max >> 7) * VGA_BIT_GREEN;
+    vgaColor |= (qb_max >> 7) * VGA_BIT_BLUE;
+
+    /* If the quantized color matches the input exactly, we can return immediately */
+    RGBColor result = vgaPalette[vgaColor];
+    if (result.r == r && result.g == g && result.b == b) {
+      return vgaColor;
+    }
+
+    /* For ambiguous cases (e.g., pure colors that could be dark or bright),
+     * check both possibilities and pick the closer one
+     */
+    if ((qr_max | qg_max | qb_max) && (!qr || !qg || !qb)) {
+      /* At least one MAX component and at least one OFF component
+       * e.g., (255, 0, 0) could be Red (4) or Light Red (12)
+       * Compare distance to both bright and dark versions
+       */
       int darkColor = vgaColor & ~VGA_BIT_BRIGHT;
-      if (darkColor < VGA_COLOR_COUNT) {
-        int distBright = colorDistanceSquared(r, g, b,
-                                             vgaPalette[vgaColor].r,
-                                             vgaPalette[vgaColor].g,
-                                             vgaPalette[vgaColor].b);
-        int distDark = colorDistanceSquared(r, g, b,
-                                           vgaPalette[darkColor].r,
-                                           vgaPalette[darkColor].g,
-                                           vgaPalette[darkColor].b);
-        if (distDark < distBright) {
-          return darkColor;
-        }
+      int distBright = colorDistanceSquared(r, g, b,
+                                           vgaPalette[vgaColor].r,
+                                           vgaPalette[vgaColor].g,
+                                           vgaPalette[vgaColor].b);
+      int distDark = colorDistanceSquared(r, g, b,
+                                         vgaPalette[darkColor].r,
+                                         vgaPalette[darkColor].g,
+                                         vgaPalette[darkColor].b);
+      if (distDark < distBright) {
+        return darkColor;
       }
     }
+  } else {
+    /* Dark colors (0-7): Color bits set if component is REG or higher
+     * Use bit shift trick: (qr >> 7) extracts the high bit
+     * CI_REG (0xAA) >> 7 = 1, CI_OFF (0x00) >> 7 = 0
+     */
+    vgaColor = (qr >> 7) * VGA_BIT_RED;
+    vgaColor |= (qg >> 7) * VGA_BIT_GREEN;
+    vgaColor |= (qb >> 7) * VGA_BIT_BLUE;
   }
 
   return vgaColor;
