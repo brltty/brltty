@@ -16,8 +16,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #include <stdio.h>
+
 #include "color.h"
+#include "strfmt.h"
 
 typedef enum {
   CI_OFF = 0X00,
@@ -401,9 +405,9 @@ hsvColorToRgb(HSVColor color) {
   return hsvToRgb(color.h, color.s, color.v);
 }
 
-/* Helper function to get hue name */
-static const char *
-getHueName(float hue) {
+/* Return the name for the specified hue angle */
+const char *
+hsvHueName(float hue) {
   /* Hue ranges (degrees):
    * Red: 0-15, 345-360 (30° total, wraps around 0°)
    * Orange: 15-45
@@ -437,6 +441,133 @@ getHueName(float hue) {
   hue += 15.0f;
   hsvNormalize(&hue, NULL, NULL);
   return hueNames[(int)hue / 30];
+}
+
+/* Return the HSV modifier for the specified saturation leel */
+const HSVModifier *
+hsvSaturationModifier (float saturation) {
+  if (saturation < 0.1f) {
+    static const HSVModifier modifier = {
+      .name = "Pale",
+      .comment = "Minimal color presence, almost indistinguishable from gray",
+    };
+
+    return &modifier;
+  }
+
+  if (saturation < 0.2f) {
+    static const HSVModifier modifier = {
+      .name = "Faint",
+      .comment = "Subdued color presence, subtle and muted",
+    };
+
+    return &modifier;
+  }
+
+  if (saturation < 0.4f) {
+    static const HSVModifier modifier = {
+      .name = "Soft",
+      .comment = "Low color presence, mild and gentle",
+    };
+
+    return &modifier;
+  }
+
+  if (saturation > 0.95f) {
+    static const HSVModifier modifier = {
+      .name = "Pure",
+      .comment = "Absolute color presence, pristine and minimally altered",
+    };
+
+    return &modifier;
+  }
+
+  if (saturation > 0.85f) {
+    static const HSVModifier modifier = {
+      .name = "Full",
+      .comment = "Intense color presence, bold and striking",
+    };
+
+    return &modifier;
+  }
+
+  if (saturation > 0.7f) {
+    static const HSVModifier modifier = {
+      .name = "Rich",
+      .comment = "Strong color presence, vivid and full-bodied",
+    };
+
+    return &modifier;
+  }
+
+  if (saturation > 0.5f) {
+    static const HSVModifier modifier = {
+      .name = "Vibrant",
+      .comment = "High color presence, noticeable and lively",
+    };
+
+    return &modifier;
+  }
+
+  {
+    static const HSVModifier modifier = {
+      .name = "Moderate",
+      .comment = "Balanced color presence, clearly visible and well-defined",
+      .suppress = 1,
+    };
+
+    return &modifier;
+  }
+}
+
+/* Return the HSV modifier for the specified brightness (value) leel */
+const HSVModifier *
+hsvBrightnessModifier (float brightness) {
+  if (brightness < 0.2f) {
+    static const HSVModifier modifier = {
+      .name = "Faded",
+      .comment = "Almost black, very little light",
+    };
+
+    return &modifier;
+  }
+
+  if (brightness < 0.4f) {
+    static const HSVModifier modifier = {
+      .name = "Dark",
+      .comment = "Low light, shades are deep",
+    };
+
+    return &modifier;
+  }
+
+  if (brightness > 0.85f) {
+    static const HSVModifier modifier = {
+      .name = "Bright",
+      .comment = "Almost white, very bright and clear",
+    };
+
+    return &modifier;
+  }
+
+  if (brightness > 0.7f) {
+    static const HSVModifier modifier = {
+      .name = "Light",
+      .comment = "High light level, easily visible",
+    };
+
+    return &modifier;
+  }
+
+  {
+    static const HSVModifier modifier = {
+      .name = "Medium",
+      .comment = "Balanced light, clear but not bright",
+      .suppress = 1,
+    };
+
+    return &modifier;
+  }
 }
 
 const char *
@@ -559,66 +690,19 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
     return buffer;
   }
 
-  /* Get the base hue name */
-  const char *hueName = getHueName(hsv.h);
+  { /* Combine modifiers and hue name */
+    const char *hue = hsvHueName(hsv.h);
+    const HSVModifier *saturation = hsvSaturationModifier(hsv.s);
+    const HSVModifier *brightness = hsvBrightnessModifier(hsv.v);
 
-  /* Determine brightness modifier */
-  const char *brightnessModifier = "";
-  if (hsv.v < 0.2f) {
-    /* Almost black, very little light */
-    brightnessModifier = "Faded";
-  } else if (hsv.v < 0.4f) {
-    /* Low light, shades are deep */
-    brightnessModifier = "Dark";
-  } else if (hsv.v > 0.85f) {
-    /* Almost white, very bright and clear */
-    brightnessModifier = "Bright";
-  } else if (hsv.v > 0.7f) {
-    /* High light level, easily visible */
-    brightnessModifier = "Light";
-  } else {
-    /* Balanced light, clear but not bright */
-  //brightnessModifier = "Medium";
+    STR_BEGIN(buffer, bufferSize);
+    if (!brightness->suppress) STR_PRINTF("%s ", brightness->name);
+    if (!saturation->suppress) STR_PRINTF("%s ", saturation->name);
+    STR_PRINTF("%s", hue);
+    STR_END;
+
+    return buffer;
   }
-
-  /* Determine saturation modifier */
-  const char *saturationModifier = "";
-  if (hsv.s < 0.1f) {
-    /* Minimal color presence, almost indistinguishable from gray */
-    saturationModifier = "Pale";
-  } else if (hsv.s < 0.2f) {
-    /* Subdued color presence, subtle and muted */
-    saturationModifier = "Faint";
-  } else if (hsv.s < 0.4f) {
-    /* Low color presence, mild and gentle */
-    saturationModifier = "Soft";
-  } else if (hsv.s > 0.95f) {
-    /* Absolute color presence, pristine and minimally altered */
-    saturationModifier = "Pure";
-  } else if (hsv.s > 0.85f) {
-    /* Intense color presence, bold and striking */
-    saturationModifier = "Full";
-  } else if (hsv.s > 0.7f) {
-    /* Strong color presence, vivid and full-bodied */
-    saturationModifier = "Rich";
-  } else if (hsv.s > 0.5f) {
-    /* High color presence, noticeable and lively */
-    saturationModifier = "Vibrant";
-  } else {
-    /* Balanced color presence, clearly visible and well-defined */
-  //saturationModifier = "Moderate";
-  }
-
-  /* Combine modifiers and hue name */
-  snprintf(
-    buffer, bufferSize,
-    "%s%s%s%s%s",
-    brightnessModifier, (*brightnessModifier? " ": ""),
-    saturationModifier, (*saturationModifier? " ": ""),
-    hueName
-  );
-
-  return buffer;
 }
 
 const char *

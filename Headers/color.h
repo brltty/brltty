@@ -88,6 +88,21 @@ extern const char *rgbToDescription (char *buffer, size_t bufferSize, unsigned c
  */
 extern const char *rgbColorToDescription (char *buffer, size_t bufferSize, RGBColor color);
 
+typedef struct {
+  const char *name;
+  const char *comment;
+  unsigned char suppress:1;
+} HSVModifier;
+
+/* Return the name for the specified hue angle */
+extern const char *hsvHueName(float hue);
+
+/* Return the HSV modifier for the specified saturation leel */
+extern const HSVModifier *hsvSaturationModifier (float saturation);
+
+/* Return the HSV modifier for the specified brightness (value) leel */
+extern const HSVModifier *hsvBrightnessModifier (float brightness);
+
 /* Describe an HSV color as a human-readable string
  * buffer must be at least 64 bytes
  * Returns pointer to buffer
