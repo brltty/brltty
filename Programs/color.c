@@ -627,26 +627,6 @@ rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color) {
   return rgbToDescription(buffer, bufferSize, color.r, color.g, color.b);
 }
 
-/* Standard ANSI colors: basic (0 to 7) and bright (8 to 15) */
-static const RGBColor ansiPalette[16] = {
-  /* Black */          [ 0] = {CI_OFF, CI_OFF, CI_OFF},
-  /* Red */            [ 1] = {CI_REG, CI_OFF, CI_OFF},
-  /* Green */          [ 2] = {CI_OFF, CI_REG, CI_OFF},
-  /* Yellow */         [ 3] = {CI_REG, CI_REG, CI_OFF},
-  /* Blue */           [ 4] = {CI_OFF, CI_OFF, CI_REG},
-  /* Magenta */        [ 5] = {CI_REG, CI_OFF, CI_REG},
-  /* Cyan */           [ 6] = {CI_OFF, CI_REG, CI_REG},
-  /* White */          [ 7] = {CI_REG, CI_REG, CI_REG},
-  /* Bright Black */   [ 8] = {CI_DIM, CI_DIM, CI_DIM},
-  /* Bright Red */     [ 9] = {CI_MAX, CI_DIM, CI_DIM},
-  /* Bright Green */   [10] = {CI_DIM, CI_MAX, CI_DIM},
-  /* Bright Yellow */  [11] = {CI_MAX, CI_MAX, CI_DIM},
-  /* Bright Blue */    [12] = {CI_DIM, CI_DIM, CI_MAX},
-  /* Bright Magenta */ [13] = {CI_MAX, CI_DIM, CI_MAX},
-  /* Bright Cyan */    [14] = {CI_DIM, CI_MAX, CI_MAX},
-  /* Bright White */   [15] = {CI_MAX, CI_MAX, CI_MAX}
-};
-
 /* Convert ANSI 256-color code to RGB */
 RGBColor
 ansiToRgb (unsigned int code) {
@@ -654,7 +634,10 @@ ansiToRgb (unsigned int code) {
 
   if (code < 16) {
     /* Standard ANSI colors */
-    rgb = ansiPalette[code];
+    int vga = code & (VGA_BIT_BRIGHT | VGA_BIT_GREEN);
+    if (code & VGA_BIT_BLUE) vga |= VGA_BIT_RED;
+    if (code & VGA_BIT_RED) vga |= VGA_BIT_BLUE;
+    rgb = vgaPalette[vga];
   } else if (code < 232) {
     /* 6x6x6 color cube */
     code -= 16;
