@@ -621,18 +621,18 @@ hsvHandler (Queue *arguments) {
   const char *saturationArgument;
   float saturationLevel;
 
-  const char *valueName = "value percent";
-  const char *valueArgument;
-  float valueLevel;
+  const char *brightnessName = "brightness percent";
+  const char *brightnessArgument;
+  float brightnessLevel;
 
   if ((hueArgument = getNextArgument(arguments, hueName))) {
     if ((saturationArgument = getNextArgument(arguments, saturationName))) {
-      if ((valueArgument = getNextArgument(arguments, valueName))) {
+      if ((brightnessArgument = getNextArgument(arguments, brightnessName))) {
         if (noMoreArguments(arguments)) {
           if (parseDegrees(&hueAngle, hueArgument, hueName)) {
             if (parsePercent(&saturationLevel, saturationArgument, saturationName)) {
-              if (parsePercent(&valueLevel, valueArgument, valueName)) {
-                showHSV(hueAngle, saturationLevel, valueLevel);
+              if (parsePercent(&brightnessLevel, brightnessArgument, brightnessName)) {
+                showHSV(hueAngle, saturationLevel, brightnessLevel);
               }
             }
           }
@@ -692,7 +692,7 @@ static const ColorModel colorModels[] = {
   },
 
   { .name = "HSV",
-    .syntax = "hue (degrees) saturation (percent) value (percent)",
+    .syntax = "hue (degrees) saturation (percent) brightness (percent)",
     .handler = hsvHandler,
   },
 
