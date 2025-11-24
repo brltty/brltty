@@ -86,7 +86,7 @@ extern int isSameRow (
 extern unsigned char infoMode;
 
 extern int canBraille (void);
-extern int writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length);
+extern int writeBrailleCharacters (const char *label, const wchar_t *characters, size_t length);
 extern void fillStatusSeparator (wchar_t *text, unsigned char *dots);
 
 extern int writeBrailleText (const char *mode, const char *text);

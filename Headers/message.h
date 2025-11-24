@@ -30,7 +30,7 @@ typedef enum {
   MSG_SYNC    = 0X8  /* run synchronously */
 } MessageOptions;
 
-extern int message (const char *mode, const char *text, MessageOptions options);
+extern int message (const char *label, const char *text, MessageOptions options);
 extern int sayMessage (const char *text);
 
 extern int messageHoldTimeout;

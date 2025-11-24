@@ -44,7 +44,7 @@ save (void) {
   if (saved) {
     alert(ALERT_COMMAND_DONE);
   } else {
-    message(NULL, gettext("not saved"), 0);
+    message("warn", gettext("not saved"), 0);
   }
 
   return saved;
@@ -52,7 +52,6 @@ save (void) {
 
 static int
 handlePreferencesCommands (int command, void *data) {
-  static const char modeString_preferences[] = "prf";
   PreferencesCommandData *pcd = data;
 
   switch (command & BRL_MSK_CMD) {
@@ -92,7 +91,7 @@ handlePreferencesCommands (int command, void *data) {
       if (isSpecialScreen(SCR_MENU)) {
         setPreferences(&pcd->savedPreferences);
         menuScreenUpdated();
-        message(modeString_preferences, gettext("changes discarded"), 0);
+        message("warn", gettext("changes discarded"), 0);
       } else if (loadPreferences(0)) {
         menuScreenUpdated();
         alert(ALERT_COMMAND_DONE);

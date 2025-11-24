@@ -154,7 +154,7 @@ showTime (const TimeFormattingData *fmt) {
   char buffer[0X80];
 
   formatBrailleTime(buffer, sizeof(buffer), fmt);
-  message(NULL, buffer, MSG_SILENT);
+  message("time", buffer, MSG_SILENT);
 }
 
 static void
@@ -186,7 +186,7 @@ showCharacterDescription (int column, int row) {
   STR_FORMAT(formatScreenColor, &character.color);
 
   STR_END;
-  message(NULL, description, 0);
+  message("char", description, 0);
 }
 
 static void
@@ -212,7 +212,7 @@ showColorDescription (int column, int row) {
   }
 
   STR_END;
-  message(NULL, description, 0);
+  message("color", description, 0);
 }
 
 static int
@@ -273,7 +273,7 @@ handleMiscellaneousCommands (int command, void *data) {
       if (ok) {
         infoMode = 0;
       } else {
-        message(NULL, gettext("help not available"), 0);
+        message("warn", gettext("help not available"), 0);
       }
 
       break;

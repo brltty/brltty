@@ -1310,7 +1310,7 @@ makeBrailleHelpPage (const char *keyTablePath) {
 
     if (!getHelpLineCount()) {
       addHelpLine(WS_C("help not available"));
-      message(NULL, gettext("no key bindings"), 0);
+      message("warn", gettext("no key bindings"), 0);
     }
   }
 }
@@ -2106,7 +2106,7 @@ startBrailleDriver (void) {
           text = banner;
         }
 
-        if (message(NULL, text, MSG_SILENT)) return 1;
+        if (message("start", text, MSG_SILENT)) return 1;
       }
     }
 
@@ -2151,9 +2151,9 @@ static const ActivityMethods brailleDriverActivityMethods = {
 static ActivityObject *brailleDriverActivity = NULL;
 
 static void
-writeBrailleMessage (const char *text) {
+writeBrailleMessage (const char *label, const char *text) {
   clearStatusCells(&brl);
-  message(NULL, text, (MSG_NODELAY | MSG_SILENT | MSG_SYNC));
+  message(label, text, (MSG_NODELAY | MSG_SILENT | MSG_SYNC));
   brl.noDisplay = 1;
 }
 
@@ -2168,7 +2168,7 @@ exitBrailleDriver (void *data) {
       text = gettext("BRLTTY stopped");
     }
 
-    writeBrailleMessage(text);
+    writeBrailleMessage("exit", text);
   }
 
   if (brailleDriverActivity) {
@@ -2209,7 +2209,7 @@ disableBrailleDriver (const char *reason) {
   ActivityObject *activity = getBrailleDriverActivity(0);
 
   if (activity) {
-    if (reason) writeBrailleMessage(reason);
+    if (reason) writeBrailleMessage("stop", reason);
     stopActivity(activity);
   }
 }

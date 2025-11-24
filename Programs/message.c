@@ -44,7 +44,7 @@
 int messageHoldTimeout = DEFAULT_MESSAGE_HOLD_TIMEOUT;
 
 typedef struct {
-  const char *mode;
+  const char *label;
   MessageOptions options;
 
   unsigned char presented:1;
@@ -478,7 +478,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
       int isLastSegment = segment == mgd.segments.last;
       brl.cursor = BRL_NO_CURSOR;
 
-      if (!writeBrailleCharacters(mgp->mode, segment->start, segment->length)) {
+      if (!writeBrailleCharacters(mgp->label, segment->start, segment->length)) {
         mgp->presented = 0;
         break;
       }
@@ -522,7 +522,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 }
 
 int 
-message (const char *mode, const char *text, MessageOptions options) {
+message (const char *label, const char *text, MessageOptions options) {
   if (options & MSG_LOG) pushLogMessage(text);
 
   int presented = 0;
@@ -531,7 +531,7 @@ message (const char *mode, const char *text, MessageOptions options) {
 
   if ((mgp = malloc(size))) {
     memset(mgp, 0, size);
-    mgp->mode = mode? mode: "";
+    mgp->label = label? label: "";
     mgp->options = options;
     mgp->presented = 1;
     strcpy(mgp->text, text);

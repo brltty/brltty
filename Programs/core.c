@@ -433,7 +433,7 @@ fillStatusSeparator (wchar_t *text, unsigned char *dots) {
 }
 
 int
-writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length) {
+writeBrailleCharacters (const char *label, const wchar_t *characters, size_t length) {
   wchar_t textBuffer[brl.textColumns * brl.textRows];
 
   fillTextRegion(
@@ -442,13 +442,13 @@ writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t leng
   );
 
   {
-    size_t modeLength = mode? countUtf8Characters(mode): 0;
-    wchar_t modeCharacters[modeLength + 1];
-    makeWcharsFromUtf8(mode, modeCharacters, ARRAY_COUNT(modeCharacters));
+    size_t labelLength = label? countUtf8Characters(label): 0;
+    wchar_t labelCharacters[labelLength + 1];
+    makeWcharsFromUtf8(label, labelCharacters, ARRAY_COUNT(labelCharacters));
 
     fillTextRegion(
       textBuffer, brl.buffer, statusStart, statusCount,
-      brl.textColumns, brl.textRows, modeCharacters, modeLength
+      brl.textColumns, brl.textRows, labelCharacters, labelLength
     );
   }
 

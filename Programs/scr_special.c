@@ -154,7 +154,7 @@ endSpecialScreens (void) {
 static void
 announceCurrentScreen (void) {
   const char *title = currentScreen->getTitle();
-  if (title) message(NULL, title, 0);
+  if (title) message("info", title, 0);
 }
 
 static void
