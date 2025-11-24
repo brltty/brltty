@@ -19,6 +19,7 @@
 #ifndef BRLTTY_INCLUDED_SCR
 #define BRLTTY_INCLUDED_SCR
 
+#include "strfmth.h"
 #include "scr_types.h"
 #include "ktb_types.h"
 #include "driver.h"
@@ -36,7 +37,9 @@ extern void describeScreen (ScreenDescription *);		/* get screen status */
 
 extern int readScreen (short left, short top, short width, short height, ScreenCharacter *buffer);
 extern int readScreenText (short left, short top, short width, short height, wchar_t *buffer);
+
 extern unsigned char getScreenColorAttributes (const ScreenColor *color);
+extern STR_DECLARE_FORMATTER(formatScreenColor, const ScreenColor *color);
 
 extern int insertScreenKey (ScreenKey key);
 extern ScreenPasteMode getScreenPasteMode (void);

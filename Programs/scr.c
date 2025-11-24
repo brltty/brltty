@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "unicode.h"
 #include "scr.h"
 #include "scr_utils.h"
@@ -167,6 +168,46 @@ getScreenColorAttributes (const ScreenColor *color) {
 
   return attributes;
 }
+
+STR_BEGIN_FORMATTER(formatScreenColor, const ScreenColor *color)
+  const char *on = " on ";
+
+  const char *styleNames[8];
+  unsigned int styleCount = 0;
+
+  if (color->usingRGB) {
+    ColorDescriptionBuffer foreground;
+    rgbColorToDescription(foreground, sizeof(foreground), color->foreground);
+
+    ColorDescriptionBuffer background;
+    rgbColorToDescription(background, sizeof(background), color->background);
+
+    STR_PRINTF("%s%s%s", foreground, on, background);
+    if (color->isBlinking) styleNames[styleCount++] = "blink";
+    if (color->isBold) styleNames[styleCount++] = "bold";
+    if (color->isItalic) styleNames[styleCount++] = "italic";
+    if (color->hasUnderline) styleNames[styleCount++] = "underline";
+    if (color->hasStrikeThrough) styleNames[styleCount++] = "strike";
+  } else {
+    unsigned char attributes = color->vgaAttributes;
+    const char *foreground = vgaColorName(vgaGetForegroundColor(attributes));
+    const char *background = vgaColorName(vgaGetBackgroundColor(attributes));
+
+    STR_PRINTF("%s%s%s", foreground, on, background);
+    if (attributes & VGA_BIT_BLINK) styleNames[styleCount++] = "blink";
+  }
+
+  if (styleCount > 0) {
+    const char *delimiter = " (";
+
+    for (unsigned int i=0; i<styleCount; i+=1) {
+      STR_PRINTF("%s%s", delimiter, styleNames[i]);
+      delimiter = ", ";
+    }
+
+    STR_PRINTF(")");
+  }
+STR_END_FORMATTER
 
 int
 insertScreenKey (ScreenKey key) {
