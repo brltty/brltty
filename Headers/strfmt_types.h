@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_STRFMTH
-#define BRLTTY_INCLUDED_STRFMTH
+#ifndef BRLTTY_INCLUDED_STRFMT_TYPES
+#define BRLTTY_INCLUDED_STRFMT_TYPES
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,4 +33,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_STRFMTH */
+#endif /* BRLTTY_INCLUDED_STRFMT_TYPES */

@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <strfmth.h>
+#include "strfmt_types.h"
 
 #include "get_sockets.h"
 

@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_CMDLINE_TYPES
 #define BRLTTY_INCLUDED_CMDLINE_TYPES
 
-#include "strfmth.h"
+#include "strfmt_types.h"
 
 #ifdef __cplusplus
 extern "C" {

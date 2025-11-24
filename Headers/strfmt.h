@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 
-#include "strfmth.h"
+#include "strfmt_types.h"
 
 #ifdef __cplusplus
 extern "C" {

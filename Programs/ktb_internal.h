@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_KTB_INTERNAL
 #define BRLTTY_INCLUDED_KTB_INTERNAL
 
-#include "strfmth.h"
+#include "strfmt_types.h"
 #include "cmd_types.h"
 #include "async_handle.h"
 

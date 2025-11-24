@@ -20,7 +20,7 @@
 #define BRLTTY_INCLUDED_HID_INSPECT
 
 #include "hid_types.h"
-#include "strfmth.h"
+#include "strfmt_types.h"
 
 #ifdef __cplusplus
 extern "C" {

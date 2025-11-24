@@ -21,7 +21,7 @@
 
 #include "prologue.h"
 
-#include "strfmth.h"
+#include "strfmt_types.h"
 #include "program.h"
 #include "timing.h"
 #include "cmd.h"

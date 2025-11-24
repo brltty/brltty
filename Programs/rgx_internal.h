@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_RGX_INTERNAL
 #define BRLTTY_INCLUDED_RGX_INTERNAL
 
-#include "strfmth.h"
+#include "strfmt_types.h"
 
 #if defined(USE_PKG_RGX_NONE)
 #define RGX_NO_MATCH 1

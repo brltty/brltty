@@ -20,7 +20,7 @@
 #define BRLTTY_INCLUDED_IO_BLUETOOTH
 
 #include "async_types_io.h"
-#include "strfmth.h"
+#include "strfmt_types.h"
 
 #ifdef __cplusplus
 extern "C" {

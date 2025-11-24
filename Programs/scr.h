@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_SCR
 #define BRLTTY_INCLUDED_SCR
 
-#include "strfmth.h"
+#include "strfmt_types.h"
 #include "scr_types.h"
 #include "ktb_types.h"
 #include "driver.h"
