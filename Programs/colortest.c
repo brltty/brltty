@@ -580,7 +580,7 @@ parsePercent (float *value, const char *argument, const char *name) {
   return 1;
 }
 
-static void
+static int
 rgbHandler (Queue *arguments) {
   const char *redName = "red intensity";
   const char *redArgument;
@@ -602,6 +602,7 @@ rgbHandler (Queue *arguments) {
             if (parseIntensity(&greenIntensity, greenArgument, greenName)) {
               if (parseIntensity(&blueIntensity, blueArgument, blueName)) {
                 showRGB(redIntensity, greenIntensity, blueIntensity);
+                return 1;
               }
             }
           }
@@ -609,9 +610,11 @@ rgbHandler (Queue *arguments) {
       }
     }
   }
+
+  return 0;
 }
 
-static void
+static int
 hsvHandler (Queue *arguments) {
   const char *hueName = "hue angle";
   const char *hueArgument;
@@ -633,6 +636,7 @@ hsvHandler (Queue *arguments) {
             if (parsePercent(&saturationLevel, saturationArgument, saturationName)) {
               if (parsePercent(&brightnessLevel, brightnessArgument, brightnessName)) {
                 showHSV(hueAngle, saturationLevel, brightnessLevel);
+                return 1;
               }
             }
           }
@@ -640,9 +644,11 @@ hsvHandler (Queue *arguments) {
       }
     }
   }
+
+  return 0;
 }
 
-static void
+static int
 vgaHandler (Queue *arguments) {
   const char *vgaName = "VGA color number";
   const char *vgaArgument = getNextArgument(arguments, vgaName);
@@ -653,12 +659,15 @@ vgaHandler (Queue *arguments) {
 
       if (parseInteger(&vgaColor, vgaArgument, 0, (VGA_COLOR_COUNT - 1), vgaName)) {
         showVGA(vgaColor);
+        return 1;
       }
     }
   }
+
+  return 0;
 }
 
-static void
+static int
 ansiHandler (Queue *arguments) {
   const char *ansiName = "ANSI color number";
   const char *ansiArgument = getNextArgument(arguments, ansiName);
@@ -669,15 +678,18 @@ ansiHandler (Queue *arguments) {
 
       if (parseInteger(&ansiColor, ansiArgument, 0, UINT8_MAX, ansiName)) {
         showANSI(ansiColor);
+        return 1;
       }
     }
   }
+
+  return 0;
 }
 
 typedef struct {
   const char *name;
   const char *syntax;
-  void (*handler) (Queue *arguments);
+  int (*handler) (Queue *arguments);
 } ColorModel;
 
 static void
