@@ -707,6 +707,26 @@ static const ColorModel colorModels[] = {
   },
 };
 
+static int
+handleColorModel (const char *name, Queue *arguments, const ColorModel **current) {
+  for (int i=0; i<ARRAY_COUNT(colorModels); i+=1) {
+    const ColorModel *model = &colorModels[i];
+
+    if (isAbbreviation(model->name, name)) {
+      if (isEmptyQueue(arguments)) {
+        *current = model;
+        putColorModelSyntax(*current);
+      } else {
+        model->handler(arguments);
+      }
+
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
 /* Interactive color description test */
 static void
 enterInteractiveMode (void) {
@@ -766,37 +786,24 @@ enterInteractiveMode (void) {
       }
     }
 
-    if (!isEmptyQueue(arguments)) {
-      char *command = dequeueItem(arguments);
+    if (isEmptyQueue(arguments)) continue;
+    char *command = dequeueItem(arguments);
 
-      if (isAbbreviation(QUIT_COMMAND, command)) {
-        if (noMoreArguments(arguments)) break;
-        continue;
-      }
-
-      for (int i=0; i<ARRAY_COUNT(colorModels); i+=1) {
-        const ColorModel *model = &colorModels[i];
-
-        if (isAbbreviation(model->name, command)) {
-          if (isEmptyQueue(arguments)) {
-            currentColorModel = model;
-            putColorModelSyntax(currentColorModel);
-          } else {
-            model->handler(arguments);
-          }
-
-          goto COMMAND_DONE;
-        }
-      }
-
-      if (isdigit(command[0])) {
-        prequeueItem(arguments, command);
-        currentColorModel->handler(arguments);
-      } else {
-        logMessage(LOG_WARNING, "unrecognized command");
-      }
+    if (isAbbreviation(QUIT_COMMAND, command)) {
+      if (noMoreArguments(arguments)) break;
+      continue;
     }
-  COMMAND_DONE:
+
+    if (handleColorModel(command, arguments, &currentColorModel)) {
+      continue;
+    }
+
+    if (isdigit(command[0])) {
+      prequeueItem(arguments, command);
+      currentColorModel->handler(arguments);
+    } else {
+      logMessage(LOG_WARNING, "unrecognized command");
+    }
   }
 
   if (line) free(line);
