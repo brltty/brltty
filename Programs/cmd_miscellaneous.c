@@ -189,6 +189,11 @@ showCharacterDescription (int column, int row) {
   message("char", description, 0);
 }
 
+static
+STR_BEGIN_FORMATTER(formatRGBColor, RGBColor color)
+  STR_PRINTF("%02X%02X%02X", color.r, color.g, color.b);
+STR_END_FORMATTER
+
 static void
 showColorDescription (int column, int row) {
   ScreenCharacter character;
@@ -202,11 +207,10 @@ showColorDescription (int column, int row) {
   STR_PRINTF(": ");
 
   if (color->usingRGB) {
-    STR_PRINTF(
-      "RGB %02X%02X%02X/%02X%02X%02X",
-      color->foreground.r, color->foreground.g, color->foreground.b,
-      color->background.r, color->background.g, color->background.b
-    );
+    STR_PRINTF("RGB ");
+    STR_FORMAT(formatRGBColor, color->foreground);
+    STR_PRINTF(" / ");
+    STR_FORMAT(formatRGBColor, color->background);
   } else {
     STR_PRINTF("VGA %02X", color->vgaAttributes);
   }
