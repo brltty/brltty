@@ -473,8 +473,17 @@ showColor (RGBColor rgb, HSVColor hsv) {
 
   {
     int vga = rgbToVga(rgb.r, rgb.g, rgb.b, 0);
-    const char *name = vgaColorName(vga);
-    putf("%sNearest VGA: %d \"%s\"\n", colorIndent, vga, name);
+    int fastVga = rgbToVgaFast(rgb.r, rgb.g, rgb.b, 0);
+
+    {
+      const char *name = vgaColorName(vga);
+      putf("%sNearest VGA: %d \"%s\"\n", colorIndent, vga, name);
+    }
+
+    if (vga != fastVga) {
+      const char *name = vgaColorName(fastVga);
+      putf("%sFast VGA: %d \"%s\"\n", colorIndent, fastVga, name);
+    }
   }
 }
 
@@ -719,24 +728,14 @@ static const ColorModel colorModels[] = {
   },
 };
 
-static int
-handleColorModel (const char *name, Queue *arguments, const ColorModel **current) {
+static const ColorModel *
+getColorModel (const char *name) {
   for (int i=0; i<ARRAY_COUNT(colorModels); i+=1) {
     const ColorModel *model = &colorModels[i];
-
-    if (isAbbreviation(model->name, name)) {
-      if (isEmptyQueue(arguments)) {
-        *current = model;
-        putColorModelSyntax(*current);
-      } else {
-        model->handler(arguments);
-      }
-
-      return 1;
-    }
+    if (isAbbreviation(model->name, name)) return model;
   }
 
-  return 0;
+  return NULL;
 }
 
 /* Interactive color description test */
@@ -803,18 +802,22 @@ enterInteractiveMode (void) {
 
     if (isAbbreviation(QUIT_COMMAND, command)) {
       if (noMoreArguments(arguments)) break;
-      continue;
-    }
-
-    if (handleColorModel(command, arguments, &currentColorModel)) {
-      continue;
-    }
-
-    if (isdigit(command[0])) {
-      prequeueItem(arguments, command);
-      currentColorModel->handler(arguments);
     } else {
-      logMessage(LOG_WARNING, "unrecognized command");
+      const ColorModel *model = getColorModel(command);
+
+      if (model) {
+        if (isEmptyQueue(arguments)) {
+          currentColorModel = model;
+          putColorModelSyntax(currentColorModel);
+        } else {
+          model->handler(arguments);
+        }
+      } else if (isdigit(command[0])) {
+        prequeueItem(arguments, command);
+        currentColorModel->handler(arguments);
+      } else {
+        logMessage(LOG_WARNING, "unrecognized command");
+      }
     }
   }
 
