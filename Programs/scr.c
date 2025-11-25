@@ -156,22 +156,27 @@ readScreenText (short left, short top, short width, short height, wchar_t *buffe
   return 1;
 }
 
+int
+sameScreenColors (const ScreenColor *color1, const ScreenColor *color2) {
+  return memcmp(color1, color2, sizeof(*color1)) == 0;
+}
+
 unsigned char
 getScreenColorAttributes (const ScreenColor *color) {
   if (!color->usingRGB) return color->vgaAttributes;
 
-  unsigned char attributes = (rgbColorToVgaFast(color->foreground, 0) << VGA_SHIFT_FG)
-                           | (rgbColorToVgaFast(color->background, 1) << VGA_SHIFT_BG);
+  static ScreenColor cachedColor = {.usingRGB=0};
+  static unsigned char cachedAttributes = 0;
 
-  if (color->isBlinking) attributes |= VGA_BIT_BLINK;
-  if (color->isBold) attributes |= VGA_BIT_FG_BRIGHT;
+  if (!sameScreenColors(color, &cachedColor))  {
+    ScreenColor c = *color;
+    toVGAScreenColor(&c);
 
-  return attributes;
-}
+    cachedColor = *color;
+    cachedAttributes = c.vgaAttributes;
+  }
 
-int
-sameScreenColors (const ScreenColor *color1, const ScreenColor *color2) {
-  return memcmp(color1, color2, sizeof(*color1)) == 0;
+  return cachedAttributes;
 }
 
 STR_BEGIN_FORMATTER(formatScreenColor, const ScreenColor *color)
