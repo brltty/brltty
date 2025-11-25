@@ -28,9 +28,11 @@ addProgramOption m string.anything modifiedIndicator "the modified indicator" "$
 addProgramOption p string.anything prependText "text to prepend to the revision identifier"
 addProgramOption r string.anything revisionIdentifier "the revision identifier"
 addProgramOption s flag asString "render the revision identifier as a quoted string"
+optionalProgramParameters
 addProgramParameter source sourceRoot "the top-level directory of the source tree"
 parseProgramArguments "${@}"
 
+[ -n "${sourceRoot}" ] || sourceRoot="${programDirectory}"
 [ -e "${sourceRoot}" ] || semanticError "directory not found: ${sourceRoot}"
 [ -d "${sourceRoot}" ] || semanticError "not a directory: ${sourceRoot}"
 
