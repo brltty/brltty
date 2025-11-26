@@ -128,7 +128,7 @@ createSegment (const char *path, int driverDirectives) {
   key_t key;
 
   if (makeTerminalKey(&key, path)) {
-    segmentHeader = createScreenSegment(&segmentIdentifier, key, COLS, LINES, ENABLE_ROW_ARRAY);
+    segmentHeader = createScreenSegment(&segmentIdentifier, key, LINES, COLS, ENABLE_ROW_ARRAY);
 
     if (segmentHeader) {
       if (driverDirectives) enableMessages(key);
@@ -317,9 +317,9 @@ ptyEndScreen (void) {
 }
 
 void
-ptyResizeScreen (unsigned int lines, unsigned int columns) {
-  if (is_term_resized(lines, columns)) {
-    resize_term(lines, columns);
+ptyResizeScreen (unsigned int height, unsigned int width) {
+  if (is_term_resized(height, width)) {
+    resize_term(height, width);
   }
 }
 

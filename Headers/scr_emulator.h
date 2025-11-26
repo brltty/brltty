@@ -44,7 +44,7 @@ extern void fillScreenRows (ScreenSegmentHeader *segment, unsigned int row, unsi
 extern void moveScreenRows (ScreenSegmentHeader *segment, unsigned int from, unsigned int to, unsigned int count);
 extern void scrollScreenRows (ScreenSegmentHeader *segment, unsigned int top, unsigned int size, unsigned int count, int down);
 
-extern ScreenSegmentHeader *createScreenSegment (int *identifier, key_t key, int columns, int rows, int enableRowArray);
+extern ScreenSegmentHeader *createScreenSegment (int *identifier, key_t key, int height, int width, int enableRowArray);
 extern int destroyScreenSegment (int identifier);
 
 extern int createMessageQueue (int *queue, key_t key);

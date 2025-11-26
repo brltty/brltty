@@ -28,7 +28,7 @@ extern "C" {
 
 extern int ptyBeginScreen (PtyObject *pty, int driverDirectives);
 extern void ptyEndScreen (void);
-extern void ptyResizeScreen (unsigned int lines, unsigned int columns);
+extern void ptyResizeScreen (unsigned int height, unsigned int width);
 extern void ptyRefreshScreen (void);
 
 extern void ptySetCursorPosition (unsigned int row, unsigned int column);

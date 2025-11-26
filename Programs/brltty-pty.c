@@ -152,10 +152,10 @@ writeDriverDirective (const char *format, ...) {
 }
 
 static int
-setWindowSize (int tty, size_t columns, size_t lines) {
+setWindowSize (int tty, size_t width, size_t height) {
   struct winsize size = {
-    .ws_col = columns,
-    .ws_row = lines,
+    .ws_col = width,
+    .ws_row = height,
   };
 
   if (ioctl(tty, TIOCSWINSZ, &size) != -1) return 1;
@@ -180,7 +180,7 @@ setEnvironmentInteger (const char *variable, int integer) {
 }
 
 static int
-setEnvironmentVariables (size_t *columns, size_t *lines) {
+setEnvironmentVariables (size_t *width, size_t *height) {
   if (!setEnvironmentString("TERM_PROGRAM", programName)) return 0;
   if (!setEnvironmentString("TERM_PROGRAM_VERSION", PACKAGE_VERSION)) return 0;
 
@@ -202,12 +202,12 @@ setEnvironmentVariables (size_t *columns, size_t *lines) {
     }
   }
 
-  if (getConsoleSize(columns, lines)) {
-    if (!setEnvironmentInteger("COLUMNS", *columns)) return 0;
-    if (!setEnvironmentInteger("LINES", *lines)) return 0;
+  if (getConsoleSize(width, height)) {
+    if (!setEnvironmentInteger("COLUMNS", *width)) return 0;
+    if (!setEnvironmentInteger("LINES", *height)) return 0;
   } else {
-    *columns = 0;
-    *lines = 0;
+    *width = 0;
+    *height = 0;
   }
 
   return setEnvironmentString("TERM", ptyGetTerminalType());
@@ -220,11 +220,11 @@ prepareChild (void) {
   setsid();
   ptyCloseMaster(ptyObject);
 
-  size_t columns, lines;
-  if (setEnvironmentVariables(&columns, &lines)) {
+  size_t width, height;
+  if (setEnvironmentVariables(&width, &height)) {
     int tty;
     if (!ptyOpenSlave(ptyObject, &tty)) return 0;
-    setWindowSize(tty, columns, lines);
+    setWindowSize(tty, width, height);
 
     {
       int keep = 0;
@@ -301,11 +301,11 @@ parentQuitMonitor (int signalNumber) {
 
 static void
 windowSizeMonitor (int signalNumber) {
-  size_t columns, lines;
+  size_t width, height;
 
-  if (getConsoleSize(&columns, &lines)) {
-    setWindowSize(ptyGetMaster(ptyObject), columns, lines);
-    ptyResizeTerminal(lines, columns);
+  if (getConsoleSize(&width, &height)) {
+    setWindowSize(ptyGetMaster(ptyObject), width, height);
+    ptyResizeTerminal(height, width);
   }
 }
 

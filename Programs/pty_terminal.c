@@ -100,8 +100,8 @@ ptyEndTerminal (void) {
 }
 
 void
-ptyResizeTerminal (unsigned int lines, unsigned int columns) {
-  ptyResizeScreen(lines, columns);
+ptyResizeTerminal (unsigned int height, unsigned int width) {
+  ptyResizeScreen(height, width);
 }
 
 static void
@@ -156,6 +156,57 @@ ptyProcessTerminalInput (PtyObject *pty) {
       KEY(F(10)    , F10)
       KEY(F(11)    , F11)
       KEY(F(12)    , F12)
+      KEY(F(13)    , F13)
+      KEY(F(14)    , F14)
+      KEY(F(15)    , F15)
+      KEY(F(16)    , F16)
+      KEY(F(17)    , F17)
+      KEY(F(18)    , F18)
+      KEY(F(19)    , F19)
+      KEY(F(20)    , F20)
+      KEY(F(21)    , F21)
+      KEY(F(22)    , F22)
+      KEY(F(23)    , F23)
+      KEY(F(24)    , F24)
+      KEY(F(25)    , F25)
+      KEY(F(26)    , F26)
+      KEY(F(27)    , F27)
+      KEY(F(28)    , F28)
+      KEY(F(29)    , F29)
+      KEY(F(30)    , F30)
+      KEY(F(31)    , F31)
+      KEY(F(32)    , F32)
+      KEY(F(33)    , F33)
+      KEY(F(34)    , F34)
+      KEY(F(35)    , F35)
+      KEY(F(36)    , F36)
+      KEY(F(37)    , F37)
+      KEY(F(38)    , F38)
+      KEY(F(39)    , F39)
+      KEY(F(40)    , F40)
+      KEY(F(41)    , F41)
+      KEY(F(42)    , F42)
+      KEY(F(43)    , F43)
+      KEY(F(44)    , F44)
+      KEY(F(45)    , F45)
+      KEY(F(46)    , F46)
+      KEY(F(47)    , F47)
+      KEY(F(48)    , F48)
+      KEY(F(49)    , F49)
+      KEY(F(50)    , F50)
+      KEY(F(51)    , F51)
+      KEY(F(52)    , F52)
+      KEY(F(53)    , F53)
+      KEY(F(54)    , F54)
+      KEY(F(55)    , F55)
+      KEY(F(56)    , F56)
+      KEY(F(57)    , F57)
+      KEY(F(58)    , F58)
+      KEY(F(59)    , F59)
+      KEY(F(60)    , F60)
+      KEY(F(61)    , F61)
+      KEY(F(62)    , F62)
+      KEY(F(63)    , F63)
     }
     #undef KEY
 
@@ -455,48 +506,58 @@ performBracketAction_m (unsigned char byte) {
 
         case 3:
           bright = 0;
-          goto doForeground;
+          goto DO_FOREGROUND;
 
         case 4:
           bright = 0;
-          goto doBackground;
+          goto DO_BACKGROUND;
 
         case 9:
           bright = 1;
-          goto doForeground;
+          goto DO_FOREGROUND;
 
         case 10:
           bright = 1;
-          goto doBackground;
+          goto DO_BACKGROUND;
 
         const char *name;
         const char *description;
         void (*setColor) (int color);
         int color;
 
-      doForeground:
+      DO_FOREGROUND:
         name = "setaf";
         description = "foreground color";
         setColor = ptySetForegroundColor;
-        goto doColor;
+        goto DO_COLOR;
 
-      doBackground:
+      DO_BACKGROUND:
         name = "setab";
         description = "background color";
         setColor = ptySetBackgroundColor;
-        goto doColor;
+        goto DO_COLOR;
 
-      doColor:
+      DO_COLOR:
         color = number % 10;
 
         if (color == 8) {
           if (!bright) {
-            if (count > 1) {
+            if (count >= 2) {
               switch (outputParserNumberArray[++index]) {
-                case 5: {
-                  if (count > 2) {
+                case 2: {
+                  if (count >= 5) {
                     color = outputParserNumberArray[++index];
-                    if (color <= 0XF) goto setColor;
+                    color = outputParserNumberArray[++index];
+                    color = outputParserNumberArray[++index];
+                  }
+
+                  break;
+                }
+
+                case 5: {
+                  if (count >= 3) {
+                    color = outputParserNumberArray[++index];
+                    if (color <= 0XF) goto SET_COLOR;
                   }
 
                   break;
@@ -514,7 +575,7 @@ performBracketAction_m (unsigned char byte) {
           color |= 0X8;
         }
 
-      setColor:
+      SET_COLOR:
         logOutputAction(name, description);
         setColor(color);
         continue;
@@ -650,14 +711,14 @@ performBracketAction (unsigned char byte) {
     case 'f':
       action = "hvp";
       allowZero = 1;
-      goto doMoveCursor;
+      goto MOVE_CURSOR;
 
     case 'H':
       action = "cup";
       allowZero = 0;
-      goto doMoveCursor;
+      goto MOVE_CURSOR;
 
-    doMoveCursor:
+    MOVE_CURSOR:
       if (outputParserNumberCount == 0) {
         addOutputParserNumber(1);
         addOutputParserNumber(1);
