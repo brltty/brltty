@@ -91,7 +91,9 @@ extern const char *rgbColorToDescription (char *buffer, size_t bufferSize, RGBCo
 typedef struct {
   const char *name;
   const char *comment;
-  unsigned char suppress:1;
+  unsigned char optional:1;
+  unsigned char lowest:1;
+  unsigned char highest:1;
 } HSVModifier;
 
 /* Return the name for the specified hue angle */

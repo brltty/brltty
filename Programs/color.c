@@ -450,6 +450,7 @@ hsvSaturationModifier (float saturation) {
     static const HSVModifier modifier = {
       .name = "Pale",
       .comment = "Minimal color presence, almost indistinguishable from gray",
+      .lowest = 1,
     };
 
     return &modifier;
@@ -477,6 +478,7 @@ hsvSaturationModifier (float saturation) {
     static const HSVModifier modifier = {
       .name = "Pure",
       .comment = "Absolute color presence, pristine and minimally altered",
+      .highest = 1,
     };
 
     return &modifier;
@@ -513,7 +515,7 @@ hsvSaturationModifier (float saturation) {
     static const HSVModifier modifier = {
       .name = "Moderate",
       .comment = "Balanced color presence, clearly visible and well-defined",
-      .suppress = 1,
+      .optional = 1,
     };
 
     return &modifier;
@@ -527,6 +529,7 @@ hsvBrightnessModifier (float brightness) {
     static const HSVModifier modifier = {
       .name = "Faded",
       .comment = "Almost black, very little light",
+      .lowest = 1,
     };
 
     return &modifier;
@@ -545,6 +548,7 @@ hsvBrightnessModifier (float brightness) {
     static const HSVModifier modifier = {
       .name = "Bright",
       .comment = "Almost white, very bright and clear",
+      .highest = 1,
     };
 
     return &modifier;
@@ -563,7 +567,7 @@ hsvBrightnessModifier (float brightness) {
     static const HSVModifier modifier = {
       .name = "Medium",
       .comment = "Balanced light, clear but not bright",
-      .suppress = 1,
+      .optional = 1,
     };
 
     return &modifier;
@@ -582,15 +586,21 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
 
   if (hsv.s < 0.08f) {
     /* Achromatic - shades of gray */
+    STR_BEGIN(buffer, bufferSize);
+
     if (hsv.v > 0.92f) {
-      snprintf(buffer, bufferSize, "White");
-    } else if (hsv.v > 0.65f) {
-      snprintf(buffer, bufferSize, "Light Gray");
-    } else if (hsv.v > 0.35f) {
-      snprintf(buffer, bufferSize, "Gray");
+      STR_PRINTF("White");
     } else {
-      snprintf(buffer, bufferSize, "Dark Gray");
+      if (hsv.v > 0.65f) {
+        STR_PRINTF("Light ");
+      } else if (hsv.v < 0.35f) {
+        STR_PRINTF("Dark ");
+      }
+
+      STR_PRINTF("Gray");
     }
+
+    STR_END
     return buffer;
   }
 
@@ -696,8 +706,8 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
     const HSVModifier *brightness = hsvBrightnessModifier(hsv.v);
 
     STR_BEGIN(buffer, bufferSize);
-    if (!brightness->suppress) STR_PRINTF("%s ", brightness->name);
-    if (!saturation->suppress) STR_PRINTF("%s ", saturation->name);
+    if (!brightness->optional) STR_PRINTF("%s ", brightness->name);
+    if (!saturation->optional) STR_PRINTF("%s ", saturation->name);
     STR_PRINTF("%s", hue);
     STR_END;
 
