@@ -550,7 +550,9 @@ performBracketAction_m (unsigned char byte) {
                     unsigned int red = outputParserNumberArray[++index];
                     unsigned int green = outputParserNumberArray[++index];
                     unsigned int blue = outputParserNumberArray[++index];
+
                     color = rgbToVga(red, green, blue, 0);
+                    goto SET_COLOR;
                   }
 
                   break;
