@@ -42,7 +42,7 @@ static unsigned char colorPairMap[0100];
 
 static unsigned char
 toColorPair (unsigned char foreground, unsigned char background) {
-  return colorPairMap[(background << 3) | foreground];
+  return colorPairMap[(background << 4) | foreground];
 }
 
 static void
@@ -67,8 +67,8 @@ initializeColorPairs (void) {
     colorPairMap[0] = pair;
   }
 
-  for (unsigned char foreground=COLOR_BLACK; foreground<=COLOR_WHITE; foreground+=1) {
-    for (unsigned char background=COLOR_BLACK; background<=COLOR_WHITE; background+=1) {
+  for (unsigned char foreground=0; foreground<=0XF; foreground+=1) {
+    for (unsigned char background=0; background<=0XF; background+=1) {
       unsigned char pair = toColorPair(foreground, background);
       if (!pair) continue;
       init_pair(pair, foreground, background);
@@ -146,10 +146,21 @@ storeCursorPosition (void) {
 }
 
 static void
-setColor (ScreenSegmentColor *ssc, unsigned char color, unsigned char level) {
-  if (color & COLOR_RED) ssc->red = level;
-  if (color & COLOR_GREEN) ssc->green = level;
-  if (color & COLOR_BLUE) ssc->blue = level;
+setColor (ScreenSegmentColor *ssc, unsigned char color, unsigned char bold, int dim) {
+  int bright = !!(color & 0X8);
+  unsigned char on  = bright? SCI_MAX: SCI_REG;
+  unsigned char off = bright? SCI_DIM: SCI_OFF;
+
+  if (bold) on = UINT8_MAX;
+  if (dim) on >>= 1, off >>= 1;
+
+  ssc->red = (color & COLOR_RED)? on: off;
+  ssc->green = (color & COLOR_GREEN)? on: off;
+  ssc->blue = (color & COLOR_BLUE)? on: off;
+
+  if ((ssc->red == SCI_REG) && (ssc->green == SCI_REG) && (ssc->blue == SCI_OFF)) {
+    ssc->green = SCI_DIM;
+  }
 }
 
 static ScreenSegmentCharacter *
@@ -189,19 +200,16 @@ setCharacter (unsigned int row, unsigned int column, const ScreenSegmentCharacte
   };
 
   {
-    short fgColor, bgColor;
-    pair_content(colorPair, &fgColor, &bgColor);
+    short foreground, background;
+    pair_content(colorPair, &foreground, &background);
 
-    unsigned char bgLevel = SCREEN_SEGMENT_COLOR_LEVEL;
-    unsigned char fgLevel = bgLevel;
-
-    if (attributes & (A_BOLD | A_STANDOUT)) fgLevel = UINT8_MAX;
-    if (attributes & A_DIM) fgLevel >>= 1, bgLevel >>= 1;
+    int bold = !!(attributes & A_BOLD);
+    int dim = !!(attributes & A_DIM);
 
     {
       ScreenSegmentColor *cfg, *cbg;
 
-      if (attributes & A_REVERSE) {
+      if (attributes & (A_REVERSE | A_STANDOUT | A_ITALIC)) {
         cfg = &character.background;
         cbg = &character.foreground;
       } else {
@@ -209,14 +217,13 @@ setCharacter (unsigned int row, unsigned int column, const ScreenSegmentCharacte
         cbg = &character.background;
       }
 
-      setColor(cfg, fgColor, fgLevel);
-      setColor(cbg, bgColor, bgLevel);
+      setColor(cfg, foreground, bold, dim);
+      setColor(cbg, background, 0, dim);
     }
   }
 
   if (attributes & A_BLINK) character.blink = 1;
   if (attributes & A_UNDERLINE) character.underline = 1;
-  if (attributes & A_ITALIC) character.italic = 1;
 
   {
     ScreenSegmentCharacter *location = getScreenCharacter(segmentHeader, row, column, end);

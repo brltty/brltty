@@ -447,21 +447,40 @@ performBracketAction_m (unsigned char byte) {
 
   for (unsigned int index=0; index<outputParserNumberCount; index+=1) {
     unsigned int number = outputParserNumberArray[index];
+    unsigned int count = outputParserNumberCount - index;
 
     switch (number / 10) {
       {
+        int bright;
+
+        case 3:
+          bright = 0;
+          goto doForeground;
+
+        case 4:
+          bright = 0;
+          goto doBackground;
+
+        case 9:
+          bright = 1;
+          goto doForeground;
+
+        case 10:
+          bright = 1;
+          goto doBackground;
+
         const char *name;
         const char *description;
         void (*setColor) (int color);
         int color;
 
-      case 3:
+      doForeground:
         name = "setaf";
         description = "foreground color";
         setColor = ptySetForegroundColor;
         goto doColor;
 
-      case 4:
+      doBackground:
         name = "setab";
         description = "background color";
         setColor = ptySetBackgroundColor;
@@ -469,9 +488,33 @@ performBracketAction_m (unsigned char byte) {
 
       doColor:
         color = number % 10;
-        if (color == 8) return OBP_UNEXPECTED;
-        if (color == 9) color = -1;
 
+        if (color == 8) {
+          if (!bright) {
+            if (count > 1) {
+              switch (outputParserNumberArray[++index]) {
+                case 5: {
+                  if (count > 2) {
+                    color = outputParserNumberArray[++index];
+                    if (color <= 0XF) goto setColor;
+                  }
+
+                  break;
+                }
+              }
+            }
+          }
+
+          return OBP_UNEXPECTED;
+        }
+
+        if (color == 9) {
+          color = -1;
+        } else if (bright) {
+          color |= 0X8;
+        }
+
+      setColor:
         logOutputAction(name, description);
         setColor(color);
         continue;

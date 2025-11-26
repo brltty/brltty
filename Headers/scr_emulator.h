@@ -29,10 +29,16 @@ extern void moveScreenCharacters (ScreenSegmentCharacter *to, const ScreenSegmen
 extern void setScreenCharacters (ScreenSegmentCharacter *from, const ScreenSegmentCharacter *to, const ScreenSegmentCharacter *character);
 extern void propagateScreenCharacter (ScreenSegmentCharacter *from, const ScreenSegmentCharacter *to);
 
+typedef enum {
+  SCI_OFF = 0X00,
+  SCI_DIM = 0X55,
+  SCI_REG = 0XAA,
+  SCI_MAX = 0XFF,
+} ScreenColorIntensity;
+
 #define SCREEN_SEGMENT_COLOR(r, g, b) {.red=r, .green=g, .blue=b}
-#define SCREEN_SEGMENT_COLOR_LEVEL 0XAA
-#define SCREEN_SEGMENT_COLOR_BLACK SCREEN_SEGMENT_COLOR(0, 0, 0)
-#define SCREEN_SEGMENT_COLOR_WHITE SCREEN_SEGMENT_COLOR(SCREEN_SEGMENT_COLOR_LEVEL, SCREEN_SEGMENT_COLOR_LEVEL, SCREEN_SEGMENT_COLOR_LEVEL)
+#define SCREEN_SEGMENT_COLOR_BLACK SCREEN_SEGMENT_COLOR(SCI_OFF, SCI_OFF, SCI_OFF)
+#define SCREEN_SEGMENT_COLOR_WHITE SCREEN_SEGMENT_COLOR(SCI_REG, SCI_REG, SCI_REG)
 
 extern void fillScreenRows (ScreenSegmentHeader *segment, unsigned int row, unsigned int count, const ScreenSegmentCharacter *character);
 extern void moveScreenRows (ScreenSegmentHeader *segment, unsigned int from, unsigned int to, unsigned int count);
