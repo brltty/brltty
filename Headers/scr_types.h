@@ -162,6 +162,8 @@ typedef enum {
   SCR_KEY_F61,
   SCR_KEY_F62,
   SCR_KEY_F63,
+
+  SCR_KEY_COUNT // not a key - must be last
 } ScreenKey;
 
 static inline int
