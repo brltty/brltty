@@ -704,9 +704,9 @@ static char *fallback_resources[] = {
   "*displayb.background: black",
   "*displayb.foreground: white",
 #endif /* USE_XAW */
-  "*keybox.background: lightgrey",
+  "*keybox.background: lightgray",
   "*menu.Label: Brltty",
-  "*menu.background: lightgrey",
+  "*menu.background: lightgray",
   NULL
 };
 #endif /* USE_XT */
