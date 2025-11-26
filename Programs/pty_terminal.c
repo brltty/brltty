@@ -36,6 +36,7 @@
 #include "pty_terminal.h"
 #include "pty_screen.h"
 #include "scr_types.h"
+#include "color.h"
 #include "ascii.h"
 
 static unsigned char terminalLogLevel = LOG_DEBUG;
@@ -546,9 +547,10 @@ performBracketAction_m (unsigned char byte) {
               switch (outputParserNumberArray[++index]) {
                 case 2: {
                   if (count >= 5) {
-                    color = outputParserNumberArray[++index];
-                    color = outputParserNumberArray[++index];
-                    color = outputParserNumberArray[++index];
+                    unsigned int red = outputParserNumberArray[++index];
+                    unsigned int green = outputParserNumberArray[++index];
+                    unsigned int blue = outputParserNumberArray[++index];
+                    color = rgbToVga(red, green, blue, 0);
                   }
 
                   break;
