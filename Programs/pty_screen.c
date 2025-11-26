@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include "get_term.h"
 #include "log.h"
 #include "pty_screen.h"
 #include "scr_emulator.h"
@@ -34,15 +35,23 @@ ptySetScreenLogLevel (unsigned char level) {
 }
 
 static unsigned char hasColors = 0;
-static unsigned char currentForegroundColor;
-static unsigned char currentBackgroundColor;
-static unsigned char defaultForegroundColor;
-static unsigned char defaultBackgroundColor;
 static unsigned char colorPairMap[0100];
 
-static unsigned char
+static unsigned char currentForegroundColor;
+static unsigned char currentBackgroundColor;
+
+static unsigned char defaultForegroundColor;
+static unsigned char defaultBackgroundColor;
+
+static unsigned char vgaColorBits;
+static unsigned char vgaColorCount;
+static unsigned char vgaColorMask;
+
+static inline unsigned char
 toColorPair (unsigned char foreground, unsigned char background) {
-  return colorPairMap[(background << 4) | foreground];
+  return colorPairMap[
+    ((background & vgaColorMask) << vgaColorBits) | (foreground & vgaColorMask)
+  ];
 }
 
 static void
@@ -56,7 +65,10 @@ initializeColorPairs (void) {
   for (unsigned int pair=0; pair<ARRAY_COUNT(colorPairMap); pair+=1) {
     colorPairMap[pair] = pair;
   }
+}
 
+static void
+prepareColorPairs (void) {
   {
     short foreground, background;
     pair_content(0, &foreground, &background);
@@ -67,8 +79,8 @@ initializeColorPairs (void) {
     colorPairMap[0] = pair;
   }
 
-  for (unsigned char foreground=0; foreground<=0XF; foreground+=1) {
-    for (unsigned char background=0; background<=0XF; background+=1) {
+  for (unsigned char foreground=0; foreground<vgaColorCount; foreground+=1) {
+    for (unsigned char background=0; background<vgaColorCount; background+=1) {
       unsigned char pair = toColorPair(foreground, background);
       if (!pair) continue;
       init_pair(pair, foreground, background);
@@ -283,11 +295,18 @@ ptyBeginScreen (PtyObject *pty, int driverDirectives) {
     savedCursorColumn = 0;
 
     hasColors = has_colors();
-    initializeColors(COLOR_WHITE, COLOR_BLACK);
+    initializeColorPairs();
 
     if (hasColors) {
       start_color();
-      initializeColorPairs();
+
+      vgaColorBits = (COLORS > 8)? 4: 3;
+      vgaColorCount = 1 << vgaColorBits;
+      vgaColorMask = vgaColorCount - 1;
+
+      prepareColorPairs();
+    } else {
+      initializeColors(COLOR_WHITE, COLOR_BLACK);
     }
 
     if (createSegment(ptyGetPath(pty), driverDirectives)) {
