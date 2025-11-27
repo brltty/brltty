@@ -72,6 +72,32 @@ ptySetLogUnexpectedTerminalIO (int yes) {
   logUnexpected = yes;
 }
 
+static int
+testTerminalType (const char *type) {
+  int status;
+  if (setupterm(type, STDOUT_FILENO, &status) == OK) return 1;
+
+  switch (status) {
+    case 1:
+      logMessage(LOG_WARNING, "hardcopy terminal: %s", type);
+      break;
+
+    case 0:
+      logMessage(LOG_WARNING, "unrecognized terminal type: %s", type);
+      break;
+
+    case -1:
+      logMessage(LOG_WARNING, "terminfo database not installed");
+      break;
+
+    default:
+      logMessage(LOG_WARNING, "unexpected setupterm error status: %d", status);
+      break;
+  }
+
+  return 0;
+}
+
 const char *
 ptyGetTerminalType (void) {
   static const char *terminalType = NULL;
@@ -86,36 +112,16 @@ ptyGetTerminalType (void) {
     };
 
     for (const char *const *type=terminalTypes; *type; type+=1) {
-      int status;
-
-      if (setupterm(*type, STDOUT_FILENO, &status) == OK) {
+      if (testTerminalType(*type)) {
         terminalType = *type;
         break;
-      }
-
-      switch (status) {
-        case 1:
-          logMessage(LOG_WARNING, "terminal type is hardcopy: %s", *type);
-          break;
-
-        case 0:
-          logMessage(LOG_WARNING, "terminal type not found: %s", *type);
-          break;
-
-        case -1:
-          logMessage(LOG_WARNING, "terminfo database not found");
-          break;
-
-        default:
-          logMessage(LOG_WARNING, "unexpected setupterm error status: %d", status);
-          break;
       }
     }
 
     if (terminalType) {
-      logMessage(LOG_NOTICE, "terminal type: %s", terminalType);
+      logMessage(LOG_INFO, "selected terminal type: %s", terminalType);
     } else {
-      logMessage(LOG_WARNING, "terminal type not found");
+      logMessage(LOG_ERR, "can't use any eligible terminal type");
     }
   }
 

@@ -56,7 +56,7 @@ toColorPair (unsigned char foreground, unsigned char background) {
 }
 
 static void
-initializeColors (unsigned char foreground, unsigned char background) {
+initializeCharacterColors (unsigned char foreground, unsigned char background) {
   currentForegroundColor = defaultForegroundColor = foreground;
   currentBackgroundColor = defaultBackgroundColor = background;
 }
@@ -73,7 +73,7 @@ initializeColorPairs (void) {
   {
     short foreground, background;
     pair_content(0, &foreground, &background);
-    initializeColors(foreground, background);
+    initializeCharacterColors(foreground, background);
 
     unsigned char pair = toColorPair(foreground, background);
     colorPairMap[pair] = 0;
@@ -311,7 +311,7 @@ ptyBeginScreen (PtyObject *pty, int driverDirectives) {
     if (hasColors) {
       initializeColorPairs();
     } else {
-      initializeColors(COLOR_WHITE, COLOR_BLACK);
+      initializeCharacterColors(COLOR_WHITE, COLOR_BLACK);
     }
 
     if (createSegment(ptyGetPath(pty), driverDirectives)) {
@@ -577,7 +577,7 @@ ptyRemoveAttributes (attr_t attributes) {
 }
 
 static void
-setCharacterColors (void) {
+setColorAttribute (void) {
   attroff(A_COLOR);
   attron(COLOR_PAIR(toColorPair(currentForegroundColor, currentBackgroundColor)));
 }
@@ -586,14 +586,14 @@ void
 ptySetForegroundColor (int color) {
   if (color == -1) color = defaultForegroundColor;
   currentForegroundColor = color;
-  setCharacterColors();
+  setColorAttribute();
 }
 
 void
 ptySetBackgroundColor (int color) {
   if (color == -1) color = defaultBackgroundColor;
   currentBackgroundColor = color;
-  setCharacterColors();
+  setColorAttribute();
 }
 
 void
