@@ -49,6 +49,7 @@
 #include "parse.h"
 #include "async_handle.h"
 #include "async_io.h"
+#include "embed.h"
 
 /* From scr_main.h */
 extern void mainScreenUpdated(void);
@@ -536,12 +537,16 @@ startTmuxControlMode(void) {
   /* Initialize input buffer */
   tmuxReadBufferUsed = 0;
 
+  brlttyEnableInterrupt();
+
   logMessage(LOG_DEBUG, "Tmux control mode started");
   return 1;
 }
 
 static void
 stopTmuxControlMode(void) {
+  brlttyDisableInterrupt();
+
   if (tmuxPid > 0) {
     kill(tmuxPid, SIGTERM);
     waitpid(tmuxPid, NULL, 0);
@@ -963,6 +968,7 @@ parseTmuxOutput(const char *line) {
       screenNeedsUpdate = 1;
     } else if (strncmp(line, "%exit", 5) == 0) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Tmux exit: %s", line);
+      brlttyInterrupt(WAIT_STOP);
     } else {
       /* Starts with % but not a known control message */
       logMessage(LOG_CATEGORY(SCREEN_DRIVER), "Line starts with %% but not a control message: %s", line);
@@ -997,6 +1003,7 @@ ASYNC_MONITOR_CALLBACK(tmuxMonitorCallback) {
         bytesRead = 0;
       } else {
         logMessage(LOG_ERR, "Error reading from tmux: %s", strerror(errno));
+        brlttyInterrupt(WAIT_STOP);
         return 0;
       }
     }
