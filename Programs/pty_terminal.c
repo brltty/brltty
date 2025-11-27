@@ -37,6 +37,7 @@
 #include "pty_screen.h"
 #include "scr_types.h"
 #include "color.h"
+#include "get_term.h"
 #include "ascii.h"
 
 static unsigned char terminalLogLevel = LOG_DEBUG;
@@ -71,11 +72,54 @@ ptySetLogUnexpectedTerminalIO (int yes) {
   logUnexpected = yes;
 }
 
-static const char ptyTerminalType[] = "screen";
-
 const char *
 ptyGetTerminalType (void) {
-  return ptyTerminalType;
+  static const char *terminalType = NULL;
+
+  if (!terminalType) {
+    static const char *const terminalTypes[] = {
+      "tmux-256color",
+      "screen-256color",
+      "tmux",
+      "screen",
+      NULL
+    };
+
+    for (const char *const *type=terminalTypes; *type; type+=1) {
+      int status;
+
+      if (setupterm(*type, STDOUT_FILENO, &status) == OK) {
+        terminalType = *type;
+        break;
+      }
+
+      switch (status) {
+        case 1:
+          logMessage(LOG_WARNING, "terminal type is hardcopy: %s", *type);
+          break;
+
+        case 0:
+          logMessage(LOG_WARNING, "terminal type not found: %s", *type);
+          break;
+
+        case -1:
+          logMessage(LOG_WARNING, "terminfo database not found");
+          break;
+
+        default:
+          logMessage(LOG_WARNING, "unexpected setupterm error status: %d", status);
+          break;
+      }
+    }
+
+    if (terminalType) {
+      logMessage(LOG_NOTICE, "terminal type: %s", terminalType);
+    } else {
+      logMessage(LOG_WARNING, "terminal type not found");
+    }
+  }
+
+  return terminalType;
 }
 
 static unsigned char insertMode = 0;
