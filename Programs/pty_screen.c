@@ -35,7 +35,7 @@ ptySetScreenLogLevel (unsigned char level) {
 }
 
 static unsigned char hasColors = 0;
-static unsigned char colorPairMap[0100];
+static unsigned char colorPairMap[1 << (4 + 4)];
 
 static unsigned char currentForegroundColor;
 static unsigned char currentBackgroundColor;
@@ -43,14 +43,15 @@ static unsigned char currentBackgroundColor;
 static unsigned char defaultForegroundColor;
 static unsigned char defaultBackgroundColor;
 
-static unsigned char vgaColorBits;
-static unsigned char vgaColorCount;
-static unsigned char vgaColorMask;
+static unsigned char colorBits;
+static unsigned char colorCount;
+static unsigned char colorMask;
+static unsigned int pairCount;
 
 static inline unsigned char
 toColorPair (unsigned char foreground, unsigned char background) {
   return colorPairMap[
-    ((background & vgaColorMask) << vgaColorBits) | (foreground & vgaColorMask)
+    ((background & colorMask) << colorBits) | (foreground & colorMask)
   ];
 }
 
@@ -61,14 +62,14 @@ initializeColors (unsigned char foreground, unsigned char background) {
 }
 
 static void
-initializeColorPairs (void) {
+initializeColorPairMap (void) {
   for (unsigned int pair=0; pair<ARRAY_COUNT(colorPairMap); pair+=1) {
     colorPairMap[pair] = pair;
   }
 }
 
 static void
-prepareColorPairs (void) {
+initializeColorPairs (void) {
   {
     short foreground, background;
     pair_content(0, &foreground, &background);
@@ -79,8 +80,8 @@ prepareColorPairs (void) {
     colorPairMap[0] = pair;
   }
 
-  for (unsigned char foreground=0; foreground<vgaColorCount; foreground+=1) {
-    for (unsigned char background=0; background<vgaColorCount; background+=1) {
+  for (unsigned char foreground=0; foreground<colorCount; foreground+=1) {
+    for (unsigned char background=0; background<colorCount; background+=1) {
       unsigned char pair = toColorPair(foreground, background);
       if (!pair) continue;
       init_pair(pair, foreground, background);
@@ -295,16 +296,20 @@ ptyBeginScreen (PtyObject *pty, int driverDirectives) {
     savedCursorColumn = 0;
 
     hasColors = has_colors();
-    initializeColorPairs();
+    initializeColorPairMap();
+    colorBits = 3;
 
     if (hasColors) {
       start_color();
+      if (COLORS > 8) colorBits += 1;
+    }
 
-      vgaColorBits = (COLORS > 8)? 4: 3;
-      vgaColorCount = 1 << vgaColorBits;
-      vgaColorMask = vgaColorCount - 1;
+    colorCount = 1 << colorBits;
+    colorMask = colorCount - 1;
+    pairCount = colorCount << colorBits;
 
-      prepareColorPairs();
+    if (hasColors) {
+      initializeColorPairs();
     } else {
       initializeColors(COLOR_WHITE, COLOR_BLACK);
     }
