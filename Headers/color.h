@@ -89,9 +89,9 @@ extern const char *vgaColorName (int vga);
 typedef struct {
   const char *name;
   const char *comment;
-  unsigned char optional:1;
-  unsigned char lowest:1;
-  unsigned char highest:1;
+  unsigned char isOptional:1;
+  unsigned char isLowest:1;
+  unsigned char isHighest:1;
 } HSVModifier;
 
 /* Return the name for the specified hue angle */

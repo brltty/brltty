@@ -551,18 +551,18 @@ const HSVModifier *
 hsvSaturationModifier (float saturation) {
   if (saturation < 0.1f) {
     static const HSVModifier modifier = {
-      .name = "Pale",
-      .comment = "Minimal color presence, almost indistinguishable from gray",
-      .lowest = 1,
+      .name = "Faint",
+      .comment = "almost indistinguishable from gray",
+      .isLowest = 1,
     };
 
     return &modifier;
   }
 
-  if (saturation < 0.2f) {
+  if (saturation < 0.25f) {
     static const HSVModifier modifier = {
-      .name = "Faint",
-      .comment = "Subdued color presence, subtle and muted",
+      .name = "Pale",
+      .comment = "gentle and delicate",
     };
 
     return &modifier;
@@ -570,8 +570,17 @@ hsvSaturationModifier (float saturation) {
 
   if (saturation < 0.4f) {
     static const HSVModifier modifier = {
+      .name = "Weak",
+      .comment = "subtle and understated",
+    };
+
+    return &modifier;
+  }
+
+  if (saturation < 0.55f) {
+    static const HSVModifier modifier = {
       .name = "Soft",
-      .comment = "Low color presence, mild and gentle",
+      .comment = "balanced and pleasant",
     };
 
     return &modifier;
@@ -579,9 +588,9 @@ hsvSaturationModifier (float saturation) {
 
   if (saturation > 0.95f) {
     static const HSVModifier modifier = {
-      .name = "Pure",
-      .comment = "Absolute color presence, pristine and minimally altered",
-      .highest = 1,
+      .name = "Rich",
+      .comment = "deep and full-bodied",
+      .isHighest = 1,
     };
 
     return &modifier;
@@ -589,8 +598,8 @@ hsvSaturationModifier (float saturation) {
 
   if (saturation > 0.85f) {
     static const HSVModifier modifier = {
-      .name = "Full",
-      .comment = "Intense color presence, bold and striking",
+      .name = "Vivid",
+      .comment = "striking and intense",
     };
 
     return &modifier;
@@ -598,17 +607,8 @@ hsvSaturationModifier (float saturation) {
 
   if (saturation > 0.7f) {
     static const HSVModifier modifier = {
-      .name = "Rich",
-      .comment = "Strong color presence, vivid and full-bodied",
-    };
-
-    return &modifier;
-  }
-
-  if (saturation > 0.5f) {
-    static const HSVModifier modifier = {
       .name = "Vibrant",
-      .comment = "High color presence, noticeable and lively",
+      .comment = "lively and energetc",
     };
 
     return &modifier;
@@ -617,8 +617,8 @@ hsvSaturationModifier (float saturation) {
   {
     static const HSVModifier modifier = {
       .name = "Moderate",
-      .comment = "Balanced color presence, clearly visible and well-defined",
-      .optional = 1,
+      .comment = "clear and distinct",
+      .isOptional = 1,
     };
 
     return &modifier;
@@ -632,7 +632,7 @@ hsvBrightnessModifier (float brightness) {
     static const HSVModifier modifier = {
       .name = "Faded",
       .comment = "Almost black, very little light",
-      .lowest = 1,
+      .isLowest = 1,
     };
 
     return &modifier;
@@ -651,7 +651,7 @@ hsvBrightnessModifier (float brightness) {
     static const HSVModifier modifier = {
       .name = "Bright",
       .comment = "Almost white, very bright and clear",
-      .highest = 1,
+      .isHighest = 1,
     };
 
     return &modifier;
@@ -670,7 +670,7 @@ hsvBrightnessModifier (float brightness) {
     static const HSVModifier modifier = {
       .name = "Medium",
       .comment = "Balanced light, clear but not bright",
-      .optional = 1,
+      .isOptional = 1,
     };
 
     return &modifier;
@@ -809,8 +809,8 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
     const HSVModifier *brightness = hsvBrightnessModifier(hsv.v);
 
     STR_BEGIN(buffer, bufferSize);
-    if (!brightness->optional) STR_PRINTF("%s ", brightness->name);
-    if (!saturation->optional) STR_PRINTF("%s ", saturation->name);
+    if (!brightness->isOptional) STR_PRINTF("%s ", brightness->name);
+    if (!saturation->isOptional) STR_PRINTF("%s ", saturation->name);
     STR_PRINTF("%s", hue);
     STR_END;
 
