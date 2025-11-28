@@ -119,6 +119,7 @@ END_COMMAND_LINE_PARAMETERS(programParameters)
 
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "The -a option may not be combined with any option that requests a specific test.",
+  "If none of the tests are requested then interactive mode is entered.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
@@ -188,7 +189,9 @@ putNotice (const char *notice) {
 
 static void
 putTestHeader (const char *name) {
-  putf("=== %s ===\n", name);
+  if (opt_quietness <= OPTQ_TEST) {
+    putf("=== %s ===\n", name);
+  }
 }
 
 static int
@@ -740,7 +743,9 @@ typedef struct {
 
 static void
 putColorModelSyntax (const ColorModel *model) {
-  putf("\n%s color model syntax: %s\n", model->name, model->syntax);
+  if (opt_quietness <= OPTQ_TEST) {
+    putf("\n%s color model syntax: %s\n", model->name, model->syntax);
+  }
 }
 
 static const ColorModel colorModels[] = {
@@ -934,9 +939,7 @@ performRequestedTests (void) {
     const RequestableTest *test = &requetableTestTable[i];
 
     if (*test->requested) {
-      if (opt_quietness <= OPTQ_TEST) {
-        putTestHeader(test->name);
-      }
+      putTestHeader(test->name);
 
       if (test->summary) {
         if (opt_quietness <= OPTQ_INFO) {
