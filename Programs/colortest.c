@@ -472,6 +472,11 @@ showColor (RGBColor rgb, HSVColor hsv) {
   }
 
   {
+    HLSColor hls = rgbColorToHls(rgb);
+    putf("%sHLS: (%.1f°, %.0f%%, %.0f%%)\n", colorIndent, hls.h, hls.l*100.0f, hls.s*100.0f);
+  }
+
+  {
     int vga = rgbToVga(rgb.r, rgb.g, rgb.b, 0);
     int fastVga = rgbToVgaFast(rgb.r, rgb.g, rgb.b, 0);
 
@@ -497,6 +502,12 @@ static void
 showHSV (float h, float s, float v) {
   HSVColor hsv = {.h=h, .s=s, .v=v};
   showColor(hsvColorToRgb(hsv), hsv);
+}
+
+static void
+showHLS (float h, float l, float s) {
+  RGBColor rgb = hlsToRgb(h, l, s);
+  showRGB(rgb.r, rgb.g, rgb.b);
 }
 
 static void
@@ -658,6 +669,40 @@ hsvHandler (Queue *arguments) {
 }
 
 static int
+hlsHandler (Queue *arguments) {
+  const char *hueName = "hue angle";
+  const char *hueArgument;
+  float hueAngle;
+
+  const char *lightnessName = "lightness percent";
+  const char *lightnessArgument;
+  float lightnessLevel;
+
+  const char *saturationName = "saturation percent";
+  const char *saturationArgument;
+  float saturationLevel;
+
+  if ((hueArgument = getNextArgument(arguments, hueName))) {
+    if ((lightnessArgument = getNextArgument(arguments, lightnessName))) {
+      if ((saturationArgument = getNextArgument(arguments, saturationName))) {
+        if (noMoreArguments(arguments)) {
+          if (parseDegrees(&hueAngle, hueArgument, hueName)) {
+            if (parsePercent(&lightnessLevel, lightnessArgument, lightnessName)) {
+              if (parsePercent(&saturationLevel, saturationArgument, saturationName)) {
+                showHLS(hueAngle, lightnessLevel, saturationLevel);
+                return 1;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return 0;
+}
+
+static int
 vgaHandler (Queue *arguments) {
   const char *vgaName = "VGA color number";
   const char *vgaArgument = getNextArgument(arguments, vgaName);
@@ -715,6 +760,11 @@ static const ColorModel colorModels[] = {
   { .name = "HSV",
     .syntax = "hue (degrees) saturation (percent) brightness (percent)",
     .handler = hsvHandler,
+  },
+
+  { .name = "HLS",
+    .syntax = "hue (degrees) lightness (percent) saturation (percent)",
+    .handler = hlsHandler,
   },
 
   { .name = "VGA",

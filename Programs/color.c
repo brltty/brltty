@@ -405,6 +405,109 @@ hsvColorToRgb(HSVColor color) {
   return hsvToRgb(color.h, color.s, color.v);
 }
 
+HLSColor
+rgbToHls(unsigned char r, unsigned char g, unsigned char b) {
+  float divisor = (float)UINT8_MAX;
+  float red = (float)r / divisor;
+  float green = (float)g / divisor;
+  float blue = (float)b / divisor;
+
+  float min = red;
+  if (green < min) min = green;
+  if (blue < min) min = blue;
+
+  float max = red;
+  if (green > max) max = green;
+  if (blue > max) max = blue;
+
+  HLSColor hls;
+  hls.l = (min + max) / 2.0f;
+
+  if (min == max) {
+    hls.h = 0.0f;
+    hls.s = 0.0f;
+  } else {
+    hls.h = rgbToHsv(r, g, b).h;
+
+    if (hls.l < 0.5f) {
+      hls.s = (max - min) / (max + min);
+    } else {
+      hls.s = (max - min) / (2.0f - max - min);
+    }
+  }
+
+  return hls;
+}
+
+HLSColor
+rgbColorToHls(RGBColor color) {
+  return rgbToHls(color.r, color.g, color.b);
+}
+
+static float
+floatModulus (float x, float y) {
+  if (y == 0.0f) {
+    return 0.0; // or some other error handling
+  }
+
+  // Calculate the modulus
+  double result = x - (y * ((int)(x / y)));
+
+  // Ensure the result has the same sign as x
+  if (result < 0.0f) result += y;
+
+  return result;
+}
+
+RGBColor
+hlsToRgb(float h, float l, float s) {
+  /* Clamp inputs */
+  hsvNormalize(&h, &l, &s);
+  float red, green, blue;
+
+  if (s == 0.0f) {
+    red = green = blue = l;
+  } else {
+    float dl = (l * 2.0f) - 1.0f;
+    if (dl < 0.0f) dl = -dl;
+
+    float hs = h / 60.0f;
+    float hf = floatModulus(hs, 2.0f) - 1.0f;
+    if (hf < 0.0f) hf = -hf;
+
+    float c = (1 - dl) * s;
+    float x = c * (1.0f - hf);
+    float m = l - (c / 2);
+
+    switch ((int)hs) {
+      case  0: red = c; green = x; blue = 0; break;
+      case  1: red = x; green = c; blue = 0; break;
+      case  2: red = 0; green = c; blue = x; break;
+      case  3: red = 0; green = x; blue = c; break;
+      case  4: red = x; green = 0; blue = c; break;
+      case  5: red = c; green = 0; blue = x; break;
+      default: red = 0; green = 0; blue = 0; break;
+    }
+
+    red += m;
+    green += m;
+    blue += m;
+  }
+
+  RGBColor rgb = {
+    .r = (int)(red * 255.0f),
+    .g = (int)(green * 255.0f),
+    .b = (int)(blue * 255.0f),
+  };
+
+  return rgb;
+}
+
+RGBColor
+hlsColorToRgb(HLSColor hls) {
+  return hlsToRgb(hls.h, hls.l, hls.s);
+}
+
 /* Return the name for the specified hue angle */
 const char *
 hsvHueName(float hue) {
@@ -729,6 +832,16 @@ rgbToDescription(char *buffer, size_t bufferSize, unsigned char r, unsigned char
 const char *
 rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color) {
   return rgbToDescription(buffer, bufferSize, color.r, color.g, color.b);
+}
+
+const char *
+hlsToDescription(char *buffer, size_t bufferSize, float h, float l, float s) {
+  return rgbColorToDescription(buffer, bufferSize, hlsToRgb(h, l, s));
+}
+
+const char *
+hlsColorToDescription(char *buffer, size_t bufferSize, HLSColor hls) {
+  return hlsToDescription(buffer, bufferSize, hls.h, hls.l, hls.s);
 }
 
 /* Convert ANSI 256-color code to RGB */
