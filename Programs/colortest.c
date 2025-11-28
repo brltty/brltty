@@ -925,6 +925,11 @@ static int
 performRequestedTests (void) {
   int allPassed = 1;
 
+  if (opt_quietness <= OPTQ_INFO) {
+    putNotice("BRLTTY Color Conversion Test Suite");
+    putf("\n");
+  }
+
   for (int i=0; i<requetableTestCount; i+=1) {
     const RequestableTest *test = &requetableTestTable[i];
 
@@ -949,6 +954,10 @@ performRequestedTests (void) {
     }
   }
 
+  if (opt_quietness <= OPTQ_INFO) {
+    putNotice("Tests Complete");
+  }
+
   return allPassed;
 }
 
@@ -969,24 +978,14 @@ main (int argc, char *argv[]) {
       }
 
       testRequested = 1;
+      break;
     }
   }
 
-  if (testRequested) {
-    if (opt_quietness <= OPTQ_INFO) {
-      putNotice("BRLTTY Color Conversion Test Suite");
-      putf("\n");
-    }
-
-    int allTestsPassed = performRequestedTests();
-
-    if (opt_quietness <= OPTQ_INFO) {
-      putNotice("Tests Complete");
-    }
-
-    if (!allTestsPassed) return PROG_EXIT_SEMANTIC;
-  } else {
+  if (!testRequested) {
     doInteractiveMode();
+  } else if (!performRequestedTests()) {
+    return PROG_EXIT_SEMANTIC;
   }
 
   return PROG_EXIT_SUCCESS;
