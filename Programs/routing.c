@@ -506,7 +506,7 @@ completeRouting(RoutingStatus status) {
   ctx->state = RS_COMPLETED;
 
   // Wake up the main loop to process the completion
-  brlttyInterrupt(1);
+  brlttyInterrupt(WAIT_CONTINUE);
 }
 
 static void
