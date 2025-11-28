@@ -61,7 +61,6 @@ typedef enum {
 } OptQuietness;
 
 static int opt_quietness;
-static int opt_enterInteractiveMode;
 static int opt_performAllTests;
 
 static int opt_testVGAtoRGBtoVGA;
@@ -76,12 +75,6 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .setting.flag = &opt_quietness,
     .flags = OPT_Extend,
     .description = "reduce verbosity - this option is cumulative",
-  },
-
-  { .word = "interactive-mode",
-    .letter = 'i',
-    .setting.flag = &opt_enterInteractiveMode,
-    .description = "enter interactive mode after performing the requested tests",
   },
 
   { .word = "all-tests",
@@ -126,7 +119,6 @@ END_COMMAND_LINE_PARAMETERS(programParameters)
 
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "The -a option may not be combined with any option that requests a specific test.",
-  "If neither -a is specified nor any specific test is requested then, unless -i has been specified, all of the tests are performed.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
@@ -788,16 +780,12 @@ getColorModel (const char *name) {
   return NULL;
 }
 
-/* Interactive color description test */
+#define QUIT_COMMAND "quit"
+static const ColorModel *defaultColorModel = colorModels;
+
 static void
-enterInteractiveMode (void) {
-  pushLogPrefix("ERROR");
-  const ColorModel *currentColorModel = colorModels;
-
-  putTestHeader("Interactive Color Test");
+showInteractiveHelp (void) {
   putf("Commands are not case-sensitive and may be abbreviated.\n");
-
-  #define QUIT_COMMAND "quit"
   putf("Use the \"" QUIT_COMMAND "\" command to exit this mode.\n");
 
   {
@@ -810,15 +798,25 @@ enterInteractiveMode (void) {
       if (i > 0) putf(",");
       if (i == last) putf(" and");
       putf(" %s", model->name);
-      if (model == currentColorModel) putf(" (the default)");
+      if (model == defaultColorModel) putf(" (the default)");
     }
 
-    putf(".\n");
+    putf("\n");
   }
 
   putf("To switch to another color model, enter its name with no additional arguments.\n");
   putf("If additional arguments follow the name then that color model is used.\n");
   putf("If only numeric arguments are specified then the current color model is used.\n");
+}
+
+/* Interactive color description test */
+static void
+doInteractiveMode (void) {
+  pushLogPrefix("ERROR");
+  const ColorModel *currentColorModel = defaultColorModel;
+
+  putTestHeader("Interactive Color Test");
+  if (opt_quietness <= OPTQ_INFO) showInteractiveHelp();
   putColorModelSyntax(currentColorModel);
 
   Queue *arguments = newQueue(NULL, NULL);
@@ -852,6 +850,11 @@ enterInteractiveMode (void) {
 
     if (isAbbreviation(QUIT_COMMAND, command)) {
       if (noMoreArguments(arguments)) break;
+    } else if (isAbbreviation("help", command)) {
+      if (noMoreArguments(arguments)) {
+        showInteractiveHelp();
+        putColorModelSyntax(currentColorModel);
+      }
     } else {
       const ColorModel *model = getColorModel(command);
 
@@ -917,37 +920,6 @@ static const RequestableTest requetableTestTable[] = {
 
 static const size_t requetableTestCount = ARRAY_COUNT(requetableTestTable);
 
-/* Audit the test options */
-static int
-auditTestOptions (void) {
-  int testRequested = 0;
-
-  for (int i=0; i<requetableTestCount; i+=1) {
-    const RequestableTest *test = &requetableTestTable[i];
-
-    if (*test->requested) {
-      if (opt_performAllTests) {
-        logMessage(LOG_ERR, "conflicting test options");
-        return 0;
-      }
-
-      testRequested = 1;
-      break;
-    }
-  }
-
-  if (!testRequested) {
-    if (opt_performAllTests || !opt_enterInteractiveMode) {
-      for (int i=0; i<requetableTestCount; i+=1) {
-        const RequestableTest *test = &requetableTestTable[i];
-        *test->requested = 1;
-      }
-    }
-  }
-
-  return 1;
-}
-
 /* perform the requested tests */
 static int
 performRequestedTests (void) {
@@ -985,27 +957,37 @@ int
 main (int argc, char *argv[]) {
   PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
-  if (!auditTestOptions()) {
-    return PROG_EXIT_SYNTAX;
+  int testRequested = 0;
+
+  for (int i=0; i<requetableTestCount; i+=1) {
+    const RequestableTest *test = &requetableTestTable[i];
+
+    if (*test->requested) {
+      if (opt_performAllTests) {
+        logMessage(LOG_ERR, "conflicting test options");
+        return PROG_EXIT_SYNTAX;
+      }
+
+      testRequested = 1;
+    }
   }
 
-  if (opt_quietness <= OPTQ_INFO) {
-    putNotice("BRLTTY Color Conversion Test Suite");
-    putf("\n");
+  if (testRequested) {
+    if (opt_quietness <= OPTQ_INFO) {
+      putNotice("BRLTTY Color Conversion Test Suite");
+      putf("\n");
+    }
+
+    int allTestsPassed = performRequestedTests();
+
+    if (opt_quietness <= OPTQ_INFO) {
+      putNotice("Tests Complete");
+    }
+
+    if (!allTestsPassed) return PROG_EXIT_SEMANTIC;
+  } else {
+    doInteractiveMode();
   }
 
-  int allTestsPassed = performRequestedTests();
-
-  /* Interactive mode if requested */
-  if (opt_enterInteractiveMode) {
-    enterInteractiveMode();
-  } else if (opt_quietness <= OPTQ_INFO) {
-    putf("Run with the -i flag for interactive mode.\n\n");
-  }
-
-  if (opt_quietness <= OPTQ_INFO) {
-    putNotice("Tests Complete");
-  }
-
-  return allTestsPassed? PROG_EXIT_SUCCESS: PROG_EXIT_SEMANTIC;
+  return PROG_EXIT_SUCCESS;
 }
