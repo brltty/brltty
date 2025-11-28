@@ -781,7 +781,7 @@ getColorModel (const char *name) {
 }
 
 #define QUIT_COMMAND "quit"
-static const ColorModel *defaultColorModel = colorModels;
+static const ColorModel *const defaultColorModel = colorModels;
 
 static void
 showInteractiveHelp (void) {
@@ -966,7 +966,7 @@ int
 main (int argc, char *argv[]) {
   PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
-  int testRequested = 0;
+  int testRequested = opt_performAllTests;
 
   for (int i=0; i<requetableTestCount; i+=1) {
     const RequestableTest *test = &requetableTestTable[i];
@@ -978,7 +978,8 @@ main (int argc, char *argv[]) {
       }
 
       testRequested = 1;
-      break;
+    } else if (opt_performAllTests) {
+      *test->requested = 1;
     }
   }
 
