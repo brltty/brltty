@@ -504,6 +504,17 @@ startTmuxControlMode(void) {
     close(pipeStdin[0]);
     close(pipeStdout[1]);
 
+#ifndef O_CLOEXEC
+    /* Close all other file descriptors inherited from BRLTTY
+     * (braille devices, log files, sockets, etc.).
+     * This is only needed if O_CLOEXEC is not available. */
+    long maxfd = sysconf(_SC_OPEN_MAX);
+    if (maxfd < 0) maxfd = 1024;  /* Fallback if sysconf fails */
+    for (int fd = 3; fd < maxfd; fd++) {
+      close(fd);  /* close() is async-signal-safe and ignores EBADF */
+    }
+#endif
+
     /* Build tmux command */
     if (sessionParameter) {
       if (socketParameter) {
