@@ -122,9 +122,9 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "If none of the tests are requested then interactive mode is entered.",
   "",
   "The -q option is cumulative.",
-  "Output verbosity is increasingly reduced each time it's specified as follows:",
+  "Output verbosity is increasingly reduced, each time it's specified, as follows:",
   "  1: Informational messages and initial interactive mode help.",
-  "  2: Test summaries and results that pass.",
+  "  2: Test objectives and results that pass.",
   "  3: Test results that pass but with a qualification.",
   "  4: Test results that fail.",
   "  5: Test summaries.",
@@ -895,38 +895,38 @@ doInteractiveMode (void) {
 
 typedef struct {
   const char *name;
-  const char *summary;
+  const char *objective;
   int *requested;
   int (*perform) (const char *testName);
 } RequestableTest;
 
 static const RequestableTest requetableTestTable[] = {
   { .name = "VGA to RGB to VGA Round-Trip Test",
-    .summary = "Verify the successful conversion of each VGA color to RGB and then back to VGA",
+    .objective = "Verify the successful conversion of each VGA color to RGB and then back to VGA",
     .requested = &opt_testVGAtoRGBtoVGA,
     .perform = testVGAtoRGBtoVGA,
   },
 
   { .name = "VGA Color Descriptions",
-    .summary = "List the name and HSV description of each VGA color",
+    .objective = "List the name and HSV description of each VGA color",
     .requested = &opt_testVGADescriptions,
     .perform = testVGADescriptions,
   },
 
   { .name = "RGB to HSV to RGB Round-Trip Test",
-    .summary = "Verify the successful conversion of some RGB colors to HSV and then back to RGB",
+    .objective = "Verify the successful conversion of some RGB colors to HSV and then back to RGB",
     .requested = &opt_testRGBtoHSVtoRGB,
     .perform = testRGBtoHSVtoRGB,
   },
 
   { .name = "Color Recognition Test",
-    .summary = "Verify the recognition of some common colors",
+    .objective = "Verify the recognition of some common colors",
     .requested = &opt_testColorRecognition,
     .perform = testColorRecognition,
   },
 
   { .name = "RGB to Nearest VGA Mappings",
-    .summary = "Show how some common colors are mapped to their nearest VGA colors",
+    .objective = "Show how some common colors are mapped to their nearest VGA colors",
     .requested = &opt_testRGBtoVGA,
     .perform = testRGBtoVGA,
   },
@@ -950,9 +950,9 @@ performRequestedTests (void) {
     if (*test->requested) {
       putTestHeader(test->name);
 
-      if (test->summary) {
+      if (test->objective) {
         if (opt_quietness <= OPTQ_PASS) {
-          putf("%s...\n\n", test->summary);
+          putf("%s...\n\n", test->objective);
         }
       }
 
