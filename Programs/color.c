@@ -698,21 +698,31 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
 
   if (hsv.s < 0.08f) {
     /* Achromatic - shades of gray */
-    STR_BEGIN(buffer, bufferSize);
+    const char *name;
 
-    if (hsv.v > 0.92f) {
-      STR_PRINTF("White");
+    if (hsv.v < 0.05f) {
+      name = "Black";
+    } else if (hsv.v < 0.1f) {
+      name = "Near-Black";
+    } else if (hsv.v < 0.2f) {
+      name = "Charcoal";
+    } else if (hsv.v < 0.4f) {
+      name = "Dark Gray";
+    } else if (hsv.v > 0.99f) {
+      name = "White";
+    } else if (hsv.v > 0.95f) {
+      name = "Near-White";
+    } else if (hsv.v > 0.9f) {
+      name = "Pearl";
+    } else if (hsv.v > 0.8f) {
+      name = "Ivory";
+    } else if (hsv.v > 0.6f) {
+      name = "Light Gray";
     } else {
-      if (hsv.v > 0.65f) {
-        STR_PRINTF("Light ");
-      } else if (hsv.v < 0.35f) {
-        STR_PRINTF("Dark ");
-      }
-
-      STR_PRINTF("Gray");
+      name = "Natural Gray";
     }
 
-    STR_END
+    snprintf(buffer, bufferSize, "%s", name);
     return buffer;
   }
 

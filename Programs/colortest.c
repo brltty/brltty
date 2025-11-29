@@ -347,7 +347,7 @@ testColorRecognition (const char *testName) {
 
     /* Grays */
     {"Light Gray",       200, 200, 200, "light gray", NULL, NULL},
-    {"Medium Gray",      128, 128, 128, "gray", NULL, NULL},
+    {"Medium Gray",      128, 128, 128, "natural gray", NULL, NULL},
     {"Dark Gray",        64,  64,  64,  "dark gray", NULL, NULL},
 
     /* Named colors - CSS/HTML color standard */
