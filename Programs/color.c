@@ -508,6 +508,48 @@ hlsColorToRgb(HLSColor hls) {
   return hlsToRgb(hls.h, hls.l, hls.s);
 }
 
+/* Return the name for the specified grayscale brightness */
+const char *
+hsvGrayName(float brightness) {
+  if (brightness < 0.05f) {
+    return "Black";
+  }
+
+  if (brightness < 0.1f) {
+    return "Near-Black";
+  }
+
+  if (brightness < 0.2f) {
+    return "Charcoal";
+  }
+
+  if (brightness < 0.4f) {
+    return "Dark Gray";
+  }
+
+  if (brightness > 0.99f) {
+    return "White";
+  }
+
+  if (brightness > 0.95f) {
+    return "Near-White";
+  }
+
+  if (brightness > 0.9f) {
+    return "Pearl";
+  }
+
+  if (brightness > 0.8f) {
+    return "Ivory";
+  }
+
+  if (brightness > 0.6f) {
+    return "Light Gray";
+  }
+
+  return "Natural Gray";
+}
+
 /* Return the name for the specified hue angle */
 const char *
 hsvHueName(float hue) {
@@ -698,31 +740,7 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
 
   if (hsv.s < 0.08f) {
     /* Achromatic - shades of gray */
-    const char *name;
-
-    if (hsv.v < 0.05f) {
-      name = "Black";
-    } else if (hsv.v < 0.1f) {
-      name = "Near-Black";
-    } else if (hsv.v < 0.2f) {
-      name = "Charcoal";
-    } else if (hsv.v < 0.4f) {
-      name = "Dark Gray";
-    } else if (hsv.v > 0.99f) {
-      name = "White";
-    } else if (hsv.v > 0.95f) {
-      name = "Near-White";
-    } else if (hsv.v > 0.9f) {
-      name = "Pearl";
-    } else if (hsv.v > 0.8f) {
-      name = "Ivory";
-    } else if (hsv.v > 0.6f) {
-      name = "Light Gray";
-    } else {
-      name = "Natural Gray";
-    }
-
-    snprintf(buffer, bufferSize, "%s", name);
+    snprintf(buffer, bufferSize, "%s", hsvGrayName(hsv.v));
     return buffer;
   }
 

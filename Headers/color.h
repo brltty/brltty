@@ -94,6 +94,9 @@ typedef struct {
   unsigned char isHighest:1;
 } HSVModifier;
 
+/* Return the name for the specified grayscale brightness */
+extern const char *hsvGrayName(float brightness);
+
 /* Return the name for the specified hue angle */
 extern const char *hsvHueName(float hue);
 
