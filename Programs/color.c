@@ -681,8 +681,8 @@ const HSVModifier *
 hsvBrightnessModifier (float brightness) {
   if (brightness < 0.2f) {
     static const HSVModifier modifier = {
-      .name = "Faded",
-      .comment = "almost black, very little light",
+      .name = "Obscure",
+      .comment = "very little light, almost black",
       .isLowest = 1,
     };
 
@@ -692,7 +692,7 @@ hsvBrightnessModifier (float brightness) {
   if (brightness < 0.4f) {
     static const HSVModifier modifier = {
       .name = "Dark",
-      .comment = "low light, shades are deep",
+      .comment = "low light, visible but subdued",
     };
 
     return &modifier;
@@ -701,7 +701,7 @@ hsvBrightnessModifier (float brightness) {
   if (brightness > 0.85f) {
     static const HSVModifier modifier = {
       .name = "Bright",
-      .comment = "almost white, very bright and clear",
+      .comment = "lots of light, vivid and fully illuminated",
       .isHighest = 1,
     };
 
@@ -711,7 +711,7 @@ hsvBrightnessModifier (float brightness) {
   if (brightness > 0.7f) {
     static const HSVModifier modifier = {
       .name = "Light",
-      .comment = "high light level, easily visible",
+      .comment = "high light, clear and easily distinguishable",
     };
 
     return &modifier;
@@ -720,7 +720,7 @@ hsvBrightnessModifier (float brightness) {
   {
     static const HSVModifier modifier = {
       .name = "Medium",
-      .comment = "balanced light, clear but not bright",
+      .comment = "neutral, visible but not prominent",
       .isOptional = 1,
     };
 
