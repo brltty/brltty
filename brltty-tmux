@@ -36,7 +36,8 @@ processExtraProgramParameters() {
    readonly programParameters=("${@}")
 }
 
-addProgramOption s flag useSudo "use sudo to execute brltty as root"
+addProgramOption s flag optSudo "use sudo to execute brltty as root"
+addProgramOption c flag optContinue "continue as non-root if sudo fails"
 optionalProgramParameters "argument" "additional options passed through to brltty"
 parseProgramArguments "${@}"
 
@@ -46,10 +47,15 @@ tmuxSocket="${TMUX}"
 if [ "$(id -u)" -eq 0 ]
 then
    export CONTROLVT="$(fgconsole)"
-elif "${useSudo}"
+elif "${optSudo}"
 then
-   exec sudo --preserve-env=TMUX -- "${programDirectory}/${programName}" "${programArguments[@]}"
-   exit "${?}"
+   sudo --validate && {
+      exec sudo --preserve-env=TMUX -- "${programDirectory}/${programName}" "${programArguments[@]}"
+      exit "${?}"
+   }
+
+   "${optContinue}" || exit 9
+   logWarning "continuing - executing brltty as \"$(id -u -n)\""
 fi
 
 brailleDriver=ba # BrlAPI
