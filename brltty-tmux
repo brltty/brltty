@@ -36,14 +36,24 @@ processExtraProgramParameters() {
    readonly programParameters=("${@}")
 }
 
+addProgramOption s flag useSudo "use sudo to execute brltty as root"
 optionalProgramParameters "argument" "additional options passed through to brltty"
 parseProgramArguments "${@}"
 
-brailleDriver=ba # BrlAPI
-screenDriver=tx # Tmux
-
 tmuxSocket="${TMUX}"
 [ -n "${tmuxSocket}" ] || semanticError "not using tmux"
+
+if [ "$(id -u)" -eq 0 ]
+then
+   export CONTROLVT="$(fgconsole)"
+elif "${useSudo}"
+then
+   exec sudo --preserve-env=TMUX -- "${programDirectory}/${programName}" "${programArguments[@]}"
+   exit "${?}"
+fi
+
+brailleDriver=ba # BrlAPI
+screenDriver=tx # Tmux
 
 brlttyOptions=(
   "--braille-driver=${brailleDriver}"
@@ -51,13 +61,6 @@ brlttyOptions=(
   "--screen-parameters=${screenDriver}:socket=${tmuxSocket}"
 )
 
-[ "$(id -u)" -eq 0 ] || {
-   exec sudo --preserve-env=TMUX -- "${programDirectory}/${programName}" "${programArguments[@]}"
-   exit "${?}"
-}
-
-export CONTROLVT="$(fgconsole)"
-
 findSiblingCommand brlttyPath brltty run-brltty || semanticError "brltty not found"
-"${brlttyPath}" "${brlttyOptions[@]}" "${programParameters[@]}"
-exit 0
+exec "${brlttyPath}" "${brlttyOptions[@]}" "${programParameters[@]}"
+exit "${?}"
