@@ -770,6 +770,10 @@
 #screen-parameters em:Shell=command # [$SHELL]
 #screen-parameters em:User=name/number # []
 
+# Tmux Screen Driver Parameters
+#screen-parameters tx:Session=name #
+#screen-parameters tx:Socket=path #
+#
 # Windows Screen Driver Parameters
 #screen-parameters wn:Root=no # [no,yes]
 #screen-parameters wn:FollowFocus=yes # [yes,no]
