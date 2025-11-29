@@ -586,11 +586,20 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
+  if (saturation >= 1.0f) {
+    static const HSVModifier modifier = {
+      .name = "Pure",
+      .comment = "absolute, undiluted",
+      .isHighest = 1,
+    };
+
+    return &modifier;
+  }
+
   if (saturation > 0.95f) {
     static const HSVModifier modifier = {
       .name = "Rich",
       .comment = "deep and full-bodied",
-      .isHighest = 1,
     };
 
     return &modifier;

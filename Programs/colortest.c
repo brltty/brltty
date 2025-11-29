@@ -56,7 +56,7 @@ typedef enum {
    OPTQ_PASS,
    OPTQ_WARN,
    OPTQ_FAIL,
-   OPTQ_RESULT,
+   OPTQ_SUMMARY,
    OPTQ_TEST,
 } OptQuietness;
 
@@ -120,6 +120,15 @@ END_COMMAND_LINE_PARAMETERS(programParameters)
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "The -a option may not be combined with any option that requests a specific test.",
   "If none of the tests are requested then interactive mode is entered.",
+  "",
+  "The -q option is cumulative.",
+  "Output verbosity is increasingly reduced each time it's specified as follows:",
+  "  1: Informational messages and initial interactive mode help.",
+  "  2: Test summaries and results that pass.",
+  "  3: Test results that pass but with a qualification.",
+  "  4: Test results that fail.",
+  "  5: Test summaries.",
+  "  6: Test headers, test status, and color model syntax (interactive mode).",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
@@ -199,7 +208,7 @@ putTestResult (const char *name, int count, int passes) {
   int hasPassed = passes == count;
 
   if (!hasPassed) {
-    if (opt_quietness <= OPTQ_RESULT) {
+    if (opt_quietness <= OPTQ_SUMMARY) {
       putf("%d/%d tests failed\n", (count - passes), count);
     }
   }
@@ -364,11 +373,11 @@ testColorRecognition (const char *testName) {
 
     /* Light blue (173,216,230) has H=197° which is in the cyan range (180-210°).
      * "light cyan" is actually more accurate than "light blue" based on HSV analysis. */
-    {"Light Blue",       173, 216, 230, "light blue", "bright soft cyan",
+    {"Light Blue",       173, 216, 230, "light blue", "bright pale cyan",
      "H=197° is in cyan range; HSV analysis gives more accurate result"},
 
     {"Dark Green",       0,   100, 0,   "dark pure green", NULL, NULL},
-    {"Light Green",      144, 238, 144, "bright soft green", NULL, NULL},
+    {"Light Green",      144, 238, 144, "bright weak green", NULL, NULL},
   };
 
   const int testCount = ARRAY_COUNT(tests);
@@ -942,7 +951,7 @@ performRequestedTests (void) {
       putTestHeader(test->name);
 
       if (test->summary) {
-        if (opt_quietness <= OPTQ_INFO) {
+        if (opt_quietness <= OPTQ_PASS) {
           putf("%s...\n\n", test->summary);
         }
       }
