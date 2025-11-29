@@ -41,8 +41,9 @@ addProgramOption c flag optContinue "continue as non-root if sudo fails"
 optionalProgramParameters "argument" "additional options passed through to brltty"
 parseProgramArguments "${@}"
 
-tmuxSocket="${TMUX}"
-[ -n "${tmuxSocket}" ] || semanticError "not using tmux"
+tmuxSocketVariable=TMUX
+tmuxSocketPath="${!tmuxSocketVariable}"
+[ -n "${tmuxSocketPath}" ] || semanticError "not using tmux"
 
 if [ "$(id -u)" -eq 0 ]
 then
@@ -50,7 +51,7 @@ then
 elif "${optSudo}"
 then
    sudo --validate && {
-      exec sudo --preserve-env=TMUX -- "${programDirectory}/${programName}" "${programArguments[@]}"
+      exec sudo --non-interactive --preserve-env="${tmuxSocketVariable}" -- "${programDirectory}/${programName}" "${programArguments[@]}"
       exit "${?}"
    }
 
@@ -62,9 +63,10 @@ brailleDriver=ba # BrlAPI
 screenDriver=tx # Tmux
 
 brlttyOptions=(
+  "--quiet"
   "--braille-driver=${brailleDriver}"
   "--screen-driver=${screenDriver}"
-  "--screen-parameters=${screenDriver}:socket=${tmuxSocket}"
+  "--screen-parameters=${screenDriver}:socket=${tmuxSocketPath}"
 )
 
 findSiblingCommand brlttyPath brltty run-brltty || semanticError "brltty not found"
