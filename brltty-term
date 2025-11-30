@@ -108,7 +108,7 @@ addScreenParameter group "${currentGroup}"
 addScreenParameter directory "${PWD}"
 addScreenParameter home "${HOME}"
 
-findSiblingBrltty brlttyPath
+needSiblingBrltty brlttyPath
 SUDO="sudo --bell --preserve-env --preserve-env=USER,LOGNAME --"
 [ -u "${brlttyPath}" ] && SUDO=""
 [ "${currentUser}" -eq 0 ] && SUDO=""
