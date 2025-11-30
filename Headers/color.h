@@ -86,6 +86,12 @@ extern RGBColor hlsColorToRgb(HLSColor hls);
  */
 extern const char *vgaColorName (int vga);
 
+/* Return the name of the color for the specified grayscale brightness */
+extern const char *hsvGrayColorName(float brightness);
+
+/* Return the name of the color for the specified hue angle */
+extern const char *hsvHueColorName(float hue);
+
 typedef struct {
   const char *name;
   const char *comment;
@@ -93,12 +99,6 @@ typedef struct {
   unsigned char isLowest:1;
   unsigned char isHighest:1;
 } HSVModifier;
-
-/* Return the name for the specified grayscale brightness */
-extern const char *hsvGrayName(float brightness);
-
-/* Return the name for the specified hue angle */
-extern const char *hsvHueName(float hue);
 
 /* Return the HSV modifier for the specified saturation leel */
 extern const HSVModifier *hsvSaturationModifier (float saturation);
