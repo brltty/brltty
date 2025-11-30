@@ -38,7 +38,7 @@ processExtraProgramParameters() {
 
 addProgramOption s flag optSudo "use sudo to execute brltty as root"
 addProgramOption c flag optContinue "continue as non-root if sudo fails"
-optionalProgramParameters "argument" "additional options passed through to brltty"
+optionalProgramParameters "-brltty" "arguments after -- are options passed through to brltty"
 parseProgramArguments "${@}"
 
 tmuxSocketVariable=TMUX
@@ -47,7 +47,7 @@ tmuxSocketPath="${!tmuxSocketVariable}"
 
 if [ "$(id -u)" -eq 0 ]
 then
-   export CONTROLVT="$(fgconsole)"
+   export WINDOWPATH="$(fgconsole)"
 elif "${optSudo}"
 then
    sudo --validate && {
@@ -69,11 +69,12 @@ screenDriver=tx # Tmux
 
 brlttyOptions=(
    --quiet
+   --no-api
    --braille-driver="${brailleDriver}"
    --screen-driver="${screenDriver}"
    --screen-parameters="${screenDriver}:socket=${tmuxSocketPath}"
 )
 
-findSiblingBrltty brlttyPath
+needSiblingBrltty brlttyPath
 exec "${brlttyPath}" "${brlttyOptions[@]}" "${programParameters[@]}" 2>/dev/null
 exit "${?}"
