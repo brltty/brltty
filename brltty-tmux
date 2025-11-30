@@ -51,7 +51,7 @@ then
 elif "${optSudo}"
 then
    sudo --validate && {
-      exec sudo --non-interactive --preserve-env="${tmuxSocketVariable}" -- "${programDirectory}/${programName}" "${programArguments[@]}"
+      exec sudo --non-interactive --preserve-env="${tmuxSocketVariable}" -- "${programPath}" "${programArguments[@]}"
       exit "${?}"
    }
 

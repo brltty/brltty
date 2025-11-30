@@ -150,6 +150,7 @@ resolveDirectory() {
 
 programDirectory="$(dirname "${0}")"
 readonly programDirectory="$(resolveDirectory "${programDirectory}")"
+readonly programPath="${programDirectory}/${programName}"
 
 parseParameterString() {
    local valuesArray="${1}"
