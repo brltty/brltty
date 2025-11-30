@@ -510,7 +510,7 @@ hlsColorToRgb(HLSColor hls) {
 
 /* Return the name of the color for the specified grayscale brightness */
 const char *
-hsvGrayColorName(float brightness) {
+gsColorName(float brightness) {
   if (brightness < 0.05f) {
     return "Black";
   }
@@ -535,10 +535,6 @@ hsvGrayColorName(float brightness) {
     return "Near-White";
   }
 
-  if (brightness > 0.9f) {
-    return "Pearl";
-  }
-
   if (brightness > 0.8f) {
     return "Ivory";
   }
@@ -552,7 +548,7 @@ hsvGrayColorName(float brightness) {
 
 /* Return the name of the color for the specified hue angle */
 const char *
-hsvHueColorName(float hue) {
+hueColorName(float hue) {
   /* Hue ranges (degrees):
    * Red: 0-15, 345-360 (30° total, wraps around 0°)
    * Orange: 15-45
@@ -740,7 +736,7 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
 
   if (hsv.s < 0.08f) {
     /* Achromatic - shades of gray */
-    snprintf(buffer, bufferSize, "%s", hsvGrayColorName(hsv.v));
+    snprintf(buffer, bufferSize, "%s", gsColorName(hsv.v));
     return buffer;
   }
 
@@ -841,7 +837,7 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
   }
 
   { /* Combine modifiers and hue name */
-    const char *hue = hsvHueColorName(hsv.h);
+    const char *hue = hueColorName(hsv.h);
     const HSVModifier *saturation = hsvSaturationModifier(hsv.s);
     const HSVModifier *brightness = hsvBrightnessModifier(hsv.v);
 

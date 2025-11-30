@@ -87,10 +87,10 @@ extern RGBColor hlsColorToRgb(HLSColor hls);
 extern const char *vgaColorName (int vga);
 
 /* Return the name of the color for the specified grayscale brightness */
-extern const char *hsvGrayColorName(float brightness);
+extern const char *gsColorName(float brightness);
 
 /* Return the name of the color for the specified hue angle */
-extern const char *hsvHueColorName(float hue);
+extern const char *hueColorName(float hue);
 
 typedef struct {
   const char *name;

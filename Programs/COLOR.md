@@ -338,10 +338,10 @@ Convenience wrapper for `hsvNormalize()` that accepts an HSVColor structure poin
 
 ### HSV Analysis Functions
 
-#### hsvHueColorName
+#### hueColorName
 
 ```c
-const char *hsvHueColorName(float hue);
+const char *hueColorName(float hue);
 ```
 
 Returns the name for the specified hue angle.
