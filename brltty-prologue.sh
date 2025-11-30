@@ -314,6 +314,19 @@ findSiblingCommand() {
    return 1
 }
 
+findSiblingBrltty() {
+   local -n _path="${1}"
+   local _continue="${2:-false}"
+
+   findSiblingCommand _path brltty run-brltty || {
+      "${_continue}" || semanticError "brltty not found"
+      setVariable _path ""
+      return 1
+   }
+
+   return 0
+}
+
 findHostCommand() {
    local pathVariable="${1}"
    local command="${2}"

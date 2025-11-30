@@ -81,10 +81,6 @@ shellCommand=""
 [ -t 0 ] || semanticError "standard input isn't a terminal"
 [ -t 1 ] || semanticError "standard output isn't a terminal"
 
-findSiblingCommand brlttyPath brltty run-brltty || {
-   semanticError "brltty not found"
-}
-
 [ -n "${shellCommand}" ] || shellCommand="${BRLTTY_TERM_SHELL}"
 [ -n "${shellCommand}" ] || shellCommand="${SHELL}"
 [ -n "${shellCommand}" ] || shellCommand="sh"
@@ -112,6 +108,7 @@ addScreenParameter group "${currentGroup}"
 addScreenParameter directory "${PWD}"
 addScreenParameter home "${HOME}"
 
+findSiblingBrltty brlttyPath
 SUDO="sudo --bell --preserve-env --preserve-env=USER,LOGNAME --"
 [ -u "${brlttyPath}" ] && SUDO=""
 [ "${currentUser}" -eq 0 ] && SUDO=""

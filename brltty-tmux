@@ -69,6 +69,6 @@ brlttyOptions=(
   "--screen-parameters=${screenDriver}:socket=${tmuxSocketPath}"
 )
 
-findSiblingCommand brlttyPath brltty run-brltty || semanticError "brltty not found"
+findSiblingBrltty brlttyPath
 exec "${brlttyPath}" "${brlttyOptions[@]}" "${programParameters[@]}"
 exit "${?}"
