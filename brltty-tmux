@@ -51,7 +51,12 @@ then
 elif "${optSudo}"
 then
    sudo --validate && {
-      exec sudo --non-interactive --preserve-env="${tmuxSocketVariable}" -- "${programPath}" "${programArguments[@]}"
+      sudoOptions=(
+         --non-interactive
+         --preserve-env="${tmuxSocketVariable}"
+      )
+
+      exec sudo "${sudoOptions[@]}" -- "${programPath}" "${programArguments[@]}"
       exit "${?}"
    }
 
@@ -63,12 +68,12 @@ brailleDriver=ba # BrlAPI
 screenDriver=tx # Tmux
 
 brlttyOptions=(
-  "--quiet"
-  "--braille-driver=${brailleDriver}"
-  "--screen-driver=${screenDriver}"
-  "--screen-parameters=${screenDriver}:socket=${tmuxSocketPath}"
+   --quiet
+   --braille-driver="${brailleDriver}"
+   --screen-driver="${screenDriver}"
+   --screen-parameters="${screenDriver}:socket=${tmuxSocketPath}"
 )
 
 findSiblingBrltty brlttyPath
-exec "${brlttyPath}" "${brlttyOptions[@]}" "${programParameters[@]}"
+exec "${brlttyPath}" "${brlttyOptions[@]}" "${programParameters[@]}" 2>/dev/null
 exit "${?}"
