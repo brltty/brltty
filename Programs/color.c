@@ -565,7 +565,7 @@ hueColorName(float hue) {
    * Red-Magenta: 315-345
    */
 
-  static const char *const hueNames[] = {
+  static const char *const colorNames[] = {
     /*   0° */ "Red",
     /*  30° */ "Orange",
     /*  60° */ "Yellow",
@@ -582,7 +582,7 @@ hueColorName(float hue) {
 
   hue += 15.0f;
   hsvNormalize(&hue, NULL, NULL);
-  return hueNames[(int)hue / 30];
+  return colorNames[(int)hue / 30];
 }
 
 /* Return the HSV modifier for the specified saturation leel */
@@ -727,108 +727,126 @@ hsvBrightnessModifier (float brightness) {
 
 const HSVColorEntry hsvColorTable[] = {
   { .name = "Olive",
+    .comment = "dark yellow-green",
     .hue = {.minimum=55.0f, .maximum=65.0f},
     .saturation = {.minimum=0.5f, .maximum=0.7f},
     .value = {.minimum=0.3f, .maximum=0.5f},
   },
 
   { .name = "Dark Brown",
+    .comment = "dark orange/yellow with low brightness",
     .hue = {.minimum=20.0f, .maximum=30.0f},
     .saturation = {.minimum=0.7f, .maximum=1.0f},
     .value = {.minimum=0.2f, .maximum=0.3f},
   },
 
   { .name = "Brown",
+    .comment = "dark orange/yellow with low brightness",
     .hue = {.minimum=20.0f, .maximum=30.0f},
     .saturation = {.minimum=0.7f, .maximum=1.0f},
     .value = {.minimum=0.3f, .maximum=0.5f},
   },
 
   { .name = "Beige",
+    .comment = "very desaturated brown/orange",
     .hue = {.minimum=30.0f, .maximum=50.0f},
     .saturation = {.minimum=0.1f, .maximum=0.3f},
     .value = {.minimum=0.7f, .maximum=0.9f},
   },
 
   { .name = "Tan",
+    .comment = "very desaturated brown/orange",
     .hue = {.minimum=30.0f, .maximum=40.0f},
     .saturation = {.minimum=0.2f, .maximum=0.4f},
     .value = {.minimum=0.7f, .maximum=0.8f},
   },
 
   { .name = "Light Pink",
+    .comment = "light/desaturated red",
     .hue = {.minimum=330.0f, .maximum=350.0f},
     .saturation = {.minimum=0.2f, .maximum=0.4f},
     .value = {.minimum=0.8f, .maximum=1.0f},
   },
 
   { .name = "Pink",
+    .comment = "light/desaturated red",
     .hue = {.minimum=330.0f, .maximum=350.0f},
     .saturation = {.minimum=0.4f, .maximum=0.6f},
     .value = {.minimum=0.8f, .maximum=1.0f},
   },
 
   { .name = "Coral",
+    .comment = "orangish-pink",
     .hue = {.minimum=0.0f, .maximum=10.0f},
     .saturation = {.minimum=0.5f, .maximum=0.7f},
     .value = {.minimum=0.8f, .maximum=1.0f},
   },
 
   { .name = "Lime",
+    .comment = "bright yellow-green",
     .hue = {.minimum=70.0f, .maximum=90.0f},
     .saturation = {.minimum=0.8f, .maximum=1.0f},
     .value = {.minimum=0.7f, .maximum=1.0f},
   },
 
   { .name = "Dark Teal",
+    .comment = "cyan with moderate saturation and value",
     .hue = {.minimum=170.0f, .maximum=190.0f},
     .saturation = {.minimum=0.5f, .maximum=0.7f},
     .value = {.minimum=0.3f, .maximum=0.5f},
   },
 
   { .name = "Teal",
+    .comment = "cyan with moderate saturation and value",
     .hue = {.minimum=170.0f, .maximum=190.0f},
     .saturation = {.minimum=0.5f, .maximum=0.7f},
     .value = {.minimum=0.5f, .maximum=0.7f},
   },
 
   { .name = "Turquoise",
+    .comment = "bright cyan",
     .hue = {.minimum=170.0f, .maximum=190.0f},
     .saturation = {.minimum=0.5f, .maximum=0.7f},
     .value = {.minimum=0.7f, .maximum=0.9f},
   },
 
   { .name = "Maroon",
+    .comment = "very dark red",
     .hue = {.minimum=0.0f, .maximum=10.0f},
     .saturation = {.minimum=0.7f, .maximum=1.0f},
     .value = {.minimum=0.2f, .maximum=0.3f},
   },
 
   { .name = "Navy",
+    .comment = "very dark blue",
     .hue = {.minimum=210.0f, .maximum=240.0f},
     .saturation = {.minimum=0.8f, .maximum=1.0f},
     .value = {.minimum=0.3f, .maximum=0.5f},
   },
 
   { .name = "Indigo",
+    .comment = "between blue and violet",
     .hue = {.minimum=250.0f, .maximum=270.0f},
     .saturation = {.minimum=0.5f, .maximum=0.7f},
     .value = {.minimum=0.3f, .maximum=0.5f},
   },
 
   { .name = "Lavender",
+    .comment = "pale violet/magenta",
     .hue = {.minimum=260.0f, .maximum=280.0f},
     .saturation = {.minimum=0.3f, .maximum=0.5f},
     .value = {.minimum=0.8f, .maximum=1.0f},
   },
 
   { .name = "Gold",
+    .comment = "saturated yellow with orange tint",
     .hue = {.minimum=40.0f, .maximum=50.0f},
     .saturation = {.minimum=0.7f, .maximum=1.0f},
     .value = {.minimum=0.7f, .maximum=0.9f},
   },
 
   { .name = "Purple",
+    .comment = "darker mix of less red and more blue",
     .hue = {.minimum=270.0f, .maximum=290.0f},
     .saturation = {.minimum=0.8f, .maximum=1.0f},
     .value = {.minimum=0.5f, .maximum=0.7f},
@@ -975,7 +993,7 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
     return buffer;
   }
 
-  { /* Combine modifiers and hue name */
+  { /* Combine modifiers and hue color */
     const char *hue = hueColorName(hsv.h);
     const HSVModifier *saturation = hsvSaturationModifier(hsv.s);
     const HSVModifier *brightness = hsvBrightnessModifier(hsv.v);

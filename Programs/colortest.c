@@ -858,7 +858,7 @@ cmdGrayscale (Queue *arguments) {
 }
 
 static int
-cmdHues (Queue *arguments) {
+cmdHue (Queue *arguments) {
   if (isEmptyQueue(arguments)) {
     typedef struct {
       const char *color;
@@ -1020,7 +1020,7 @@ sortHSVColorEntries (const void *item1, const void *item2) {
 static void
 showHSVColorEntry (const HSVColorEntry *color) {
   putf(
-    "%s%s: Hue:%.0f°-%.0f° Saturatinn:%.0f%%-%.0f%% Value:%.0f%%-%.0f%%\n",
+    "%s%s: Hue:%.0f°-%.0f° Sat:%.0f%%-%.0f%% Val:%.0f%%-%.0f%%\n",
     blockIndent, color->name,
     color->hue.minimum, color->hue.maximum,
     color->saturation.minimum*100.0f, color->saturation.maximum*100.0f,
@@ -1129,9 +1129,9 @@ static const CommandEntry commandTable[] = {
     .handler = cmdGrayscale,
   },
 
-  { .name = "hues",
+  { .name = "hue",
     .help = "List the hue colors.",
-    .handler = cmdHues,
+    .handler = cmdHue,
   },
 
   { .name = "overlaps",
