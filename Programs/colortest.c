@@ -464,6 +464,10 @@ testRGBtoVGA (const char *testName) {
 }
 
 static const char blockIndent[] = "  ";
+static const char grayName[] = "grayscale percent";
+static const char hueName[] = "hue angle";
+static const char saturationName[] = "saturation percent";
+static const char brightnessName[] = "brightness percent";
 
 static void
 showColor (RGBColor rgb, HSVColor hsv) {
@@ -641,15 +645,12 @@ rgbHandler (Queue *arguments) {
 
 static int
 hsvHandler (Queue *arguments) {
-  const char *hueName = "hue angle";
   const char *hueArgument;
   float hueAngle;
 
-  const char *saturationName = "saturation percent";
   const char *saturationArgument;
   float saturationLevel;
 
-  const char *brightnessName = "brightness percent";
   const char *brightnessArgument;
   float brightnessLevel;
 
@@ -797,7 +798,7 @@ getColorModel (const char *name) {
 
 static int
 cmdGrayscale (Queue *arguments) {
-  if (noMoreArguments(arguments)) {
+  if (isEmptyQueue(arguments)) {
     typedef struct {
       const char *color;
       unsigned char from;
@@ -838,12 +839,27 @@ cmdGrayscale (Queue *arguments) {
     return 1;
   }
 
+  {
+    const char *argument = getNextArgument(arguments, grayName);
+
+    if (argument) {
+      if (noMoreArguments(arguments)) {
+        float level;
+
+        if (parsePercent(&level, argument, grayName)) {
+          putf("%s%s\n", blockIndent, gsColorName(level));
+          return 1;
+        }
+      }
+    }
+  }
+
   return 0;
 }
 
 static int
 cmdHues (Queue *arguments) {
-  if (noMoreArguments(arguments)) {
+  if (isEmptyQueue(arguments)) {
     typedef struct {
       const char *color;
       unsigned int from;
@@ -884,101 +900,19 @@ cmdHues (Queue *arguments) {
     return 1;
   }
 
-  return 0;
-}
-
-static int
-sortHSVColorEntries (const void *item1, const void *item2) {
-  const HSVColorEntry *const *color1 = item1;
-  const HSVColorEntry *const *color2 = item2;
-  return strcasecmp((*color1)->name, (*color2)->name);
-}
-
-static void
-showHSVColorEntry (const HSVColorEntry *color) {
-  putf(
-    "%s%s: Hue:%.0f°-%.0f° Saturatinn:%.0f%%-%.0f%% Value:%.0f%%-%.0f%%\n",
-    blockIndent, color->name,
-    color->hue.minimum, color->hue.maximum,
-    color->saturation.minimum*100.0f, color->saturation.maximum*100.0f,
-    color->value.minimum*100.0f, color->value.maximum*100.0f
-  );
-}
-
-static int
-cmdColors (Queue *arguments) {
-  const HSVColorEntry *sorted[hsvColorCount];
-
   {
-    for (int i=0; i<hsvColorCount; i+=1) {
-      sorted[i] = &hsvColorTable[i];
-    }
+    const char *argument = getNextArgument(arguments, hueName);
 
-    qsort(sorted, hsvColorCount, sizeof(sorted[0]), sortHSVColorEntries);
-  }
-
-  if (isEmptyQueue(arguments)) {
-
-    for (int i=0; i<hsvColorCount; i+=1) {
-      showHSVColorEntry(sorted[i]);
-    }
-
-    return 1;
-  }
-
-  {
-    const char *name = getNextArgument(arguments, "color name");
-
-    if (name) {
+    if (argument) {
       if (noMoreArguments(arguments)) {
-        int found = 0;
+        float angle;
 
-        for (int i=0; i<hsvColorCount; i+=1) {
-          const HSVColorEntry *color = sorted[i];
-
-          if (isAbbreviation(color->name, name)) {
-            showHSVColorEntry(color);
-            found = 1;
-          }
-        }
-
-        if (found) return 1;
-        logMessage(LOG_WARNING, "color not found");
-      }
-    }
-  }
-
-  return 0;
-}
-
-static inline int
-hsvRangesOverlap (const HSVComponentRange *range1, const HSVComponentRange *range2) {
-  return (range2->minimum <= range1->maximum) &&
-         (range2->maximum >= range1->minimum);
-}
-
-static int
-cmdOverlaps (Queue *arguments) {
-  if (noMoreArguments(arguments)) {
-    for (int i=0; i<hsvColorCount; i+=1) {
-      const HSVColorEntry *color1 = &hsvColorTable[i];
-
-      for (int j=i+1; j<hsvColorCount; j+=1) {
-        const HSVColorEntry *color2 = &hsvColorTable[j];
-        int huesOverlap = hsvRangesOverlap(&color1->hue, &color2->hue);
-        int saturationsOverlap = hsvRangesOverlap(&color1->saturation, &color2->saturation);
-        int valuesOverlap = hsvRangesOverlap(&color1->value, &color2->value);
-
-        if (huesOverlap && saturationsOverlap && valuesOverlap) {
-          putf(
-            "%s%s & %s\n",
-            blockIndent, color1->name, color2->name
-          );
+        if (parseDegrees(&angle, argument, hueName)) {
+          putf("%s%s\n", blockIndent, hueColorName(angle));
+          return 1;
         }
       }
     }
-
-    return 1;
   }
 
   return 0;
@@ -1028,9 +962,24 @@ hsvListModifiers (const HSVModifier *(*getModifier) (float level)) {
 
 static int
 cmdSaturation (Queue *arguments) {
-  if (noMoreArguments(arguments)) {
+  if (isEmptyQueue(arguments)) {
     hsvListModifiers(hsvSaturationModifier);
     return 1;
+  }
+
+  {
+    const char *argument = getNextArgument(arguments, saturationName);
+
+    if (argument) {
+      if (noMoreArguments(arguments)) {
+        float level;
+
+        if (parsePercent(&level, argument, saturationName)) {
+          putf("%s%s\n", blockIndent, hsvSaturationModifier(level)->name);
+          return 1;
+        }
+      }
+    }
   }
 
   return 0;
@@ -1038,8 +987,120 @@ cmdSaturation (Queue *arguments) {
 
 static int
 cmdBrightness (Queue *arguments) {
-  if (noMoreArguments(arguments)) {
+  if (isEmptyQueue(arguments)) {
     hsvListModifiers(hsvBrightnessModifier);
+    return 1;
+  }
+
+  {
+    const char *argument = getNextArgument(arguments, brightnessName);
+
+    if (argument) {
+      if (noMoreArguments(arguments)) {
+        float level;
+
+        if (parsePercent(&level, argument, brightnessName)) {
+          putf("%s%s\n", blockIndent, hsvBrightnessModifier(level)->name);
+          return 1;
+        }
+      }
+    }
+  }
+
+  return 0;
+}
+
+static int
+sortHSVColorEntries (const void *item1, const void *item2) {
+  const HSVColorEntry *const *color1 = item1;
+  const HSVColorEntry *const *color2 = item2;
+  return strcasecmp((*color1)->name, (*color2)->name);
+}
+
+static void
+showHSVColorEntry (const HSVColorEntry *color) {
+  putf(
+    "%s%s: Hue:%.0f°-%.0f° Saturatinn:%.0f%%-%.0f%% Value:%.0f%%-%.0f%%\n",
+    blockIndent, color->name,
+    color->hue.minimum, color->hue.maximum,
+    color->saturation.minimum*100.0f, color->saturation.maximum*100.0f,
+    color->value.minimum*100.0f, color->value.maximum*100.0f
+  );
+}
+
+static int
+cmdColors (Queue *arguments) {
+  const HSVColorEntry *colors[hsvColorCount];
+
+  {
+    for (int i=0; i<hsvColorCount; i+=1) {
+      colors[i] = &hsvColorTable[i];
+    }
+
+    qsort(colors, hsvColorCount, sizeof(colors[0]), sortHSVColorEntries);
+  }
+
+  if (isEmptyQueue(arguments)) {
+
+    for (int i=0; i<hsvColorCount; i+=1) {
+      showHSVColorEntry(colors[i]);
+    }
+
+    return 1;
+  }
+
+  {
+    const char *name = getNextArgument(arguments, "color name");
+
+    if (name) {
+      if (noMoreArguments(arguments)) {
+        int found = 0;
+
+        for (int i=0; i<hsvColorCount; i+=1) {
+          const HSVColorEntry *color = colors[i];
+
+          if (isAbbreviation(color->name, name)) {
+            showHSVColorEntry(color);
+            found = 1;
+          }
+        }
+
+        if (found) return 1;
+        logMessage(LOG_WARNING, "color not found");
+      }
+    }
+  }
+
+  return 0;
+}
+
+static inline int
+hsvRangesOverlap (const HSVComponentRange *range1, const HSVComponentRange *range2) {
+  return (range2->minimum <= range1->maximum) &&
+         (range2->maximum >= range1->minimum);
+}
+
+static int
+cmdOverlaps (Queue *arguments) {
+  if (noMoreArguments(arguments)) {
+    for (int i=0; i<hsvColorCount; i+=1) {
+      const HSVColorEntry *color1 = &hsvColorTable[i];
+
+      for (int j=i+1; j<hsvColorCount; j+=1) {
+        const HSVColorEntry *color2 = &hsvColorTable[j];
+        int huesOverlap = hsvRangesOverlap(&color1->hue, &color2->hue);
+        int saturationsOverlap = hsvRangesOverlap(&color1->saturation, &color2->saturation);
+        int valuesOverlap = hsvRangesOverlap(&color1->value, &color2->value);
+
+        if (huesOverlap && saturationsOverlap && valuesOverlap) {
+          putf(
+            "%s%s & %s\n",
+            blockIndent, color1->name, color2->name
+          );
+        }
+      }
+    }
+
     return 1;
   }
 
