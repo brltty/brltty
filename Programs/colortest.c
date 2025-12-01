@@ -462,22 +462,22 @@ testRGBtoVGA (const char *testName) {
   return 1;
 }
 
-static const char colorIndent[] = "  ";
+static const char blockIndent[] = "  ";
 
 static void
 showColor (RGBColor rgb, HSVColor hsv) {
-  putf("%sRGB: (%d, %d, %d)\n", colorIndent, rgb.r, rgb.g, rgb.b);
-  putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", colorIndent, hsv.h, hsv.s*100.0f, hsv.v*100.0f);
+  putf("%sRGB: (%d, %d, %d)\n", blockIndent, rgb.r, rgb.g, rgb.b);
+  putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", blockIndent, hsv.h, hsv.s*100.0f, hsv.v*100.0f);
 
   {
     ColorDescriptionBuffer description;
     hsvColorToDescription(description, sizeof(description), hsv);
-    putf("%sColor: %s\n", colorIndent, description);
+    putf("%sColor: %s\n", blockIndent, description);
   }
 
   {
     HLSColor hls = rgbColorToHls(rgb);
-    putf("%sHLS: (%.1f°, %.0f%%, %.0f%%)\n", colorIndent, hls.h, hls.l*100.0f, hls.s*100.0f);
+    putf("%sHLS: (%.1f°, %.0f%%, %.0f%%)\n", blockIndent, hls.h, hls.l*100.0f, hls.s*100.0f);
   }
 
   {
@@ -486,12 +486,12 @@ showColor (RGBColor rgb, HSVColor hsv) {
 
     {
       const char *name = vgaColorName(vga);
-      putf("%sNearest VGA: %d \"%s\"\n", colorIndent, vga, name);
+      putf("%sNearest VGA: %d \"%s\"\n", blockIndent, vga, name);
     }
 
     if (vga != fastVga) {
       const char *name = vgaColorName(fastVga);
-      putf("%sFast VGA: %d \"%s\"\n", colorIndent, fastVga, name);
+      putf("%sFast VGA: %d \"%s\"\n", blockIndent, fastVga, name);
     }
   }
 }
@@ -516,14 +516,14 @@ showHLS (float h, float l, float s) {
 
 static void
 showVGA (int vga) {
-  putf("%sVGA: %d\n", colorIndent, vga);
+  putf("%sVGA: %d\n", blockIndent, vga);
   RGBColor rgb = vgaToRgb(vga);
   showRGB(rgb.r, rgb.g, rgb.b);
 }
 
 static void
 showANSI (int ansi) {
-  putf("%sANSI: %d\n", colorIndent, ansi);
+  putf("%sANSI: %d\n", blockIndent, ansi);
   RGBColor rgb = ansiToRgb(ansi);
   showRGB(rgb.r, rgb.g, rgb.b);
 }
@@ -798,9 +798,230 @@ getColorModel (const char *name) {
 static const ColorModel *const defaultColorModel = colorModels;
 
 static void
-showInteractiveHelp (void) {
+hsvListModifiers (const HSVModifier *(*getModifier) (float level)) {
+  typedef struct {
+    const HSVModifier *modifier;
+    unsigned char from;
+    unsigned char to;
+  } Range;
+
+  Range ranges[20];
+  unsigned int count = 0;
+
+  for (unsigned int percent=0; percent<=100; percent+=1) {
+    const HSVModifier *modifier = getModifier((float)percent / 100.0f);
+
+    if (count > 0) {
+      if (strcmp(modifier->name, ranges[count-1].modifier->name) == 0) {
+        goto next;
+      }
+    }
+
+    if (count == ARRAY_COUNT(ranges)) break;
+    ranges[count].modifier = modifier;
+    ranges[count].from = percent;
+    count += 1;
+
+  next:
+    ranges[count-1].to = percent;
+  }
+
+  for (unsigned int i=0; i<count; i+=1) {
+    const Range *range = &ranges[i];
+    const HSVModifier *modifier = range->modifier;
+
+    putf(
+      "%s%s: %u%%-%u%%: %s\n",
+      blockIndent, modifier->name,
+      range->from, range->to,
+      modifier->comment
+    );
+  }
+}
+
+static int
+cmdBrightness (Queue *arguments) {
+  if (noMoreArguments(arguments)) {
+    hsvListModifiers(hsvBrightnessModifier);
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+cmdGrayscale (Queue *arguments) {
+  if (noMoreArguments(arguments)) {
+    typedef struct {
+      const char *color;
+      unsigned char from;
+      unsigned char to;
+    } Range;
+
+    Range ranges[20];
+    unsigned int count = 0;
+
+    for (unsigned int percent=0; percent<=100; percent+=1) {
+      const char *color = gsColorName((float)percent / 100.0f);
+
+      if (count > 0) {
+        if (strcmp(color, ranges[count-1].color) == 0) {
+          goto next;
+        }
+      }
+
+      if (count == ARRAY_COUNT(ranges)) break;
+      ranges[count].color = color;
+      ranges[count].from = percent;
+      count += 1;
+
+    next:
+      ranges[count-1].to = percent;
+    }
+
+    for (unsigned int i=0; i<count; i+=1) {
+      const Range *range = &ranges[i];
+
+      putf(
+        "%s%s: %u%%-%u%%\n",
+        blockIndent, range->color,
+        range->from, range->to
+      );
+    }
+
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+cmdHues (Queue *arguments) {
+  if (noMoreArguments(arguments)) {
+    typedef struct {
+      const char *color;
+      unsigned int from;
+      unsigned int to;
+    } Range;
+
+    Range ranges[20];
+    unsigned int count = 0;
+
+    for (unsigned int angle=0; angle<360; angle+=1) {
+      const char *color = hueColorName((float)angle);
+
+      if (count > 0) {
+        if (strcmp(color, ranges[count-1].color) == 0) {
+          goto next;
+        }
+      }
+
+      if (count == ARRAY_COUNT(ranges)) break;
+      ranges[count].color = color;
+      ranges[count].from = angle;
+      count += 1;
+
+    next:
+      ranges[count-1].to = angle;
+    }
+
+    for (unsigned int i=0; i<count; i+=1) {
+      const Range *range = &ranges[i];
+
+      putf(
+        "%s%s: %u°-%u°\n",
+        blockIndent, range->color,
+        range->from, range->to
+      );
+    }
+
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+cmdOverlaps (Queue *arguments) {
+  if (noMoreArguments(arguments)) {
+  }
+
+  return 0;
+}
+
+static int
+cmdSaturation (Queue *arguments) {
+  if (noMoreArguments(arguments)) {
+    hsvListModifiers(hsvSaturationModifier);
+    return 1;
+  }
+
+  return 0;
+}
+
+typedef struct {
+  const char *name;
+  const char *help;
+  int (*handler) (Queue *arguments);
+} CommandEntry;
+
+static const CommandEntry commandTable[] = {
+  { .name = "brightness",
+    .help = "List the HSV brightness (value) modifiers.",
+    .handler = cmdBrightness,
+  },
+
+  { .name = "grayscale",
+    .help = "List the grayscale colors.",
+    .handler = cmdGrayscale,
+  },
+
+  { .name = "hues",
+    .help = "List the hue colors.",
+    .handler = cmdHues,
+  },
+
+  { .name = "overlaps",
+    .help = "List the HSV color definition overlaps.",
+    .handler = cmdOverlaps,
+  },
+
+  { .name = "saturation",
+    .help = "List the HSV saturation modifiers.",
+    .handler = cmdSaturation,
+  },
+};
+
+static const CommandEntry *
+getCommand (const char *name) {
+  for (int i=0; i<ARRAY_COUNT(commandTable); i+=1) {
+    const CommandEntry *cmd = &commandTable[i];
+    if (isAbbreviation(cmd->name, name)) return cmd;
+  }
+
+  return NULL;
+}
+
+static void
+showInteractiveHelp (int includeCommands) {
   putf("Commands are not case-sensitive and may be abbreviated.\n");
   putf("Use the \"" QUIT_COMMAND "\" command to exit this mode.\n");
+  putf("\n");
+
+  if (includeCommands) {
+    putf("The following commands are available:\n");
+
+    for (int i=0; i<ARRAY_COUNT(commandTable); i+=1) {
+      const CommandEntry *cmd = &commandTable[i];
+
+      putf(
+        "%s%-10s  %s\n",
+        blockIndent, cmd->name, cmd->help
+      );
+    }
+
+    putf("\n");
+  }
 
   {
     putf("The supported color models are:");
@@ -830,7 +1051,7 @@ doInteractiveMode (void) {
   const ColorModel *currentColorModel = defaultColorModel;
 
   putTestHeader("Interactive Color Test");
-  if (opt_quietness <= OPTQ_INFO) showInteractiveHelp();
+  if (opt_quietness <= OPTQ_INFO) showInteractiveHelp(0);
   putColorModelSyntax(currentColorModel);
 
   Queue *arguments = newQueue(NULL, NULL);
@@ -866,24 +1087,30 @@ doInteractiveMode (void) {
       if (noMoreArguments(arguments)) break;
     } else if (isAbbreviation("help", command)) {
       if (noMoreArguments(arguments)) {
-        showInteractiveHelp();
+        showInteractiveHelp(1);
         putColorModelSyntax(currentColorModel);
       }
     } else {
-      const ColorModel *model = getColorModel(command);
+      const CommandEntry *cmd = getCommand(command);
 
-      if (model) {
-        if (isEmptyQueue(arguments)) {
-          currentColorModel = model;
-          putColorModelSyntax(currentColorModel);
-        } else {
-          model->handler(arguments);
-        }
-      } else if (isdigit(command[0])) {
-        prequeueItem(arguments, command);
-        currentColorModel->handler(arguments);
+      if (cmd) {
+        cmd->handler(arguments);
       } else {
-        logMessage(LOG_WARNING, "unrecognized command");
+        const ColorModel *model = getColorModel(command);
+
+        if (model) {
+          if (isEmptyQueue(arguments)) {
+            currentColorModel = model;
+            putColorModelSyntax(currentColorModel);
+          } else {
+            model->handler(arguments);
+          }
+        } else if (isdigit(command[0])) {
+          prequeueItem(arguments, command);
+          currentColorModel->handler(arguments);
+        } else {
+          logMessage(LOG_WARNING, "unrecognized command");
+        }
       }
     }
   }
