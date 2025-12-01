@@ -891,35 +891,70 @@ static int
 sortHSVColorEntries (const void *item1, const void *item2) {
   const HSVColorEntry *const *color1 = item1;
   const HSVColorEntry *const *color2 = item2;
-  return strcmp((*color1)->name, (*color2)->name);
+  return strcasecmp((*color1)->name, (*color2)->name);
+}
+
+static void
+showHSVColorEntry (const HSVColorEntry *color) {
+  putf(
+    "%s%s: Hue:%.0f°-%.0f° Saturatinn:%.0f%%-%.0f%% Value:%.0f%%-%.0f%%\n",
+    blockIndent, color->name,
+    color->hue.minimum, color->hue.maximum,
+    color->saturation.minimum*100.0f, color->saturation.maximum*100.0f,
+    color->value.minimum*100.0f, color->value.maximum*100.0f
+  );
 }
 
 static int
 cmdColors (Queue *arguments) {
-  if (noMoreArguments(arguments)) {
-    const HSVColorEntry *sorted[hsvColorCount];
+  const HSVColorEntry *sorted[hsvColorCount];
 
+  {
     for (int i=0; i<hsvColorCount; i+=1) {
       sorted[i] = &hsvColorTable[i];
     }
 
     qsort(sorted, hsvColorCount, sizeof(sorted[0]), sortHSVColorEntries);
+  }
+
+  if (isEmptyQueue(arguments)) {
 
     for (int i=0; i<hsvColorCount; i+=1) {
-      const HSVColorEntry *color = sorted[i];
-      putf(
-        "%s%s: Hue:%.0f°-%.0f° Saturatinn:%.0f%%-%.0f%% Value:%.0f%%-%.0f%%\n",
-        blockIndent, color->name,
-        color->hue.minimum, color->hue.maximum,
-        color->saturation.minimum*100.0f, color->saturation.maximum*100.0f,
-        color->value.minimum*100.0f, color->value.maximum*100.0f
-      );
+      showHSVColorEntry(sorted[i]);
     }
 
     return 1;
   }
 
+  {
+    const char *name = getNextArgument(arguments, "color name");
+
+    if (name) {
+      if (noMoreArguments(arguments)) {
+        int found = 0;
+
+        for (int i=0; i<hsvColorCount; i+=1) {
+          const HSVColorEntry *color = sorted[i];
+
+          if (isAbbreviation(color->name, name)) {
+            showHSVColorEntry(color);
+            found = 1;
+          }
+        }
+
+        if (found) return 1;
+        logMessage(LOG_WARNING, "color not found");
+      }
+    }
+  }
+
   return 0;
+}
+
+static inline int
+hsvRangesOverlap (const HSVComponentRange *range1, const HSVComponentRange *range2) {
+  return (range2->minimum <= range1->maximum) &&
+         (range2->maximum >= range1->minimum);
 }
 
 static int
@@ -930,13 +965,11 @@ cmdOverlaps (Queue *arguments) {
 
       for (int j=i+1; j<hsvColorCount; j+=1) {
         const HSVColorEntry *color2 = &hsvColorTable[j];
-        #define OVERLAPS(property) ((color2->property.minimum <= color1->property.maximum) && (color2->property.maximum >= color1->property.minimum))
-        int hueOverlaps = OVERLAPS(hue);
-        int saturationOverlaps = OVERLAPS(saturation);
-        int valueOverlaps = OVERLAPS(value);
-        #undef OVERLAPS
+        int huesOverlap = hsvRangesOverlap(&color1->hue, &color2->hue);
+        int saturationsOverlap = hsvRangesOverlap(&color1->saturation, &color2->saturation);
+        int valuesOverlap = hsvRangesOverlap(&color1->value, &color2->value);
 
-        if (hueOverlaps && saturationOverlaps && valueOverlaps) {
+        if (huesOverlap && saturationsOverlap && valuesOverlap) {
           putf(
             "%s%s & %s\n",
             blockIndent, color1->name, color2->name
