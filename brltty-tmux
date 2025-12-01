@@ -28,7 +28,15 @@ END_OF_PROGRAM_USAGE_PURPOSE
 
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
-Any command line arguments specified after -- are treated as brltty options.
+If brltty is started as root (see the -s option)
+then the current foreground console (tty) is claimed
+and switching between virtual consoles will work as expected.
+If, however, brltty is started as a non-root user then switching
+between virtual consoles won't work properly because determining
+which one is in the foreground requires root privileges.
+The longer explanation is that it will almost still work in that keyboard
+input will go to the new one but the braille display will continue to show
+what's on the virtual console from which this script was run.
 END_OF_PROGRAM_USAGE_NOTES
 }
 
@@ -36,18 +44,20 @@ processExtraProgramParameters() {
    readonly programParameters=("${@}")
 }
 
-addProgramOption s flag optSudo "use sudo to execute brltty as root"
+addProgramOption s flag optSudo "use sudo to start brltty as root"
 addProgramOption c flag optContinue "continue as non-root if sudo fails"
-optionalProgramParameters "-brltty" "arguments after -- are options passed through to brltty"
+optionalProgramParameters "-brltty" "arguments after -- are passed through to brltty as its options"
 parseProgramArguments "${@}"
 
 tmuxSocketVariable=TMUX
 tmuxSocketPath="${!tmuxSocketVariable}"
 [ -n "${tmuxSocketPath}" ] || semanticError "not using tmux"
 
+ttyNumber=""
+
 if [ "$(id -u)" -eq 0 ]
 then
-   export WINDOWPATH="$(fgconsole)"
+   ttyNumber="$(fgconsole)"
 elif "${optSudo}"
 then
    sudo --validate && {
@@ -61,8 +71,11 @@ then
    }
 
    "${optContinue}" || exit 9
-   logWarning "continuing - executing brltty as \"$(id -u -n)\""
+   logWarning "continuing - starting brltty as \"$(id -u -n)\""
 fi
+
+[ -n "${ttyNumber}" ] || logWarning "can't determine foreground console - console switching won't work properly"
+export WINDOWPATH="${ttyNumber}"
 
 brailleDriver=ba # BrlAPI
 screenDriver=tx # Tmux
