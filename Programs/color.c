@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "color.h"
+#include "color_internal.h"
 #include "strfmt.h"
 
 typedef enum {
@@ -722,6 +723,144 @@ hsvBrightnessModifier (float brightness) {
 
     return &modifier;
   }
+}
+
+const HSVColorEntry hsvColorTable[] = {
+  { .name = "Olive",
+    .hue = {.minimum=55.0f, .maximum=65.0f},
+    .saturation = {.minimum=0.5f, .maximum=0.7f},
+    .value = {.minimum=0.3f, .maximum=0.5f},
+  },
+
+  { .name = "Dark Brown",
+    .hue = {.minimum=20.0f, .maximum=30.0f},
+    .saturation = {.minimum=0.7f, .maximum=1.0f},
+    .value = {.minimum=0.2f, .maximum=0.3f},
+  },
+
+  { .name = "Brown",
+    .hue = {.minimum=20.0f, .maximum=30.0f},
+    .saturation = {.minimum=0.7f, .maximum=1.0f},
+    .value = {.minimum=0.3f, .maximum=0.5f},
+  },
+
+  { .name = "Beige",
+    .hue = {.minimum=30.0f, .maximum=50.0f},
+    .saturation = {.minimum=0.1f, .maximum=0.3f},
+    .value = {.minimum=0.7f, .maximum=0.9f},
+  },
+
+  { .name = "Tan",
+    .hue = {.minimum=30.0f, .maximum=40.0f},
+    .saturation = {.minimum=0.2f, .maximum=0.4f},
+    .value = {.minimum=0.7f, .maximum=0.8f},
+  },
+
+  { .name = "Light Pink",
+    .hue = {.minimum=330.0f, .maximum=350.0f},
+    .saturation = {.minimum=0.2f, .maximum=0.4f},
+    .value = {.minimum=0.8f, .maximum=1.0f},
+  },
+
+  { .name = "Pink",
+    .hue = {.minimum=330.0f, .maximum=350.0f},
+    .saturation = {.minimum=0.4f, .maximum=0.6f},
+    .value = {.minimum=0.8f, .maximum=1.0f},
+  },
+
+  { .name = "Coral",
+    .hue = {.minimum=0.0f, .maximum=10.0f},
+    .saturation = {.minimum=0.5f, .maximum=0.7f},
+    .value = {.minimum=0.8f, .maximum=1.0f},
+  },
+
+  { .name = "Lime",
+    .hue = {.minimum=70.0f, .maximum=90.0f},
+    .saturation = {.minimum=0.8f, .maximum=1.0f},
+    .value = {.minimum=0.7f, .maximum=1.0f},
+  },
+
+  { .name = "Dark Teal",
+    .hue = {.minimum=170.0f, .maximum=190.0f},
+    .saturation = {.minimum=0.5f, .maximum=0.7f},
+    .value = {.minimum=0.3f, .maximum=0.5f},
+  },
+
+  { .name = "Teal",
+    .hue = {.minimum=170.0f, .maximum=190.0f},
+    .saturation = {.minimum=0.5f, .maximum=0.7f},
+    .value = {.minimum=0.5f, .maximum=0.7f},
+  },
+
+  { .name = "Turquoise",
+    .hue = {.minimum=170.0f, .maximum=190.0f},
+    .saturation = {.minimum=0.5f, .maximum=0.7f},
+    .value = {.minimum=0.7f, .maximum=0.9f},
+  },
+
+  { .name = "Maroon",
+    .hue = {.minimum=0.0f, .maximum=10.0f},
+    .saturation = {.minimum=0.7f, .maximum=1.0f},
+    .value = {.minimum=0.2f, .maximum=0.3f},
+  },
+
+  { .name = "Navy",
+    .hue = {.minimum=210.0f, .maximum=240.0f},
+    .saturation = {.minimum=0.8f, .maximum=1.0f},
+    .value = {.minimum=0.3f, .maximum=0.5f},
+  },
+
+  { .name = "Indigo",
+    .hue = {.minimum=250.0f, .maximum=270.0f},
+    .saturation = {.minimum=0.5f, .maximum=0.7f},
+    .value = {.minimum=0.3f, .maximum=0.5f},
+  },
+
+  { .name = "Lavender",
+    .hue = {.minimum=260.0f, .maximum=280.0f},
+    .saturation = {.minimum=0.3f, .maximum=0.5f},
+    .value = {.minimum=0.8f, .maximum=1.0f},
+  },
+
+  { .name = "Gold",
+    .hue = {.minimum=40.0f, .maximum=50.0f},
+    .saturation = {.minimum=0.7f, .maximum=1.0f},
+    .value = {.minimum=0.7f, .maximum=0.9f},
+  },
+
+  { .name = "Purple",
+    .hue = {.minimum=270.0f, .maximum=290.0f},
+    .saturation = {.minimum=0.8f, .maximum=1.0f},
+    .value = {.minimum=0.5f, .maximum=0.7f},
+  },
+
+  { .name = "Silver",
+    .hue = {.minimum=0.0f, .maximum=360.0f},
+    .saturation = {.minimum=0.0f, .maximum=0.1f},
+    .value = {.minimum=0.75f, .maximum=0.95f},
+  },
+};
+
+const size_t hsvColorCount = ARRAY_COUNT(hsvColorTable);
+
+const HSVColorEntry *
+hsvColorEntry(HSVColor hsv) {
+  for (int i=0; i<ARRAY_COUNT(hsvColorTable); i+=1) {
+    const HSVColorEntry *color = &hsvColorTable[i];
+
+    if (hsv.h < color->hue.minimum) continue;
+    if (hsv.h > color->hue.maximum) continue;
+
+    if (hsv.s < color->saturation.minimum) continue;
+    if (hsv.s > color->saturation.maximum) continue;
+
+    if (hsv.v < color->value.minimum) continue;
+    if (hsv.v > color->value.maximum) continue;
+
+    return color;
+  }
+
+  return NULL;
 }
 
 const char *

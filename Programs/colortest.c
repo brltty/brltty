@@ -47,6 +47,7 @@
 #include "log.h"
 #include "cmdline.h"
 #include "color.h"
+#include "color_internal.h"
 #include "parse.h"
 #include "file.h"
 #include "queue.h"
@@ -794,61 +795,6 @@ getColorModel (const char *name) {
   return NULL;
 }
 
-#define QUIT_COMMAND "quit"
-static const ColorModel *const defaultColorModel = colorModels;
-
-static void
-hsvListModifiers (const HSVModifier *(*getModifier) (float level)) {
-  typedef struct {
-    const HSVModifier *modifier;
-    unsigned char from;
-    unsigned char to;
-  } Range;
-
-  Range ranges[20];
-  unsigned int count = 0;
-
-  for (unsigned int percent=0; percent<=100; percent+=1) {
-    const HSVModifier *modifier = getModifier((float)percent / 100.0f);
-
-    if (count > 0) {
-      if (strcmp(modifier->name, ranges[count-1].modifier->name) == 0) {
-        goto next;
-      }
-    }
-
-    if (count == ARRAY_COUNT(ranges)) break;
-    ranges[count].modifier = modifier;
-    ranges[count].from = percent;
-    count += 1;
-
-  next:
-    ranges[count-1].to = percent;
-  }
-
-  for (unsigned int i=0; i<count; i+=1) {
-    const Range *range = &ranges[i];
-    const HSVModifier *modifier = range->modifier;
-
-    putf(
-      "%s%s: %u%%-%u%%: %s\n",
-      blockIndent, modifier->name,
-      range->from, range->to,
-      modifier->comment
-    );
-  }
-}
-
-static int
-cmdBrightness (Queue *arguments) {
-  if (noMoreArguments(arguments)) {
-    hsvListModifiers(hsvBrightnessModifier);
-    return 1;
-  }
-
-  return 0;
-}
-
 static int
 cmdGrayscale (Queue *arguments) {
   if (noMoreArguments(arguments)) {
@@ -907,7 +853,7 @@ cmdHues (Queue *arguments) {
     Range ranges[20];
     unsigned int count = 0;
 
-    for (unsigned int angle=0; angle<360; angle+=1) {
+    for (unsigned int angle=0; angle<=360; angle+=1) {
       const char *color = hueColorName((float)angle);
 
       if (count > 0) {
@@ -942,17 +888,125 @@ cmdHues (Queue *arguments) {
 }
 
 static int
-cmdOverlaps (Queue *arguments) {
+sortHSVColorEntries (const void *item1, const void *item2) {
+  const HSVColorEntry *const *color1 = item1;
+  const HSVColorEntry *const *color2 = item2;
+  return strcmp((*color1)->name, (*color2)->name);
+}
+
+static int
+cmdColors (Queue *arguments) {
   if (noMoreArguments(arguments)) {
+    const HSVColorEntry *sorted[hsvColorCount];
+
+    for (int i=0; i<hsvColorCount; i+=1) {
+      sorted[i] = &hsvColorTable[i];
+    }
+
+    qsort(sorted, hsvColorCount, sizeof(sorted[0]), sortHSVColorEntries);
+
+    for (int i=0; i<hsvColorCount; i+=1) {
+      const HSVColorEntry *color = sorted[i];
+      putf(
+        "%s%s: Hue:%.0f°-%.0f° Saturatinn:%.0f%%-%.0f%% Value:%.0f%%-%.0f%%\n",
+        blockIndent, color->name,
+        color->hue.minimum, color->hue.maximum,
+        color->saturation.minimum*100.0f, color->saturation.maximum*100.0f,
+        color->value.minimum*100.0f, color->value.maximum*100.0f
+      );
+    }
+
+    return 1;
   }
 
   return 0;
 }
 
 static int
+cmdOverlaps (Queue *arguments) {
+  if (noMoreArguments(arguments)) {
+    for (int i=0; i<hsvColorCount; i+=1) {
+      const HSVColorEntry *color1 = &hsvColorTable[i];
+
+      for (int j=i+1; j<hsvColorCount; j+=1) {
+        const HSVColorEntry *color2 = &hsvColorTable[j];
+        #define OVERLAPS(property) ((color2->property.minimum <= color1->property.maximum) && (color2->property.maximum >= color1->property.minimum))
+        int hueOverlaps = OVERLAPS(hue);
+        int saturationOverlaps = OVERLAPS(saturation);
+        int valueOverlaps = OVERLAPS(value);
+        #undef OVERLAPS
+
+        if (hueOverlaps && saturationOverlaps && valueOverlaps) {
+          putf(
+            "%s%s & %s\n",
+            blockIndent, color1->name, color2->name
+          );
+        }
+      }
+    }
+
+    return 1;
+  }
+
+  return 0;
+}
+
+static void
+hsvListModifiers (const HSVModifier *(*getModifier) (float level)) {
+  typedef struct {
+    const HSVModifier *modifier;
+    unsigned char from;
+    unsigned char to;
+  } Range;
+
+  Range ranges[20];
+  unsigned int count = 0;
+
+  for (unsigned int percent=0; percent<=100; percent+=1) {
+    const HSVModifier *modifier = getModifier((float)percent / 100.0f);
+
+    if (count > 0) {
+      if (strcmp(modifier->name, ranges[count-1].modifier->name) == 0) {
+        goto next;
+      }
+    }
+
+    if (count == ARRAY_COUNT(ranges)) break;
+    ranges[count].modifier = modifier;
+    ranges[count].from = percent;
+    count += 1;
+
+  next:
+    ranges[count-1].to = percent;
+  }
+
+  for (unsigned int i=0; i<count; i+=1) {
+    const Range *range = &ranges[i];
+    const HSVModifier *modifier = range->modifier;
+
+    putf(
+      "%s%s: %u%%-%u%%: %s\n",
+      blockIndent, modifier->name,
+      range->from, range->to,
+      modifier->comment
+    );
+  }
+}
+
+static int
 cmdSaturation (Queue *arguments) {
   if (noMoreArguments(arguments)) {
     hsvListModifiers(hsvSaturationModifier);
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+cmdBrightness (Queue *arguments) {
+  if (noMoreArguments(arguments)) {
+    hsvListModifiers(hsvBrightnessModifier);
     return 1;
   }
 
@@ -969,6 +1023,11 @@ static const CommandEntry commandTable[] = {
   { .name = "brightness",
     .help = "List the HSV brightness (value) modifiers.",
     .handler = cmdBrightness,
+  },
+
+  { .name = "colors",
+    .help = "List the color table.",
+    .handler = cmdColors,
   },
 
   { .name = "grayscale",
@@ -1002,14 +1061,19 @@ getCommand (const char *name) {
   return NULL;
 }
 
+#define QUIT_COMMAND "quit"
+#define HELP_COMMAND "help"
+static const ColorModel *const defaultColorModel = colorModels;
+
 static void
 showInteractiveHelp (int includeCommands) {
   putf("Commands are not case-sensitive and may be abbreviated.\n");
   putf("Use the \"" QUIT_COMMAND "\" command to exit this mode.\n");
+  putf("Use the \"" HELP_COMMAND "\" command to discover the rest of them.\n");
   putf("\n");
 
   if (includeCommands) {
-    putf("The following commands are available:\n");
+    putf("The rest of the commands are:\n");
 
     for (int i=0; i<ARRAY_COUNT(commandTable); i+=1) {
       const CommandEntry *cmd = &commandTable[i];
@@ -1085,7 +1149,7 @@ doInteractiveMode (void) {
 
     if (isAbbreviation(QUIT_COMMAND, command)) {
       if (noMoreArguments(arguments)) break;
-    } else if (isAbbreviation("help", command)) {
+    } else if (isAbbreviation(HELP_COMMAND, command)) {
       if (noMoreArguments(arguments)) {
         showInteractiveHelp(1);
         putColorModelSyntax(currentColorModel);
