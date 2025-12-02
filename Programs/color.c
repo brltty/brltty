@@ -521,10 +521,14 @@ gsColorName(float brightness) {
   }
 
   if (brightness < 0.2f) {
+    return "coal";
+  }
+
+  if (brightness < 0.3f) {
     return "Charcoal";
   }
 
-  if (brightness < 0.4f) {
+  if (brightness < 0.5f) {
     return "Dark Gray";
   }
 
@@ -533,14 +537,14 @@ gsColorName(float brightness) {
   }
 
   if (brightness > 0.95f) {
-    return "Near-White";
+    return "White";
   }
 
-  if (brightness > 0.8f) {
-    return "Ivory";
+  if (brightness > 0.9f) {
+    return "Very Light Gray";
   }
 
-  if (brightness > 0.6f) {
+  if (brightness > 0.7f) {
     return "Light Gray";
   }
 
@@ -738,16 +742,22 @@ const HSVColorEntry hsvColorTable[] = {
     .value = {.minimum=0.20f, .maximum=0.40f},
   },
 
-  { .name = "Beige",
-    .hue = {.minimum=40.0f, .maximum=50.0f},
-    .saturation = {.minimum=0.10f, .maximum=0.20f},
-    .value = {.minimum=0.90f, .maximum=1.00f},
+  { .name = "Brown",
+    .hue = {.minimum=20.0f, .maximum=30.0f},
+    .saturation = {.minimum=0.60f, .maximum=0.80f},
+    .value = {.minimum=0.40f, .maximum=0.60f},
   },
 
   { .name = "Tan",
     .hue = {.minimum=30.0f, .maximum=40.0f},
     .saturation = {.minimum=0.30f, .maximum=0.50f},
     .value = {.minimum=0.70f, .maximum=0.90f},
+  },
+
+  { .name = "Rose",
+    .hue = {.minimum=330.0f, .maximum=350.0f},
+    .saturation = {.minimum=0.40f, .maximum=0.60f},
+    .value = {.minimum=0.80f, .maximum=1.00f},
   },
 
   { .name = "Light Pink",
@@ -828,10 +838,40 @@ const HSVColorEntry hsvColorTable[] = {
     .value = {.minimum=0.40f, .maximum=0.60f},
   },
 
-  { .name = "Silver",
+  { .name = "Cream",
+    .hue = {.minimum=40.0f, .maximum=50.0f},
+    .saturation = {.minimum=0.10f, .maximum=0.20f},
+    .value = {.minimum=0.95f, .maximum=1.00f},
+  },
+
+  { .name = "Off-White",
     .hue = {.minimum=0.0f, .maximum=360.0f},
-    .saturation = {.minimum=0.00f, .maximum=0.10f},
-    .value = {.minimum=0.75f, .maximum=0.95f},
+    .saturation = {.minimum=0.05f, .maximum=0.10f},
+    .value = {.minimum=0.95f, .maximum=1.00f},
+  },
+
+  { .name = "Beige",
+    .hue = {.minimum=30.0f, .maximum=40.0f},
+    .saturation = {.minimum=0.10f, .maximum=0.20f},
+    .value = {.minimum=0.80f, .maximum=0.90f},
+  },
+
+  { .name = "Eggshell",
+    .hue = {.minimum=40.0f, .maximum=60.0f},
+    .saturation = {.minimum=0.05f, .maximum=0.15f},
+    .value = {.minimum=0.90f, .maximum=1.00f},
+  },
+
+  { .name = "Alabaster",
+    .hue = {.minimum=0.0f, .maximum=360.0f},
+    .saturation = {.minimum=0.05f, .maximum=0.10f},
+    .value = {.minimum=0.90f, .maximum=1.00f},
+  },
+
+  { .name = "Vanilla",
+    .hue = {.minimum=50.0f, .maximum=60.0f},
+    .saturation = {.minimum=0.10f, .maximum=0.20f},
+    .value = {.minimum=0.95f, .maximum=1.00f},
   },
 
   { .name = "Chartreuse",
@@ -902,14 +942,8 @@ const HSVColorEntry hsvColorTable[] = {
 
   { .name = "Ivory",
     .hue = {.minimum=40.0f, .maximum=50.0f},
-    .saturation = {.minimum=0.00f, .maximum=0.10f},
+    .saturation = {.minimum=0.05f, .maximum=0.10f},
     .value = {.minimum=0.95f, .maximum=1.00f},
-  },
-
-  { .name = "Chocolate",
-    .hue = {.minimum=20.0f, .maximum=30.0f},
-    .saturation = {.minimum=0.60f, .maximum=0.80f},
-    .value = {.minimum=0.40f, .maximum=0.60f},
   },
 
   { .name = "Sienna",
@@ -958,12 +992,6 @@ const HSVColorEntry hsvColorTable[] = {
     .hue = {.minimum=0.0f, .maximum=10.0f},
     .saturation = {.minimum=0.80f, .maximum=1.00f},
     .value = {.minimum=0.70f, .maximum=0.90f},
-  },
-
-  { .name = "Rose",
-    .hue = {.minimum=330.0f, .maximum=350.0f},
-    .saturation = {.minimum=0.40f, .maximum=0.60f},
-    .value = {.minimum=0.80f, .maximum=1.00f},
   },
 
   { .name = "Aquamarine",
@@ -1018,18 +1046,6 @@ const HSVColorEntry hsvColorTable[] = {
     .hue = {.minimum=55.0f, .maximum=65.0f},
     .saturation = {.minimum=0.80f, .maximum=1.00f},
     .value = {.minimum=0.90f, .maximum=1.00f},
-  },
-
-  { .name = "Coal",
-    .hue = {.minimum=0.0f, .maximum=360.0f},
-    .saturation = {.minimum=0.00f, .maximum=0.10f},
-    .value = {.minimum=0.10f, .maximum=0.20f},
-  },
-
-  { .name = "Charcoal",
-    .hue = {.minimum=0.0f, .maximum=360.0f},
-    .saturation = {.minimum=0.00f, .maximum=0.10f},
-    .value = {.minimum=0.20f, .maximum=0.30f},
   },
 };
 
@@ -1151,14 +1167,19 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
 
   if (hsv.v < 0.08f) {
     name = "Black";
-  } else if (hsv.s < 0.08f) {
-    /* Achromatic - shades of gray */
+  } else if (hsv.s < 0.05f) {
     name = gsColorName(hsv.v);
   } else if (useHSVColorTable) {
     const HSVColorEntry *color = hsvColorEntry(hsv);
     if (color) name = color->name;
   } else {
     name = hsvCodedColorName(hsv);
+  }
+
+  if (!name) {
+    if (hsv.v < 0.1f) {
+      name = gsColorName(hsv.v);
+    }
   }
 
   if (name) {

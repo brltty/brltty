@@ -1089,27 +1089,56 @@ cmdColors (Queue *arguments) {
   return 0;
 }
 
-static inline int
+static int
 hsvRangesOverlap (const HSVComponentRange *range1, const HSVComponentRange *range2) {
-  return (range2->minimum <= range1->maximum) &&
-         (range2->maximum >= range1->minimum);
+  return (range2->minimum < range1->maximum) &&
+         (range2->maximum > range1->minimum);
 }
 
 static int
-cmdOverlaps (Queue *arguments) {
+hsvColorsOverlap (const HSVColorEntry *color1, const HSVColorEntry *color2) {
+  return hsvRangesOverlap(&color1->hue, &color2->hue) &&
+         hsvRangesOverlap(&color1->saturation, &color2->saturation) &&
+         hsvRangesOverlap(&color1->value, &color2->value);
+}
+
+static int
+hsvRangeContains (const HSVComponentRange *outer, const HSVComponentRange *inner) {
+  return (outer->minimum <= inner->minimum) &&
+         (outer->maximum >= inner->maximum);
+}
+
+static int
+hsvColorContains (const HSVColorEntry *outer, const HSVColorEntry *inner) {
+  return hsvRangeContains(&outer->hue, &inner->hue) &&
+         hsvRangeContains(&outer->saturation, &inner->saturation) &&
+         hsvRangeContains(&outer->value, &inner->value);
+}
+
+static int
+cmdTable (Queue *arguments) {
   if (noMoreArguments(arguments)) {
     for (int i=0; i<hsvColorCount; i+=1) {
       const HSVColorEntry *color1 = &hsvColorTable[i];
 
       for (int j=i+1; j<hsvColorCount; j+=1) {
         const HSVColorEntry *color2 = &hsvColorTable[j];
-        int huesOverlap = hsvRangesOverlap(&color1->hue, &color2->hue);
-        int saturationsOverlap = hsvRangesOverlap(&color1->saturation, &color2->saturation);
-        int valuesOverlap = hsvRangesOverlap(&color1->value, &color2->value);
 
-        if (huesOverlap && saturationsOverlap && valuesOverlap) {
+        if (strcasecmp(color1->name, color2->name) == 0) {
+          putf("%s%s duplicated\n", blockIndent, color1->name);
+        } else if (hsvColorContains(color1, color2)) {
           putf(
-            "%s%s & %s\n",
+            "%s%s contains %s\n",
+            blockIndent, color1->name, color2->name
+          );
+        } else if (hsvColorContains(color2, color1)) {
+          putf(
+            "%s%s is contained by %s\n",
+            blockIndent, color1->name, color2->name
+          );
+        } else if (hsvColorsOverlap(color1, color2)) {
+          putf(
+            "%s%s overlaps %s\n",
             blockIndent, color1->name, color2->name
           );
         }
@@ -1149,14 +1178,14 @@ static const CommandEntry commandTable[] = {
     .handler = cmdHue,
   },
 
-  { .name = "overlaps",
-    .help = "Show the overlapping special color definitions.",
-    .handler = cmdOverlaps,
-  },
-
   { .name = "saturation",
     .help = "List the HSV saturation modifier names and ranges.",
     .handler = cmdSaturation,
+  },
+
+  { .name = "table",
+    .help = "Check the special color definition table for problems.",
+    .handler = cmdTable,
   },
 };
 
