@@ -881,22 +881,8 @@ hsvColorEntry(HSVColor hsv) {
   return NULL;
 }
 
-const char *
-hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
-  hsvNormalize(&hsv.h, &hsv.s, &hsv.v);
-
-  /* Handle special cases */
-  if (hsv.v < 0.08f) {
-    snprintf(buffer, bufferSize, "Black");
-    return buffer;
-  }
-
-  if (hsv.s < 0.08f) {
-    /* Achromatic - shades of gray */
-    snprintf(buffer, bufferSize, "%s", gsColorName(hsv.v));
-    return buffer;
-  }
-
+static const char *
+hsvSpecialColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
   /* Special case for olive: dark yellow-green - check BEFORE brown */
   if ((hsv.h >= 60.0f && hsv.h < 120.0f) && hsv.v >= 0.48f && hsv.v < 0.55f && hsv.s > 0.85f) {
     snprintf(buffer, bufferSize, "Olive");
@@ -991,6 +977,33 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
   if ((hsv.h >= 40.0f && hsv.h < 60.0f) && hsv.v > 0.7f && hsv.s > 0.6f) {
     snprintf(buffer, bufferSize, "Gold");
     return buffer;
+  }
+
+  return NULL;
+}
+
+const char *
+hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
+  hsvNormalize(&hsv.h, &hsv.s, &hsv.v);
+
+  /* Handle special cases */
+  if (hsv.v < 0.08f) {
+    snprintf(buffer, bufferSize, "Black");
+    return buffer;
+  }
+
+  if (hsv.s < 0.08f) {
+    /* Achromatic - shades of gray */
+    snprintf(buffer, bufferSize, "%s", gsColorName(hsv.v));
+    return buffer;
+  }
+
+  if (0) {
+    const HSVColorEntry *color = hsvColorEntry(hsv);
+    if (color) return color->name;
+  } else {
+    const char *description = hsvSpecialColorToDescription(buffer, bufferSize, hsv);
+    if (description) return description;
   }
 
   { /* Combine modifiers and hue color */
