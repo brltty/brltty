@@ -882,31 +882,28 @@ hsvColorEntry(HSVColor hsv) {
 }
 
 static const char *
-hsvSpecialColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
+hsvColorDescription(HSVColor hsv) {
   /* Special case for olive: dark yellow-green - check BEFORE brown */
   if ((hsv.h >= 60.0f && hsv.h < 120.0f) && hsv.v >= 0.48f && hsv.v < 0.55f && hsv.s > 0.85f) {
-    snprintf(buffer, bufferSize, "Olive");
-    return buffer;
+    return "Olive";
   }
 
   /* Special case for brown: dark orange/yellow with low brightness */
   if ((hsv.h >= 15.0f && hsv.h < 90.0f) && hsv.v < 0.7f && hsv.s > 0.3f) {
     if (hsv.v < 0.42f) {
-      snprintf(buffer, bufferSize, "Dark Brown");
+      return "Dark Brown";
     } else {
-      snprintf(buffer, bufferSize, "Brown");
+      return "Brown";
     }
-    return buffer;
   }
 
   /* Special case for tan/beige: very desaturated brown/orange */
   if ((hsv.h >= 15.0f && hsv.h < 75.0f) && hsv.v > 0.6f && hsv.s < 0.35f && hsv.s > 0.08f) {
     if (hsv.v > 0.85f) {
-      snprintf(buffer, bufferSize, "Beige");
+      return "Beige";
     } else {
-      snprintf(buffer, bufferSize, "Tan");
+      return "Tan";
     }
-    return buffer;
   }
 
   /* Special case for pink: light/desaturated red */
@@ -914,69 +911,59 @@ hsvSpecialColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
     /* Web color standards: Pink (255,192,203) S=0.247, LightPink (255,182,193) S=0.286
      * Counterintuitively, "LightPink" has higher saturation than "Pink" */
     if (hsv.s > 0.27f) {
-      snprintf(buffer, bufferSize, "Light Pink");
+      return "Light Pink";
     } else {
-      snprintf(buffer, bufferSize, "Pink");
+      return "Pink";
     }
-    return buffer;
   }
 
   /* Special case for coral: orangish-pink */
   if ((hsv.h >= 5.0f && hsv.h < 25.0f) && hsv.v > 0.7f && hsv.s > 0.4f && hsv.s < 0.75f) {
-    snprintf(buffer, bufferSize, "Coral");
-    return buffer;
+    return "Coral";
   }
 
   /* Special case for lime: bright yellow-green */
   if ((hsv.h >= 90.0f && hsv.h < 135.0f) && hsv.v > 0.75f && hsv.s > 0.75f) {
-    snprintf(buffer, bufferSize, "Lime");
-    return buffer;
+    return "Lime";
   }
 
   /* Special case for teal: cyan with moderate saturation and value */
   if ((hsv.h >= 165.0f && hsv.h < 195.0f) && hsv.v > 0.35f && hsv.v < 0.75f && hsv.s > 0.4f) {
     if (hsv.v < 0.5f) {
-      snprintf(buffer, bufferSize, "Dark Teal");
+      return "Dark Teal";
     } else {
-      snprintf(buffer, bufferSize, "Teal");
+      return "Teal";
     }
-    return buffer;
   }
 
   /* Special case for turquoise: bright cyan */
   if ((hsv.h >= 170.0f && hsv.h < 200.0f) && hsv.v > 0.75f && hsv.s > 0.6f) {
-    snprintf(buffer, bufferSize, "Turquoise");
-    return buffer;
+    return "Turquoise";
   }
 
   /* Special case for maroon: very dark red */
   if ((hsv.h < 15.0f || hsv.h >= 345.0f) && hsv.v >= 0.45f && hsv.v <= 0.55f && hsv.s > 0.9f) {
-    snprintf(buffer, bufferSize, "Maroon");
-    return buffer;
+    return "Maroon";
   }
 
   /* Special case for navy: very dark blue */
   if ((hsv.h >= 210.0f && hsv.h < 270.0f) && hsv.v >= 0.45f && hsv.v <= 0.55f && hsv.s > 0.9f) {
-    snprintf(buffer, bufferSize, "Navy");
-    return buffer;
+    return "Navy";
   }
 
   /* Special case for indigo: between blue and violet */
   if ((hsv.h >= 255.0f && hsv.h < 285.0f) && hsv.v > 0.35f && hsv.v < 0.75f && hsv.s > 0.5f) {
-    snprintf(buffer, bufferSize, "Indigo");
-    return buffer;
+    return "Indigo";
   }
 
   /* Special case for lavender: pale violet/magenta */
   if ((hsv.h >= 230.0f && hsv.h < 280.0f) && hsv.v > 0.85f && hsv.s < 0.2f && hsv.s > 0.05f) {
-    snprintf(buffer, bufferSize, "Lavender");
-    return buffer;
+    return "Lavender";
   }
 
   /* Special case for gold: saturated yellow with orange tint */
   if ((hsv.h >= 40.0f && hsv.h < 60.0f) && hsv.v > 0.7f && hsv.s > 0.6f) {
-    snprintf(buffer, bufferSize, "Gold");
-    return buffer;
+    return "Gold";
   }
 
   return NULL;
@@ -985,28 +972,24 @@ hsvSpecialColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
 const char *
 hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
   hsvNormalize(&hsv.h, &hsv.s, &hsv.v);
+  const char *description = NULL;
 
-  /* Handle special cases */
   if (hsv.v < 0.08f) {
-    snprintf(buffer, bufferSize, "Black");
-    return buffer;
-  }
-
-  if (hsv.s < 0.08f) {
+    description = "Black";
+  } else if (hsv.s < 0.08f) {
     /* Achromatic - shades of gray */
-    snprintf(buffer, bufferSize, "%s", gsColorName(hsv.v));
-    return buffer;
-  }
-
-  if (0) {
+    description = gsColorName(hsv.v);
+  } else if (0) {
     const HSVColorEntry *color = hsvColorEntry(hsv);
-    if (color) return color->name;
+    if (color) description = color->name;
   } else {
-    const char *description = hsvSpecialColorToDescription(buffer, bufferSize, hsv);
-    if (description) return description;
+    description = hsvColorDescription(hsv);
   }
 
-  { /* Combine modifiers and hue color */
+  if (description) {
+    snprintf(buffer, bufferSize, "%s", description);
+  } else {
+    /* Combine modifiers and hue color */
     const char *hue = hueColorName(hsv.h);
     const HSVModifier *saturation = hsvSaturationModifier(hsv.s);
     const HSVModifier *brightness = hsvBrightnessModifier(hsv.v);
@@ -1016,9 +999,9 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
     if (!saturation->isOptional) STR_PRINTF("%s ", saturation->name);
     STR_PRINTF("%s", hue);
     STR_END;
-
-    return buffer;
   }
+
+  return buffer;
 }
 
 const char *
