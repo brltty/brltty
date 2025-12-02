@@ -860,6 +860,7 @@ const HSVColorEntry hsvColorTable[] = {
 };
 
 const size_t hsvColorCount = ARRAY_COUNT(hsvColorTable);
+unsigned char useHSVColorTable = 0;
 
 const HSVColorEntry *
 hsvColorEntry(HSVColor hsv) {
@@ -979,7 +980,7 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
   } else if (hsv.s < 0.08f) {
     /* Achromatic - shades of gray */
     description = gsColorName(hsv.v);
-  } else if (0) {
+  } else if (useHSVColorTable) {
     const HSVColorEntry *color = hsvColorEntry(hsv);
     if (color) description = color->name;
   } else {

@@ -475,9 +475,24 @@ showColor (RGBColor rgb, HSVColor hsv) {
   putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", blockIndent, hsv.h, hsv.s*100.0f, hsv.v*100.0f);
 
   {
-    ColorDescriptionBuffer description;
-    hsvColorToDescription(description, sizeof(description), hsv);
-    putf("%sColor: %s\n", blockIndent, description);
+    unsigned char wasUsingTable = useHSVColorTable;
+
+    useHSVColorTable = 0;
+    ColorDescriptionBuffer codedDescription;
+    hsvColorToDescription(codedDescription, sizeof(codedDescription), hsv);
+
+    useHSVColorTable = 1;
+    ColorDescriptionBuffer tableDescription;
+    hsvColorToDescription(tableDescription, sizeof(tableDescription), hsv);
+
+    if (strcasecmp(codedDescription, tableDescription) == 0) {
+      putf("%sColor: %s\n", blockIndent, codedDescription);
+    } else {
+      putf("%sCoded Color: %s\n", blockIndent, codedDescription);
+      putf("%sTable Color: %s\n", blockIndent, tableDescription);
+    }
+
+    useHSVColorTable = wasUsingTable;
   }
 
   {
@@ -1115,32 +1130,32 @@ typedef struct {
 
 static const CommandEntry commandTable[] = {
   { .name = "brightness",
-    .help = "List the HSV brightness (value) modifiers.",
+    .help = "List the HSV brightness (value) modifier names and ranges.",
     .handler = cmdBrightness,
   },
 
   { .name = "colors",
-    .help = "List the color table.",
+    .help = "List the special color definitions.",
     .handler = cmdColors,
   },
 
   { .name = "grayscale",
-    .help = "List the grayscale colors.",
+    .help = "List the grayscale color names and brightness ranges.",
     .handler = cmdGrayscale,
   },
 
   { .name = "hue",
-    .help = "List the hue colors.",
+    .help = "List the main hue color names and ranges.",
     .handler = cmdHue,
   },
 
   { .name = "overlaps",
-    .help = "List the HSV color definition overlaps.",
+    .help = "Show the overlapping special color definitions.",
     .handler = cmdOverlaps,
   },
 
   { .name = "saturation",
-    .help = "List the HSV saturation modifiers.",
+    .help = "List the HSV saturation modifier names and ranges.",
     .handler = cmdSaturation,
   },
 };
