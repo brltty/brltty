@@ -30,10 +30,10 @@ typedef struct {
 
 typedef struct {
   const char *name;
-  const char *comment;
   HSVComponentRange hue;
   HSVComponentRange saturation;
   HSVComponentRange value;
+  unsigned char instance;
 } HSVColorEntry;
 
 extern const HSVColorEntry hsvColorTable[];

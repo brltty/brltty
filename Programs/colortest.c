@@ -1125,7 +1125,12 @@ cmdTable (Queue *arguments) {
         const HSVColorEntry *color2 = &hsvColorTable[j];
 
         if (strcasecmp(color1->name, color2->name) == 0) {
-          putf("%s%s duplicated\n", blockIndent, color1->name);
+          if (color1->instance == color2->instance) {
+            putf(
+              "%s%s[%u] duplicated\n",
+              blockIndent, color1->name, color1->instance
+            );
+          }
         } else if (hsvColorContains(color1, color2)) {
           putf(
             "%s%s contains %s\n",
