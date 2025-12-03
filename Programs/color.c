@@ -729,6 +729,10 @@ hsvBrightnessModifier (float brightness) {
   }
 }
 
+// Off-White: H: 0-360, S: 0-5%, V: 95-100%
+// Cerulean: H: 200-220, S: 50-70%, V: 70-90%
+// Mauve: H: 270-290, S: 20-40%, V: 70-90%
+// Ebony: H: 0-40, S: 0-20%, V: 10-20%
 const HSVColorEntry hsvColorTable[] = {
   { .name = "Olive",
     .hue = {.minimum=55.0f, .maximum=65.0f},
@@ -844,12 +848,6 @@ const HSVColorEntry hsvColorTable[] = {
     .value = {.minimum=0.90f, .maximum=1.00f},
   },
 
-  { .name = "Off-White",
-    .hue = {.minimum=0.0f, .maximum=360.0f},
-    .saturation = {.minimum=0.00f, .maximum=0.05f},
-    .value = {.minimum=0.95f, .maximum=1.00f},
-  },
-
   { .name = "Beige",
     .hue = {.minimum=30.0f, .maximum=40.0f},
     .saturation = {.minimum=0.10f, .maximum=0.20f},
@@ -911,13 +909,14 @@ const HSVColorEntry hsvColorTable[] = {
   },
 
   { .name = "Crimson",
+    .instance = 1,
     .hue = {.minimum=0.0f, .maximum=10.0f},
     .saturation = {.minimum=0.60f, .maximum=0.80f},
     .value = {.minimum=0.60f, .maximum=0.80f},
   },
 
   { .name = "Crimson",
-    .instance = 1,
+    .instance = 2,
     .hue = {.minimum=350.0f, .maximum=360.0f},
     .saturation = {.minimum=0.60f, .maximum=0.80f},
     .value = {.minimum=0.60f, .maximum=0.80f},

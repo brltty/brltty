@@ -1116,8 +1116,10 @@ hsvColorContains (const HSVColorEntry *outer, const HSVColorEntry *inner) {
 }
 
 static int
-cmdTable (Queue *arguments) {
+cmdProblems (Queue *arguments) {
   if (noMoreArguments(arguments)) {
+    unsigned int problemCount = 0;
+
     for (int i=0; i<hsvColorCount; i+=1) {
       const HSVColorEntry *color1 = &hsvColorTable[i];
 
@@ -1126,28 +1128,38 @@ cmdTable (Queue *arguments) {
 
         if (strcasecmp(color1->name, color2->name) == 0) {
           if (color1->instance == color2->instance) {
+            problemCount += 1;
             putf(
               "%s%s[%u] duplicated\n",
               blockIndent, color1->name, color1->instance
             );
           }
-        } else if (hsvColorContains(color1, color2)) {
+        }
+
+        if (hsvColorContains(color1, color2)) {
+          problemCount += 1;
           putf(
             "%s%s contains %s\n",
             blockIndent, color1->name, color2->name
           );
         } else if (hsvColorContains(color2, color1)) {
+          problemCount += 1;
           putf(
             "%s%s is contained by %s\n",
             blockIndent, color1->name, color2->name
           );
         } else if (hsvColorsOverlap(color1, color2)) {
+          problemCount += 1;
           putf(
             "%s%s overlaps %s\n",
             blockIndent, color1->name, color2->name
           );
         }
       }
+    }
+
+    if (!problemCount) {
+      putf("No problems found.\n");
     }
 
     return 1;
@@ -1183,14 +1195,14 @@ static const CommandEntry commandTable[] = {
     .handler = cmdHue,
   },
 
+  { .name = "problems",
+    .help = "Check the special color definition table for problems.",
+    .handler = cmdProblems,
+  },
+
   { .name = "saturation",
     .help = "List the HSV saturation modifier names and ranges.",
     .handler = cmdSaturation,
-  },
-
-  { .name = "table",
-    .help = "Check the special color definition table for problems.",
-    .handler = cmdTable,
   },
 };
 
