@@ -115,18 +115,6 @@ bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
   free(bcx);
 }
 
-static int
-bthGetConnectLogLevel (int error) {
-  switch (error) {
-    case EHOSTUNREACH:
-    case EHOSTDOWN:
-      return LOG_CATEGORY(BLUETOOTH_IO);
-
-    default:
-      return LOG_ERR;
-  }
-}
-
 int
 bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout) {
   bcx->remoteAddress.rc_channel = channel;
@@ -146,7 +134,7 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
                                       sizeof(bcx->remoteAddress));
 
         if (connectResult != -1) return 1;
-        logSystemProblem(bthGetConnectLogLevel(errno), "RFCOMM connect");
+        logSystemProblem(LOG_CATEGORY(BLUETOOTH_IO), "RFCOMM connect");
       }
     } else {
       logSystemError("RFCOMM bind");
@@ -232,7 +220,7 @@ bthNewL2capConnection (const bdaddr_t *address, int timeout) {
                                         timeout);
 
       if (connectResult != -1) return socketDescriptor;
-      logSystemProblem(bthGetConnectLogLevel(errno), "L2CAP connect");
+      logSystemProblem(LOG_CATEGORY(BLUETOOTH_IO), "L2CAP connect");
     }
 
     setSocketNoLinger(socketDescriptor);

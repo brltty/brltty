@@ -385,7 +385,10 @@ hidLinuxNewHandle (struct udev_device *device) {
 
       close(handle->fileDescriptor);
     } else {
-      logMessage(LOG_ERR, "device open error: %s: %s", devPath, strerror(errno));
+      logMessage(LOG_CATEGORY(HID_IO),
+        "device open error: %s: %s",
+        devPath, strerror(errno)
+      );
     }
 
     free(handle);
