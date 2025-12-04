@@ -1046,7 +1046,7 @@ const HSVColorEntry hsvColorTable[] = {
 
   { .name = "Ebony",
     .hue = {.minimum=0.0f, .maximum=40.0f},
-    .saturation = {.minimum=0.00f, .maximum=0.20f},
+    .saturation = {.minimum=0.05f, .maximum=0.25f},
     .value = {.minimum=0.10f, .maximum=0.20f},
   },
 
