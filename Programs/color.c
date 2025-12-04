@@ -729,10 +729,6 @@ hsvBrightnessModifier (float brightness) {
   }
 }
 
-// Off-White: H: 0-360, S: 0-5%, V: 95-100%
-// Cerulean: H: 200-220, S: 50-70%, V: 70-90%
-// Mauve: H: 270-290, S: 20-40%, V: 70-90%
-// Ebony: H: 0-40, S: 0-20%, V: 10-20%
 const HSVColorEntry hsvColorTable[] = {
   { .name = "Olive",
     .hue = {.minimum=55.0f, .maximum=65.0f},
@@ -825,9 +821,9 @@ const HSVColorEntry hsvColorTable[] = {
   },
 
   { .name = "Lavender",
-    .hue = {.minimum=260.0f, .maximum=280.0f},
-    .saturation = {.minimum=0.20f, .maximum=0.40f},
-    .value = {.minimum=0.80f, .maximum=1.00f},
+    .hue = {.minimum=250.0f, .maximum=270.0f},
+    .saturation = {.minimum=0.30f, .maximum=0.50f},
+    .value = {.minimum=0.80f, .maximum=0.95f},
   },
 
   { .name = "Gold",
@@ -952,6 +948,12 @@ const HSVColorEntry hsvColorTable[] = {
     .value = {.minimum=0.95f, .maximum=1.00f},
   },
 
+  { .name = "Off-White",
+    .hue = {.minimum=0.0f, .maximum=360.0f},
+    .saturation = {.minimum=0.01f, .maximum=0.05f},
+    .value = {.minimum=0.95f, .maximum=1.00f},
+  },
+
   { .name = "Sienna",
     .hue = {.minimum=10.0f, .maximum=20.0f},
     .saturation = {.minimum=0.60f, .maximum=0.80f},
@@ -971,15 +973,27 @@ const HSVColorEntry hsvColorTable[] = {
   },
 
   { .name = "Sky Blue",
-    .hue = {.minimum=190.0f, .maximum=210.0f},
-    .saturation = {.minimum=0.40f, .maximum=0.60f},
+    .hue = {.minimum=195.0f, .maximum=205.0f},
+    .saturation = {.minimum=0.30f, .maximum=0.50f},
     .value = {.minimum=0.80f, .maximum=1.00f},
+  },
+
+  { .name = "Cerulean",
+    .hue = {.minimum=200.0f, .maximum=210.0f},
+    .saturation = {.minimum=0.50f, .maximum=0.70f},
+    .value = {.minimum=0.70f, .maximum=0.90f},
   },
 
   { .name = "Forest Green",
     .hue = {.minimum=120.0f, .maximum=140.0f},
     .saturation = {.minimum=0.50f, .maximum=0.70f},
     .value = {.minimum=0.40f, .maximum=0.60f},
+  },
+
+  { .name = "Mauve",
+    .hue = {.minimum=270.0f, .maximum=280.0f},
+    .saturation = {.minimum=0.20f, .maximum=0.40f},
+    .value = {.minimum=0.70f, .maximum=0.85f},
   },
 
   { .name = "Slate Gray",
@@ -989,9 +1003,9 @@ const HSVColorEntry hsvColorTable[] = {
   },
 
   { .name = "Azure",
-    .hue = {.minimum=210.0f, .maximum=230.0f},
+    .hue = {.minimum=210.0f, .maximum=220.0f},
     .saturation = {.minimum=0.40f, .maximum=0.60f},
-    .value = {.minimum=0.80f, .maximum=1.00f},
+    .value = {.minimum=0.70f, .maximum=0.90f},
   },
 
   { .name = "Scarlet",
@@ -1030,6 +1044,12 @@ const HSVColorEntry hsvColorTable[] = {
     .value = {.minimum=0.70f, .maximum=0.85f},
   },
 
+  { .name = "Ebony",
+    .hue = {.minimum=0.0f, .maximum=40.0f},
+    .saturation = {.minimum=0.00f, .maximum=0.20f},
+    .value = {.minimum=0.10f, .maximum=0.20f},
+  },
+
   { .name = "Rust",
     .hue = {.minimum=18.0f, .maximum=25.0f},
     .saturation = {.minimum=0.60f, .maximum=0.80f},
@@ -1049,7 +1069,7 @@ const HSVColorEntry hsvColorTable[] = {
   },
 
   { .name = "Denim",
-    .hue = {.minimum=210.0f, .maximum=230.0f},
+    .hue = {.minimum=225.0f, .maximum=230.0f},
     .saturation = {.minimum=0.50f, .maximum=0.70f},
     .value = {.minimum=0.60f, .maximum=0.80f},
   },
