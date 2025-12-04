@@ -28,6 +28,8 @@
 SUBSYSTEM!="hidraw", GOTO="brltty_hid_end"
 ACTION!="add", GOTO="brltty_hid_end"
 
+IMPORT{file}="/sys$devpath/../../uevent"
+ENV{HID_ID}=="0005:*", GOTO="brltty_hid_bluetooth"
 ATTRS{bInterfaceNumber}=="?*", GOTO="brltty_hid_usb"
 GOTO="brltty_hid_end"
 
@@ -35,8 +37,13 @@ LABEL="brltty_hid_usb"
 ENV{.BRLTTY_HID_NAME}="$attr{../product}-Intf:$attr{bInterfaceNumber}"
 GOTO="brltty_hid_filter"
 
+LABEL="brltty_hid_bluetooth"
+ENV{.BRLTTY_HID_NAME}="$env{HID_NAME}"
+GOTO="brltty_hid_filter"
+
 LABEL="brltty_hid_filter"
 ENV{.BRLTTY_HID_NAME}=="NLS eReader *", GOTO="brltty_hid_add"
+ENV{.BRLTTY_HID_NAME}=="Brailliant BI 40X*", GOTO="brltty_hid_add"
 GOTO="brltty_hid_end"
 
 LABEL="brltty_hid_add"
