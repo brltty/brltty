@@ -1090,6 +1090,26 @@ cmdColors (Queue *arguments) {
 }
 
 static int
+hsvValidRange (const HSVComponentRange *range, float minimum, float maximum) {
+  if (range->maximum < range->minimum) return 0;
+  if (range->minimum < minimum) return 0;
+  if (range->maximum > maximum) return 0;
+  return 1;
+}
+
+static int
+hsvValidAngleRange (const HSVComponentRange *range) {
+  if ((float)(int)range->minimum != range->minimum) return 0;
+  if ((float)(int)range->maximum != range->maximum) return 0;
+  return hsvValidRange(range, 0.0f, 360.0f);
+}
+
+static int
+hsvValidLevelRange (const HSVComponentRange *range) {
+  return hsvValidRange(range, 0.0f, 1.0f);
+}
+
+static int
 hsvRangesOverlap (const HSVComponentRange *range1, const HSVComponentRange *range2) {
   return (range2->minimum < range1->maximum) &&
          (range2->maximum > range1->minimum);
@@ -1130,10 +1150,37 @@ cmdProblems (Queue *arguments) {
           if (color1->instance == color2->instance) {
             problemCount += 1;
             putf(
-              "%s%s[%u] duplicated\n",
+              "%s%s[%u]: duplicate color definition\n",
               blockIndent, color1->name, color1->instance
             );
           }
+        }
+
+        if (!hsvValidAngleRange(&color1->hue)) {
+          problemCount += 1;
+          putf(
+            "%s%s: invalid hue range %.0f-%.0f\n",
+            blockIndent, color1->name,
+            color1->hue.minimum, color1->hue.maximum
+          );
+        }
+
+        if (!hsvValidLevelRange(&color1->saturation)) {
+          problemCount += 1;
+          putf(
+            "%s%s: invalid saturation range %.2f-%.2f\n",
+            blockIndent, color1->name,
+            color1->saturation.minimum, color1->saturation.maximum
+          );
+        }
+
+        if (!hsvValidLevelRange(&color1->value)) {
+          problemCount += 1;
+          putf(
+            "%s%s: invalid value range %.2f-%.2f\n",
+            blockIndent, color1->name,
+            color1->value.minimum, color1->value.maximum
+          );
         }
 
         if (hsvColorContains(color1, color2)) {
