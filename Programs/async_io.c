@@ -159,7 +159,7 @@ struct AsyncIoDataStruct {
 void
 asyncDeallocateIoData (AsyncIoData *iod) {
   if (iod) {
-    if (iod->functionQueue) deallocateQueue(iod->functionQueue);
+    if (iod->functionQueue) destroyQueue(iod->functionQueue);
     free(iod);
   }
 }
@@ -559,7 +559,7 @@ static void
 deallocateFunctionEntry (void *item, void *data) {
   FunctionEntry *function = item;
 
-  if (function->operations) deallocateQueue(function->operations);
+  if (function->operations) destroyQueue(function->operations);
   if (function->methods->endFunction) function->methods->endFunction(function);
   free(function);
 }
@@ -875,7 +875,7 @@ getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *method
             if (element) return element;
           }
 
-          deallocateQueue(function->operations);
+          destroyQueue(function->operations);
         }
 
         free(function);

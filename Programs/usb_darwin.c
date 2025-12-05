@@ -704,7 +704,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
       logMessage(LOG_ERR, "USB pipe not found: ept=%02X",
                  endpoint->descriptor->bEndpointAddress);
 
-      deallocateQueue(eptx->completedRequests);
+      destroyQueue(eptx->completedRequests);
     } else {
       logSystemError("USB completed request queue allocate");
     }
@@ -720,7 +720,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 void
 usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
   if (eptx->completedRequests) {
-    deallocateQueue(eptx->completedRequests);
+    destroyQueue(eptx->completedRequests);
     eptx->completedRequests = NULL;
   }
 

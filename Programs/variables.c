@@ -123,7 +123,7 @@ newVariableNestingLevel (VariableNestingLevel *previous, const char *name) {
 
 static void
 destroyVariableNestingLevel (VariableNestingLevel *vnl) {
-  deallocateQueue(vnl->variables);
+  destroyQueue(vnl->variables);
   free(vnl);
 }
 

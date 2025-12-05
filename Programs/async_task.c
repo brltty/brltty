@@ -37,7 +37,7 @@ struct AsyncTaskDataStruct {
 void
 asyncDeallocateTaskData (AsyncTaskData *td) {
   if (td) {
-    if (td->taskQueue) deallocateQueue(td->taskQueue);
+    if (td->taskQueue) destroyQueue(td->taskQueue);
     free(td);
   }
 }

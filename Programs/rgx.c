@@ -367,7 +367,7 @@ rgxNewObject (void *data) {
 
 void
 rgxDestroyObject (RGX_Object *rgx) {
-  deallocateQueue(rgx->matchers);
+  destroyQueue(rgx->matchers);
   free(rgx);
 }
 

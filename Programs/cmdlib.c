@@ -41,7 +41,7 @@ newCommandArguments (void) {
 
 void
 destroyCommandArguments (CommandArguments *arguments) {
-  deallocateQueue(arguments->queue);
+  destroyQueue(arguments->queue);
   free(arguments);
 }
 

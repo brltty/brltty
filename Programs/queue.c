@@ -305,7 +305,7 @@ deleteElements (Queue *queue) {
 }
 
 void
-deallocateQueue (Queue *queue) {
+destroyQueue (Queue *queue) {
   deleteElements(queue);
   free(queue);
 }
@@ -315,7 +315,7 @@ exitProgramQueue (void *data) {
   Queue **queue = data;
 
   if (*queue) {
-    deallocateQueue(*queue);
+    destroyQueue(*queue);
     *queue = NULL;
   }
 }

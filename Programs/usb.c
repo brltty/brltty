@@ -748,7 +748,7 @@ usbDeallocateEndpoint (void *item, void *data) {
       }
 
       if (endpoint->direction.input.pending.requests) {
-        deallocateQueue(endpoint->direction.input.pending.requests);
+        destroyQueue(endpoint->direction.input.pending.requests);
         endpoint->direction.input.pending.requests = NULL;
       }
 
@@ -906,7 +906,7 @@ usbRemoveEndpoints (UsbDevice *device, int final) {
     deleteElements(device->endpoints);
 
     if (final) {
-      deallocateQueue(device->endpoints);
+      destroyQueue(device->endpoints);
       device->endpoints = NULL;
     }
   }
@@ -1037,7 +1037,7 @@ usbCloseDevice (UsbDevice *device) {
   usbRemoveEndpoints(device, 1);
 
   if (device->inputFilters) {
-    deallocateQueue(device->inputFilters);
+    destroyQueue(device->inputFilters);
     device->inputFilters = NULL;
   }
 
@@ -1077,7 +1077,7 @@ usbOpenDevice (UsbDeviceExtension *extension) {
           }
         }
 
-        deallocateQueue(device->inputFilters);
+        destroyQueue(device->inputFilters);
       }
 
       usbRemoveEndpoints(device, 1);

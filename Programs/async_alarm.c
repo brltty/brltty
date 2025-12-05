@@ -44,7 +44,7 @@ struct AsyncAlarmDataStruct {
 void
 asyncDeallocateAlarmData (AsyncAlarmData *ad) {
   if (ad) {
-    if (ad->alarmQueue) deallocateQueue(ad->alarmQueue);
+    if (ad->alarmQueue) destroyQueue(ad->alarmQueue);
     free(ad);
   }
 }

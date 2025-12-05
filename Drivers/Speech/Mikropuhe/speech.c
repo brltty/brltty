@@ -480,7 +480,7 @@ spk_destruct (SpeechSynthesizer *spk) {
   closeSoundDevice();
 
   if (speechQueue) {
-    deallocateQueue(speechQueue);
+    destroyQueue(speechQueue);
     speechQueue = NULL;
   }
 

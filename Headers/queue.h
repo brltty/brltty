@@ -29,7 +29,7 @@ typedef void ItemDeallocator (void *item, void *data);
 typedef int ItemComparator (const void *newItem, const void *existingItem, void *queueData);
 
 extern Queue *newQueue (ItemDeallocator *deallocateItem, ItemComparator *compareItems);
-extern void deallocateQueue (Queue *queue);
+extern void destroyQueue (Queue *queue);
 
 typedef Queue *QueueCreator (void *data);
 extern Queue *getProgramQueue (

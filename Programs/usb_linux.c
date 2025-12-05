@@ -1210,7 +1210,7 @@ usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
   usbStopSignalMonitor(eptx);
 
   if (eptx->completedRequests) {
-    deallocateQueue(eptx->completedRequests);
+    destroyQueue(eptx->completedRequests);
     eptx->completedRequests = NULL;
   }
 
@@ -1548,7 +1548,7 @@ usbFindDevice (UsbDeviceChooser *chooser, UsbChooseChannelData *data) {
       }
 
       if (!ok) {
-        deallocateQueue(usbHostDevices);
+        destroyQueue(usbHostDevices);
         usbHostDevices = NULL;
       }
     }
@@ -1570,7 +1570,7 @@ usbFindDevice (UsbDeviceChooser *chooser, UsbChooseChannelData *data) {
 void
 usbForgetDevices (void) {
   if (usbHostDevices) {
-    deallocateQueue(usbHostDevices);
+    destroyQueue(usbHostDevices);
     usbHostDevices = NULL;
   }
 }

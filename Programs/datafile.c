@@ -1315,7 +1315,7 @@ processDataStream (
         reportDataError(&file, "outstanding condition at end of file");
       }
 
-      deallocateQueue(file.conditions);
+      destroyQueue(file.conditions);
     }
 
     releaseVariableNestingLevel(currentDataVariables);

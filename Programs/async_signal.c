@@ -56,7 +56,7 @@ void
 asyncDeallocateSignalData (AsyncSignalData *sd) {
   if (sd) {
 #ifdef ASYNC_CAN_MONITOR_SIGNALS
-    if (sd->signalQueue) deallocateQueue(sd->signalQueue);
+    if (sd->signalQueue) destroyQueue(sd->signalQueue);
 #endif /* ASYNC_CAN_MONITOR_SIGNALS */
 
     free(sd);
@@ -420,7 +420,7 @@ static void
 deallocateSignalEntry (void *item, void *data) {
   SignalEntry *sig = item;
 
-  deallocateQueue(sig->monitors);
+  destroyQueue(sig->monitors);
   free(sig);
 }
 
@@ -575,7 +575,7 @@ getSignalElement (int signalNumber, int create) {
             if (parameters.signalElement) return parameters.signalElement;
           }
 
-          deallocateQueue(sig->monitors);
+          destroyQueue(sig->monitors);
         }
 
         free(sig);

@@ -419,7 +419,7 @@ endBrailleMessages (BrailleDisplay *brl) {
   cancelBrailleMessageAlarm(brl);
 
   if (brl->acknowledgements.messages) {
-    deallocateQueue(brl->acknowledgements.messages);
+    destroyQueue(brl->acknowledgements.messages);
     brl->acknowledgements.messages = NULL;
   }
 }

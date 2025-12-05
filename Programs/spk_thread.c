@@ -920,7 +920,7 @@ constructSpeechDriverThread (
 #endif /* GOT_PTHREADS */
 
       spk->driver.thread = NULL;
-      deallocateQueue(sdt->requestQueue);
+      destroyQueue(sdt->requestQueue);
     }
 
     free(sdt);
@@ -956,7 +956,7 @@ destroySpeechDriverThread (SpeechSynthesizer *spk) {
 #endif /* GOT_PTHREADS */
 
   sdt->speechSynthesizer->driver.thread = NULL;
-  deallocateQueue(sdt->requestQueue);
+  destroyQueue(sdt->requestQueue);
   free(sdt);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */

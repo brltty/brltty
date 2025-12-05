@@ -513,7 +513,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
       }
     nameError:
 
-      deallocateQueue(eptx->requests);
+      destroyQueue(eptx->requests);
     }
 
     free(eptx);
@@ -540,7 +540,7 @@ usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
   }
 
   if (eptx->requests) {
-    deallocateQueue(eptx->requests);
+    destroyQueue(eptx->requests);
     eptx->requests = NULL;
   }
 

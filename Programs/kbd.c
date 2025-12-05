@@ -192,7 +192,7 @@ destroyKeyboardMonitorObject (KeyboardMonitorObject *kmo) {
     destroyKeyboardInstanceObject(kio);
   }
 
-  if (kmo->instanceQueue) deallocateQueue(kmo->instanceQueue);
+  if (kmo->instanceQueue) destroyQueue(kmo->instanceQueue);
   if (kmo->kmx) destroyKeyboardMonitorExtension(kmo->kmx);
   free(kmo);
 }
@@ -214,7 +214,7 @@ newKeyboardMonitorObject (const KeyboardProperties *properties, KeyEventHandler 
           return kmo;
         }
 
-        deallocateQueue(kmo->instanceQueue);
+        destroyQueue(kmo->instanceQueue);
       }
 
       destroyKeyboardMonitorExtension(kmo->kmx);

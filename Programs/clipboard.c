@@ -266,7 +266,7 @@ newClipboard (void) {
 void
 destroyClipboard (ClipboardObject *cpb) {
   if (cpb->buffer.characters) free(cpb->buffer.characters);
-  deallocateQueue(cpb->history.queue);
+  destroyQueue(cpb->history.queue);
   free(cpb);
 }
 
