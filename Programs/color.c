@@ -446,18 +446,16 @@ rgbColorToHls(RGBColor color) {
 }
 
 static float
-floatModulus (float x, float y) {
-  if (y == 0.0f) {
-    return 0.0; // or some other error handling
-  }
+realModulus (double x, double y) {
+  if (y == 0.0f) return 0.0 / 0.0;
 
   // Calculate the modulus
-  double result = x - (y * ((int)(x / y)));
+  double modulus = x - (y * ((int)(x / y)));
 
   // Ensure the result has the same sign as x
-  if (result < 0.0f) result += y;
+  if (modulus < 0.0f) modulus += y;
 
-  return result;
+  return modulus;
 }
 
 RGBColor
@@ -473,7 +471,7 @@ hlsToRgb(float h, float l, float s) {
     if (dl < 0.0f) dl = -dl;
 
     float hs = h / 60.0f;
-    float hf = floatModulus(hs, 2.0f) - 1.0f;
+    float hf = realModulus(hs, 2.0f) - 1.0f;
     if (hf < 0.0f) hf = -hf;
 
     float c = (1 - dl) * s;
