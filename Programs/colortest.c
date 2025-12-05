@@ -115,12 +115,12 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
-static const char *requestedCommand;
+static const char *specifiedCommand;
 
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
   { .name = "command",
-    .description = "the command to execute",
-    .setting = &requestedCommand,
+    .description = "the name of the command to execute or of the color model to evaluate",
+    .setting = &specifiedCommand,
     .optional = 1,
   },
 END_COMMAND_LINE_PARAMETERS(programParameters)
@@ -139,6 +139,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "  5: Test summaries.",
   "  6: Test headers, test status, and color model syntax (interactive mode).",
   "",
+  "Command names are case-insensitive and may be abbreviated.",
   "The recognized commands are:",
   "  brightness [percent]",
   "  colors [color]",
@@ -147,12 +148,18 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "  problems",
   "  saturation [percent]",
   "",
+  "Color model names are case-insensitive and may be abbreviated.",
   "The supported color models are:",
   "  ANSI  the ANSI terminal 256-color model",
   "  HLS   the Hue Lightness Saturation model",
   "  HSV   the Hue Saturation Value (brightness) model",
   "  RGB   the Red Green Blue odel",
-  "  VGA   the Video Graphics Adapter 16-color model",
+  "  VGA   the Video Graphics Array 16-color model",
+  "",
+  "The return codes of this command are:",
+  "  0  Successful execution.",
+  "  1  There was a syntax error.",
+  "  2  A test failed.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
@@ -165,7 +172,7 @@ BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
 
   .extraParameters = {
     .name = "arg",
-    .description = "arguments for the requested command",
+    .description = "arguments for the specified command or color model",
   },
 END_COMMAND_LINE_DESCRIPTOR
 
@@ -581,7 +588,7 @@ getNextArgument (Queue *arguments, const char *name) {
   const char *argument = dequeueItem(arguments);
 
   if (!argument) {
-    logMessage(LOG_WARNING, "missing %s", name);
+    logMessage(LOG_ERR, "missing %s", name);
   }
 
   return argument;
@@ -592,7 +599,7 @@ noMoreArguments (Queue *arguments) {
   const char *argument = dequeueItem(arguments);
   if (!argument) return 1;
 
-  logMessage(LOG_WARNING, "too many arguments: %s", argument);
+  logMessage(LOG_ERR, "too many arguments: %s", argument);
   return 0;
 }
 
@@ -600,7 +607,7 @@ static int
 parseInteger (int *value, const char *argument, int minimum, int maximum, const char *name) {
   if (validateInteger(value, argument, &minimum, &maximum)) return 1;
 
-  logMessage(LOG_WARNING,
+  logMessage(LOG_ERR,
     "invalid %s: %s (must be an integer >= %d and <= %d)",
     name, argument, minimum, maximum
   );
@@ -616,7 +623,7 @@ parseFloat (float *value, const char *argument, float minimum, float maximum, in
     }
   }
 
-  logMessage(LOG_WARNING,
+  logMessage(LOG_ERR,
     "invalid %s: %s (must be a real number >= %g and %s %g)",
     name, argument, minimum, (inclusive? "<=": "<"), maximum
   );
@@ -630,7 +637,7 @@ parseIntensity (int *intensity, const char *argument, const char *name) {
   static const int maximum = UINT8_MAX;
   if (validateInteger(intensity, argument, &minimum, &maximum)) return 1;
 
-  logMessage(LOG_WARNING,
+  logMessage(LOG_ERR,
     "invalid %s: %s (must be an integer >= %d and <= %d)",
     name, argument, minimum, maximum
   );
@@ -1109,7 +1116,8 @@ cmdColors (Queue *arguments) {
         }
 
         if (found) return 1;
-        logMessage(LOG_WARNING, "color not found");
+        logMessage(LOG_ERR, "color not found");
+        return 2;
       }
     }
   }
@@ -1525,9 +1533,9 @@ main (int argc, char *argv[]) {
     }
   }
 
-  if (*requestedCommand || (argc > 0)) {
+  if (*specifiedCommand || (argc > 0)) {
     if (testRequested) {
-      logMessage(LOG_ERR, "can't request both tests and a command");
+      logMessage(LOG_ERR, "can't request a test and specify a command");
       return PROG_EXIT_SYNTAX;
     }
 
@@ -1537,7 +1545,7 @@ main (int argc, char *argv[]) {
       enqueueItem(arguments, argv[i]);
     }
 
-    int result = doCommand(requestedCommand, arguments, NULL);
+    int result = doCommand(specifiedCommand, arguments, NULL);
     deallocateQueue(arguments);
     if (result == 2) return PROG_EXIT_SEMANTIC;
     return result? PROG_EXIT_SUCCESS: PROG_EXIT_SYNTAX;
