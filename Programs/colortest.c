@@ -1262,20 +1262,23 @@ showInteractiveHelp (int includeCommands) {
     for (int i=0; i<ARRAY_COUNT(commandTable); i+=1) {
       const CommandEntry *cmd = &commandTable[i];
 
-      int offset = offsets[i] = STR_LENGTH;
+      int *offset = &offsets[i];
+      *offset = STR_LENGTH;
+
       STR_PRINTF("%s", cmd->name);
       if (cmd->syntax && *cmd->syntax) STR_PRINTF(" %s", cmd->syntax);
-      int length = lengths[i] = STR_LENGTH - offset;
 
-      if (length > longest) longest = length;
+      int *length = &lengths[i];
+      *length = STR_LENGTH - *offset;
+
+      if (*length > longest) longest = *length;
     }
 
     for (int i=0; i<ARRAY_COUNT(commandTable); i+=1) {
       const CommandEntry *cmd = &commandTable[i];
-      putf("%s%.*s", blockIndent, lengths[i], &buffer[offsets[i]]);
+      putf("%s%-*.*s", blockIndent, longest, lengths[i], &buffer[offsets[i]]);
 
-      if (cmd->help) {
-        for (int j=lengths[i]; j<longest; j+=1) putf(" ");
+      if (cmd->help && *cmd->help) {
         putf("  %s", cmd->help);
       }
 
