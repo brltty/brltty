@@ -115,12 +115,20 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+static const char *requestedCommand;
+
 BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+  { .name = "command",
+    .description = "the command to execute",
+    .setting = &requestedCommand,
+    .optional = 1,
+  },
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "The -a option may not be combined with any option that requests a specific test.",
-  "If none of the tests are requested then interactive mode is entered.",
+  "Specifying a command conflicts with requesting that any tests be performed.",
+  "If none of the tests are requested, and if a command isn't specified, then interactive mode is entered.",
   "",
   "The -q option is cumulative.",
   "Output verbosity is increasingly reduced, each time it's specified, as follows:",
@@ -130,6 +138,21 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "  4: Test results that fail.",
   "  5: Test summaries.",
   "  6: Test headers, test status, and color model syntax (interactive mode).",
+  "",
+  "The recognized commands are:",
+  "  brightness [percent]",
+  "  colors [color]",
+  "  grayscale [percent]",
+  "  hue [degrees]",
+  "  problems",
+  "  saturation [percent]",
+  "",
+  "The supported color models are:",
+  "  ANSI  the ANSI terminal 256-color model",
+  "  HLS   the Hue Lightness Saturation model",
+  "  HSV   the Hue Saturation Value (brightness) model",
+  "  RGB   the Red Green Blue odel",
+  "  VGA   the Video Graphics Adapter 16-color model",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
@@ -139,6 +162,11 @@ BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .options = &programOptions,
   .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes),
+
+  .extraParameters = {
+    .name = "arg",
+    .description = "arguments for the requested command",
+  },
 END_COMMAND_LINE_DESCRIPTOR
 
 #define VGA_NAME_FORMAT "(%13s)"
@@ -1205,10 +1233,8 @@ cmdProblems (Queue *arguments) {
       }
     }
 
-    if (!problemCount) {
-      putf("No problems found.\n");
-    }
-
+    if (problemCount) return 2;
+    if (opt_quietness <= OPTQ_PASS) putf("No problems found.\n");
     return 1;
   }
 
@@ -1254,13 +1280,41 @@ static const CommandEntry commandTable[] = {
 };
 
 static const CommandEntry *
-getCommand (const char *name) {
+getCommandEntry (const char *name) {
   for (int i=0; i<ARRAY_COUNT(commandTable); i+=1) {
     const CommandEntry *cmd = &commandTable[i];
     if (isAbbreviation(cmd->name, name)) return cmd;
   }
 
   return NULL;
+}
+
+static int
+doCommand (const char *name, Queue *arguments, const ColorModel **currentModel) {
+  {
+    const CommandEntry *cmd = getCommandEntry(name);
+
+    if (cmd) {
+      return cmd->handler(arguments);
+    }
+  }
+
+  {
+    const ColorModel *model = getColorModel(name);
+
+    if (model) {
+      if (currentModel && isEmptyQueue(arguments)) {
+        *currentModel = model;
+        putColorModelSyntax(model);
+        return 1;
+      }
+
+      return model->handler(arguments);
+    }
+  }
+
+  logMessage(LOG_ERR, "unrecognized command: %s", name);
+  return 0;
 }
 
 #define QUIT_COMMAND "quit"
@@ -1356,28 +1410,11 @@ doInteractiveMode (void) {
         showInteractiveHelp(1);
         putColorModelSyntax(currentColorModel);
       }
+    } else if (isdigit(command[0])) {
+      prequeueItem(arguments, command);
+      currentColorModel->handler(arguments);
     } else {
-      const CommandEntry *cmd = getCommand(command);
-
-      if (cmd) {
-        cmd->handler(arguments);
-      } else {
-        const ColorModel *model = getColorModel(command);
-
-        if (model) {
-          if (isEmptyQueue(arguments)) {
-            currentColorModel = model;
-            putColorModelSyntax(currentColorModel);
-          } else {
-            model->handler(arguments);
-          }
-        } else if (isdigit(command[0])) {
-          prequeueItem(arguments, command);
-          currentColorModel->handler(arguments);
-        } else {
-          logMessage(LOG_WARNING, "unrecognized command");
-        }
-      }
+      doCommand(command, arguments, &currentColorModel);
     }
   }
 
@@ -1486,6 +1523,24 @@ main (int argc, char *argv[]) {
     } else if (opt_performAllTests) {
       *test->requested = 1;
     }
+  }
+
+  if (*requestedCommand || (argc > 0)) {
+    if (testRequested) {
+      logMessage(LOG_ERR, "can't request both tests and a command");
+      return PROG_EXIT_SYNTAX;
+    }
+
+    Queue *arguments = newQueue(NULL,NULL);
+
+    for (int i=0; i<argc; i+=1) {
+      enqueueItem(arguments, argv[i]);
+    }
+
+    int result = doCommand(requestedCommand, arguments, NULL);
+    deallocateQueue(arguments);
+    if (result == 2) return PROG_EXIT_SEMANTIC;
+    return result? PROG_EXIT_SUCCESS: PROG_EXIT_SYNTAX;
   }
 
   if (!testRequested) {
