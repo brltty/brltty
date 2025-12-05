@@ -46,11 +46,11 @@
 
 #include "log.h"
 #include "cmdline.h"
+#include "cmdlib.h"
 #include "color.h"
 #include "color_internal.h"
 #include "parse.h"
 #include "file.h"
-#include "queue.h"
 
 typedef enum {
    OPTQ_INFO,
@@ -181,30 +181,6 @@ END_COMMAND_LINE_DESCRIPTOR
 #define VGA_COLOR_FORMAT "VGA %2d"
 #define RGB_COLOR_FORMAT "RGB(%3d, %3d, %3d)"
 #define HSV_COLOR_FORMAT "HSV(%5.1f°, %3.0f%%, %3.0f%%)"
-
-static void
-checkForOutputError (void) {
-  if (ferror(stdout)) {
-    logSystemError("standard output write");
-    exit(PROG_EXIT_FATAL);
-  }
-}
-
-static void
-flushOutput (void) {
-  fflush(stdout);
-  checkForOutputError();
-}
-
-static void putf (const char *format, ...) PRINTF(1, 2);
-static void
-putf (const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  vprintf(format, args);
-  va_end(args);
-  checkForOutputError();
-}
 
 static void
 putNotice (const char *notice) {
@@ -584,54 +560,6 @@ showANSI (int ansi) {
   showRGB(rgb.r, rgb.g, rgb.b);
 }
 
-static const char *
-getNextArgument (Queue *arguments, const char *name) {
-  const char *argument = dequeueItem(arguments);
-
-  if (!argument) {
-    logMessage(LOG_ERR, "missing %s", name);
-  }
-
-  return argument;
-}
-
-static int
-noMoreArguments (Queue *arguments) {
-  const char *argument = dequeueItem(arguments);
-  if (!argument) return 1;
-
-  logMessage(LOG_ERR, "too many arguments: %s", argument);
-  return 0;
-}
-
-static int
-parseInteger (int *value, const char *argument, int minimum, int maximum, const char *name) {
-  if (validateInteger(value, argument, &minimum, &maximum)) return 1;
-
-  logMessage(LOG_ERR,
-    "invalid %s: %s (must be an integer >= %d and <= %d)",
-    name, argument, minimum, maximum
-  );
-
-  return 0;
-}
-
-static int
-parseFloat (float *value, const char *argument, float minimum, float maximum, int inclusive, const char *name) {
-  if (validateFloat(value, argument, &minimum, &maximum)) {
-    if (inclusive || (*value < maximum)) {
-      return 1;
-    }
-  }
-
-  logMessage(LOG_ERR,
-    "invalid %s: %s (must be a real number >= %g and %s %g)",
-    name, argument, minimum, (inclusive? "<=": "<"), maximum
-  );
-
-  return 0;
-}
-
 static int
 parseIntensity (int *intensity, const char *argument, const char *name) {
   static const int minimum = 0;
@@ -647,21 +575,7 @@ parseIntensity (int *intensity, const char *argument, const char *name) {
 }
 
 static int
-parseDegrees (float *degrees, const char *argument, const char *name) {
-  return parseFloat(degrees, argument, 0.0f, 360.0f, 0, name);
-}
-
-static int
-parsePercent (float *value, const char *argument, const char *name) {
-  const float maximum = 100.0f;
-  if (!parseFloat(value, argument, 0.0f, maximum, 1, name)) return 0;
-
-  *value /= maximum;
-  return 1;
-}
-
-static int
-rgbHandler (Queue *arguments) {
+rgbHandler (CommandArguments *arguments) {
   const char *redName = "red intensity";
   const char *redArgument;
   int redIntensity;
@@ -677,7 +591,7 @@ rgbHandler (Queue *arguments) {
   if ((redArgument = getNextArgument(arguments, redName))) {
     if ((greenArgument = getNextArgument(arguments, greenName))) {
       if ((blueArgument = getNextArgument(arguments, blueName))) {
-        if (noMoreArguments(arguments)) {
+        if (verifyNoMoreArguments(arguments)) {
           if (parseIntensity(&redIntensity, redArgument, redName)) {
             if (parseIntensity(&greenIntensity, greenArgument, greenName)) {
               if (parseIntensity(&blueIntensity, blueArgument, blueName)) {
@@ -695,7 +609,7 @@ rgbHandler (Queue *arguments) {
 }
 
 static int
-hsvHandler (Queue *arguments) {
+hsvHandler (CommandArguments *arguments) {
   const char *hueArgument;
   float hueAngle;
 
@@ -708,7 +622,7 @@ hsvHandler (Queue *arguments) {
   if ((hueArgument = getNextArgument(arguments, hueName))) {
     if ((saturationArgument = getNextArgument(arguments, saturationName))) {
       if ((brightnessArgument = getNextArgument(arguments, brightnessName))) {
-        if (noMoreArguments(arguments)) {
+        if (verifyNoMoreArguments(arguments)) {
           if (parseDegrees(&hueAngle, hueArgument, hueName)) {
             if (parsePercent(&saturationLevel, saturationArgument, saturationName)) {
               if (parsePercent(&brightnessLevel, brightnessArgument, brightnessName)) {
@@ -726,7 +640,7 @@ hsvHandler (Queue *arguments) {
 }
 
 static int
-hlsHandler (Queue *arguments) {
+hlsHandler (CommandArguments *arguments) {
   const char *hueName = "hue angle";
   const char *hueArgument;
   float hueAngle;
@@ -742,7 +656,7 @@ hlsHandler (Queue *arguments) {
   if ((hueArgument = getNextArgument(arguments, hueName))) {
     if ((lightnessArgument = getNextArgument(arguments, lightnessName))) {
       if ((saturationArgument = getNextArgument(arguments, saturationName))) {
-        if (noMoreArguments(arguments)) {
+        if (verifyNoMoreArguments(arguments)) {
           if (parseDegrees(&hueAngle, hueArgument, hueName)) {
             if (parsePercent(&lightnessLevel, lightnessArgument, lightnessName)) {
               if (parsePercent(&saturationLevel, saturationArgument, saturationName)) {
@@ -760,12 +674,12 @@ hlsHandler (Queue *arguments) {
 }
 
 static int
-vgaHandler (Queue *arguments) {
+vgaHandler (CommandArguments *arguments) {
   const char *vgaName = "VGA color number";
   const char *vgaArgument = getNextArgument(arguments, vgaName);
 
   if (vgaArgument) {
-    if (noMoreArguments(arguments)) {
+    if (verifyNoMoreArguments(arguments)) {
       int vgaColor;
 
       if (parseInteger(&vgaColor, vgaArgument, 0, (VGA_COLOR_COUNT - 1), vgaName)) {
@@ -779,12 +693,12 @@ vgaHandler (Queue *arguments) {
 }
 
 static int
-ansiHandler (Queue *arguments) {
+ansiHandler (CommandArguments *arguments) {
   const char *ansiName = "ANSI color number";
   const char *ansiArgument = getNextArgument(arguments, ansiName);
 
   if (ansiArgument) {
-    if (noMoreArguments(arguments)) {
+    if (verifyNoMoreArguments(arguments)) {
       int ansiColor;
 
       if (parseInteger(&ansiColor, ansiArgument, 0, UINT8_MAX, ansiName)) {
@@ -800,7 +714,7 @@ ansiHandler (Queue *arguments) {
 typedef struct {
   const char *name;
   const char *syntax;
-  int (*handler) (Queue *arguments);
+  int (*handler) (CommandArguments *arguments);
 } ColorModel;
 
 static void
@@ -848,8 +762,8 @@ getColorModel (const char *name) {
 }
 
 static int
-cmdGrayscale (Queue *arguments) {
-  if (isEmptyQueue(arguments)) {
+cmdGrayscale (CommandArguments *arguments) {
+  if (checkNoMoreArguments(arguments)) {
     typedef struct {
       const char *color;
       unsigned char from;
@@ -894,7 +808,7 @@ cmdGrayscale (Queue *arguments) {
     const char *argument = getNextArgument(arguments, grayName);
 
     if (argument) {
-      if (noMoreArguments(arguments)) {
+      if (verifyNoMoreArguments(arguments)) {
         float level;
 
         if (parsePercent(&level, argument, grayName)) {
@@ -909,8 +823,8 @@ cmdGrayscale (Queue *arguments) {
 }
 
 static int
-cmdHue (Queue *arguments) {
-  if (isEmptyQueue(arguments)) {
+cmdHue (CommandArguments *arguments) {
+  if (checkNoMoreArguments(arguments)) {
     typedef struct {
       const char *color;
       unsigned int from;
@@ -955,7 +869,7 @@ cmdHue (Queue *arguments) {
     const char *argument = getNextArgument(arguments, hueName);
 
     if (argument) {
-      if (noMoreArguments(arguments)) {
+      if (verifyNoMoreArguments(arguments)) {
         float angle;
 
         if (parseDegrees(&angle, argument, hueName)) {
@@ -1012,8 +926,8 @@ hsvListModifiers (const HSVModifier *(*getModifier) (float level)) {
 }
 
 static int
-cmdSaturation (Queue *arguments) {
-  if (isEmptyQueue(arguments)) {
+cmdSaturation (CommandArguments *arguments) {
+  if (checkNoMoreArguments(arguments)) {
     hsvListModifiers(hsvSaturationModifier);
     return 1;
   }
@@ -1022,7 +936,7 @@ cmdSaturation (Queue *arguments) {
     const char *argument = getNextArgument(arguments, saturationName);
 
     if (argument) {
-      if (noMoreArguments(arguments)) {
+      if (verifyNoMoreArguments(arguments)) {
         float level;
 
         if (parsePercent(&level, argument, saturationName)) {
@@ -1037,8 +951,8 @@ cmdSaturation (Queue *arguments) {
 }
 
 static int
-cmdBrightness (Queue *arguments) {
-  if (isEmptyQueue(arguments)) {
+cmdBrightness (CommandArguments *arguments) {
+  if (checkNoMoreArguments(arguments)) {
     hsvListModifiers(hsvBrightnessModifier);
     return 1;
   }
@@ -1047,7 +961,7 @@ cmdBrightness (Queue *arguments) {
     const char *argument = getNextArgument(arguments, brightnessName);
 
     if (argument) {
-      if (noMoreArguments(arguments)) {
+      if (verifyNoMoreArguments(arguments)) {
         float level;
 
         if (parsePercent(&level, argument, brightnessName)) {
@@ -1080,7 +994,7 @@ showHSVColorEntry (const HSVColorEntry *color) {
 }
 
 static int
-cmdColors (Queue *arguments) {
+cmdColors (CommandArguments *arguments) {
   const HSVColorEntry *colors[hsvColorCount];
 
   {
@@ -1091,7 +1005,7 @@ cmdColors (Queue *arguments) {
     qsort(colors, hsvColorCount, sizeof(colors[0]), sortHSVColorEntries);
   }
 
-  if (isEmptyQueue(arguments)) {
+  if (checkNoMoreArguments(arguments)) {
 
     for (int i=0; i<hsvColorCount; i+=1) {
       showHSVColorEntry(colors[i]);
@@ -1104,7 +1018,7 @@ cmdColors (Queue *arguments) {
     const char *name = getNextArgument(arguments, "color name");
 
     if (name) {
-      if (noMoreArguments(arguments)) {
+      if (verifyNoMoreArguments(arguments)) {
         int found = 0;
 
         for (int i=0; i<hsvColorCount; i+=1) {
@@ -1173,8 +1087,8 @@ hsvColorContains (const HSVColorEntry *outer, const HSVColorEntry *inner) {
 }
 
 static int
-cmdProblems (Queue *arguments) {
-  if (noMoreArguments(arguments)) {
+cmdProblems (CommandArguments *arguments) {
+  if (verifyNoMoreArguments(arguments)) {
     unsigned int problemCount = 0;
 
     for (int i=0; i<hsvColorCount; i+=1) {
@@ -1253,7 +1167,7 @@ cmdProblems (Queue *arguments) {
 typedef struct {
   const char *name;
   const char *help;
-  int (*handler) (Queue *arguments);
+  int (*handler) (CommandArguments *arguments);
 } CommandEntry;
 
 static const CommandEntry commandTable[] = {
@@ -1299,7 +1213,7 @@ getCommandEntry (const char *name) {
 }
 
 static int
-doCommand (const char *name, Queue *arguments, const ColorModel **currentModel) {
+doCommand (const char *name, CommandArguments *arguments, const ColorModel **currentModel) {
   {
     const CommandEntry *cmd = getCommandEntry(name);
 
@@ -1312,7 +1226,7 @@ doCommand (const char *name, Queue *arguments, const ColorModel **currentModel) 
     const ColorModel *model = getColorModel(name);
 
     if (model) {
-      if (currentModel && isEmptyQueue(arguments)) {
+      if (currentModel && checkNoMoreArguments(arguments)) {
         *currentModel = model;
         putColorModelSyntax(model);
         return 1;
@@ -1376,14 +1290,14 @@ showInteractiveHelp (int includeCommands) {
 /* Interactive color description test */
 static void
 doInteractiveMode (void) {
-  pushLogPrefix("ERROR");
+  beginInteractiveMode();
   const ColorModel *currentColorModel = defaultColorModel;
 
   putTestHeader("Interactive Color Test");
   if (opt_quietness <= OPTQ_INFO) showInteractiveHelp(0);
   putColorModelSyntax(currentColorModel);
 
-  Queue *arguments = newQueue(NULL, NULL);
+  CommandArguments *arguments = newCommandArguments();
   char *line = NULL;
   size_t lineSize = 0;
 
@@ -1396,31 +1310,21 @@ doInteractiveMode (void) {
       break;
     }
 
-    {
-      deleteElements(arguments);
+    removeArguments(arguments);
+    addArgumentsFromString(arguments, line);
 
-      const char *delimiters = " ";
-      char *string = line;
-      char *argument;
-
-      while ((argument = strtok(string, delimiters))) {
-        enqueueItem(arguments, argument);
-        string = NULL;
-      }
-    }
-
-    if (isEmptyQueue(arguments)) continue;
-    char *command = dequeueItem(arguments);
+    if (checkNoMoreArguments(arguments)) continue;
+    char *command = getNextArgument(arguments, "command");
 
     if (isAbbreviation(QUIT_COMMAND, command)) {
-      if (noMoreArguments(arguments)) break;
+      if (verifyNoMoreArguments(arguments)) break;
     } else if (isAbbreviation(HELP_COMMAND, command)) {
-      if (noMoreArguments(arguments)) {
+      if (verifyNoMoreArguments(arguments)) {
         showInteractiveHelp(1);
         putColorModelSyntax(currentColorModel);
       }
     } else if (isdigit(command[0])) {
-      prequeueItem(arguments, command);
+      restoreArgument(arguments, command);
       currentColorModel->handler(arguments);
     } else {
       doCommand(command, arguments, &currentColorModel);
@@ -1428,8 +1332,8 @@ doInteractiveMode (void) {
   }
 
   if (line) free(line);
-  deallocateQueue(arguments);
-  popLogPrefix();
+  destroyCommandArguments(arguments);
+  endInteractiveMode();
 }
 
 typedef struct {
@@ -1540,14 +1444,11 @@ main (int argc, char *argv[]) {
       return PROG_EXIT_SYNTAX;
     }
 
-    Queue *arguments = newQueue(NULL,NULL);
-
-    for (int i=0; i<argc; i+=1) {
-      enqueueItem(arguments, argv[i]);
-    }
-
+    CommandArguments *arguments = newCommandArguments();
+    addArgumentsFromArray(arguments, argv, argc);
     int result = doCommand(specifiedCommand, arguments, NULL);
-    deallocateQueue(arguments);
+    destroyCommandArguments(arguments);
+
     if (result == 2) return PROG_EXIT_SEMANTIC;
     return result? PROG_EXIT_SUCCESS: PROG_EXIT_SYNTAX;
   }
