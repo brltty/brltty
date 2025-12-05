@@ -157,9 +157,10 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "  VGA   the Video Graphics Array 16-color model",
   "",
   "The return codes of this command are:",
-  "  0  Successful execution.",
-  "  1  There was a syntax error.",
-  "  2  A test failed.",
+  "  0  Successful.",
+  "  2  A syntax error was encountered.",
+  "  3  A test failed, a problem was found, etc.",
+  "  4  A system error occurred.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
@@ -1116,7 +1117,7 @@ cmdColors (Queue *arguments) {
         }
 
         if (found) return 1;
-        logMessage(LOG_ERR, "color not found");
+        logMessage(LOG_ERR, "color not recognized: %s", name);
         return 2;
       }
     }
