@@ -1274,18 +1274,19 @@ showInteractiveHelp (int includeCommands) {
       if (*length > longest) longest = *length;
     }
 
+    STR_END;
+
     for (int i=0; i<ARRAY_COUNT(commandTable); i+=1) {
       const CommandEntry *cmd = &commandTable[i];
-      putf("%s%-*.*s", blockIndent, longest, lengths[i], &buffer[offsets[i]]);
+      putf("%s%.*s", blockIndent, lengths[i], &buffer[offsets[i]]);
 
       if (cmd->help && *cmd->help) {
-        putf("  %s", cmd->help);
+        putf("%*s  %s", (longest - lengths[i]), "", cmd->help);
       }
 
       putf("\n");
     }
 
-    STR_END;
     putf("\n");
   }
 
