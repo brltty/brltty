@@ -186,11 +186,11 @@ STR_BEGIN_FORMATTER(formatScreenColor, const ScreenColor *color)
   unsigned int styleCount = 0;
 
   if (color->usingRGB) {
-    ColorDescriptionBuffer foreground;
-    rgbColorToDescription(foreground, sizeof(foreground), color->foreground);
+    ColorNameBuffer foreground;
+    rgbColorToName(foreground, sizeof(foreground), color->foreground);
 
-    ColorDescriptionBuffer background;
-    rgbColorToDescription(background, sizeof(background), color->background);
+    ColorNameBuffer background;
+    rgbColorToName(background, sizeof(background), color->background);
 
     STR_PRINTF("%s%s%s", foreground, on, background);
     if (color->isBlinking) styleNames[styleCount++] = "blink";

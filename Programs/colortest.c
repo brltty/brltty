@@ -39,8 +39,6 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
-#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -165,7 +163,7 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "colortest",
-  .purpose = "Test the color conversion and description functions.",
+  .purpose = "Test the color conversion and name functions.",
 
   .options = &programOptions,
   .parameters = &programParameters,
@@ -222,7 +220,7 @@ putTestResult (const char *name, int count, int passes) {
 
   if (!hasPassed) {
     if (opt_quietness <= OPTQ_SUMMARY) {
-      putf("%d/%d tests failed\n", (count - passes), count);
+      putf("%d/%d tests failed.\n", (count - passes), count);
     }
   }
 
@@ -237,8 +235,8 @@ putTestResult (const char *name, int count, int passes) {
 typedef struct {
   const char *name;
   unsigned char r, g, b;
-  const char *expectedDescription;
-  const char *alternateDescription;  /* Optional alternate acceptable description */
+  const char *expectedName;
+  const char *alternateName;  /* Optional alternate acceptable name */
   const char *alternateReason;       /* Reason why alternate is acceptable */
 } ColorTest;
 
@@ -272,14 +270,14 @@ static int
 testVGADescriptions (const char *testName) {
   if (opt_quietness <= OPTQ_PASS) {
     for (int vga=0; vga<VGA_COLOR_COUNT; vga+=1) {
-      const char *name = vgaColorName(vga);
+      const char *vgaName = vgaColorName(vga);
 
       RGBColor rgb = vgaToRgb(vga);
-      ColorDescriptionBuffer description;
-      rgbColorToDescription(description, sizeof(description), rgb);
+      ColorNameBuffer rgbName;
+      rgbColorToName(rgbName, sizeof(rgbName), rgb);
 
       putf(VGA_COLOR_FORMAT " " VGA_NAME_FORMAT ": " RGB_COLOR_FORMAT " -> \"%s\"\n",
-           vga, name, rgb.r, rgb.g, rgb.b, description);
+           vga, vgaName, rgb.r, rgb.g, rgb.b, rgbName);
     }
   }
 
@@ -361,7 +359,8 @@ testColorRecognition (const char *testName) {
     /* Grays */
     {"Light Gray",       200, 200, 200, "light gray", NULL, NULL},
     {"Medium Gray",      128, 128, 128, "natural gray", NULL, NULL},
-    {"Dark Gray",        64,  64,  64,  "dark gray", NULL, NULL},
+    {"Dark Gray",        64,  64,  64,  "dark gray", "charcoal",
+     "grayscale analysis is more granular"},
 
     /* Named colors - CSS/HTML color standard */
     {"Brown",            170, 85,  0,   "brown", NULL, NULL},  /* VGA Brown RGB values */
@@ -381,7 +380,7 @@ testColorRecognition (const char *testName) {
     {"Tan",              210, 180, 140, "tan", NULL, NULL},      /* CSS Tan */
     {"Beige",            245, 245, 220, "beige", NULL, NULL},    /* CSS Beige */
 
-    /* Compound descriptions */
+    /* Compound names */
     {"Dark Blue",        0,   0,   139, "navy", NULL, NULL},
 
     /* Light blue (173,216,230) has H=197° which is in the cyan range (180-210°).
@@ -399,13 +398,13 @@ testColorRecognition (const char *testName) {
   for (int i=0; i<testCount; i+=1) {
     const ColorTest *test = &tests[i];
 
-    ColorDescriptionBuffer description;
-    rgbToDescription(description, sizeof(description), test->r, test->g, test->b);
+    ColorNameBuffer rgbName;
+    rgbToName(rgbName, sizeof(rgbName), test->r, test->g, test->b);
 
-    /* Check if result matches expected or alternate description */
-    int matchExpected = strcasecmp(description, test->expectedDescription) == 0;
-    int matchAlternate = test->alternateDescription &&
-                         (strcasecmp(description, test->alternateDescription) == 0);
+    /* Check if result matches expected or alternate name */
+    int matchExpected = strcasecmp(rgbName, test->expectedName) == 0;
+    int matchAlternate = test->alternateName &&
+                         (strcasecmp(rgbName, test->alternateName) == 0);
 
     int passed = matchExpected || matchAlternate;
     if (passed) passCount += 1;
@@ -427,13 +426,13 @@ testColorRecognition (const char *testName) {
 
     if (opt_quietness <= quietnessLevel) {
       putf("%-20s " RGB_COLOR_FORMAT " -> %-20s [%s]\n",
-           test->name, test->r, test->g, test->b, description, status);
+           test->name, test->r, test->g, test->b, rgbName, status);
 
       if (!passed) {
-        putf("  Expected: \"%s\"\n", test->expectedDescription);
+        putf("  Expected: \"%s\"\n", test->expectedName);
 
-        if (test->alternateDescription) {
-          putf("  Alternate: \"%s\"\n", test->alternateDescription);
+        if (test->alternateName) {
+          putf("  Alternate: \"%s\"\n", test->alternateName);
         }
       } else if (matchAlternate) {
         /* Show why alternate was accepted */
@@ -490,18 +489,18 @@ showColor (RGBColor rgb, HSVColor hsv) {
     unsigned char wasUsingTable = useHSVColorTable;
 
     useHSVColorTable = 0;
-    ColorDescriptionBuffer codedDescription;
-    hsvColorToDescription(codedDescription, sizeof(codedDescription), hsv);
+    ColorNameBuffer codedColor;
+    hsvColorToName(codedColor, sizeof(codedColor), hsv);
 
     useHSVColorTable = 1;
-    ColorDescriptionBuffer tableDescription;
-    hsvColorToDescription(tableDescription, sizeof(tableDescription), hsv);
+    ColorNameBuffer tableColor;
+    hsvColorToName(tableColor, sizeof(tableColor), hsv);
 
-    if (strcasecmp(codedDescription, tableDescription) == 0) {
-      putf("%sColor: %s\n", blockIndent, codedDescription);
+    if (strcasecmp(codedColor, tableColor) == 0) {
+      putf("%sColor: %s\n", blockIndent, codedColor);
     } else {
-      putf("%sCoded Color: %s\n", blockIndent, codedDescription);
-      putf("%sTable Color: %s\n", blockIndent, tableDescription);
+      putf("%sCoded Color: %s\n", blockIndent, codedColor);
+      putf("%sTable Color: %s\n", blockIndent, tableColor);
     }
 
     useHSVColorTable = wasUsingTable;
@@ -1287,7 +1286,7 @@ showInteractiveHelp (int includeCommands) {
   putf("If only numeric arguments are specified then the current color model is used.\n");
 }
 
-/* Interactive color description test */
+/* Interactive color test */
 static void
 doInteractiveMode (void) {
   beginInteractiveMode();

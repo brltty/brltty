@@ -1193,7 +1193,7 @@ hsvCodedColorName(HSVColor hsv) {
 }
 
 const char *
-hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
+hsvColorToName(char *buffer, size_t bufferSize, HSVColor hsv) {
   hsvNormalize(&hsv.h, &hsv.s, &hsv.v);
   const char *name = NULL;
 
@@ -1233,29 +1233,29 @@ hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv) {
 }
 
 const char *
-hsvToDescription(char *buffer, size_t bufferSize, float h, float s, float v) {
+hsvToName(char *buffer, size_t bufferSize, float h, float s, float v) {
   HSVColor hsv = {.h=h, .s=s, .v=v};
-  return hsvColorToDescription(buffer, bufferSize, hsv);
+  return hsvColorToName(buffer, bufferSize, hsv);
 }
 
 const char *
-rgbToDescription(char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b) {
-  return hsvColorToDescription(buffer, bufferSize, rgbToHsv(r, g, b));
+rgbToName(char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b) {
+  return hsvColorToName(buffer, bufferSize, rgbToHsv(r, g, b));
 }
 
 const char *
-rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color) {
-  return rgbToDescription(buffer, bufferSize, color.r, color.g, color.b);
+rgbColorToName(char *buffer, size_t bufferSize, RGBColor color) {
+  return rgbToName(buffer, bufferSize, color.r, color.g, color.b);
 }
 
 const char *
-hlsToDescription(char *buffer, size_t bufferSize, float h, float l, float s) {
-  return rgbColorToDescription(buffer, bufferSize, hlsToRgb(h, l, s));
+hlsToName(char *buffer, size_t bufferSize, float h, float l, float s) {
+  return rgbColorToName(buffer, bufferSize, hlsToRgb(h, l, s));
 }
 
 const char *
-hlsColorToDescription(char *buffer, size_t bufferSize, HLSColor hls) {
-  return hlsToDescription(buffer, bufferSize, hls.h, hls.l, hls.s);
+hlsColorToName(char *buffer, size_t bufferSize, HLSColor hls) {
+  return hlsToName(buffer, bufferSize, hls.h, hls.l, hls.s);
 }
 
 /* Convert ANSI 256-color code to RGB */

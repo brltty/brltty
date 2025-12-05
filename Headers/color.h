@@ -110,41 +110,41 @@ extern const HSVModifier *hsvBrightnessModifier (float brightness);
  * buffer must be at least 64 bytes
  * Returns pointer to buffer
  */
-extern const char *hsvToDescription(char *buffer, size_t bufferSize, float h, float s, float v);
+extern const char *hsvToName(char *buffer, size_t bufferSize, float h, float s, float v);
 
 /* Describe an HSV color structure as a human-readable string
  * buffer must be at least 64 bytes
  * Returns pointer to buffer
  */
-extern const char *hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv);
+extern const char *hsvColorToName(char *buffer, size_t bufferSize, HSVColor hsv);
 
 /* Describe an RGB color as a human-readable string
- * Uses HSV analysis to provide detailed descriptions like:
+ * Uses HSV analysis to provide more accurate names like:
  * "vivid red", "dark blue", "pale cyan", "bright orange", etc.
  * buffer must be at least 64 bytes
  * Returns pointer to buffer
  */
-extern const char *rgbToDescription (char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b);
+extern const char *rgbToName (char *buffer, size_t bufferSize, unsigned char r, unsigned char g, unsigned char b);
 
 /* Describe an RGB color structure as a human-readable string
  * buffer must be at least 64 bytes
  * Returns pointer to buffer
  */
-extern const char *rgbColorToDescription (char *buffer, size_t bufferSize, RGBColor color);
+extern const char *rgbColorToName (char *buffer, size_t bufferSize, RGBColor color);
 
 /* Describe an HLS color as a human-readable string
- * Uses HSV analysis to provide detailed descriptions like:
+ * Uses HSV analysis to provide more accurate names like:
  * "vivid red", "dark blue", "pale cyan", "bright orange", etc.
  * buffer must be at least 64 bytes
  * Returns pointer to buffer
  */
-extern const char *hlsToDescription(char *buffer, size_t bufferSize, float h, float l, float s);
+extern const char *hlsToName(char *buffer, size_t bufferSize, float h, float l, float s);
 
 /* Describe an HLS color structure as a human-readable string
  * buffer must be at least 64 bytes
  * Returns pointer to buffer
  */
-extern const char *hlsColorToDescription(char *buffer, size_t bufferSize, HLSColor hls);
+extern const char *hlsColorToName(char *buffer, size_t bufferSize, HLSColor hls);
 
 /* Convert ANSI 256-color code to RGB */
 extern RGBColor ansiToRgb (unsigned int code);

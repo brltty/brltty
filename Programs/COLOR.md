@@ -408,12 +408,12 @@ Returns the HSV modifier descriptor for the specified brightness (value) level.
 - Light (0.7-0.85): High light level
 - Bright (> 0.85): Almost white, very bright (highest)
 
-### Color Description
+### Color Name
 
-#### hsvColorToDescription
+#### hsvColorToName
 
 ```c
-const char *hsvColorToDescription(char *buffer, size_t bufferSize, HSVColor hsv);
+const char *hsvColorToName(char *buffer, size_t bufferSize, HSVColor hsv);
 ```
 
 Generates a human-readable description of an HSV color.
@@ -460,18 +460,18 @@ char buffer[64];
 HSVColor hsv;
 
 hsv = (HSVColor){0.0, 1.0, 1.0};
-hsvColorToDescription(buffer, sizeof(buffer), hsv);
+hsvColorToName(buffer, sizeof(buffer), hsv);
 /* Returns: "Pure Red" */
 
 hsv = (HSVColor){240.0, 0.6, 0.3};
-hsvColorToDescription(buffer, sizeof(buffer), hsv);
+hsvColorToName(buffer, sizeof(buffer), hsv);
 /* Returns: "Dark Blue" */
 ```
 
-#### hsvToDescription
+#### hsvToName
 
 ```c
-const char *hsvToDescription(char *buffer, size_t bufferSize, float h, float s, float v);
+const char *hsvToName(char *buffer, size_t bufferSize, float h, float s, float v);
 ```
 
 Convenience function that accepts individual HSV components instead of an HSVColor structure.
@@ -479,17 +479,17 @@ Convenience function that accepts individual HSV components instead of an HSVCol
 **Example:**
 ```c
 char buffer[64];
-hsvToDescription(buffer, sizeof(buffer), 120.0, 0.8, 0.6);
+hsvToName(buffer, sizeof(buffer), 120.0, 0.8, 0.6);
 ```
 
-#### rgbToDescription
+#### rgbToName
 
 ```c
-const char *rgbToDescription(char *buffer, size_t bufferSize,
+const char *rgbToName(char *buffer, size_t bufferSize,
                              unsigned char r, unsigned char g, unsigned char b);
 ```
 
-Generates a human-readable description of an RGB color by converting to HSV and using `hsvColorToDescription()`.
+Generates a human-readable description of an RGB color by converting to HSV and using `hsvColorToName()`.
 
 **Parameters:**
 - `buffer`: Output buffer (recommended minimum 64 bytes)
@@ -504,71 +504,71 @@ Generates a human-readable description of an RGB color by converting to HSV and 
 ```c
 char buffer[64];
 
-rgbToDescription(buffer, sizeof(buffer), 255, 0, 0);
+rgbToName(buffer, sizeof(buffer), 255, 0, 0);
 /* Returns: "Pure Red" */
 
-rgbToDescription(buffer, sizeof(buffer), 50, 50, 150);
+rgbToName(buffer, sizeof(buffer), 50, 50, 150);
 /* Returns: "Dark Blue" */
 
-rgbToDescription(buffer, sizeof(buffer), 10, 10, 10);
+rgbToName(buffer, sizeof(buffer), 10, 10, 10);
 /* Returns: "Black" */
 
-rgbToDescription(buffer, sizeof(buffer), 245, 245, 245);
+rgbToName(buffer, sizeof(buffer), 245, 245, 245);
 /* Returns: "White" */
 
-rgbToDescription(buffer, sizeof(buffer), 170, 85, 0);
+rgbToName(buffer, sizeof(buffer), 170, 85, 0);
 /* Returns: "Brown" (VGA Brown color) */
 
-rgbToDescription(buffer, sizeof(buffer), 101, 67, 33);
+rgbToName(buffer, sizeof(buffer), 101, 67, 33);
 /* Returns: "Dark Brown" */
 
-rgbToDescription(buffer, sizeof(buffer), 255, 192, 203);
+rgbToName(buffer, sizeof(buffer), 255, 192, 203);
 /* Returns: "Pink" */
 
-rgbToDescription(buffer, sizeof(buffer), 255, 127, 80);
+rgbToName(buffer, sizeof(buffer), 255, 127, 80);
 /* Returns: "Coral" */
 
-rgbToDescription(buffer, sizeof(buffer), 128, 128, 0);
+rgbToName(buffer, sizeof(buffer), 128, 128, 0);
 /* Returns: "Olive" */
 
-rgbToDescription(buffer, sizeof(buffer), 50, 205, 50);
+rgbToName(buffer, sizeof(buffer), 50, 205, 50);
 /* Returns: "Lime" */
 
-rgbToDescription(buffer, sizeof(buffer), 0, 128, 128);
+rgbToName(buffer, sizeof(buffer), 0, 128, 128);
 /* Returns: "Teal" */
 
-rgbToDescription(buffer, sizeof(buffer), 64, 224, 208);
+rgbToName(buffer, sizeof(buffer), 64, 224, 208);
 /* Returns: "Turquoise" */
 
-rgbToDescription(buffer, sizeof(buffer), 128, 0, 0);
+rgbToName(buffer, sizeof(buffer), 128, 0, 0);
 /* Returns: "Maroon" */
 
-rgbToDescription(buffer, sizeof(buffer), 0, 0, 128);
+rgbToName(buffer, sizeof(buffer), 0, 0, 128);
 /* Returns: "Navy" */
 
-rgbToDescription(buffer, sizeof(buffer), 75, 0, 130);
+rgbToName(buffer, sizeof(buffer), 75, 0, 130);
 /* Returns: "Indigo" */
 
-rgbToDescription(buffer, sizeof(buffer), 230, 230, 250);
+rgbToName(buffer, sizeof(buffer), 230, 230, 250);
 /* Returns: "Lavender" */
 
-rgbToDescription(buffer, sizeof(buffer), 255, 215, 0);
+rgbToName(buffer, sizeof(buffer), 255, 215, 0);
 /* Returns: "Gold" */
 
-rgbToDescription(buffer, sizeof(buffer), 210, 180, 140);
+rgbToName(buffer, sizeof(buffer), 210, 180, 140);
 /* Returns: "Tan" */
 
-rgbToDescription(buffer, sizeof(buffer), 245, 245, 220);
+rgbToName(buffer, sizeof(buffer), 245, 245, 220);
 /* Returns: "Beige" */
 ```
 
-#### rgbColorToDescription
+#### rgbColorToName
 
 ```c
-const char *rgbColorToDescription(char *buffer, size_t bufferSize, RGBColor color);
+const char *rgbColorToName(char *buffer, size_t bufferSize, RGBColor color);
 ```
 
-Convenience wrapper for `rgbToDescription()` that accepts an RGBColor structure.
+Convenience wrapper for `rgbToName()` that accepts an RGBColor structure.
 
 ### Color Interpolation
 
@@ -638,7 +638,7 @@ void describe_ansi_color(unsigned int ansi_color) {
     RGBColor rgb = ansiToRgb(ansi_color);
 
     /* Get human-readable description */
-    rgbColorToDescription(description, sizeof(description), rgb);
+    rgbColorToName(description, sizeof(description), rgb);
     printf("ANSI color %u: RGB(%u,%u,%u) = %s\n",
            ansi_color, rgb.r, rgb.g, rgb.b, description);
 }
@@ -660,7 +660,7 @@ void analyze_color(unsigned char r, unsigned char g, unsigned char b) {
     hsv = rgbToHsv(r, g, b);
 
     /* Get description */
-    rgbToDescription(description, sizeof(description), r, g, b);
+    rgbToName(description, sizeof(description), r, g, b);
 
     /* Find closest VGA color using both methods */
     vgaColor = rgbToVga(r, g, b, 0);
@@ -697,7 +697,7 @@ void create_gradient(RGBColor start, RGBColor end, int steps) {
     for (int i = 0; i < steps; i++) {
         float t = (float)i / (float)(steps - 1);
         RGBColor color = rgbColorInterpolate(start, end, t);
-        rgbColorToDescription(description, sizeof(description), color);
+        rgbColorToName(description, sizeof(description), color);
         printf("Step %d: RGB(%u,%u,%u) - %s\n", i, color.r, color.g, color.b, description);
     }
 }
