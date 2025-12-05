@@ -63,10 +63,10 @@ static int opt_quietness;
 static int opt_performAllTests;
 
 static int opt_testVGAtoRGBtoVGA;
-static int opt_testVGADescriptions;
+static int opt_listVGAColors;
 static int opt_testRGBtoHSVtoRGB;
 static int opt_testColorRecognition;
-static int opt_testRGBtoVGA;
+static int opt_showRGBtoVGA;
 
 BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "quieter",
@@ -85,30 +85,30 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   { .word = "vga-roundtrip",
     .letter = 'v',
     .setting.flag = &opt_testVGAtoRGBtoVGA,
-    .description = "test VGA to RGB to VGA round-trip - conflicts with requesting all tests",
+    .description = "test the VGA to RGB to VGA round-trip - conflicts with requesting all tests",
   },
 
-  { .word = "vga-descriptions",
-    .letter = 'd',
-    .setting.flag = &opt_testVGADescriptions,
-    .description = "list VGA color descriptions - conflicts with requesting all tests",
+  { .word = "vga-colors",
+    .letter = 'l',
+    .setting.flag = &opt_listVGAColors,
+    .description = "list all of the VGA colors - conflicts with requesting all tests",
   },
 
   { .word = "rgb-roundtrip",
     .letter = 'r',
     .setting.flag = &opt_testRGBtoHSVtoRGB,
-    .description = "test RGB to HSV to RGB round-trip - conflicts with requesting all tests",
+    .description = "test the RGB to HSV to RGB round-trip - conflicts with requesting all tests",
   },
 
   { .word = "color-recognition",
     .letter = 'c',
     .setting.flag = &opt_testColorRecognition,
-    .description = "test recognition of common colors - conflicts with requesting all tests",
+    .description = "test the recognition of common colors - conflicts with requesting all tests",
   },
 
   { .word = "vga-mappings",
     .letter = 'm',
-    .setting.flag = &opt_testRGBtoVGA,
+    .setting.flag = &opt_showRGBtoVGA,
     .description = "show some RGB to nearest VGA mappings - conflicts with requesting all tests",
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
@@ -267,7 +267,7 @@ testVGAtoRGBtoVGA (const char *testName) {
 
 /* List VGA colors */
 static int
-testVGADescriptions (const char *testName) {
+listVGAColors (const char *testName) {
   if (opt_quietness <= OPTQ_PASS) {
     for (int vga=0; vga<VGA_COLOR_COUNT; vga+=1) {
       const char *vgaName = vgaColorName(vga);
@@ -446,7 +446,7 @@ testColorRecognition (const char *testName) {
 
 /* Test RGB to VGA mapping with various colors */
 static int
-testRGBtoVGA (const char *testName) {
+showRGBtoVGA (const char *testName) {
   static const ColorTest tests[] = {
     {"Bright Red",       255, 0,   0,   NULL, NULL, NULL},  /* Should be 12 (Light Red) */
     {"Dark Red",         128, 0,   0,   NULL, NULL, NULL},  /* Should be 4 (Red) */
@@ -561,16 +561,7 @@ showANSI (int ansi) {
 
 static int
 parseIntensity (int *intensity, const char *argument, const char *name) {
-  static const int minimum = 0;
-  static const int maximum = UINT8_MAX;
-  if (validateInteger(intensity, argument, &minimum, &maximum)) return 1;
-
-  logMessage(LOG_ERR,
-    "invalid %s: %s (must be an integer >= %d and <= %d)",
-    name, argument, minimum, maximum
-  );
-
-  return 0;
+  return parseInteger(intensity, argument, 0, UINT8_MAX, name);
 }
 
 static int
@@ -1349,10 +1340,10 @@ static const RequestableTest requetableTestTable[] = {
     .perform = testVGAtoRGBtoVGA,
   },
 
-  { .name = "VGA Color Descriptions",
-    .objective = "List the name and HSV description of each VGA color",
-    .requested = &opt_testVGADescriptions,
-    .perform = testVGADescriptions,
+  { .name = "VGA Color Listing",
+    .objective = "List the VGA number and name, as well as the HSV name, of each VGA color",
+    .requested = &opt_listVGAColors,
+    .perform = listVGAColors,
   },
 
   { .name = "RGB to HSV to RGB Round-Trip Test",
@@ -1369,8 +1360,8 @@ static const RequestableTest requetableTestTable[] = {
 
   { .name = "RGB to Nearest VGA Mappings",
     .objective = "Show how some common colors are mapped to their nearest VGA colors",
-    .requested = &opt_testRGBtoVGA,
-    .perform = testRGBtoVGA,
+    .requested = &opt_showRGBtoVGA,
+    .perform = showRGBtoVGA,
   },
 };
 
