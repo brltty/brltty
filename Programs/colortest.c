@@ -43,6 +43,7 @@
 #include <ctype.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "cmdline.h"
 #include "cmdlib.h"
 #include "color.h"
@@ -140,7 +141,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "Command names are case-insensitive and may be abbreviated.",
   "The recognized commands are:",
   "  brightness [percent]",
-  "  colors [color]",
+  "  colors [name]",
   "  grayscale [percent]",
   "  hue [degrees]",
   "  problems",
@@ -1157,37 +1158,44 @@ cmdProblems (CommandArguments *arguments) {
 typedef struct {
   const char *name;
   const char *help;
+  const char *syntax;
   int (*handler) (CommandArguments *arguments);
 } CommandEntry;
 
 static const CommandEntry commandTable[] = {
   { .name = "brightness",
     .help = "List the HSV brightness (value) modifier names and ranges.",
+    .syntax = "[percent]",
     .handler = cmdBrightness,
   },
 
   { .name = "colors",
-    .help = "List the special color definitions.",
+    .help = "List the color definitions table.",
+    .syntax = "[name]",
     .handler = cmdColors,
   },
 
   { .name = "grayscale",
     .help = "List the grayscale color names and brightness ranges.",
+    .syntax = "[percent]",
     .handler = cmdGrayscale,
   },
 
   { .name = "hue",
     .help = "List the main hue color names and ranges.",
+    .syntax = "[degrees]",
     .handler = cmdHue,
   },
 
   { .name = "problems",
-    .help = "Check the special color definition table for problems.",
+    .help = "Check the color definition table for problems.",
+    .syntax = "",
     .handler = cmdProblems,
   },
 
   { .name = "saturation",
     .help = "List the HSV saturation modifier names and ranges.",
+    .syntax = "[percent]",
     .handler = cmdSaturation,
   },
 };
@@ -1244,15 +1252,37 @@ showInteractiveHelp (int includeCommands) {
   if (includeCommands) {
     putf("The rest of the commands are:\n");
 
+    int offsets[ARRAY_COUNT(commandTable)];
+    int lengths[ARRAY_COUNT(commandTable)];
+    int longest = 0;
+
+    char buffer[0X400];
+    STR_BEGIN(buffer, sizeof(buffer));
+
     for (int i=0; i<ARRAY_COUNT(commandTable); i+=1) {
       const CommandEntry *cmd = &commandTable[i];
 
-      putf(
-        "%s%-10s  %s\n",
-        blockIndent, cmd->name, cmd->help
-      );
+      int offset = offsets[i] = STR_LENGTH;
+      STR_PRINTF("%s", cmd->name);
+      if (cmd->syntax && *cmd->syntax) STR_PRINTF(" %s", cmd->syntax);
+      int length = lengths[i] = STR_LENGTH - offset;
+
+      if (length > longest) longest = length;
     }
 
+    for (int i=0; i<ARRAY_COUNT(commandTable); i+=1) {
+      const CommandEntry *cmd = &commandTable[i];
+      putf("%s%.*s", blockIndent, lengths[i], &buffer[offsets[i]]);
+
+      if (cmd->help) {
+        for (int j=lengths[i]; j<longest; j+=1) putf(" ");
+        putf("  %s", cmd->help);
+      }
+
+      putf("\n");
+    }
+
+    STR_END;
     putf("\n");
   }
 
