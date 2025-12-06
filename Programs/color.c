@@ -1129,7 +1129,7 @@ hsvSearchComparer (const void *target, const void *item) {
   return 0;
 }
 
-static const HSVColorEntry *
+const HSVColorEntry *
 hsvColorEntry(HSVColor hsv) {
   if (useHSVColorSorting) {
     static const HSVColorEntry *sortedTable[ARRAY_COUNT(hsvColorTable)] = {NULL};

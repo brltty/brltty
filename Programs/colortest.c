@@ -1097,13 +1097,86 @@ hsvColorContains (const HSVColorEntry *outer, const HSVColorEntry *inner) {
          hsvRangeContains(&outer->value, &inner->value);
 }
 
+static void putColorProblem (const HSVColorEntry *color, const char *format, ...) PRINTF(2, 3);
+
+static void
+putColorProblem (const HSVColorEntry *color, const char *format, ...) {
+  putf("%s%s[%u]: ", blockIndent, color->name, color->instance);
+
+  {
+    va_list args;
+    va_start(args, format);
+    vputf(format, args);
+    va_end(args);
+  }
+
+  putf("\n");
+}
+
 static int
 cmdProblems (CommandArguments *arguments) {
   if (verifyNoMoreArguments(arguments)) {
     unsigned int problemCount = 0;
 
+    unsigned char wasUsingSorting = useHSVColorSorting;
+    useHSVColorSorting = 0;
+
     for (int i=0; i<hsvColorCount; i+=1) {
       const HSVColorEntry *color1 = &hsvColorTable[i];
+
+      if (!hsvValidAngleRange(&color1->hue)) {
+        problemCount += 1;
+        putColorProblem(
+          color1, "invalid hue range: %.0f-%.0f",
+          color1->hue.minimum, color1->hue.maximum
+        );
+      }
+
+      if (!hsvValidLevelRange(&color1->saturation)) {
+        problemCount += 1;
+        putColorProblem(
+          color1, "invalid saturation range: %.2f-%.2f",
+          color1->saturation.minimum, color1->saturation.maximum
+        );
+      }
+
+      if (!hsvValidLevelRange(&color1->value)) {
+        problemCount += 1;
+        putColorProblem(
+          color1, "invalid value range: %.2f-%.2f",
+          color1->value.minimum, color1->value.maximum
+        );
+      }
+
+      if (useHSVColorSorting) {
+        static const float increment = 0.001;
+
+        HSVColor hsv = {
+          .h = color1->hue.minimum + increment,
+          .s = color1->saturation.minimum + increment,
+          .v = color1->value.minimum + increment,
+        };
+
+        if (color1 != hsvColorEntry(hsv)) {
+          problemCount += 1;
+          putColorProblem(color1, "sorted lookup failed (minimum)");
+        }
+      }
+
+      if (useHSVColorSorting) {
+        static const float decrement = 0.001;
+
+        HSVColor hsv = {
+          .h = color1->hue.maximum - decrement,
+          .s = color1->saturation.maximum - decrement,
+          .v = color1->value.maximum - decrement,
+        };
+
+        if (color1 != hsvColorEntry(hsv)) {
+          problemCount += 1;
+          putColorProblem(color1, "sorted lookup failed (maximum)");
+        }
+      }
 
       for (int j=i+1; j<hsvColorCount; j+=1) {
         const HSVColorEntry *color2 = &hsvColorTable[j];
@@ -1111,38 +1184,8 @@ cmdProblems (CommandArguments *arguments) {
         if (strcasecmp(color1->name, color2->name) == 0) {
           if (color1->instance == color2->instance) {
             problemCount += 1;
-            putf(
-              "%s%s[%u]: duplicate color definition\n",
-              blockIndent, color1->name, color1->instance
-            );
+            putColorProblem(color1, "duplicate definition");
           }
-        }
-
-        if (!hsvValidAngleRange(&color1->hue)) {
-          problemCount += 1;
-          putf(
-            "%s%s: invalid hue range %.0f-%.0f\n",
-            blockIndent, color1->name,
-            color1->hue.minimum, color1->hue.maximum
-          );
-        }
-
-        if (!hsvValidLevelRange(&color1->saturation)) {
-          problemCount += 1;
-          putf(
-            "%s%s: invalid saturation range %.2f-%.2f\n",
-            blockIndent, color1->name,
-            color1->saturation.minimum, color1->saturation.maximum
-          );
-        }
-
-        if (!hsvValidLevelRange(&color1->value)) {
-          problemCount += 1;
-          putf(
-            "%s%s: invalid value range %.2f-%.2f\n",
-            blockIndent, color1->name,
-            color1->value.minimum, color1->value.maximum
-          );
         }
 
         if (hsvColorContains(color1, color2)) {
@@ -1167,8 +1210,10 @@ cmdProblems (CommandArguments *arguments) {
       }
     }
 
-    if (problemCount) return 2;
+    if (problemCount > 0) return 2;
     if (opt_quietness <= OPTQ_PASS) putf("No problems found.\n");
+
+    useHSVColorSorting = wasUsingSorting;
     return 1;
   }
 
