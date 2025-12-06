@@ -1081,9 +1081,74 @@ const HSVColorEntry hsvColorTable[] = {
 
 const size_t hsvColorCount = ARRAY_COUNT(hsvColorTable);
 unsigned char useHSVColorTable = 0;
+unsigned char useHSVColorSorting = 0;
+
+static int
+hsvRangeComparer (const HSVComponentRange *range1, const HSVComponentRange *range2) {
+  if (range1->minimum < range2->minimum) return -1;
+  if (range1->minimum > range2->minimum) return 1;
+
+  if (range1->maximum < range2->maximum) return -1;
+  if (range1->maximum > range2->maximum) return 1;
+
+  return 0;
+}
+
+static int
+hsvColorSorter (const void *item1, const void *item2) {
+  const HSVColorEntry *const *color1 = item1;
+  const HSVColorEntry *const *color2 = item2;
+  int relation;
+
+  relation = hsvRangeComparer(&(*color1)->hue, &(*color2)->hue);
+  if (relation != 0) return relation;
+
+  relation = hsvRangeComparer(&(*color1)->saturation, &(*color2)->saturation);
+  if (relation != 0) return relation;
+
+  relation = hsvRangeComparer(&(*color1)->value, &(*color2)->value);
+  if (relation != 0) return relation;
+
+  return 0;
+}
+
+static int
+hsvColorSearcher (const void *target, const void *item) {
+  const HSVColor *hsv = target;
+  const HSVColorEntry *const *color = item;
+
+  if (hsv->h < (*color)->hue.minimum) return -1;
+  if (hsv->h > (*color)->hue.maximum) return 1;
+
+  if (hsv->s < (*color)->saturation.minimum) return -1;
+  if (hsv->s > (*color)->saturation.maximum) return 1;
+
+  if (hsv->v < (*color)->value.minimum) return -1;
+  if (hsv->v > (*color)->value.maximum) return 1;
+
+  return 0;
+}
 
 static const HSVColorEntry *
 hsvColorEntry(HSVColor hsv) {
+  if (useHSVColorSorting) {
+    static const HSVColorEntry *sortedTable[ARRAY_COUNT(hsvColorTable)] = {NULL};
+
+    if (!sortedTable[0]) {
+      for (int i=0; i<hsvColorCount; i+=1) {
+        sortedTable[i] = &hsvColorTable[i];
+      }
+
+      qsort(sortedTable, hsvColorCount, sizeof(sortedTable[0]), hsvColorSorter);
+    }
+
+    const HSVColorEntry **color = bsearch(
+      &hsv, sortedTable, hsvColorCount, sizeof(sortedTable[0]), hsvColorSearcher
+    );
+
+    return color? *color: NULL;
+  }
+
   for (int i=0; i<ARRAY_COUNT(hsvColorTable); i+=1) {
     const HSVColorEntry *color = &hsvColorTable[i];
 

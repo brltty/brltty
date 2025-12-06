@@ -39,6 +39,7 @@ typedef struct {
 extern const HSVColorEntry hsvColorTable[];
 extern const size_t hsvColorCount;
 extern unsigned char useHSVColorTable;
+extern unsigned char useHSVColorSorting;
 
 #ifdef __cplusplus
 }
