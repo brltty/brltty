@@ -489,23 +489,38 @@ showColor (RGBColor rgb, HSVColor hsv) {
 
   {
     unsigned char wasUsingTable = useHSVColorTable;
+    unsigned char wasUsingSorting = useHSVColorSorting;
 
     useHSVColorTable = 0;
-    ColorNameBuffer codedColor;
-    hsvColorToName(codedColor, sizeof(codedColor), hsv);
+    useHSVColorSorting = 0;
+
+    ColorNameBuffer inlineName;
+    hsvColorToName(inlineName, sizeof(inlineName), hsv);
 
     useHSVColorTable = 1;
-    ColorNameBuffer tableColor;
-    hsvColorToName(tableColor, sizeof(tableColor), hsv);
+    ColorNameBuffer lookupName;
+    hsvColorToName(lookupName, sizeof(lookupName), hsv);
 
-    if (strcasecmp(codedColor, tableColor) == 0) {
-      putf("%sColor: %s\n", blockIndent, codedColor);
+    useHSVColorSorting = 1;
+    ColorNameBuffer sortedName;
+    hsvColorToName(sortedName, sizeof(sortedName), hsv);
+
+    int showLookupName = strcasecmp(inlineName, lookupName) != 0;
+    int showSortedName = strcasecmp(lookupName, sortedName) != 0;
+
+    if (showLookupName || showSortedName) {
+      putf("%sInline Name: %s\n", blockIndent, inlineName);
+      putf("%sLookup Name: %s\n", blockIndent, lookupName);
+
+      if (showSortedName) {
+        putf("%sSorted Name: %s\n", blockIndent, sortedName);
+      }
     } else {
-      putf("%sCoded Color: %s\n", blockIndent, codedColor);
-      putf("%sTable Color: %s\n", blockIndent, tableColor);
+      putf("%sName: %s\n", blockIndent, inlineName);
     }
 
     useHSVColorTable = wasUsingTable;
+    useHSVColorSorting = wasUsingSorting;
   }
 
   {

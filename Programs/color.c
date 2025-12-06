@@ -1095,7 +1095,7 @@ hsvRangeComparer (const HSVComponentRange *range1, const HSVComponentRange *rang
 }
 
 static int
-hsvColorSorter (const void *item1, const void *item2) {
+hsvSortComparer (const void *item1, const void *item2) {
   const HSVColorEntry *const *color1 = item1;
   const HSVColorEntry *const *color2 = item2;
   int relation;
@@ -1113,7 +1113,7 @@ hsvColorSorter (const void *item1, const void *item2) {
 }
 
 static int
-hsvColorSearcher (const void *target, const void *item) {
+hsvSearchComparer (const void *target, const void *item) {
   const HSVColor *hsv = target;
   const HSVColorEntry *const *color = item;
 
@@ -1139,36 +1139,36 @@ hsvColorEntry(HSVColor hsv) {
         sortedTable[i] = &hsvColorTable[i];
       }
 
-      qsort(sortedTable, hsvColorCount, sizeof(sortedTable[0]), hsvColorSorter);
+      qsort(sortedTable, hsvColorCount, sizeof(sortedTable[0]), hsvSortComparer);
     }
 
-    const HSVColorEntry **color = bsearch(
-      &hsv, sortedTable, hsvColorCount, sizeof(sortedTable[0]), hsvColorSearcher
+    const HSVColorEntry *const *color = bsearch(
+      &hsv, sortedTable, hsvColorCount, sizeof(sortedTable[0]), hsvSearchComparer
     );
 
-    return color? *color: NULL;
-  }
+    if (color) return *color;
+  } else {
+    for (int i=0; i<ARRAY_COUNT(hsvColorTable); i+=1) {
+      const HSVColorEntry *color = &hsvColorTable[i];
 
-  for (int i=0; i<ARRAY_COUNT(hsvColorTable); i+=1) {
-    const HSVColorEntry *color = &hsvColorTable[i];
+      if (hsv.h < color->hue.minimum) continue;
+      if (hsv.h > color->hue.maximum) continue;
 
-    if (hsv.h < color->hue.minimum) continue;
-    if (hsv.h > color->hue.maximum) continue;
+      if (hsv.s < color->saturation.minimum) continue;
+      if (hsv.s > color->saturation.maximum) continue;
 
-    if (hsv.s < color->saturation.minimum) continue;
-    if (hsv.s > color->saturation.maximum) continue;
+      if (hsv.v < color->value.minimum) continue;
+      if (hsv.v > color->value.maximum) continue;
 
-    if (hsv.v < color->value.minimum) continue;
-    if (hsv.v > color->value.maximum) continue;
-
-    return color;
+      return color;
+    }
   }
 
   return NULL;
 }
 
 static const char *
-hsvCodedColorName(HSVColor hsv) {
+hsvInlineColorName(HSVColor hsv) {
   /* Special case for olive: dark yellow-green - check BEFORE brown */
   if ((hsv.h >= 60.0f && hsv.h < 120.0f) && hsv.v >= 0.48f && hsv.v < 0.55f && hsv.s > 0.85f) {
     return "Olive";
@@ -1268,7 +1268,7 @@ hsvColorToName(char *buffer, size_t bufferSize, HSVColor hsv) {
     const HSVColorEntry *color = hsvColorEntry(hsv);
     if (color) name = color->name;
   } else {
-    name = hsvCodedColorName(hsv);
+    name = hsvInlineColorName(hsv);
   }
 
   if (!name) {
