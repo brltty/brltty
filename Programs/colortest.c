@@ -1129,7 +1129,7 @@ cmdProblems (CommandArguments *arguments) {
     unsigned int problemCount = 0;
 
     unsigned char wasUsingSorting = useHSVColorSorting;
-    useHSVColorSorting = 0;
+    useHSVColorSorting = 1;
 
     for (int i=0; i<hsvColorCount; i+=1) {
       const HSVColorEntry *color1 = &hsvColorTable[i];
@@ -1167,9 +1167,14 @@ cmdProblems (CommandArguments *arguments) {
           .v = color1->value.minimum + increment,
         };
 
-        if (color1 != hsvColorEntry(hsv)) {
+        const HSVColorEntry *color = hsvColorEntry(hsv);
+
+        if (color1 != color) {
           problemCount += 1;
-          putColorProblem(color1, "sorted lookup failed (minimum)");
+          putColorProblem(
+            color1, "sorted lookup failed (minimum) -> %s",
+            color? color->name: "none"
+          );
         }
       }
 
@@ -1182,9 +1187,14 @@ cmdProblems (CommandArguments *arguments) {
           .v = color1->value.maximum - decrement,
         };
 
-        if (color1 != hsvColorEntry(hsv)) {
+        const HSVColorEntry *color = hsvColorEntry(hsv);
+
+        if (color1 != color) {
           problemCount += 1;
-          putColorProblem(color1, "sorted lookup failed (maximum)");
+          putColorProblem(
+            color1, "sorted lookup failed (maximum) -> %s",
+            color? color->name: "none"
+          );
         }
       }
 
@@ -1211,10 +1221,18 @@ cmdProblems (CommandArguments *arguments) {
       }
     }
 
-    if (problemCount > 0) return 2;
-    if (opt_quietness <= OPTQ_PASS) putf("No problems found.\n");
-
     useHSVColorSorting = wasUsingSorting;
+
+    if (problemCount > 0) {
+      putf(
+        "%u %s found.\n",
+        problemCount, ((problemCount == 1)? "problem": "problems")
+      );
+
+      return 2;
+    }
+
+    if (opt_quietness <= OPTQ_PASS) putf("No problems found.\n");
     return 1;
   }
 

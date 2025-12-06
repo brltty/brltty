@@ -1133,27 +1133,26 @@ hsvSortComparer (const void *item1, const void *item2) {
 }
 
 static int
+hsvRangeContains (const HSVComponentRange *range, float value) {
+  if (value <= range->minimum) return -1;
+  if (value >= range->maximum) return 1;
+  return 0;
+}
+
+static int
 hsvSearchComparer (const void *target, const void *item) {
   const HSVColor *hsv = target;
   const HSVColorEntry *const *color = item;
+  int relation;
 
-  {
-    float midpoint = hsvRangeMidpoint(&(*color)->hue);
-    if (hsv->h < midpoint) return -1;
-    if (hsv->h > midpoint) return 1;
-  }
+  relation = hsvRangeContains(&(*color)->hue, hsv->h);
+  if (relation != 0) return relation;
 
-  {
-    float midpoint = hsvRangeMidpoint(&(*color)->saturation);
-    if (hsv->s < midpoint) return -1;
-    if (hsv->s > midpoint) return 1;
-  }
+  relation = hsvRangeContains(&(*color)->saturation, hsv->s);
+  if (relation != 0) return relation;
 
-  {
-    float midpoint = hsvRangeMidpoint(&(*color)->value);
-    if (hsv->v < midpoint) return -1;
-    if (hsv->v > midpoint) return 1;
-  }
+  relation = hsvRangeContains(&(*color)->value, hsv->v);
+  if (relation != 0) return relation;
 
   return 0;
 }
@@ -1168,11 +1167,15 @@ hsvColorEntry (HSVColor hsv) {
         sortedTable[i] = &hsvColorTable[i];
       }
 
-      qsort(sortedTable, hsvColorCount, sizeof(sortedTable[0]), hsvSortComparer);
+      qsort(
+        sortedTable, ARRAY_COUNT(sortedTable),
+        sizeof(sortedTable[0]), hsvSortComparer
+      );
     }
 
     const HSVColorEntry *const *color = bsearch(
-      &hsv, sortedTable, hsvColorCount, sizeof(sortedTable[0]), hsvSearchComparer
+      &hsv, sortedTable, ARRAY_COUNT(sortedTable),
+      sizeof(sortedTable[0]), hsvSearchComparer
     );
 
     if (color) return *color;
