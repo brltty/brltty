@@ -476,10 +476,11 @@ showRGBtoVGA (const char *testName) {
 }
 
 static const char blockIndent[] = "  ";
+static const char brightnessName[] = "brightness percent";
 static const char grayName[] = "grayscale percent";
 static const char hueName[] = "hue angle";
+static const char lightnessName[] = "lightness percent";
 static const char saturationName[] = "saturation percent";
-static const char brightnessName[] = "brightness percent";
 
 static void
 showColor (RGBColor rgb, HSVColor hsv) {
@@ -632,15 +633,12 @@ hsvHandler (CommandArguments *arguments) {
 
 static int
 hlsHandler (CommandArguments *arguments) {
-  const char *hueName = "hue angle";
   const char *hueArgument;
   float hueAngle;
 
-  const char *lightnessName = "lightness percent";
   const char *lightnessArgument;
   float lightnessLevel;
 
-  const char *saturationName = "saturation percent";
   const char *saturationArgument;
   float saturationLevel;
 
@@ -970,7 +968,14 @@ static int
 sortHSVColorEntries (const void *item1, const void *item2) {
   const HSVColorEntry *const *color1 = item1;
   const HSVColorEntry *const *color2 = item2;
-  return strcasecmp((*color1)->name, (*color2)->name);
+
+  int relation = strcasecmp((*color1)->name, (*color2)->name);
+  if (relation != 0) return relation;
+
+  if ((*color1)->instance < (*color2)->instance) return -1;
+  if ((*color1)->instance > (*color2)->instance) return 1;
+
+  return 0;
 }
 
 static void
@@ -1278,10 +1283,12 @@ showInteractiveHelp (int includeCommands) {
 
     for (int i=0; i<ARRAY_COUNT(commandTable); i+=1) {
       const CommandEntry *cmd = &commandTable[i];
-      putf("%s%.*s", blockIndent, lengths[i], &buffer[offsets[i]]);
+      int *length = &lengths[i];
+
+      putf("%s%.*s", blockIndent, *length, &buffer[offsets[i]]);
 
       if (cmd->help && *cmd->help) {
-        putf("%*s  %s", (longest - lengths[i]), "", cmd->help);
+        putf("%*s  %s", (longest - *length), "", cmd->help);
       }
 
       putf("\n");
