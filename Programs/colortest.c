@@ -1113,6 +1113,16 @@ putColorProblem (const HSVColorEntry *color, const char *format, ...) {
   putf("\n");
 }
 
+static void
+putColorsProblem (const HSVColorEntry *color1, const HSVColorEntry *color2, const char *relation) {
+  putf(
+    "%s%s[%u] %s %s[%u]\n",
+    blockIndent, color1->name, color1->instance,
+    relation, color2->name, color2->instance
+  );
+}
+
+
 static int
 cmdProblems (CommandArguments *arguments) {
   if (verifyNoMoreArguments(arguments)) {
@@ -1190,22 +1200,13 @@ cmdProblems (CommandArguments *arguments) {
 
         if (hsvColorContains(color1, color2)) {
           problemCount += 1;
-          putf(
-            "%s%s contains %s\n",
-            blockIndent, color1->name, color2->name
-          );
+          putColorsProblem(color1, color2, "contains");
         } else if (hsvColorContains(color2, color1)) {
           problemCount += 1;
-          putf(
-            "%s%s is contained by %s\n",
-            blockIndent, color1->name, color2->name
-          );
+          putColorsProblem(color1, color2, "is within");
         } else if (hsvColorsOverlap(color1, color2)) {
           problemCount += 1;
-          putf(
-            "%s%s overlaps %s\n",
-            blockIndent, color1->name, color2->name
-          );
+          putColorsProblem(color1, color2,"overlaps");
         }
       }
     }

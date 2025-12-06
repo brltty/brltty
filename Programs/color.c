@@ -1083,13 +1083,33 @@ const size_t hsvColorCount = ARRAY_COUNT(hsvColorTable);
 unsigned char useHSVColorTable = 0;
 unsigned char useHSVColorSorting = 0;
 
-static int
-hsvRangeComparer (const HSVComponentRange *range1, const HSVComponentRange *range2) {
-  if (range1->minimum < range2->minimum) return -1;
-  if (range1->minimum > range2->minimum) return 1;
+static inline float
+hsvRangeMidpoint (const HSVComponentRange *range) {
+  return (range->minimum + range->maximum) / 2.0;
+}
 
-  if (range1->maximum < range2->maximum) return -1;
-  if (range1->maximum > range2->maximum) return 1;
+static inline float
+hsvRangeSize (const HSVComponentRange *range) {
+  return range->maximum - range->minimum;
+}
+
+static int
+hsvCompareRanges (const HSVComponentRange *range1, const HSVComponentRange *range2) {
+  {
+    float midpoint1 = hsvRangeMidpoint(range1);
+    float midpoint2 = hsvRangeMidpoint(range2);
+
+    if (midpoint1 < midpoint2) return -1;
+    if (midpoint1 > midpoint2) return 1;
+  }
+
+  {
+    float size1 = hsvRangeSize(range1);
+    float size2 = hsvRangeSize(range2);
+
+    if (size1 < size2) return -1;
+    if (size1 > size2) return 1;
+  }
 
   return 0;
 }
@@ -1100,13 +1120,13 @@ hsvSortComparer (const void *item1, const void *item2) {
   const HSVColorEntry *const *color2 = item2;
   int relation;
 
-  relation = hsvRangeComparer(&(*color1)->hue, &(*color2)->hue);
+  relation = hsvCompareRanges(&(*color1)->hue, &(*color2)->hue);
   if (relation != 0) return relation;
 
-  relation = hsvRangeComparer(&(*color1)->saturation, &(*color2)->saturation);
+  relation = hsvCompareRanges(&(*color1)->saturation, &(*color2)->saturation);
   if (relation != 0) return relation;
 
-  relation = hsvRangeComparer(&(*color1)->value, &(*color2)->value);
+  relation = hsvCompareRanges(&(*color1)->value, &(*color2)->value);
   if (relation != 0) return relation;
 
   return 0;
@@ -1117,20 +1137,29 @@ hsvSearchComparer (const void *target, const void *item) {
   const HSVColor *hsv = target;
   const HSVColorEntry *const *color = item;
 
-  if (hsv->h < (*color)->hue.minimum) return -1;
-  if (hsv->h > (*color)->hue.maximum) return 1;
+  {
+    float midpoint = hsvRangeMidpoint(&(*color)->hue);
+    if (hsv->h < midpoint) return -1;
+    if (hsv->h > midpoint) return 1;
+  }
 
-  if (hsv->s < (*color)->saturation.minimum) return -1;
-  if (hsv->s > (*color)->saturation.maximum) return 1;
+  {
+    float midpoint = hsvRangeMidpoint(&(*color)->saturation);
+    if (hsv->s < midpoint) return -1;
+    if (hsv->s > midpoint) return 1;
+  }
 
-  if (hsv->v < (*color)->value.minimum) return -1;
-  if (hsv->v > (*color)->value.maximum) return 1;
+  {
+    float midpoint = hsvRangeMidpoint(&(*color)->value);
+    if (hsv->v < midpoint) return -1;
+    if (hsv->v > midpoint) return 1;
+  }
 
   return 0;
 }
 
 const HSVColorEntry *
-hsvColorEntry(HSVColor hsv) {
+hsvColorEntry (HSVColor hsv) {
   if (useHSVColorSorting) {
     static const HSVColorEntry *sortedTable[ARRAY_COUNT(hsvColorTable)] = {NULL};
 
