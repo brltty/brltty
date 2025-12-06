@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_CMDLIB
 
 #include "program.h"
+#include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,6 +47,7 @@ extern int parseDegrees (float *degrees, const char *argument, const char *name)
 extern int parsePercent (float *value, const char *argument, const char *name);
 
 extern void putf (const char *format, ...) PRINTF(1, 2);
+extern void vputf (const char *format, va_list args);
 extern void flushOutput (void);
 
 extern void beginInteractiveMode (void);

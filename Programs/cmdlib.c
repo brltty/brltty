@@ -153,12 +153,17 @@ checkForOutputError (void) {
 }
 
 void
+vputf (const char *format, va_list args) {
+  vprintf(format, args);
+  checkForOutputError();
+}
+
+void
 putf (const char *format, ...) {
   va_list args;
   va_start(args, format);
-  vprintf(format, args);
+  vputf(format, args);
   va_end(args);
-  checkForOutputError();
 }
 
 void
