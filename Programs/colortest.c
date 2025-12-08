@@ -144,6 +144,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "  colors [name]",
   "  grayscale [percent]",
   "  hue [degrees]",
+  "  options [[no]option ...]",
   "  problems",
   "  saturation [percent]",
   "",
@@ -1127,12 +1128,12 @@ static int
 cmdProblems (CommandArguments *arguments) {
   if (verifyNoMoreArguments(arguments)) {
     unsigned int problemCount = 0;
-
-    unsigned char wasUsingSorting = useHSVColorSorting;
-    useHSVColorSorting = 1;
+    unsigned int colorCount = 0;
+    unsigned int pairCount = 0;
 
     for (int i=0; i<hsvColorCount; i+=1) {
       const HSVColorEntry *color1 = &hsvColorTable[i];
+      colorCount += 1;
 
       if (!hsvValidAngleRange(&color1->hue)) {
         problemCount += 1;
@@ -1200,6 +1201,7 @@ cmdProblems (CommandArguments *arguments) {
 
       for (int j=i+1; j<hsvColorCount; j+=1) {
         const HSVColorEntry *color2 = &hsvColorTable[j];
+        pairCount += 1;
 
         if (strcasecmp(color1->name, color2->name) == 0) {
           if (color1->instance == color2->instance) {
@@ -1221,13 +1223,14 @@ cmdProblems (CommandArguments *arguments) {
       }
     }
 
-    useHSVColorSorting = wasUsingSorting;
-
     if (problemCount > 0) {
-      putf(
-        "%u %s found.\n",
-        problemCount, ((problemCount == 1)? "problem": "problems")
-      );
+      if (opt_quietness <= OPTQ_FAIL) {
+        putf(
+          "%u %s found (%u colors, %u color pairs).\n",
+          problemCount, ((problemCount == 1)? "problem": "problems"),
+          colorCount, pairCount
+        );
+      }
 
       return 2;
     }
@@ -1237,6 +1240,79 @@ cmdProblems (CommandArguments *arguments) {
   }
 
   return 0;
+}
+
+static int
+cmdOptions (CommandArguments *arguments) {
+  typedef struct {
+    const char *name;
+    unsigned char *setting;
+  } OptionEntry;
+
+  static const OptionEntry optionTable[] = {
+    { .name = "sorting",
+      .setting = &useHSVColorSorting,
+    },
+
+    { .name = "table",
+      .setting = &useHSVColorTable,
+    },
+  };
+
+  if (checkNoMoreArguments(arguments)) {
+    for (int i=0; i<ARRAY_COUNT(optionTable); i+=1) {
+      const OptionEntry *option = &optionTable[i];
+
+      putf("%s%s %s\n", blockIndent, option->name, (*option->setting? "on": "off"));
+    }
+  } else {
+    typedef struct {
+      unsigned char *setting;
+      unsigned char value;
+    } ChangeEntry;
+
+    ChangeEntry changes[ARRAY_COUNT(optionTable)];
+    unsigned int changeCount = 0;
+
+    const char *noPrefix = "no";
+    size_t noLength = strlen(noPrefix);
+
+    while (1) {
+      const char *name = getNextArgument(arguments, "option name");
+      unsigned char newValue = 1;
+
+      if (strlen(name) > noLength) {
+        if (strncasecmp(name, noPrefix, noLength) == 0) {
+          newValue = 0;
+          name += noLength;
+        }
+      }
+
+      for (int i=0; i<ARRAY_COUNT(optionTable); i+=1) {
+        const OptionEntry *option = &optionTable[i];
+
+        if (isAbbreviation(option->name, name)) {
+          ChangeEntry *change = &changes[changeCount++];
+          change->setting = option->setting;
+          change->value = newValue;
+          goto NEXT_ARGUMENT;
+        }
+      }
+
+      logMessage(LOG_ERR, "unrecognized option name: %s", name);
+      return 0;
+
+    NEXT_ARGUMENT:
+      if (checkNoMoreArguments(arguments)) break;
+    }
+
+    for (int i=0; i<changeCount; i+=1) {
+      const ChangeEntry *change = &changes[i];
+      *change->setting = change->value;
+    }
+  }
+
+  return 1;
 }
 
 typedef struct {
@@ -1269,6 +1345,12 @@ static const CommandEntry commandTable[] = {
     .help = "List the main hue color names and ranges.",
     .syntax = "[degrees]",
     .handler = cmdHue,
+  },
+
+  { .name = "options",
+    .help = "Inspect or change options.",
+    .syntax = "[[no]option ...]",
+    .handler = cmdOptions,
   },
 
   { .name = "problems",
@@ -1554,10 +1636,13 @@ main (int argc, char *argv[]) {
       return PROG_EXIT_SYNTAX;
     }
 
-    CommandArguments *arguments = newCommandArguments();
-    addArgumentsFromArray(arguments, argv, argc);
-    int result = doCommand(specifiedCommand, arguments, NULL);
-    destroyCommandArguments(arguments);
+    int result;
+    {
+      CommandArguments *arguments = newCommandArguments();
+      addArgumentsFromArray(arguments, argv, argc);
+      result = doCommand(specifiedCommand, arguments, NULL);
+      destroyCommandArguments(arguments);
+    }
 
     if (result == 2) return PROG_EXIT_SEMANTIC;
     return result? PROG_EXIT_SUCCESS: PROG_EXIT_SYNTAX;
