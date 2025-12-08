@@ -1266,6 +1266,12 @@ cmdOptions (CommandArguments *arguments) {
       putf("%s%s %s\n", blockIndent, option->name, (*option->setting? "on": "off"));
     }
   } else {
+    unsigned char alreadySpecified[ARRAY_COUNT(optionTable)];
+
+    for (int i=0; i<ARRAY_COUNT(alreadySpecified); i+=1) {
+      alreadySpecified[i] = 0;
+    }
+
     typedef struct {
       unsigned char *setting;
       unsigned char value;
@@ -1292,9 +1298,20 @@ cmdOptions (CommandArguments *arguments) {
         const OptionEntry *option = &optionTable[i];
 
         if (isAbbreviation(option->name, name)) {
-          ChangeEntry *change = &changes[changeCount++];
-          change->setting = option->setting;
-          change->value = newValue;
+          if (alreadySpecified[i]) {
+            logMessage(LOG_ERR, "option already specified: %s", option->name);
+            return 0;
+          }
+
+          alreadySpecified[i] = 1;
+          ChangeEntry *change = &changes[changeCount];
+
+          if (*option->setting != newValue) {
+            change->setting = option->setting;
+            change->value = newValue;
+            changeCount += 1;
+          }
+
           goto NEXT_ARGUMENT;
         }
       }
@@ -1306,9 +1323,13 @@ cmdOptions (CommandArguments *arguments) {
       if (checkNoMoreArguments(arguments)) break;
     }
 
-    for (int i=0; i<changeCount; i+=1) {
-      const ChangeEntry *change = &changes[i];
-      *change->setting = change->value;
+    if (changeCount > 0) {
+      for (int i=0; i<changeCount; i+=1) {
+        const ChangeEntry *change = &changes[i];
+        *change->setting = change->value;
+      }
+    } else if (opt_quietness <= OPTQ_INFO) {
+      putf("No changes.\n");
     }
   }
 
