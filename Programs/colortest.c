@@ -498,16 +498,23 @@ showColor (RGBColor rgb, HSVColor hsv) {
     ColorNameBuffer inlineName;
     hsvColorToName(inlineName, sizeof(inlineName), hsv);
 
-    useHSVColorTable = 1;
     ColorNameBuffer lookupName;
-    hsvColorToName(lookupName, sizeof(lookupName), hsv);
+    int showLookupName = 0;
 
-    useHSVColorSorting = 1;
     ColorNameBuffer sortedName;
-    hsvColorToName(sortedName, sizeof(sortedName), hsv);
+    int showSortedName = 0;
 
-    int showLookupName = strcasecmp(inlineName, lookupName) != 0;
-    int showSortedName = strcasecmp(lookupName, sortedName) != 0;
+    if (wasUsingTable) {
+      useHSVColorTable = 1;
+      hsvColorToName(lookupName, sizeof(lookupName), hsv);
+      showLookupName = strcasecmp(inlineName, lookupName) != 0;
+
+      if (wasUsingSorting) {
+        useHSVColorSorting = 1;
+        hsvColorToName(sortedName, sizeof(sortedName), hsv);
+        showSortedName = strcasecmp(lookupName, sortedName) != 0;
+      }
+    }
 
     if (showLookupName || showSortedName) {
       putf("%sInline Name: %s\n", blockIndent, inlineName);
