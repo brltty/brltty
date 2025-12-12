@@ -998,7 +998,7 @@ colortest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/colortest.c
 
 color.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/color.c
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/color.c
 
 ###############################################################################
 
