@@ -498,30 +498,30 @@ showColor (RGBColor rgb, HSVColor hsv) {
     ColorNameBuffer inlineName;
     hsvColorToName(inlineName, sizeof(inlineName), hsv);
 
-    ColorNameBuffer lookupName;
-    int showLookupName = 0;
+    ColorNameBuffer searchName;
+    unsigned char showSearchName = 0;
 
     ColorNameBuffer sortedName;
-    int showSortedName = 0;
+    unsigned char showSortedName = 0;
 
     if (wasUsingTable) {
       useHSVColorTable = 1;
-      hsvColorToName(lookupName, sizeof(lookupName), hsv);
-      showLookupName = strcasecmp(inlineName, lookupName) != 0;
+      hsvColorToName(searchName, sizeof(searchName), hsv);
+      showSearchName = strcasecmp(inlineName, searchName) != 0;
 
       if (wasUsingSorting) {
         useHSVColorSorting = 1;
         hsvColorToName(sortedName, sizeof(sortedName), hsv);
-        showSortedName = strcasecmp(lookupName, sortedName) != 0;
+        showSortedName = strcasecmp(searchName, sortedName) != 0;
       }
     }
 
-    if (showLookupName || showSortedName) {
-      putf("%sInline Name: %s\n", blockIndent, inlineName);
-      putf("%sLookup Name: %s\n", blockIndent, lookupName);
+    if (showSearchName || showSortedName) {
+      putf("%sName (inline): %s\n", blockIndent, inlineName);
+      putf("%sName (search): %s\n", blockIndent, searchName);
 
       if (showSortedName) {
-        putf("%sSorted Name: %s\n", blockIndent, sortedName);
+        putf("%sName (sorted): %s\n", blockIndent, sortedName);
       }
     } else {
       putf("%sName: %s\n", blockIndent, inlineName);
@@ -1180,7 +1180,7 @@ cmdProblems (CommandArguments *arguments) {
         if (color1 != color) {
           problemCount += 1;
           putColorProblem(
-            color1, "sorted lookup failed (minimum) -> %s",
+            color1, "sorted search failed (minimum) -> %s",
             color? color->name: "none"
           );
         }
@@ -1200,7 +1200,7 @@ cmdProblems (CommandArguments *arguments) {
         if (color1 != color) {
           problemCount += 1;
           putColorProblem(
-            color1, "sorted lookup failed (maximum) -> %s",
+            color1, "sorted search failed (maximum) -> %s",
             color? color->name: "none"
           );
         }
