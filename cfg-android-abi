@@ -44,7 +44,7 @@ readonly configureOptions=(
    --disable-x
 
    --without-libbraille
-   --with-braille-driver=-ba,-bg,-tt,-vr,al,at,bm,bn,ce,cn,eu,fs,hm,ht,hw,ic,ir,md,mm,mt,np,pg,pm,sk,vo
+   --with-braille-driver=-ba,-bg,-tt,al,at,bm,bn,ce,cn,dp,eu,fs,hm,ht,hw,ic,ir,md,mm,mt,np,pg,pm,sk,vo
 
    --without-espeak
    --without-espeak-ng

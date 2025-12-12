@@ -67,7 +67,7 @@ configureOptions=(
    --disable-x
 
    --without-libbraille
-   --with-braille-driver=-vr,-cn,all
+   --with-braille-driver=-cn,all
 
    --without-espeak
    --without-espeak-ng

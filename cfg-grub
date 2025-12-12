@@ -41,7 +41,7 @@ configureOptions=(
    --disable-x
 
    --without-libbraille
-   --with-braille-driver=-lt,-tt,-vd,-vr
+   --with-braille-driver=-lt,-tt,-vd
 
    --disable-speech-support
 
