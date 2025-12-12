@@ -615,7 +615,7 @@ addTestModeOption() {
 }
 
 programUsageLineCount=0
-programUsageLineWidth="$(tput cols 2>/dev/null)"
+programUsageLineWidth="$(tput cols 2>/dev/null)" || :
 [ -n "${programUsageLineWidth}" ] || programUsageLineWidth="${COLUMNS:-72}"
 
 addProgramUsageLine() {
