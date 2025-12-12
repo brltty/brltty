@@ -1432,15 +1432,15 @@ doCommand (const char *name, CommandArguments *arguments, const ColorModel **cur
   return 0;
 }
 
-#define QUIT_COMMAND "quit"
-#define HELP_COMMAND "help"
+#define CMD_QUIT "quit"
+#define CMD_HELP "help"
 static const ColorModel *const defaultColorModel = colorModels;
 
 static void
 showInteractiveHelp (int includeCommands) {
   putf("Commands are not case-sensitive and may be abbreviated.\n");
-  putf("Use the \"" QUIT_COMMAND "\" command to exit this mode.\n");
-  putf("Use the \"" HELP_COMMAND "\" command to discover the rest of them.\n");
+  putf("Use the \"" CMD_QUIT "\" command to exit this mode.\n");
+  putf("Use the \"" CMD_HELP "\" command to discover the rest of them.\n");
   putf("\n");
 
   if (includeCommands) {
@@ -1536,9 +1536,9 @@ doInteractiveMode (void) {
     if (checkNoMoreArguments(arguments)) continue;
     char *command = getNextArgument(arguments, "command");
 
-    if (isAbbreviation(QUIT_COMMAND, command)) {
+    if (isAbbreviation(CMD_QUIT, command)) {
       if (verifyNoMoreArguments(arguments)) break;
-    } else if (isAbbreviation(HELP_COMMAND, command)) {
+    } else if (isAbbreviation(CMD_HELP, command)) {
       if (verifyNoMoreArguments(arguments)) {
         showInteractiveHelp(1);
         putColorModelSyntax(currentColorModel);
