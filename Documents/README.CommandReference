@@ -39,6 +39,7 @@ Alphabetical Command Index
 * `CLIP_NEW`_
 * `CLIP_RESTORE`_
 * `CLIP_SAVE`_
+* `COLOR`_
 * `COMPBRL6`_
 * `CONTEXT`_
 * `CONTRACTED`_
@@ -232,6 +233,7 @@ Special Modes
 * `DISPMD`_
 * `FREEZE`_
 * `DESCCHAR`_
+* `COLOR`_
 * `TIME`_
 * `INDICATORS`_
 * `CONTEXT`_
@@ -271,6 +273,14 @@ The following modifiers may be specified:
 .. _DESCCHAR:
 
 **DESCCHAR** - Describe character.
+
+The following modifiers may be specified:
+
+* a column number
+
+.. _COLOR:
+
+**COLOR** - Describe color of character.
 
 The following modifiers may be specified:
 
