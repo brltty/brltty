@@ -330,7 +330,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
         gridRow = row;
         screenElement = element;
 
-        String[] text = element.getBrailleText();
+        CharSequence[] text = element.getBrailleText();
         cellWidth = getTextWidth(text);
         cellHeight = text.length;
       }
@@ -381,7 +381,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
     }
 
     public final Cell addCell (ScreenElement element) {
-      String[] text = element.getBrailleText();
+      CharSequence[] text = element.getBrailleText();
       if (text == null) return null;
 
       Point point = getPoint(element);

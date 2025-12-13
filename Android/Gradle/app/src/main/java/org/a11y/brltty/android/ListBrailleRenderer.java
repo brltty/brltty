@@ -27,7 +27,7 @@ public class ListBrailleRenderer extends BrailleRenderer {
     int top = 0;
 
     for (ScreenElement element : elements) {
-      String[] text = element.getBrailleText();
+      CharSequence[] text = element.getBrailleText();
 
       if (text != null) {
         int right = left + getTextWidth(text) - 1;

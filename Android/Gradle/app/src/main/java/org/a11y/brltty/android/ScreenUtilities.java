@@ -29,6 +29,8 @@ import android.os.Bundle;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
+import android.text.TextUtils;
+
 import android.graphics.Rect;
 import android.webkit.WebView;
 
@@ -185,16 +187,39 @@ public abstract class ScreenUtilities {
     }
   }
 
-  public static String normalizeText (CharSequence text) {
+  private static boolean isTrimmable (char character) {
+    if (Character.isWhitespace(character)) return true;
+    if (Character.isISOControl(character)) return true;
+    return false;
+  }
+
+  private static CharSequence normalizeText (CharSequence text) {
     if (text != null) {
-      String string = text.toString().trim();
-      if (string.length() > 0) return string;
+      if (!TextUtils.isEmpty(text)) {
+        int from = 0;
+        int to = text.length();
+
+        while (from < to) {
+          if (!isTrimmable(text.charAt(from))) break;
+          from += 1;
+        }
+
+        while (to > from) {
+          int last = to - 1;
+
+          if (!isTrimmable(text.charAt(last))) {
+            return text.subSequence(from, to);
+          }
+
+          to = last;
+        }
+      }
     }
 
     return null;
   }
 
-  public static String getText (AccessibilityNodeInfo node) {
+  public static CharSequence getText (AccessibilityNodeInfo node) {
     CharSequence text = null;
 
     {
@@ -210,11 +235,11 @@ public abstract class ScreenUtilities {
     if (text == null) text = node.getText();
     if (!isEditable(node)) return normalizeText(text);
 
-    if (text == null) return "";
-    return text.toString();
+    if (text == null) text = "";
+    return text;
   }
 
-  public static String getDescription (AccessibilityNodeInfo node) {
+  public static CharSequence getDescription (AccessibilityNodeInfo node) {
     return normalizeText(node.getContentDescription());
   }
 

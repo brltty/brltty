@@ -53,8 +53,8 @@ public class ScreenLogger extends Logger {
     super();
   }
 
-  private static String getText (AccessibilityNodeInfo node) {
-    String text = ScreenUtilities.getText(node);
+  private static CharSequence getText (AccessibilityNodeInfo node) {
+    CharSequence text = ScreenUtilities.getText(node);
     if (text != null) return text;
     return ScreenUtilities.getDescription(node);
   }
@@ -161,6 +161,48 @@ public class ScreenLogger extends Logger {
       }
     }
   };
+
+  public static void addSpans (StringBuilder sb, CharSequence text) {
+    if (text instanceof Spanned) {
+      Spanned spannedText = (Spanned)text;
+      Object[] spans = spannedText.getSpans(0, spannedText.length(), Object.class);
+
+      if (spans != null) {
+        boolean first = true;
+
+        for (Object span : spans) {
+          if (first) {
+            first = false;
+            add(sb, "spans:[");
+          } else {
+            sb.append(", ");
+          }
+
+          sb.append(span.getClass().getSimpleName())
+            .append('(')
+            .append(spannedText.getSpanStart(span))
+            .append("..")
+            .append(spannedText.getSpanEnd(span))
+            .append(')')
+            ;
+        }
+
+        if (!first) sb.append(']');
+      }
+    }
+  }
+
+  public static String toSpansString (CharSequence text, String label) {
+    StringBuilder sb = new StringBuilder();
+    if (label != null) sb.append(label).append(": ");
+    sb.append('"').append(text).append('"');
+    addSpans(sb, text);
+    return sb.toString();
+  }
+
+  public static String toSpansString (CharSequence text) {
+    return toSpansString(text, null);
+  }
 
   public static String toString (AccessibilityNodeInfo node) {
     StringBuilder sb = new StringBuilder();
@@ -382,34 +424,7 @@ public class ScreenLogger extends Logger {
 
     {
       CharSequence text = node.getText();
-
-      if (text instanceof Spanned) {
-        Spanned spanned = (Spanned)text;
-        Object[] spans = spanned.getSpans(0, spanned.length(), Object.class);
-
-        if (spans != null) {
-          boolean first = true;
-
-          for (Object span : spans) {
-            if (first) {
-              first = false;
-              add(sb, "spans:[");
-            } else {
-              sb.append(", ");
-            }
-
-            sb.append(span.getClass().getSimpleName())
-              .append('(')
-              .append(spanned.getSpanStart(span))
-              .append("..")
-              .append(spanned.getSpanEnd(span))
-              .append(')')
-              ;
-          }
-
-          if (!first) sb.append(']');
-        }
-      }
+      addSpans(sb, text);
     }
 
     if (APITests.haveKitkat) {

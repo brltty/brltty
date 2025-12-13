@@ -27,9 +27,9 @@ import android.graphics.Rect;
 import android.graphics.Point;
 
 public class ScreenElement {
-  private final String elementText;
+  private final CharSequence elementText;
 
-  public ScreenElement (String text) {
+  public ScreenElement (CharSequence text) {
     elementText = text;
   }
 
@@ -37,7 +37,7 @@ public class ScreenElement {
     this(ApplicationUtilities.getResourceString(text));
   }
 
-  public final String getElementText () {
+  public final CharSequence getElementText () {
     return elementText;
   }
 
@@ -189,30 +189,30 @@ public class ScreenElement {
     return setBrailleLocation(new Rect(left, top, right, bottom));
   }
 
-  private String[] brailleText = null;
+  private CharSequence[] brailleText = null;
   private int[] lineOffsets = null;
 
-  protected String[] makeBrailleText (String text) {
+  protected CharSequence[] makeBrailleText (CharSequence text) {
     if (text == null) return null;
+    int length = text.length();
 
-    List<String> lines = new ArrayList<String>();
+    List<CharSequence> lines = new ArrayList<CharSequence>();
     int start = 0;
 
-    while (true) {
-      int end = text.indexOf('\n', start);
-      if (end == -1) break;
+    for (int i=0; i<length; i+=1) {
+      if (text.charAt(i) != '\n') continue;
 
-      lines.add(text.substring(start, end));
-      start = end + 1;
+      lines.add(text.subSequence(start, i));
+      start = i + 1;
     }
 
-    if (start > 0) text = text.substring(start);
+    if (start > 0) text = text.subSequence(start, length);
     lines.add(text);
 
-    return lines.toArray(new String[lines.size()]);
+    return lines.toArray(new CharSequence[lines.size()]);
   }
 
-  public final String[] getBrailleText () {
+  public final CharSequence[] getBrailleText () {
     synchronized (this) {
       if (brailleText == null) {
         brailleText = makeBrailleText(elementText);
@@ -222,13 +222,13 @@ public class ScreenElement {
     return brailleText;
   }
 
-  private final int[] makeLineOffsets (String[] lines) {
+  private final int[] makeLineOffsets (CharSequence[] lines) {
     int[] offsets = new int[lines.length];
 
     int index = 0;
     int offset = 0;
 
-    for (String line : lines) {
+    for (CharSequence line : lines) {
       offsets[index] = offset;
       offset += lines[index].length();
       index += 1;
@@ -238,7 +238,7 @@ public class ScreenElement {
   }
 
   public final int getTextOffset (int column, int row) {
-    String[] lines = getBrailleText();
+    CharSequence[] lines = getBrailleText();
 
     synchronized (this) {
       if (lineOffsets == null) {
@@ -250,12 +250,12 @@ public class ScreenElement {
   }
 
   public final Point getBrailleCoordinates (int offset) {
-    String[] lines = getBrailleText();
+    CharSequence[] lines = getBrailleText();
 
     if (lines != null) {
       int row = 0;
 
-      for (String line : lines) {
+      for (CharSequence line : lines) {
         int length = line.length();
         if (offset < length) return new Point(offset, row);
 

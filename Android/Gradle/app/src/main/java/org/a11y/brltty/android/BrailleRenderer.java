@@ -26,6 +26,8 @@ import android.accessibilityservice.AccessibilityService;
 import android.view.KeyEvent;
 
 import android.graphics.Rect;
+import android.text.SpannableStringBuilder;
+import android.text.SpannedString;
 
 public abstract class BrailleRenderer {
   private final static String LOG_TAG = BrailleRenderer.class.getName();
@@ -49,10 +51,10 @@ public abstract class BrailleRenderer {
 
   protected abstract void setBrailleLocations (ScreenElementList elements);
 
-  protected static int getTextWidth (String[] lines) {
+  protected static int getTextWidth (CharSequence[] lines) {
     int width = 1;
 
-    for (String line : lines) {
+    for (CharSequence line : lines) {
       width = Math.max(width, line.length());
     }
 
@@ -98,30 +100,32 @@ public abstract class BrailleRenderer {
     }
   }
 
-  private void setScreenRegion (List<String> rows, Rect location, String[] lines) {
-    int width = location.right - location.left + 1;
+  private void setScreenRegion (List<CharSequence> rows, Rect location, CharSequence[] lines) {
+    while (rows.size() <= location.bottom) rows.add("");
 
-    while (rows.size() <= location.bottom) {
-      rows.add("");
-    }
+    int from = location.left;
+    int to = location.right + 1;
+    int width = to - from;
 
     for (int rowIndex=location.top; rowIndex<=location.bottom; rowIndex+=1) {
-      StringBuilder row = new StringBuilder(rows.get(rowIndex));
-      while (row.length() <= location.right) row.append(' ');
+      SpannableStringBuilder row = new SpannableStringBuilder(rows.get(rowIndex));
+      while (row.length() < to) row.append(' ');
 
       int lineIndex = rowIndex - location.top;
-      String line = (lineIndex < lines.length)? lines[lineIndex]: "";
-      if (line.length() > width) line = line.substring(0, width);
+      CharSequence text = (lineIndex < lines.length)? lines[lineIndex]: "";
+      if (text.length() > width) text = text.subSequence(0, width);
 
-      int end = location.left + line.length();
-      row.replace(location.left, end, line);
-      while (end <= location.right) row.setCharAt(end++, ' ');
+      {
+        int textEnd = from + text.length();
+        if (textEnd > from) row.replace(from, textEnd, text);
+        if (textEnd < to) row.replace(textEnd, to, " ".repeat(to - textEnd));
+      }
 
-      rows.set(rowIndex, row.toString());
+      rows.set(rowIndex, SpannedString.valueOf(row));
     }
   }
 
-  public final void renderScreenElements (ScreenElementList elements, List<String> rows) {
+  public final void renderScreenElements (ScreenElementList elements, List<CharSequence> rows) {
     setBrailleLocations(elements);
     addVirtualElements(elements);
 
@@ -139,7 +143,7 @@ public abstract class BrailleRenderer {
       }
 
       if (isVirtual) {
-        String[] text = element.getBrailleText();
+        CharSequence[] text = element.getBrailleText();
         int left = horizontalOffset;
         int top = 0;
         int right = left + getTextWidth(text) - 1;
