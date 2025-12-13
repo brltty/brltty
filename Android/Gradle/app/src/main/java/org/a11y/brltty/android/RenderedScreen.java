@@ -27,6 +27,8 @@ import java.util.HashMap;
 
 import android.util.Log;
 import android.text.TextUtils;
+import android.text.SpannableStringBuilder;
+import android.text.SpannedString;
 
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -42,7 +44,7 @@ public class RenderedScreen {
   private final AccessibilityNodeInfo rootNode;
 
   private final ScreenElementList screenElements = new ScreenElementList();
-  private final List<String> screenRows = new ArrayList<>();
+  private final List<CharSequence> screenRows = new ArrayList<>();
 
   private final int screenWidth;
   private final AccessibilityNodeInfo cursorNode;
@@ -64,7 +66,7 @@ public class RenderedScreen {
     return screenRows.size();
   }
 
-  public final String getScreenRow (int index) {
+  public final CharSequence getScreenRow (int index) {
     return screenRows.get(index);
   }
 
@@ -217,8 +219,8 @@ public class RenderedScreen {
     return getSignificantActions(node) != 0;
   }
 
-  private static String makeText (AccessibilityNodeInfo node) {
-    StringBuilder sb = new StringBuilder();
+  private static SpannableStringBuilder makeText (AccessibilityNodeInfo node) {
+    SpannableStringBuilder sb = new SpannableStringBuilder();
     boolean allowZeroLength = false;
     boolean includeDescription = false;
 
@@ -242,12 +244,12 @@ public class RenderedScreen {
     }
 
     {
-      String text = ScreenUtilities.getText(node);
+      CharSequence text = ScreenUtilities.getText(node);
 
       if (text != null) {
         allowZeroLength = true;
 
-        if (text.length() > 0) {
+        if (!TextUtils.isEmpty(text)) {
           if (sb.length() > 0) sb.append(' ');
           sb.append(text);
         }
@@ -257,7 +259,7 @@ public class RenderedScreen {
     }
 
     if (includeDescription) {
-      String description = ScreenUtilities.getDescription(node);
+      CharSequence description = ScreenUtilities.getDescription(node);
 
       if (description != null) {
         if (sb.length() > 0) sb.append(' ');
@@ -292,7 +294,7 @@ public class RenderedScreen {
     if (!(allowZeroLength || (sb.length() > 0))) {
       for (NodeTester filter : significantNodeFilters) {
         if (filter.testNode(node)) {
-          String description = ScreenUtilities.getDescription(node);
+          CharSequence description = ScreenUtilities.getDescription(node);
           if (description != null) sb.append(description);
           break;
         }
@@ -301,12 +303,12 @@ public class RenderedScreen {
       if (sb.length() == 0) return null;
     }
 
-    return sb.toString();
+    return sb;
   }
 
-  private static String getDescription (AccessibilityNodeInfo node) {
+  private static CharSequence getDescription (AccessibilityNodeInfo node) {
     {
-      String description = ScreenUtilities.getDescription(node);
+      CharSequence description = ScreenUtilities.getDescription(node);
       if (description != null) return description;
     }
 
@@ -319,7 +321,7 @@ public class RenderedScreen {
 
         if (child != null) {
           if (!hasSignificantAction(child)) {
-            String description = ScreenUtilities.getDescription(child);
+            CharSequence description = ScreenUtilities.getDescription(child);
 
             if (description != null) {
               if (sb.length() > 0) sb.append(' ');
@@ -364,7 +366,7 @@ public class RenderedScreen {
       propagatedActions &= ~actions;
 
       if (ScreenUtilities.isVisible(root)) {
-        String text = makeText(root);
+        SpannableStringBuilder text = makeText(root);
         boolean hasText = text != null;
         boolean isSkippable = false;
 
@@ -378,17 +380,14 @@ public class RenderedScreen {
               label = String.format("(%s)", label);
 
               if (text != null) {
-                label += ' ';
-                label += text;
+                text.insert(0, (label + " "));
               }
-
-              text = label;
             }
           }
         }
 
         if (hasActions && !hasText) {
-          String description = getDescription(root);
+          CharSequence description = getDescription(root);
 
           if (!isSkippable) {
             if ((description == null) && (text == null)) {
@@ -416,19 +415,20 @@ public class RenderedScreen {
 
             if (description != null) {
               if (text == null) {
-                text = description;
+                text = new SpannableStringBuilder();
               } else {
-                text += ' ';
-                text += description;
+                text.append(' ');
               }
+
+              text.append(description);
             }
           }
         }
 
         if (text != null) {
           propagatedActions |= SIGNIFICANT_NODE_ACTIONS & ~actions;
-          if (!root.isEnabled()) text += " (disabled)";
-          screenElements.add(text, root);
+          if (!root.isEnabled()) text.append(" (disabled)");
+          screenElements.add(SpannedString.valueOf(text), root);
         }
       }
     }
@@ -443,7 +443,7 @@ public class RenderedScreen {
       screenRows.add("waiting for screen update");
     }
 
-    for (String row : screenRows) {
+    for (CharSequence row : screenRows) {
       int length = row.length();
       if (length > width) width = length;
     }
@@ -535,9 +535,11 @@ public class RenderedScreen {
     int elementIndex = 0;
 
     for (ScreenElement element : screenElements) {
+      CharSequence text = element.getElementText();
+
       log(
         String.format(Locale.ROOT,
-          "screen element %d: %s", elementIndex++, element.getElementText()
+          "screen element %d: %s: \"%s\"", elementIndex++, text.getClass().getSimpleName(), text
         )
       );
     }
@@ -548,10 +550,10 @@ public class RenderedScreen {
     log(("screen width: " + screenWidth));
     int rowIndex = 0;
 
-    for (String row : screenRows) {
+    for (CharSequence row : screenRows) {
       log(
         String.format(Locale.ROOT,
-          "screen row %d: %s", rowIndex++, row.toString()
+          "screen row %d: %s: \"%s\"", rowIndex++, row.getClass().getSimpleName(), row
         )
       );
     }

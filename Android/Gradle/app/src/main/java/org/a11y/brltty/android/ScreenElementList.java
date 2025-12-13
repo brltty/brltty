@@ -72,7 +72,7 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
   private final Map<AccessibilityNodeInfo, ScreenElement> nodeToScreenElement =
         new HashMap<AccessibilityNodeInfo, ScreenElement>();
 
-  public final void add (String text, AccessibilityNodeInfo node) {
+  public final void add (CharSequence text, AccessibilityNodeInfo node) {
     node = AccessibilityNodeInfo.obtain(node);
     ScreenElement element = new RealScreenElement(text, node);
     add(element);
