@@ -53,8 +53,8 @@ public class ScreenLogger extends Logger {
     super();
   }
 
-  private static String getText (AccessibilityNodeInfo node) {
-    String text = ScreenUtilities.getText(node);
+  private static CharSequence getText (AccessibilityNodeInfo node) {
+    CharSequence text = ScreenUtilities.getText(node);
     if (text != null) return text;
     return ScreenUtilities.getDescription(node);
   }

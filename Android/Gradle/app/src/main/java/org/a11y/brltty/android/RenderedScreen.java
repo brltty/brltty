@@ -27,6 +27,7 @@ import java.util.HashMap;
 
 import android.util.Log;
 import android.text.TextUtils;
+import android.text.SpannableStringBuilder;
 
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -217,8 +218,8 @@ public class RenderedScreen {
     return getSignificantActions(node) != 0;
   }
 
-  private static String makeText (AccessibilityNodeInfo node) {
-    StringBuilder sb = new StringBuilder();
+  private static CharSequence makeText (AccessibilityNodeInfo node) {
+    SpannableStringBuilder sb = new SpannableStringBuilder();
     boolean allowZeroLength = false;
     boolean includeDescription = false;
 
@@ -242,12 +243,12 @@ public class RenderedScreen {
     }
 
     {
-      String text = ScreenUtilities.getText(node);
+      CharSequence text = ScreenUtilities.getText(node);
 
       if (text != null) {
         allowZeroLength = true;
 
-        if (text.length() > 0) {
+        if (!text.isEmpty()) {
           if (sb.length() > 0) sb.append(' ');
           sb.append(text);
         }
@@ -257,7 +258,7 @@ public class RenderedScreen {
     }
 
     if (includeDescription) {
-      String description = ScreenUtilities.getDescription(node);
+      CharSequence description = ScreenUtilities.getDescription(node);
 
       if (description != null) {
         if (sb.length() > 0) sb.append(' ');
@@ -292,7 +293,7 @@ public class RenderedScreen {
     if (!(allowZeroLength || (sb.length() > 0))) {
       for (NodeTester filter : significantNodeFilters) {
         if (filter.testNode(node)) {
-          String description = ScreenUtilities.getDescription(node);
+          CharSequence description = ScreenUtilities.getDescription(node);
           if (description != null) sb.append(description);
           break;
         }
@@ -301,12 +302,12 @@ public class RenderedScreen {
       if (sb.length() == 0) return null;
     }
 
-    return sb.toString();
+    return sb.subSequence(0, sb.length());
   }
 
-  private static String getDescription (AccessibilityNodeInfo node) {
+  private static CharSequence getDescription (AccessibilityNodeInfo node) {
     {
-      String description = ScreenUtilities.getDescription(node);
+      CharSequence description = ScreenUtilities.getDescription(node);
       if (description != null) return description;
     }
 
@@ -319,7 +320,7 @@ public class RenderedScreen {
 
         if (child != null) {
           if (!hasSignificantAction(child)) {
-            String description = ScreenUtilities.getDescription(child);
+            CharSequence description = ScreenUtilities.getDescription(child);
 
             if (description != null) {
               if (sb.length() > 0) sb.append(' ');
@@ -364,7 +365,7 @@ public class RenderedScreen {
       propagatedActions &= ~actions;
 
       if (ScreenUtilities.isVisible(root)) {
-        String text = makeText(root);
+        CharSequence text = makeText(root);
         boolean hasText = text != null;
         boolean isSkippable = false;
 
@@ -377,18 +378,21 @@ public class RenderedScreen {
             } else {
               label = String.format("(%s)", label);
 
+              SpannableStringBuilder sb = new SpannableStringBuilder();
+              sb.append(label);
+
               if (text != null) {
-                label += ' ';
-                label += text;
+                sb.append(' ');
+                sb.append(text);
               }
 
-              text = label;
+              text = sb.subSequence(0, sb.length());
             }
           }
         }
 
         if (hasActions && !hasText) {
-          String description = getDescription(root);
+          CharSequence description = getDescription(root);
 
           if (!isSkippable) {
             if ((description == null) && (text == null)) {
@@ -418,8 +422,11 @@ public class RenderedScreen {
               if (text == null) {
                 text = description;
               } else {
-                text += ' ';
-                text += description;
+                SpannableStringBuilder sb = new SpannableStringBuilder();
+                sb.append(text);
+                sb.append(' ');
+                sb.append(description);
+                text = sb.subSequence(0, sb.length());
               }
             }
           }
