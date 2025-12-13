@@ -32,7 +32,7 @@ public class RealScreenElement extends ScreenElement {
 
   private final AccessibilityNodeInfo accessibilityNode;
 
-  public RealScreenElement (String text, AccessibilityNodeInfo node) {
+  public RealScreenElement (CharSequence text, AccessibilityNodeInfo node) {
     super(text);
     accessibilityNode = AccessibilityNodeInfo.obtain(node);
 
@@ -336,15 +336,15 @@ public class RealScreenElement extends ScreenElement {
   }
 
   @Override
-  protected String[] makeBrailleText (String text) {
-    String[] lines = super.makeBrailleText(text);
+  protected CharSequence[] makeBrailleText (CharSequence text) {
+    CharSequence[] lines = super.makeBrailleText(text);
     if (lines == null) return null;
 
     if (ScreenUtilities.isEditable(accessibilityNode)) {
       int count = lines.length;
 
       for (int index=0; index<count; index+=1) {
-        lines[index] += ' ';
+        lines[index] += " ";
       }
     }
 

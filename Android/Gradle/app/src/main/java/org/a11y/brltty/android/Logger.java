@@ -35,24 +35,25 @@ public abstract class Logger {
   protected Logger () {
   }
 
-  public static String shrinkText (String text) {
+  public static String shrinkText (CharSequence text) {
     if (text == null) return null;
+    String string = text.toString();
 
     final int threshold = 50;
     final char delimiter = '\n';
 
-    int length = text.length();
-    int to = text.lastIndexOf(delimiter);
-    int from = (to == -1)? length: text.indexOf(delimiter);
+    int length = string.length();
+    int to = string.lastIndexOf(delimiter);
+    int from = (to == -1)? length: string.indexOf(delimiter);
     to += 1;
 
     from = Math.min(from, threshold);
     to = Math.max(to, (length - threshold));
 
     if (from < to) {
-      text = text.substring(0, from) + "[...]" + text.substring(to);
+      string = string.substring(0, from) + "[...]" + string.substring(to);
     }
 
-    return text;
+    return string;
   }
 }
