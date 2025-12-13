@@ -33,7 +33,15 @@ import android.view.accessibility.AccessibilityWindowInfo;
 
 import android.graphics.Rect;
 import android.graphics.Point;
+import android.graphics.Typeface;
+
 import android.text.TextUtils;
+import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StrikethroughSpan;
+import android.text.style.StyleSpan;
+import android.text.style.UnderlineSpan;
 
 import java.io.IOException;
 
@@ -45,14 +53,19 @@ public abstract class ScreenDriver {
 
   private static ScreenLogger screenLogger = null;
 
-  private static ScreenLogger getScreenLogger () {
-    if (screenLogger == null) screenLogger = new ScreenLogger();
+  public static ScreenLogger getScreenLogger () {
+    synchronized (LOG_TAG) {
+      if (screenLogger == null) {
+        screenLogger = new ScreenLogger();
+      }
+    }
+
     return screenLogger;
   }
 
-  private static void log (AccessibilityNodeInfo node) {
+  public static void log (AccessibilityNodeInfo node, boolean descend) {
     try {
-      getScreenLogger().log(node, false);
+      getScreenLogger().log(node, descend);
     } catch (IOException exception) {
       Log.d(LOG_TAG, ("node log failure: " + exception.getMessage()));
     }
@@ -344,7 +357,7 @@ public abstract class ScreenDriver {
       }
     } else {
       try {
-        if (log) log(node);
+        if (log) log(node, false);
 
         if (APITests.haveLollipop) {
           AccessibilityWindowInfo window = node.getWindow();
@@ -548,14 +561,36 @@ public abstract class ScreenDriver {
 
   public static char[] getRowText (int row, int column) {
     RenderedScreen screen = getCurrentRenderedScreen();
-    String text = (row < screen.getScreenHeight())? screen.getScreenRow(row): "";
+    CharSequence text = (row < screen.getScreenHeight())? screen.getScreenRow(row): "";
     int length = text.length();
 
     if (column > length) column = length;
     int count = length - column;
 
+    if (column > 0) text = text.subSequence(column, length);
     char[] characters = new char[count];
-    text.getChars(column, length, characters, 0);
+
+    for (int i=0; i<count; i+=1) {
+      characters[i] = text.charAt(i);
+    }
+
+    if (text instanceof Spanned) {
+      Spanned spannedText = (Spanned)text;
+      int from = 0;
+
+      while (from < count) {
+        int to = spannedText.nextSpanTransition(from, count, Object.class);
+        Object[] spans = spannedText.getSpans(from, to, Object.class);
+
+        if (spans != null) {
+          for (Object span : spans) {
+          }
+        }
+
+        from = to;
+      }
+    }
+
     return characters;
   }
 
