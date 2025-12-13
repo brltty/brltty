@@ -548,14 +548,19 @@ public abstract class ScreenDriver {
 
   public static char[] getRowText (int row, int column) {
     RenderedScreen screen = getCurrentRenderedScreen();
-    String text = (row < screen.getScreenHeight())? screen.getScreenRow(row): "";
+    CharSequence text = (row < screen.getScreenHeight())? screen.getScreenRow(row): "";
     int length = text.length();
 
     if (column > length) column = length;
     int count = length - column;
 
+    text = text.subSequence(column, length);
     char[] characters = new char[count];
-    text.getChars(column, length, characters, 0);
+
+    for (int i=0; i<count; i+=1) {
+      characters[i] = text.charAt(i);
+    }
+
     return characters;
   }
 
