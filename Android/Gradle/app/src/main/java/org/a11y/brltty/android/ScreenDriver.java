@@ -559,35 +559,23 @@ public abstract class ScreenDriver {
     return 0;
   }
 
-  public static char[] getRowText (int row, int column) {
+  public static char[] getRowText (int row) {
     RenderedScreen screen = getCurrentRenderedScreen();
     CharSequence text = (row < screen.getScreenHeight())? screen.getScreenRow(row): "";
     int length = text.length();
+    char[] characters = new char[length];
 
-    if (column > length) column = length;
-    int count = length - column;
-
-    if (column > 0) text = text.subSequence(column, length);
-    char[] characters = new char[count];
-
-    for (int i=0; i<count; i+=1) {
+    for (int i=0; i<length; i+=1) {
       characters[i] = text.charAt(i);
     }
 
     if (text instanceof Spanned) {
       Spanned spannedText = (Spanned)text;
-      int from = 0;
+      Object[] spans = spannedText.getSpans(0, length, Object.class);
 
-      while (from < count) {
-        int to = spannedText.nextSpanTransition(from, count, Object.class);
-        Object[] spans = spannedText.getSpans(from, to, Object.class);
-
-        if (spans != null) {
-          for (Object span : spans) {
-          }
+      if (spans != null) {
+        for (Object span : spans) {
         }
-
-        from = to;
       }
     }
 

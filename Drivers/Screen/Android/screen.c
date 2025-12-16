@@ -232,34 +232,56 @@ describe_AndroidScreen (ScreenDescription *description) {
 }
 
 static int
-getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jcharArray jCharacters, jint rowIndex, jint columnIndex, jint columnCount) {
-  jint characterCount = (*env)->GetArrayLength(env, jCharacters);
+getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jcharArray jRowText, jint rowIndex, jint columnIndex, jint columnCount) {
+  jint rowLength = (*env)->GetArrayLength(env, jRowText);
   if (clearJavaException(env, 1)) return 0;
+  int toColumn[rowLength + 1];
 
   {
-    ScreenCharacter *target = characters;
-    ScreenCharacter *targetEnd = target + columnCount;
+    ScreenCharacter *sc = characters;
+    ScreenCharacter *scEnd = sc + columnCount;
+    int currentColumn = 0;
 
-    if (characterCount > 0) {
-      jchar cCharacters[characterCount];
-      (*env)->GetCharArrayRegion(env, jCharacters, 0, characterCount, cCharacters);
+    if (rowLength > 0) {
+      jchar cRowText[rowLength];
+      (*env)->GetCharArrayRegion(env, jRowText, 0, rowLength, cRowText);
       if (clearJavaException(env, 1)) return 0;
 
-      const jchar *source = cCharacters;
-      const jchar *sourceEnd = source + characterCount;
+      for (int current=0; current<rowLength; current+=1) {
+        if (sc == scEnd) break;
 
-      while (source < sourceEnd) {
-        if (target == targetEnd) break;
+        toColumn[current] = currentColumn;
+        wchar_t text = cRowText[current];
 
-        target->text = *source;
-        target->color.vgaAttributes = VGA_COLOR_DEFAULT;
+        if (isSurrogateCodepoint(text)) {
+          wchar_t high = text;
+          text = UNICODE_REPLACEMENT_CHARACTER;
+          int next = current + 1;
 
-        target += 1;
-        source += 1;
+          if (next < rowLength) {
+            wchar_t low = cRowText[next];
+            wchar_t codepoint = makeSupplementaryCodepoint(high, low);
+
+            if (codepoint) {
+              text = codepoint;
+              current = next;
+              toColumn[current] = currentColumn;
+            }
+          }
+        }
+
+        if (currentColumn >= columnIndex) {
+          sc->text = text;
+          sc->color.vgaAttributes = VGA_COLOR_DEFAULT;
+          sc += 1;
+        }
+
+        currentColumn += 1;
       }
     }
 
-    clearScreenCharacters(target, (targetEnd - target));
+    toColumn[rowLength] = currentColumn;
+    clearScreenCharacters(sc, (scEnd - sc));
   }
 
   int top = locationTop + selectionTop;
@@ -282,14 +304,14 @@ getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jcharArray jCharacte
     if (from < to) {
       from -= columnIndex;
       to -= columnIndex;
-      if (to > characterCount) to = characterCount;
+      if (to > rowLength) to = rowLength;
 
-      ScreenCharacter *target = characters + from;
-      const ScreenCharacter *targetEnd = characters + to;
+      ScreenCharacter *sc = characters + from;
+      const ScreenCharacter *scEnd = characters + to;
 
-      while (target < targetEnd) {
-        target->color.vgaAttributes = VGA_COLOR_FG_BLACK | VGA_COLOR_BG_LIGHT_GRAY;
-        target += 1;
+      while (sc < scEnd) {
+        sc->color.vgaAttributes = VGA_COLOR_FG_BLACK | VGA_COLOR_BG_LIGHT_GRAY;
+        sc += 1;
       }
     }
   }
@@ -305,21 +327,20 @@ readRowCharacters (ScreenCharacter *characters, jint rowIndex, jint columnIndex,
     if (findJavaStaticMethod(env, &method, screenDriverClass, "getRowText",
                              JAVA_SIG_METHOD(JAVA_SIG_ARRAY(JAVA_SIG_CHAR),
                                              JAVA_SIG_INT // row
-                                             JAVA_SIG_INT // column
                                             ))) {
-      jcharArray jCharacters = (*env)->CallStaticObjectMethod(
-        env, screenDriverClass, method, rowIndex, columnIndex
+      jcharArray jRowText = (*env)->CallStaticObjectMethod(
+        env, screenDriverClass, method, rowIndex
       );
 
       if (!clearJavaException(env, 1)) {
-        if (jCharacters) {
+        if (jRowText) {
           int ok = getRowCharacters(
-            env, characters, jCharacters,
+            env, characters, jRowText,
             rowIndex, columnIndex, columnCount
           );
 
-          (*env)->DeleteLocalRef(env, jCharacters);
-          jCharacters = NULL;
+          (*env)->DeleteLocalRef(env, jRowText);
+          jRowText = NULL;
 
           return ok;
         }
