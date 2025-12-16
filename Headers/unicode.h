@@ -41,6 +41,9 @@ extern "C" {
 #define UNICODE_SURROGATE_LOW (1 << UNICODE_SURROGATE_SHIFT)
 #define UNICODE_SURROGATE_MASK (UNICODE_SURROGATE_LOW - 1)
 
+extern int isSurrogateCodepoint (wchar_t codepoint);
+extern wchar_t makeSupplementaryCodepoint (wchar_t high, wchar_t low);
+
 #define UNICODE_CELL_BITS 8
 #define UNICODE_ROW_BITS 8
 #define UNICODE_PLANE_BITS 8

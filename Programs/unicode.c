@@ -28,6 +28,45 @@
 #include "system_java.h"
 #endif /* __ANDROID__ */
 
+int
+isSurrogateCodepoint (wchar_t codepoint) {
+  return (codepoint >= UNICODE_SURROGATE_BEGIN) && (codepoint <= UNICODE_SURROGATE_END);
+}
+
+static int
+testLowSurrogateBit (wchar_t codepoint) {
+  return !!(codepoint & UNICODE_SURROGATE_LOW);
+}
+
+static int
+isHighSurrogate (wchar_t codepoint) {
+  return isSurrogateCodepoint(codepoint) && !testLowSurrogateBit(codepoint);
+}
+
+static int
+isLowSurrogate (wchar_t codepoint) {
+  return isSurrogateCodepoint(codepoint) && testLowSurrogateBit(codepoint);
+}
+
+static wchar_t
+getSurrogateDataBits (wchar_t codepoint) {
+  return codepoint & UNICODE_SURROGATE_MASK;
+}
+
+wchar_t
+makeSupplementaryCodepoint (wchar_t high, wchar_t low) {
+  if (isHighSurrogate(high)) {
+    if (isLowSurrogate(low)) {
+      wchar_t codepoint = getSurrogateDataBits(high) << UNICODE_SURROGATE_SHIFT;
+      codepoint |= getSurrogateDataBits(low);
+      codepoint += 0X10000;
+      return codepoint;
+    }
+  }
+
+  return 0;
+}
+
 #ifdef HAVE_ICU
 #include <unicode/uversion.h>
 #include <unicode/uchar.h>
