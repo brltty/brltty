@@ -25,6 +25,7 @@
 #include "log.h"
 #include "program.h"
 #include "cmdline.h"
+#include "cmdlib.h"
 #include "file.h"
 
 BEGIN_COMMAND_LINE_OPTIONS(programOptions)
@@ -51,7 +52,7 @@ BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .notes = COMMAND_LINE_NOTES(programNotes),
 
   .extraParameters = {
-    .name = "files",
+    .name = "more",
     .description = "additional files to process",
   },
 END_COMMAND_LINE_DESCRIPTOR
@@ -75,7 +76,7 @@ logFileName (const char *name, void *data) {
     name = strdup(name);
     if (!name) noMemory();
     if (!tsearch(name, &namesTree, compareNames)) noMemory();
-    printf("%s\n", name);
+    putf("%s\n", name);
   }
 }
 
@@ -131,9 +132,8 @@ main (int argc, char *argv[]) {
   int ok = processFile(firstFile);
 
   while (argc > 0) {
-    const char *path = *argv++;
+    if (!processFile(*argv++)) ok = 0;
     argc -= 1;
-    if (!processFile(path)) ok = 0;
   }
 
   return ok? PROG_EXIT_SUCCESS: PROG_EXIT_SEMANTIC;
