@@ -30,6 +30,11 @@ class t t
 # Lautgruppenkürzungen
 always au 16
 always eu 126
+always lyzeum =
+always mausoleum 134-16-234-135-123-15-136-134
+always museum =
+always petroleum =
+
 always ei 146
 always ch 1456
 always sch 156
@@ -41,7 +46,7 @@ before s midendword aus 16-234
 
 always barrier = shouldn't use the ie-contraction
 always bankier = shouldn't use the ie-contraction
-always famili = familie(n) shouldn't use the ie-contraction
+before e always famili =
 prfword komödie = shouldn't use the ie-contraction
 endword studie 23456-136-145-24-15 shouldn't use the ie-contraction
 midendword ien = shouldn't use the ie-contraction
@@ -83,7 +88,6 @@ always koffein = shouldn't use the ei-contraction
 before e always lili = shouldn't use the ie-contraction
 prfword linie 123-24-1345-24-15 shouldn't use the ie-contraction
 always medien = shouldn't use the ie-contraction
-always museum = shouldn't use the eu-contraction
 always propriet = proprietär shouldn't use the ie-contraction
 always döschen 145-246-234-1456-15-1345
 always höschen 125-246-234-1456-15-1345 should use the ch-contraction
