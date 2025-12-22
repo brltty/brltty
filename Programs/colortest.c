@@ -538,17 +538,8 @@ showColor (RGBColor rgb, HSVColor hsv) {
 
   {
     int vga = rgbToVga(rgb.r, rgb.g, rgb.b, 0);
-    int fastVga = rgbToVgaFast(rgb.r, rgb.g, rgb.b, 0);
-
-    {
-      const char *name = vgaColorName(vga);
-      putf("%sNearest VGA: %d \"%s\"\n", blockIndent, vga, name);
-    }
-
-    if (vga != fastVga) {
-      const char *name = vgaColorName(fastVga);
-      putf("%sFast VGA: %d \"%s\"\n", blockIndent, fastVga, name);
-    }
+    const char *name = vgaColorName(vga);
+    putf("%sNearest VGA: %d \"%s\"\n", blockIndent, vga, name);
   }
 }
 

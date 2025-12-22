@@ -7,9 +7,6 @@ This library provides comprehensive color conversion and description functions f
 The color conversion library (`color.c` and `color.h`) provides:
 
 - Bidirectional conversion between RGB and VGA 16-color palette
-  - Accurate distance-based method (`rgbToVga`)
-  - Fast bit-manipulation method (`rgbToVgaFast`)
-  - Optional 8-color mode (no bright bit)
 - Bidirectional conversion between RGB and HSV color spaces
 - ANSI 256-color to RGB conversion
 - Human-readable color descriptions based on HSV analysis
@@ -141,47 +138,6 @@ Convenience wrapper for `rgbToVga()` that accepts an RGBColor structure.
 ```c
 RGBColor color = {200, 100, 50};
 int vga = rgbColorToVga(color, 0);
-```
-
-#### rgbToVgaFast
-
-```c
-int rgbToVgaFast(unsigned char r, unsigned char g, unsigned char b, int noBrightBit);
-```
-
-Fast RGB to VGA conversion using bit-based quantization. Significantly faster than distance-based search for most cases by exploiting the regular pattern of VGA color intensities.
-
-**Parameters:**
-- `r`: Red component (0-255)
-- `g`: Green component (0-255)
-- `b`: Blue component (0-255)
-- `noBrightBit`: If non-zero, only use VGA colors 0-7 (no bright/intensity bit)
-
-**Returns:** VGA color code (0-15 or 0-7 if noBrightBit)
-
-**Algorithm:**
-1. Quantizes each RGB component to nearest VGA intensity level (0x00, 0x55, 0xAA, 0xFF)
-2. Uses bit manipulation to determine VGA color code from quantized values
-3. Handles special cases like Brown (color 6) and ambiguous colors
-4. Falls back to distance comparison for edge cases
-
-**Example:**
-```c
-int vga = rgbToVgaFast(255, 85, 85, 0);  /* Returns 12 (Light Red) */
-```
-
-#### rgbColorToVgaFast
-
-```c
-int rgbColorToVgaFast(RGBColor color, int noBrightBit);
-```
-
-Convenience wrapper for `rgbToVgaFast()` that accepts an RGBColor structure.
-
-**Example:**
-```c
-RGBColor color = {255, 85, 85};
-int vga = rgbColorToVgaFast(color, 0);
 ```
 
 #### vgaColorPalette
@@ -654,7 +610,6 @@ void analyze_color(unsigned char r, unsigned char g, unsigned char b) {
     char description[64];
     HSVColor hsv;
     int vgaColor;
-    int vgaColorFast;
 
     /* Get HSV values */
     hsv = rgbToHsv(r, g, b);
@@ -664,13 +619,11 @@ void analyze_color(unsigned char r, unsigned char g, unsigned char b) {
 
     /* Find closest VGA color using both methods */
     vgaColor = rgbToVga(r, g, b, 0);
-    vgaColorFast = rgbToVgaFast(r, g, b, 0);
 
     printf("RGB: (%u, %u, %u)\n", r, g, b);
     printf("HSV: (%.1f°, %.2f, %.2f)\n", hsv.h, hsv.s, hsv.v);
     printf("Description: %s\n", description);
-    printf("Closest VGA (accurate): %d (%s)\n", vgaColor, vgaColorName(vgaColor));
-    printf("Closest VGA (fast): %d (%s)\n", vgaColorFast, vgaColorName(vgaColorFast));
+    printf("Closest VGA: %d (%s)\n", vgaColor, vgaColorName(vgaColor));
 
     /* Show saturation and brightness modifiers */
     const HSVModifier *satMod = hsvSaturationModifier(hsv.s);
@@ -707,10 +660,6 @@ void create_gradient(RGBColor start, RGBColor end, int steps) {
 
 ### RGB to VGA Conversion
 
-Two methods are provided for RGB to VGA conversion, each with different performance and accuracy characteristics:
-
-#### Accurate Method: `rgbToVga()`
-
 Uses Euclidean distance in RGB color space to find the closest VGA color:
 
 ```
@@ -720,29 +669,6 @@ distance² = (R₁ - R₂)² + (G₁ - G₂)² + (B₁ - B₂)²
 This method provides the most accurate color matching. The function iterates through all 16 VGA colors (or 8 if `noBrightBit` is set) and returns the one with minimum distance. An early exit optimization is used when an exact match (distance = 0) is found.
 
 **Complexity:** O(n) where n is 16 or 8
-
-#### Fast Method: `rgbToVgaFast()`
-
-Uses bit-based quantization and manipulation to quickly determine VGA color:
-
-1. **Component Quantization:** Each RGB component is quantized to the nearest VGA intensity level:
-   - 0-42 → 0x00 (CI_OFF)
-   - 43-127 → 0x55 (CI_DIM)
-   - 128-212 → 0xAA (CI_REG)
-   - 213-255 → 0xFF (CI_MAX)
-
-2. **Special Case Detection:** Brown (color 6) is detected as a special case: {0xAA, 0x55, 0x00}
-
-3. **Bit Pattern Analysis:** Uses the IRGB bit pattern to determine color:
-   - Detects bright colors using bit trick: `(qr | qg | qb) & 0x55`
-   - For bright colors (8-15): Uses `component & (component << 1)` to detect MAX values
-   - For dark colors (0-7): Uses `component >> 7` to detect REG values
-
-4. **Ambiguity Resolution:** For ambiguous cases (e.g., pure colors that could be dark or bright), compares distance to both options
-
-**Complexity:** O(1) with small constant factor
-
-**Performance:** Significantly faster than distance-based search for most cases
 
 ### RGB to HSV Conversion
 
@@ -768,8 +694,7 @@ The reverse conversion uses the standard formula:
 
 ## Performance Considerations
 
-- **VGA conversion (accurate)**: O(n) with n=16 or n=8, performs distance calculations (can exit early on exact match)
-- **VGA conversion (fast)**: O(1) using bit manipulation, significantly faster for most cases
+- **VGA conversion**: O(n) with n=16 or n=8, performs distance calculations (can exit early on exact match)
 - **HSV conversions**: Use floating-point arithmetic
 - **Color descriptions**: Use static strings (no dynamic allocation)
 - **Color interpolation**: Converts to HSV, interpolates, then converts back to RGB
@@ -782,10 +707,6 @@ The reverse conversion uses the standard formula:
 - HSV color space is more intuitive for color manipulation than RGB
 - Color descriptions are designed for accessibility (screen readers, braille displays)
 - Buffer size of 64 bytes is recommended for color descriptions to accommodate all possible combinations
-- **Choosing RGB to VGA conversion method:**
-  - Use `rgbToVgaFast()` for performance-critical code (real-time rendering, large batch conversions)
-  - Use `rgbToVga()` when accuracy is paramount and performance is not critical
-  - For most use cases, `rgbToVgaFast()` provides excellent results with much better performance
 - The `noBrightBit` parameter allows restricting to 8-color mode for terminals/devices that don't support the bright/intensity bit
 - Color interpolation uses HSV space for more perceptually uniform gradients compared to RGB interpolation
 
