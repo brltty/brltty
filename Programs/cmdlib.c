@@ -21,9 +21,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "log.h"
 #include "cmdlib.h"
+#include "file.h"
 #include "parse.h"
 #include "queue.h"
 
@@ -144,12 +146,55 @@ parsePercent (float *value, const char *argument, const char *name) {
   return 1;
 }
 
+size_t
+getConsoleWidth (void) {
+  size_t width = UINT16_MAX;
+  getConsoleSize(&width, NULL);
+  return width;
+}
+
+const char *
+getTranslatedText (const char *text) {
+  if (!text) return "";
+  if (*text) text = gettext(text);
+  return text;
+}
+
 static void
 checkForOutputError (void) {
   if (ferror(stdout)) {
     logSystemError("standard output write");
     exit(PROG_EXIT_FATAL);
   }
+}
+
+void
+flushOutput (void) {
+  fflush(stdout);
+  checkForOutputError();
+}
+
+void
+putString (const char *string) {
+  fputs(string, stdout);
+  checkForOutputError();
+}
+
+void
+putBytes (const char *bytes, size_t count) {
+  fwrite(bytes, 1, count, stdout);
+  checkForOutputError();
+}
+
+void
+putByte (char byte) {
+  fputc(byte, stdout);
+  checkForOutputError();
+}
+
+void
+putNewline (void) {
+  putByte('\n');
 }
 
 void
@@ -167,9 +212,129 @@ putf (const char *format, ...) {
 }
 
 void
-flushOutput (void) {
-  fflush(stdout);
-  checkForOutputError();
+putWrappedText (
+  const char *text, char *line,
+  unsigned int lineIndent, unsigned int lineWidth
+) {
+  unsigned int textWidth = lineWidth - lineIndent;
+  unsigned int textLeft = strlen(text);
+
+  while (1) {
+    unsigned int textLength = textLeft;
+
+    if (textLength > textWidth) {
+      textLength = textWidth;
+
+      while (textLength > 0) {
+        if (isspace(text[textLength])) break;
+        textLength -= 1;
+      }
+
+      while (textLength > 0) {
+        if (!isspace(text[--textLength])) {
+          textLength += 1;
+          break;
+        }
+      }
+    }
+
+    {
+      unsigned int lineLength = lineIndent + textLength;
+
+      if (textLength > 0) {
+        memcpy(line+lineIndent, text, textLength);
+      } else {
+        while (lineLength > 0) {
+          if (!isspace(line[--lineLength])) {
+            lineLength += 1;
+            break;
+          }
+        }
+      }
+
+      if (lineLength > 0) {
+        putBytes(line, lineLength);
+        putNewline();
+      }
+
+      while (textLength < textLeft) {
+        if (!isspace(text[textLength])) break;
+        textLength += 1;
+      }
+
+      if (!(textLeft -= textLength)) break;
+      text += textLength;
+      memset(line, ' ', lineIndent);
+    }
+  }
+}
+
+void
+putFormattedLines (
+  const char *const *const *blocks,
+  char *line, int lineWidth
+) {
+  const char *const *const *block = blocks;
+
+  char *paragraphText = NULL;
+  size_t paragraphSize = 0;
+  size_t paragraphLength = 0;
+
+  while (*block) {
+    const char *const *chunk = *block++;
+    if (!*chunk) continue;
+
+    while (1) {
+      const char *text = *chunk;
+      if (!text) break;
+      text = getTranslatedText(text);
+
+      if (*text && !iswspace(*text)) {
+        size_t textLength = strlen(text);
+        size_t newLength = paragraphLength + textLength + 1;
+
+        int extendingParagraph = !!paragraphLength;
+        if (extendingParagraph) newLength += 1;
+
+        if (newLength > paragraphSize) {
+          size_t newSize = (newLength | 0XFF) + 1;
+          char *newText = realloc(paragraphText, newSize);
+
+          if (!newText) {
+            logMallocError();
+            goto done;
+          }
+
+          paragraphText = newText;
+          paragraphSize = newSize;
+        }
+
+        if (extendingParagraph) paragraphText[paragraphLength++] = ' ';
+        memcpy(&paragraphText[paragraphLength], text, textLength);
+        paragraphText[paragraphLength += textLength] = 0;
+      } else {
+        if (paragraphLength) {
+          putWrappedText(paragraphText, line, 0, lineWidth);
+          paragraphLength = 0;
+        }
+
+        putString(text);
+        putNewline();
+      }
+
+      chunk += 1;
+    }
+
+    if (paragraphLength) {
+      putWrappedText(paragraphText, line, 0, lineWidth);
+      paragraphLength = 0;
+    }
+
+    if (*block) putNewline();
+  }
+
+done:
+  if (paragraphText) free(paragraphText);
 }
 
 void

@@ -46,9 +46,27 @@ extern int parseFloat (float *value, const char *argument, float minimum, float 
 extern int parseDegrees (float *degrees, const char *argument, const char *name);
 extern int parsePercent (float *value, const char *argument, const char *name);
 
+extern size_t getConsoleWidth (void);
+extern const char *getTranslatedText (const char *text);
+
+extern void flushOutput (void);
+extern void putString (const char *string);
+extern void putBytes (const char *bytes, size_t count);
+extern void putByte (char byte);
+extern void putNewline (void);
+
 extern void putf (const char *format, ...) PRINTF(1, 2);
 extern void vputf (const char *format, va_list args);
-extern void flushOutput (void);
+
+extern void putWrappedText (
+  const char *text, char *line,
+  unsigned int lineIndent, unsigned int lineWidth
+);
+
+extern void putFormattedLines (
+  const char *const *const *blocks,
+  char *line, int lineWidth
+);
 
 extern void beginInteractiveMode (void);
 extern void endInteractiveMode (void);

@@ -18,14 +18,13 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
 #include <string.h>
-#include <strings.h>
 #include <ctype.h>
 #include <errno.h>
 
 #include "program.h"
 #include "cmdline.h"
+#include "cmdlib.h"
 #include "params.h"
 #include "log.h"
 #include "strfmt.h"
@@ -52,192 +51,17 @@ typedef struct {
   uint8_t syntaxError:1;
 } OptionProcessingData;
 
-static const char *
-getTranslatedText (const char *text) {
-  if (!text) return "";
-  if (*text) text = gettext(text);
-  return text;
+static void
+putHeader (const char *header) {
+  putString(header);
+  putByte(':');
 }
 
-static int
-putCheck (FILE *stream, const char *action) {
-  if (!ferror(stream)) return 1;
-  int error = errno;
-
-  fflush(stream);
-  logActionError(error, action);
-  return 0;
-}
-
-static int
-putBytes (FILE *stream, const char *bytes, size_t count) {
-  fwrite(bytes, 1, count, stream);
-  return putCheck(stream, "fwrite");
-}
-
-static int
-putByte (FILE *stream, char byte) {
-  fputc(byte, stream);
-  return putCheck(stream, "fputc");
-}
-
-static int
-putString (FILE *stream, const char *string) {
-  fputs(string, stream);
-  return putCheck(stream, "fputs");
-}
-
-static int
-putNewline (FILE *stream) {
-  return putByte(stream, '\n');
-}
-
-static int
-putWrappedText (
-  FILE *stream, const char *text, char *line,
-  unsigned int lineIndent, unsigned int lineWidth
-) {
-  unsigned int textWidth = lineWidth - lineIndent;
-  unsigned int textLeft = strlen(text);
-
-  while (1) {
-    unsigned int textLength = textLeft;
-
-    if (textLength > textWidth) {
-      textLength = textWidth;
-
-      while (textLength > 0) {
-        if (isspace(text[textLength])) break;
-        textLength -= 1;
-      }
-
-      while (textLength > 0) {
-        if (!isspace(text[--textLength])) {
-          textLength += 1;
-          break;
-        }
-      }
-    }
-
-    {
-      unsigned int lineLength = lineIndent + textLength;
-
-      if (textLength > 0) {
-        memcpy(line+lineIndent, text, textLength);
-      } else {
-        while (lineLength > 0) {
-          if (!isspace(line[--lineLength])) {
-            lineLength += 1;
-            break;
-          }
-        }
-      }
-
-      if (lineLength > 0) {
-        if (!putBytes(stream, line, lineLength)) return 0;
-        if (!putNewline(stream)) return 0;
-      }
-
-      while (textLength < textLeft) {
-        if (!isspace(text[textLength])) break;
-        textLength += 1;
-      }
-
-      if (!(textLeft -= textLength)) break;
-      text += textLength;
-      memset(line, ' ', lineIndent);
-    }
-  }
-
-  return 1;
-}
-
-static int
-putFormattedLines (
-  FILE *stream, const char *const *const *blocks,
-  char *line, int lineWidth
-) {
-  const char *const *const *block = blocks;
-
-  char *paragraphText = NULL;
-  size_t paragraphSize = 0;
-  size_t paragraphLength = 0;
-
-  while (*block) {
-    const char *const *chunk = *block++;
-    if (!*chunk) continue;
-
-    while (1) {
-      const char *text = *chunk;
-      if (!text) break;
-      text = getTranslatedText(text);
-
-      if (*text && !iswspace(*text)) {
-        size_t textLength = strlen(text);
-        size_t newLength = paragraphLength + textLength + 1;
-
-        int extendingParagraph = !!paragraphLength;
-        if (extendingParagraph) newLength += 1;
-
-        if (newLength > paragraphSize) {
-          size_t newSize = (newLength | 0XFF) + 1;
-          char *newText = realloc(paragraphText, newSize);
-
-          if (!newText) {
-            logMallocError();
-            goto done;
-          }
-
-          paragraphText = newText;
-          paragraphSize = newSize;
-        }
-
-        if (extendingParagraph) paragraphText[paragraphLength++] = ' ';
-        memcpy(&paragraphText[paragraphLength], text, textLength);
-        paragraphText[paragraphLength += textLength] = 0;
-      } else {
-        if (paragraphLength) {
-          if (!putWrappedText(stream, paragraphText, line, 0, lineWidth)) return 0;
-          paragraphLength = 0;
-        }
-
-        if (!putString(stream, text)) return 0;
-        if (!putNewline(stream)) return 0;
-      }
-
-      chunk += 1;
-    }
-
-    if (paragraphLength) {
-      if (!putWrappedText(stream, paragraphText, line, 0, lineWidth)) return 0;
-      paragraphLength = 0;
-    }
-
-    if (*block) {
-      if (!putNewline(stream)) {
-        return 0;
-      }
-    }
-  }
-
-done:
-  if (paragraphText) free(paragraphText);
-  return 1;
-}
-
-static int
-putHeader (FILE *stream, const char *header) {
-  return putString(stream, header)
-      && putByte(stream, ':')
-      ;
-}
-
-static int
-putTitle (FILE *stream, const char *title) {
-  return putNewline(stream)
-      && putHeader(stream, title)
-      && putNewline(stream)
-      ;
+static void
+putTitle (const char *title) {
+  putNewline();
+  putHeader(title);
+  putNewline();
 }
 
 typedef struct {
@@ -250,11 +74,8 @@ static const char *repeatableArgumentIndicator = " ...";
 static const char optionalArgumentPrefix = '[';
 static const char optionalArgumentSuffix = ']';
 
-static int
-showParameterSyntax (
-  FILE *stream,
-  const CommandLineDescriptor *descriptor
-) {
+static void
+showParameterSyntax (const CommandLineDescriptor *descriptor) {
   const CommandLineParameters *parameters = descriptor->parameters;
 
   if (parameters) {
@@ -265,73 +86,68 @@ showParameterSyntax (
     const CommandLineParameter *end = parameter + parameters->count;
 
     while (parameter < end) {
-      if (!putByte(stream, ' ')) return 0;
+      putByte(' ');
 
       if (parameter->optional) {
-        if (!putByte(stream, optionalArgumentPrefix)) return 0;
+        putByte(optionalArgumentPrefix);
         depth += 1;
       }
 
       {
         const char *name = parameter->name;
         if (!name) name = defaultParameterName;
-        if (!putString(stream, getTranslatedText(name))) return 0;
+        putString(getTranslatedText(name));
       }
 
       parameter += 1;
     }
 
     if (extra) {
-      if (!putByte(stream, ' ')) return 0;
-      if (!putByte(stream, optionalArgumentPrefix)) return 0;
-      if (!putString(stream, getTranslatedText(extra))) return 0;
-      if (!putString(stream, repeatableArgumentIndicator)) return 0;
+      putByte(' ');
+      putByte(optionalArgumentPrefix);
+      putString(getTranslatedText(extra));
+      putString(repeatableArgumentIndicator);
       depth += 1;
     }
 
     while (depth > 0) {
-      if (!putByte(stream, optionalArgumentSuffix)) return 0;
+      putByte(optionalArgumentSuffix);
       depth -= 1;
     }
   } else {
     const char *parameters = descriptor->oldParameters;
 
     if (parameters) {
-      if (!putByte(stream, ' ')) return 0;
-      if (!putString(stream, getTranslatedText(parameters))) return 0;
+      putByte(' ');
+      putString(getTranslatedText(parameters));
     }
   }
-
-  return 1;
 }
 
-static int
-showSyntax (
-  FILE *stream,
-  const CommandLineDescriptor *descriptor
-) {
-  if (!putHeader(stream, gettext("Syntax"))) return 0;
-  if (!putByte(stream, ' ')) return 0;
-  if (!putString(stream, programName)) return 0;
+static void
+showSyntax (const CommandLineDescriptor *descriptor) {
+  putHeader(gettext("Syntax"));
+  putByte(' ');
+  putString(programName);
 
   if (descriptor->options) {
     if (descriptor->options->count > 0) {
-      if (!putByte(stream, ' ')) return 0;
-      if (!putByte(stream, optionalArgumentPrefix)) return 0;
-      if (!putByte(stream, '-')) return 0;
-      if (!putString(stream, gettext("option"))) return 0;
-      if (!putString(stream, repeatableArgumentIndicator)) return 0;
-      if (!putByte(stream, optionalArgumentSuffix)) return 0;
+      putByte(' ');
+      putByte(optionalArgumentPrefix);
+      putByte('-');
+      putString(gettext("option"));
+      putString(repeatableArgumentIndicator);
+      putByte(optionalArgumentSuffix);
     }
   }
 
-  if (!showParameterSyntax(stream, descriptor)) return 0;
-  return putNewline(stream);
+  showParameterSyntax(descriptor);
+  putNewline();
 }
 
-static int
+static void
 showParameter (
-  FILE *stream, char *line, unsigned int lineWidth,
+  char *line, unsigned int lineWidth,
   const char *name, int isRepeatable, unsigned int nameWidth,
   const char *description
 ) {
@@ -361,15 +177,13 @@ showParameter (
   line[lineLength++] = ' ';
   {
     if (!description) description = "";
-    if (!putWrappedText(stream, description, line, lineLength, lineWidth)) return 0;
+    putWrappedText(description, line, lineLength, lineWidth);
   }
-
-  return 1;
 }
 
-static int
+static void
 showParameters (
-  FILE *stream, char *line, unsigned int lineWidth,
+  char *line, unsigned int lineWidth,
   const CommandLineDescriptor *descriptor
 ) {
   const CommandLineParameters *parameters = descriptor->parameters;
@@ -408,18 +222,16 @@ showParameters (
     }
 
     if (nameWidth > 0) {
-      if (!putTitle(stream, gettext("Parameters"))) return 0;
+      putTitle(gettext("Parameters"));
 
       for (unsigned int parameterIndex=0; parameterIndex<parameters->count; parameterIndex+=1) {
         const CommandLineParameter *parameter = &parameters->table[parameterIndex];
 
-        int shown = showParameter(
-          stream, line, lineWidth,
+        showParameter(
+          line, lineWidth,
           names[parameterIndex].text, 0, nameWidth,
           getTranslatedText(parameter->description)
         );
-
-        if (!shown) return 0;
       }
 
       {
@@ -427,24 +239,20 @@ showParameters (
         const char *extra = name->text;
 
         if (extra) {
-          int shown = showParameter(
-            stream, line, lineWidth,
+          showParameter(
+            line, lineWidth,
             extra, 1, nameWidth,
             getTranslatedText(descriptor->extraParameters.description)
           );
-
-          if (!shown) return 0;
         }
       }
     }
   }
-
-  return 1;
 }
 
-static int
+static void
 showOptions (
-  FILE *stream, char *line, unsigned int lineWidth,
+  char *line, unsigned int lineWidth,
   const OptionProcessingData *opd
 ) {
   size_t optionCount = opd->options->count;
@@ -481,7 +289,7 @@ showOptions (
       if (option->letter) letterWidth = 2;
     }
 
-    if (!putTitle(stream, gettext("Options"))) return 0;
+    putTitle(gettext("Options"));
 
     for (unsigned int optionIndex=0; optionIndex<optionCount; optionIndex+=1) {
       const CommandLineOption *option = &opd->options->table[optionIndex];
@@ -575,48 +383,41 @@ showOptions (
           description = from;
         }
 
-        if (!putWrappedText(stream, description, line, lineLength, lineWidth)) return 0;
+        putWrappedText(description, line, lineLength, lineWidth);
       }
     }
   }
-
-  return 1;
 }
 
-static int
+static void
 showHelp (
   const CommandLineDescriptor *descriptor,
   const OptionProcessingData *opd
 ) {
-  FILE *stream = stdout;
-
-  size_t width = UINT16_MAX;
-  getConsoleSize(&width, NULL);
+  size_t width = getConsoleWidth();
   char line[width+1];
 
   {
     const char *purpose = getTranslatedText(descriptor->purpose);
 
     if (purpose && *purpose) {
-      if (!putWrappedText(stream, purpose, line, 0, width)) return 0;
-      if (!putNewline(stream)) return 0;
+      putWrappedText(purpose, line, 0, width);
+      putNewline();
     }
   }
 
-  if (!showSyntax(stream, descriptor)) return 0;
-  if (!showParameters(stream, line, width, descriptor)) return 0;
-  if (!showOptions(stream, line, width, opd)) return 0;
+  showSyntax(descriptor);
+  showParameters(line, width, descriptor);
+  showOptions(line, width, opd);
 
   {
     const char *const *const *notes = descriptor->notes;
 
     if (notes && *notes && **notes) {
-      if (!putNewline(stream)) return 0;
-      if (!putFormattedLines(stream, notes, line, width)) return 0;
+      putNewline();
+      putFormattedLines(notes, line, width);
     }
   }
-
-  return 1;
 }
 
 static int
@@ -1535,7 +1336,8 @@ processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount,
   processOptions(&opd, argumentCount, argumentVector);
 
   if (opd.showHelp) {
-    return showHelp(&cld, &opd)? PROG_EXIT_FORCE: PROG_EXIT_FATAL;
+    showHelp(&cld, &opd);
+    return PROG_EXIT_FORCE;
   }
 
   if (cld.doBootParameters && *cld.doBootParameters) {
