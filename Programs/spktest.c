@@ -80,16 +80,30 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+static const char *driverCode;
+
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+  { .name = "driver",
+    .description = "the two-letter code of the speech driver to test",
+    .setting = &driverCode,
+  },
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "spktest",
   .purpose = strtext("Test a speech driver."),
-  .oldParameters = "[driver [parameter=value ...]]",
 
   .options = &programOptions,
+  .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes),
+
+  .extraParameters = {
+    .name = "name=value",
+    .description = "parameters for the specified speech driver",
+  },
 END_COMMAND_LINE_DESCRIPTOR
 
 static int
@@ -113,9 +127,7 @@ main (int argc, char *argv[]) {
 
   ProgramExitStatus exitStatus;
   SpeechSynthesizer spk;
-
-  const char *driver = NULL;
-  void *object;
+  void *driverObject;
 
   int speechVolume = SPK_VOLUME_DEFAULT;
   int speechRate = SPK_RATE_DEFAULT;
@@ -140,11 +152,7 @@ main (int argc, char *argv[]) {
     }
   }
 
-  if (argc) {
-    driver = *argv++, --argc;
-  }
-
-  if ((speech = loadSpeechDriver(driver, &object, opt_driversDirectory))) {
+  if ((speech = loadSpeechDriver(driverCode, &driverObject, opt_driversDirectory))) {
     const char *const *parameterNames = speech->parameters;
     char **parameterSettings;
 
@@ -175,7 +183,7 @@ main (int argc, char *argv[]) {
     while (argc) {
       char *assignment = *argv++;
       int ok = 0;
-      char *delimiter = strchr(assignment, '=');
+      char *delimiter = strchr(assignment, PARAMETER_ASSIGNMENT_CHARACTER);
 
       if (!delimiter) {
         logMessage(LOG_ERR, "missing speech driver parameter value: %s", assignment);

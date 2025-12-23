@@ -84,16 +84,24 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "scrtest",
   .purpose = strtext("Test a screen driver."),
-  .oldParameters = "[parameter=value ...]",
 
   .options = &programOptions,
+  .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes),
+
+  .extraParameters = {
+    .name = "name=value",
+    .description = "parameters for the specified screen driver",
+  },
 END_COMMAND_LINE_DESCRIPTOR
 
 static int
@@ -170,7 +178,7 @@ main (int argc, char *argv[]) {
     while (argc) {
       char *assignment = *argv++;
       int ok = 0;
-      char *delimiter = strchr(assignment, '=');
+      char *delimiter = strchr(assignment, PARAMETER_ASSIGNMENT_CHARACTER);
       if (!delimiter) {
         logMessage(LOG_ERR, "missing screen parameter value: %s", assignment);
       } else if (delimiter == assignment) {

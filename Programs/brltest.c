@@ -84,16 +84,30 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+static const char *driverCode;
+
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+  { .name = "driver",
+    .description = "the two-letter code of the braille driver to test",
+    .setting = &driverCode,
+  },
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "brltest",
   .purpose = strtext("Test a braille driver."),
-  .oldParameters = "[driver [parameter=value ...]]",
 
   .options = &programOptions,
+  .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes),
+
+  .extraParameters = {
+    .name = "name=value",
+    .description = "parameters for the specified braille driver",
+  },
 END_COMMAND_LINE_DESCRIPTOR
 
 int
@@ -101,18 +115,13 @@ main (int argc, char *argv[]) {
   PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   ProgramExitStatus exitStatus;
-  const char *driver = NULL;
-  void *object;
-
-  if (argc) {
-    driver = *argv++, --argc;
-  }
+  void *driverObject;
 
   if (!*opt_brailleDevice) {
     changeStringSetting(&opt_brailleDevice, BRAILLE_DEVICE);
   }
 
-  if ((braille = loadBrailleDriver(driver, &object, opt_driversDirectory))) {
+  if ((braille = loadBrailleDriver(driverCode, &driverObject, opt_driversDirectory))) {
     const char *const *parameterNames = braille->parameters;
     char **parameterSettings;
 
@@ -143,7 +152,7 @@ main (int argc, char *argv[]) {
     while (argc) {
       char *assignment = *argv++;
       int ok = 0;
-      char *delimiter = strchr(assignment, '=');
+      char *delimiter = strchr(assignment, PARAMETER_ASSIGNMENT_CHARACTER);
 
       if (!delimiter) {
         logMessage(LOG_ERR, "missing braille driver parameter value: %s", assignment);
