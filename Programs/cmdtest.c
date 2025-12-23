@@ -77,8 +77,8 @@ BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
 BEGIN_COMMAND_LINE_NOTES(programNotes)
-  "Unspecified text options, list options, and optional parameters",
-  "are set to an empty string (\"\").",
+  "Unspecified optional parameters are set to NULL.",
+  "Unspecified text and list options are set to an empty string (\"\").",
   "Unspecified flag options are set to false (0).",
   "Unspecified counter options are set to zero (0).",
   "Items within a list are separated from one another by a comma (,).",
@@ -91,7 +91,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_NOTES(additionalNotes)
-  "One or more additional notes blocks may be specifid.",
+  "One or more additional notes blocks may be specified.",
   "See brltty-tune.c and tune_builder.[ch] for a practical example -",
   "the notes within brltty-tune are for the command itself",
   "whereas those within tune_builder describe how to write a tune.",
@@ -124,6 +124,7 @@ main (int argc, char *argv[]) {
   logMessage(logLevel, "List: %s", listOption);
 
   logMessage(logLevel, "First Parameter: %s", firstParameter);
+  if (!secondParameter) secondParameter = "(not specified)";
   logMessage(logLevel, "Second Parameter: %s", secondParameter);
 
   for (int index=0; index<argc; index+=1) {

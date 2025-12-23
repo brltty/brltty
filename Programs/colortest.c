@@ -1656,7 +1656,7 @@ main (int argc, char *argv[]) {
     }
   }
 
-  if (*specifiedCommand || (argc > 0)) {
+  if (specifiedCommand) {
     if (testRequested) {
       logMessage(LOG_ERR, "can't request a test and specify a command");
       return PROG_EXIT_SYNTAX;

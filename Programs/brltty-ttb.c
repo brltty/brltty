@@ -188,15 +188,31 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+static const char *inputPath;
+static const char *outputPath;
+
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+  { .name = "input",
+    .description = "the name of (or path to) the input table",
+    .setting = &inputPath,
+  },
+
+  { .name = "output",
+    .description = "the name of (or path to) the output table",
+    .setting = &outputPath,
+    .optional = 1,
+  },
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "brltty-ttb",
   .purpose = strtext("Check/edit a text (computer braille) table, or convert it from one format to another."),
-  .oldParameters = "input-table [output-table]",
 
   .options = &programOptions,
+  .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
@@ -1200,8 +1216,6 @@ getFormatEntry (const char *name, const char *path, const char *description) {
   exit(PROG_EXIT_SYNTAX);
 }
 
-static const char *inputPath;
-static const char *outputPath;
 static const FormatEntry *inputFormat;
 static const FormatEntry *outputFormat;
 
@@ -2518,36 +2532,23 @@ main (int argc, char *argv[]) {
   PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   ProgramExitStatus exitStatus;
-
-  if (argc == 0) {
-    logMessage(LOG_ERR, "missing input table");
-    return PROG_EXIT_SYNTAX;
-  }
-  inputPath = *argv++, argc--;
-
-  if (argc > 0) {
-    outputPath = *argv++, argc--;
-  } else if (opt_outputFormat && *opt_outputFormat) {
-    const char *extension = locatePathExtension(inputPath);
-    int prefix = extension? (extension - inputPath): strlen(inputPath);
-    char buffer[prefix + 1 + strlen(opt_outputFormat) + 1];
-
-    snprintf(buffer, sizeof(buffer), "%.*s.%s", prefix, inputPath, opt_outputFormat);
-
-    if (!(outputPath = strdup(buffer))) {
-      logMallocError();
-      return PROG_EXIT_FATAL;
-    }
-  } else {
-    outputPath = NULL;
-  }
-
-  if (argc > 0) {
-    logMessage(LOG_ERR, "too many parameters");
-    return PROG_EXIT_SYNTAX;
-  }
-
   inputFormat = getFormatEntry(opt_inputFormat, inputPath, "input");
+
+  if (!outputPath) {
+    if (opt_outputFormat && *opt_outputFormat) {
+      const char *extension = locatePathExtension(inputPath);
+      int prefix = extension? (extension - inputPath): strlen(inputPath);
+      char buffer[prefix + 1 + strlen(opt_outputFormat) + 1];
+      snprintf(buffer, sizeof(buffer), "%.*s.%s", prefix, inputPath, opt_outputFormat);
+
+      if (!(outputPath = strdup(buffer))) {
+        logMallocError();
+        return PROG_EXIT_FATAL;
+      }
+    } else {
+      outputPath = NULL;
+    }
+  }
 
   if (outputPath) {
     outputFormat = getFormatEntry(opt_outputFormat, outputPath, "output");

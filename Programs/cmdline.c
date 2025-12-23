@@ -1067,7 +1067,7 @@ processParameters (
     }
 
     while (parameter < end) {
-      if (parameter->setting) *parameter->setting = "";
+      if (parameter->setting) *parameter->setting = NULL;
       parameter += 1;
     }
 
