@@ -138,7 +138,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "  5: Test summaries.",
   "  6: Test headers, test status, and color model syntax (interactive mode).",
   "",
-  "Command names are case-insensitive and may be abbreviated.",
+  "Command names aren't case-sensitive and may be abbreviated.",
   "The recognized commands are:",
   "  brightness [percent]",
   "  colors [name]",
@@ -148,12 +148,12 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "  problems",
   "  saturation [percent]",
   "",
-  "Color model names are case-insensitive and may be abbreviated.",
+  "Color model names aren't case-sensitive and may be abbreviated.",
   "The supported color models are:",
   "  ANSI  the ANSI terminal 256-color model",
   "  HLS   the Hue Lightness Saturation model",
   "  HSV   the Hue Saturation Value (brightness) model",
-  "  RGB   the Red Green Blue odel",
+  "  RGB   the Red Green Blue model",
   "  VGA   the Video Graphics Array 16-color model",
   "",
   "The return codes of this command are:",
@@ -1334,6 +1334,12 @@ cmdOptions (CommandArguments *arguments) {
   return 1;
 }
 
+#define CMD_NAME_QUIT "quit"
+#define CMD_NAME_HELP "help"
+
+static int cmdHelp (CommandArguments *arguments);
+static const ColorModel *const defaultColorModel = colorModels;
+
 typedef struct {
   const char *name;
   const char *help;
@@ -1358,6 +1364,12 @@ static const CommandEntry commandTable[] = {
     .help = "List the grayscale color names and brightness ranges.",
     .syntax = "[percent]",
     .handler = cmdGrayscale,
+  },
+
+  { .name = CMD_NAME_HELP,
+    .help = "Show a command usage summary.",
+    .syntax = "",
+    .handler = cmdHelp,
   },
 
   { .name = "hue",
@@ -1399,10 +1411,7 @@ static int
 doCommand (const char *name, CommandArguments *arguments, const ColorModel **currentModel) {
   {
     const CommandEntry *cmd = getCommandEntry(name);
-
-    if (cmd) {
-      return cmd->handler(arguments);
-    }
+    if (cmd) return cmd->handler(arguments);
   }
 
   {
@@ -1423,18 +1432,12 @@ doCommand (const char *name, CommandArguments *arguments, const ColorModel **cur
   return 0;
 }
 
-#define CMD_QUIT "quit"
-#define CMD_HELP "help"
-static const ColorModel *const defaultColorModel = colorModels;
-
 static void
-showInteractiveHelp (int includeCommands) {
-  putf("Commands are not case-sensitive and may be abbreviated.\n");
-  putf("Use the \"" CMD_QUIT "\" command to exit this mode.\n");
-  putf("Use the \"" CMD_HELP "\" command to discover the rest of them.\n");
-  putf("\n");
+showHelp (int listCommands) {
+  putf("Command and color model names aren't case-sensitive and may be abbreviated.\n");
+  putf("Use the \"" CMD_NAME_QUIT "\" command to exit interactive mode.\n");
 
-  if (includeCommands) {
+  if (listCommands) {
     putf("The rest of the commands are:\n");
 
     int offsets[ARRAY_COUNT(commandTable)];
@@ -1473,12 +1476,12 @@ showInteractiveHelp (int includeCommands) {
 
       putf("\n");
     }
-
-    putf("\n");
+  } else {
+    putf("Use the \"" CMD_NAME_HELP "\" command to discover the rest of them.\n");
   }
 
   {
-    putf("The supported color models are:");
+    putf("\nThe supported color models are:");
     int last = ARRAY_COUNT(colorModels) - 1;
 
     for (int i=0; i<=last; i+=1) {
@@ -1498,14 +1501,23 @@ showInteractiveHelp (int includeCommands) {
   putf("If only numeric arguments are specified then the current color model is used.\n");
 }
 
-/* Interactive color test */
+static int
+cmdHelp (CommandArguments *arguments) {
+  if (verifyNoMoreArguments(arguments)) {
+    showHelp(1);
+    return 1;
+  }
+
+  return 0;
+}
+
 static void
 doInteractiveMode (void) {
   beginInteractiveMode();
   const ColorModel *currentColorModel = defaultColorModel;
 
-  putTestHeader("Interactive Color Test");
-  if (opt_quietness <= OPTQ_INFO) showInteractiveHelp(0);
+  putTestHeader("Interactive Mode");
+  if (opt_quietness <= OPTQ_INFO) showHelp(0);
   putColorModelSyntax(currentColorModel);
 
   CommandArguments *arguments = newCommandArguments();
@@ -1527,13 +1539,8 @@ doInteractiveMode (void) {
     if (checkNoMoreArguments(arguments)) continue;
     char *command = getNextArgument(arguments, "command");
 
-    if (isAbbreviation(CMD_QUIT, command)) {
+    if (isAbbreviation(CMD_NAME_QUIT, command)) {
       if (verifyNoMoreArguments(arguments)) break;
-    } else if (isAbbreviation(CMD_HELP, command)) {
-      if (verifyNoMoreArguments(arguments)) {
-        showInteractiveHelp(1);
-        putColorModelSyntax(currentColorModel);
-      }
     } else if (isdigit(command[0])) {
       restoreArgument(arguments, command);
       currentColorModel->handler(arguments);
