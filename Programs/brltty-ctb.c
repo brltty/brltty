@@ -98,16 +98,26 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 BEGIN_COMMAND_LINE_NOTES(programNotes)
+  "If no files are specified then standard input will be read.",
+  "If -v is specified then no files will be translated.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "brltty-ctb",
   .purpose = strtext("Check/validate a contraction (literary braille) table, or translate text into contracted braille."),
-  .oldParameters = "[{input-file | -} ...]",
 
   .options = &programOptions,
+  .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes),
+
+  .extraParameters = {
+    .name = "file",
+    .description = "the files to translate (use - for standard input)",
+  },
 END_COMMAND_LINE_DESCRIPTOR
 
 static wchar_t *inputBuffer;
@@ -447,7 +457,6 @@ main (int argc, char *argv[]) {
   PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
-
   verificationTablePath = NULL;
   verificationTableStream = NULL;
   processInputCharacters = writeContractedBraille;
