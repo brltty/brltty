@@ -37,15 +37,24 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+static const char *tableName;
+
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+  { .name = "table",
+    .description = "the name of (or path to) the attributes table",
+    .setting = &tableName,
+  },
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "brltty-atb",
   .purpose = strtext("Check an attributes table."),
-  .oldParameters = "attributes-table",
 
   .options = &programOptions,
+  .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
@@ -54,27 +63,20 @@ main (int argc, char *argv[]) {
   PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
+  char *tablePath = makeAttributesTablePath(opt_tablesDirectory, tableName);
 
-  if (argc) {
-    const char *tableName = (argc--, *argv++);
-    char *tablePath = makeAttributesTablePath(opt_tablesDirectory, tableName);
+  if (tablePath) {
+    if ((attributesTable = compileAttributesTable(tablePath))) {
+      exitStatus = PROG_EXIT_SUCCESS;
 
-    if (tablePath) {
-      if ((attributesTable = compileAttributesTable(tablePath))) {
-        exitStatus = PROG_EXIT_SUCCESS;
-
-        destroyAttributesTable(attributesTable);
-      } else {
-        exitStatus = PROG_EXIT_FATAL;
-      }
-
-      free(tablePath);
+      destroyAttributesTable(attributesTable);
     } else {
       exitStatus = PROG_EXIT_FATAL;
     }
+
+    free(tablePath);
   } else {
-    logMessage(LOG_ERR, "missing attributes table name");
-    exitStatus = PROG_EXIT_SYNTAX;
+    exitStatus = PROG_EXIT_FATAL;
   }
 
   return exitStatus;
