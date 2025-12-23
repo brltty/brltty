@@ -91,15 +91,24 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+static const char *tableName;
+
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+  { .name = "table",
+    .description = "the name of (or path to) the key table",
+    .setting = &tableName,
+  },
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "brltty-ktb",
   .purpose = strtext("check a key table, list the key naems it can use, or write the key bindings it defines in useful formats."),
-  .oldParameters = "table-name",
 
   .options = &programOptions,
+  .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
@@ -295,75 +304,68 @@ main (int argc, char *argv[]) {
   PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
-
   driverObject = NULL;
 
-  if (argc) {
-    const char *tableName = (argc--, *argv++);
-    KeyTableDescriptor ktd;
-    int gotKeyTableDescriptor;
+  KeyTableDescriptor ktd;
+  int gotKeyTableDescriptor;
 
-    {
-      const char *file = locatePathName(tableName);
-      const char *delimiter = strrchr(file, '.');
-      size_t length = delimiter? (delimiter - file): strlen(file);
-      char name[length + 1];
+  {
+    const char *file = locatePathName(tableName);
+    const char *delimiter = strrchr(file, '.');
+    size_t length = delimiter? (delimiter - file): strlen(file);
+    char name[length + 1];
 
-      memcpy(name, file, length);
-      name[length] = 0;
+    memcpy(name, file, length);
+    name[length] = 0;
 
-      gotKeyTableDescriptor = getKeyTableDescriptor(&ktd, name);
+    gotKeyTableDescriptor = getKeyTableDescriptor(&ktd, name);
+  }
+
+  if (gotKeyTableDescriptor) {
+    if (opt_listKeyNames) {
+      if (!listKeyNames(ktd.names, hlpWriteLine, NULL)) {
+        exitStatus = PROG_EXIT_FATAL;
+      }
     }
 
-    if (gotKeyTableDescriptor) {
-      if (opt_listKeyNames) {
-        if (!listKeyNames(ktd.names, hlpWriteLine, NULL)) {
-          exitStatus = PROG_EXIT_FATAL;
+    if (exitStatus == PROG_EXIT_SUCCESS) {
+      KeyTable *keyTable = compileKeyTable(ktd.path, ktd.names);
+
+      if (keyTable) {
+        if (opt_audit) {
+          if (!auditKeyTable(keyTable, ktd.path)) {
+            exitStatus = PROG_EXIT_FATAL;
+          }
         }
-      }
 
-      if (exitStatus == PROG_EXIT_SUCCESS) {
-        KeyTable *keyTable = compileKeyTable(ktd.path, ktd.names);
-
-        if (keyTable) {
-          if (opt_audit) {
-            if (!auditKeyTable(keyTable, ktd.path)) {
-              exitStatus = PROG_EXIT_FATAL;
-            }
+        if (opt_listHelpScreen) {
+          if (!listKeyTable(keyTable, NULL, hlpWriteLine, NULL)) {
+            exitStatus = PROG_EXIT_FATAL;
           }
-
-          if (opt_listHelpScreen) {
-            if (!listKeyTable(keyTable, NULL, hlpWriteLine, NULL)) {
-              exitStatus = PROG_EXIT_FATAL;
-            }
-          }
-
-          if (opt_listRestructuredText) {
-            RestructuredTextData rst = {
-              .headerLevel = 0,
-              .elementLevel = 0,
-              .elementBullet = WC_C(' '),
-              .blankLine = 0
-            };
-
-            if (!listKeyTable(keyTable, &rstMethods, rstWriteLine, &rst)) {
-              exitStatus = PROG_EXIT_FATAL;
-            }
-          }
-
-          destroyKeyTable(keyTable);
-        } else {
-          exitStatus = PROG_EXIT_FATAL;
         }
-      }
 
-      free(ktd.path);
-    } else {
-      exitStatus = PROG_EXIT_FATAL;
+        if (opt_listRestructuredText) {
+          RestructuredTextData rst = {
+            .headerLevel = 0,
+            .elementLevel = 0,
+            .elementBullet = WC_C(' '),
+            .blankLine = 0
+          };
+
+          if (!listKeyTable(keyTable, &rstMethods, rstWriteLine, &rst)) {
+            exitStatus = PROG_EXIT_FATAL;
+          }
+        }
+
+        destroyKeyTable(keyTable);
+      } else {
+        exitStatus = PROG_EXIT_FATAL;
+      }
     }
+
+    free(ktd.path);
   } else {
-    logMessage(LOG_ERR, "missing key table name");
-    exitStatus = PROG_EXIT_SYNTAX;
+    exitStatus = PROG_EXIT_FATAL;
   }
 
   if (driverObject) unloadSharedObject(driverObject);
