@@ -18,12 +18,12 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
 #include "program.h"
 #include "cmdline.h"
+#include "cmdlib.h"
 #include "options.h"
 #include "prefs.h"
 #include "log.h"
@@ -102,8 +102,12 @@ BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
 BEGIN_COMMAND_LINE_NOTES(programNotes)
-  "If no files are specified then standard input will be read.",
-  "If -v is specified then no files will be translated.",
+  "Contracted braille is written to standard output.",
+  "If a text table has been specified then it defines the braille characters which are written.",
+  "If a text table hasn't been specified then Unicode braille patterns are written.",
+  "",
+  "If no files are specified then standard input is translated.",
+  "Translation isn't performed if a contraction table ii being verified.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
@@ -124,7 +128,6 @@ static wchar_t *inputBuffer;
 static size_t inputSize;
 static size_t inputLength;
 
-static FILE *outputStream;
 static unsigned char *outputBuffer;
 static int outputWidth;
 static int outputExtend;
@@ -136,62 +139,33 @@ static char *verificationTablePath;
 static FILE *verificationTableStream;
 
 static int (*processInputCharacters) (const wchar_t *characters, size_t length, void *data);
-static int (*putCell) (unsigned char cell, void *data);
+static void (*putCell) (unsigned char cell);
 
 typedef struct {
   ProgramExitStatus exitStatus;
 } LineProcessingData;
 
 static void
-noMemory (void *data) {
+onNoMemory (void *data) {
   LineProcessingData *lpd = data;
 
   logMallocError();
   lpd->exitStatus = PROG_EXIT_FATAL;
 }
 
-static int
-checkOutputStream (void *data) {
-  LineProcessingData *lpd = data;
-
-  if (ferror(outputStream)) {
-    logSystemError("output");
-    lpd->exitStatus = PROG_EXIT_FATAL;
-    return 0;
-  }
-
-  return 1;
+static void
+putCellCharacter (wchar_t character) {
+  putUtf8Character(character);
 }
 
-static int
-flushOutputStream (void *data) {
-  fflush(outputStream);
-  return checkOutputStream(data);
+static void
+putTextCell (unsigned char cell) {
+  putCellCharacter(convertDotsToCharacter(textTable, cell));
 }
 
-static int
-putCharacter (unsigned char character, void *data) {
-  fputc(character, outputStream);
-  return checkOutputStream(data);
-}
-
-static int
-putCellCharacter (wchar_t character, void *data) {
-  Utf8Buffer utf8;
-  size_t utfs = convertWcharToUtf8(character, utf8);
-
-  fprintf(outputStream, "%.*s", (int)utfs, utf8);
-  return checkOutputStream(data);
-}
-
-static int
-putTextCell (unsigned char cell, void *data) {
-  return putCellCharacter(convertDotsToCharacter(textTable, cell), data);
-}
-
-static int
-putBrailleCell (unsigned char cell, void *data) {
-  return putCellCharacter((UNICODE_BRAILLE_ROW | cell), data);
+static void
+putBrailleCell (unsigned char cell) {
+  putCellCharacter((UNICODE_BRAILLE_ROW | cell));
 }
 
 static int
@@ -204,35 +178,30 @@ writeCharacters (const wchar_t *inputLine, size_t inputLength, void *data) {
 
     if (!outputBuffer) {
       if (!(outputBuffer = malloc(outputWidth))) {
-        noMemory(data);
+        onNoMemory(data);
         return 0;
       }
     }
 
-    contractText(contractionTable, NULL,
-                 inputBuffer, &inputCount,
-                 outputBuffer, &outputCount,
-                 NULL, CTB_NO_CURSOR);
+    contractText(
+      contractionTable, NULL,
+      inputBuffer, &inputCount,
+      outputBuffer, &outputCount,
+      NULL, CTB_NO_CURSOR
+    );
 
     if ((inputCount < inputLength) && outputExtend) {
       free(outputBuffer);
       outputBuffer = NULL;
       outputWidth <<= 1;
     } else {
-      {
-        int index;
-
-        for (index=0; index<outputCount; index+=1)
-          if (!putCell(outputBuffer[index], data))
-            return 0;
+      for (int index=0; index<outputCount; index+=1) {
+        putCell(outputBuffer[index]);
       }
 
       inputBuffer += inputCount;
       inputLength -= inputCount;
-
-      if (inputLength)
-        if (!putCharacter('\n', data))
-          return 0;
+      if (inputLength) putByte('\n');
     }
   }
 
@@ -244,10 +213,7 @@ flushCharacters (wchar_t end, void *data) {
   if (inputLength) {
     if (!writeCharacters(inputBuffer, inputLength, data)) return 0;
     inputLength = 0;
-
-    if (end)
-      if (!putCharacter(end, data))
-        return 0;
+    if (end) putByte(end);
   }
 
   return 1;
@@ -269,7 +235,7 @@ processCharacters (const wchar_t *characters, size_t count, wchar_t end, void *d
         wchar_t *newBuffer = calloc(newSize, sizeof(*newBuffer));
 
         if (!newBuffer) {
-          noMemory(data);
+          onNoMemory(data);
           return 0;
         }
 
@@ -291,12 +257,12 @@ processCharacters (const wchar_t *characters, size_t count, wchar_t end, void *d
 
     if (end != '\n') {
       if (!flushCharacters(0, data)) return 0;
-      if (!putCharacter(end, data)) return 0;
+      putByte(end);
     }
   } else {
     if (!flushCharacters('\n', data)) return 0;
     if (!writeCharacters(characters, count, data)) return 0;
-    if (!putCharacter(end, data)) return 0;
+    putByte(end);
   }
 
   return 1;
@@ -318,12 +284,9 @@ writeContractedBraille (const wchar_t *characters, size_t length, void *data) {
     character += count;
     length -= count;
   }
+
   if (!processCharacters(character, length, '\n', data)) return 0;
-
-  if (opt_forceOutput)
-    if (!flushOutputStream(data))
-      return 0;
-
+  if (opt_forceOutput) putFlush();
   return 1;
 }
 
@@ -468,7 +431,6 @@ main (int argc, char *argv[]) {
   inputSize = 0;
   inputLength = 0;
 
-  outputStream = stdout;
   outputBuffer = NULL;
 
   if ((outputExtend = !*opt_outputWidth)) {
@@ -537,7 +499,9 @@ main (int argc, char *argv[]) {
             };
 
             if ((exitStatus = processInputFiles(argv, argc, &parameters)) == PROG_EXIT_SUCCESS) {
-              if (!(flushCharacters('\n', &lpd) && flushOutputStream(&lpd))) {
+              if (flushCharacters('\n', &lpd)) {
+                putFlush();
+              } else {
                 exitStatus = lpd.exitStatus;
               }
             }
