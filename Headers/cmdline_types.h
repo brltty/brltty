@@ -108,7 +108,6 @@ static const CommandLineParameters name = { \
 typedef struct {
   const char *name;
   const char *purpose;
-  const char *oldParameters;
 
   const CommandLineOptions *options;
   const CommandLineParameters *parameters;

@@ -78,49 +78,40 @@ static void
 showParameterSyntax (const CommandLineDescriptor *descriptor) {
   const CommandLineParameters *parameters = descriptor->parameters;
 
-  if (parameters) {
-    const char *extra = descriptor->extraParameters.name;
-    unsigned int depth = 0;
+  const char *extra = descriptor->extraParameters.name;
+  unsigned int depth = 0;
 
-    const CommandLineParameter *parameter = parameters->table;
-    const CommandLineParameter *end = parameter + parameters->count;
+  const CommandLineParameter *parameter = parameters->table;
+  const CommandLineParameter *end = parameter + parameters->count;
 
-    while (parameter < end) {
-      putByte(' ');
+  while (parameter < end) {
+    putByte(' ');
 
-      if (parameter->optional) {
-        putByte(optionalArgumentPrefix);
-        depth += 1;
-      }
-
-      {
-        const char *name = parameter->name;
-        if (!name) name = defaultParameterName;
-        putString(getTranslatedText(name));
-      }
-
-      parameter += 1;
-    }
-
-    if (extra) {
-      putByte(' ');
+    if (parameter->optional) {
       putByte(optionalArgumentPrefix);
-      putString(getTranslatedText(extra));
-      putString(repeatableArgumentIndicator);
       depth += 1;
     }
 
-    while (depth > 0) {
-      putByte(optionalArgumentSuffix);
-      depth -= 1;
+    {
+      const char *name = parameter->name;
+      if (!name) name = defaultParameterName;
+      putString(getTranslatedText(name));
     }
-  } else {
-    const char *parameters = descriptor->oldParameters;
 
-    if (parameters) {
-      putByte(' ');
-      putString(getTranslatedText(parameters));
-    }
+    parameter += 1;
+  }
+
+  if (extra) {
+    putByte(' ');
+    putByte(optionalArgumentPrefix);
+    putString(getTranslatedText(extra));
+    putString(repeatableArgumentIndicator);
+    depth += 1;
+  }
+
+  while (depth > 0) {
+    putByte(optionalArgumentSuffix);
+    depth -= 1;
   }
 }
 
@@ -1314,10 +1305,14 @@ exitOptions (void *data) {
 BEGIN_COMMAND_LINE_OPTIONS(defaultOptions)
 END_COMMAND_LINE_OPTIONS(defaultOptions)
 
+BEGIN_COMMAND_LINE_PARAMETERS(defaultParameters)
+END_COMMAND_LINE_PARAMETERS(defaultParameters)
+
 ProgramExitStatus
 processCommandLine (const CommandLineDescriptor *descriptor, int *argumentCount, char ***argumentVector) {
   CommandLineDescriptor cld = *descriptor;
   if (!cld.options) cld.options = &defaultOptions;
+  if (!cld.parameters) cld.parameters = &defaultParameters;
 
   uint8_t ensuredSettings[cld.options->count];
   memset(ensuredSettings, 0, sizeof(ensuredSettings));
