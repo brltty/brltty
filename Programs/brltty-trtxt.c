@@ -81,16 +81,25 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 BEGIN_COMMAND_LINE_NOTES(programNotes)
+  "If no files are specified then standard input is translated.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "brltty-trtxt",
   .purpose = strtext("Translate one binary braille representation to another."),
-  .oldParameters = "[{input-file | -} ...]",
 
   .options = &programOptions,
+  .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes),
+
+  .extraParameters = {
+    .name = "file",
+    .description = "the files to translate (use - for standard input)",
+  },
 END_COMMAND_LINE_DESCRIPTOR
 
 static TextTable *inputTable;
