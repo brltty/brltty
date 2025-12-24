@@ -75,12 +75,12 @@ END_COMMAND_LINE_PARAMETERS(programParameters)
 
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "Action names aren't case-sensitive and may be abbreviated.",
-  "They are:",
-  "  translation message [plural quantity]",
+  "The available actions are:",
   "  count",
-  "  all",
+  "  list`",
   "  metadata",
   "  property name [attribute]",
+  "  translation message [plural quantity]",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
@@ -275,7 +275,7 @@ main (int argc, char *argv[]) {
   } else if (isAbbreviation("count", requestedAction)) {
     beginAction(&argv, &argc);
     putf("%u\n", getMessageCount());
-  } else if (isAbbreviation("all", requestedAction)) {
+  } else if (isAbbreviation("list`", requestedAction)) {
     beginAction(&argv, &argc);
     listAllTranslations();
   } else if (isAbbreviation("metadata", requestedAction)) {
