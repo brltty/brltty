@@ -108,16 +108,24 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
 #endif /* HAVE_MIDI_SUPPORT */
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "brltty-morse",
   .purpose = strtext("Translate text into Morse Code tones."),
-  .oldParameters = "text ... | -f [{file | -} ...]",
 
   .options = &programOptions,
+  .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes),
+
+  .extraParameters = {
+    .name = "arg",
+    .description = "words or, if -f is specified, files",
+  },
 END_COMMAND_LINE_DESCRIPTOR
 
 static
@@ -232,7 +240,7 @@ main (int argc, char *argv[]) {
       argv += 1;
     } while (argc -= 1);
   } else {
-    logMessage(LOG_ERR, "missing text");
+    logMessage(LOG_ERR, "missing word");
     exitStatus = PROG_EXIT_SYNTAX;
   }
 

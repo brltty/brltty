@@ -85,6 +85,9 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
 #endif /* HAVE_MIDI_SUPPORT */
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "If the tune is specified on the command line then each argument contains a command group.",
   "If it's read from a file then each line contains a command group.",
@@ -94,10 +97,15 @@ END_COMMAND_LINE_NOTES
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "brltty-tune",
   .purpose = strtext("Compose a tune with the tune builder and play it with the tone generator."),
-  .oldParameters = "commands ... | -f [{file | -} ...]",
 
   .options = &programOptions,
+  .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes, tuneBuilderNotes),
+
+  .extraParameters = {
+    .name = "tune",
+    .description = "tune strings or, if -f is specified, tune files",
+  },
 END_COMMAND_LINE_DESCRIPTOR
 
 static void
