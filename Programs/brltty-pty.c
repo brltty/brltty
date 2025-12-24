@@ -135,8 +135,8 @@ BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .notes = COMMAND_LINE_NOTES(programNotes),
 
   .extraParameters = {
-    .name = "arg",
-    .description = "the command to run followed by its arguments",
+    .name = "command",
+    .description = "the command, followed by its arguments, to run",
   },
 END_COMMAND_LINE_DESCRIPTOR
 
@@ -272,7 +272,7 @@ runChild (char **command) {
   }
 
   if (prepareChild()) {
-    int result = execvp(*command, command);
+    int result = execvp(command[0], command);
 
     if (result == -1) {
       switch (errno) {
