@@ -18,9 +18,7 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
 #include <string.h>
-#include <errno.h>
 
 #include "log.h"
 #include "program.h"

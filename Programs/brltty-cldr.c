@@ -18,15 +18,14 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
 #include "program.h"
 #include "cmdline.h"
+#include "cmdlib.h"
 #include "log.h"
 #include "cldr.h"
-#include "datafile.h"
 #include "utf8.h"
 
 #define DEFAULT_OUTPUT_FORMAT "%s\\t%n\\n"
@@ -42,6 +41,15 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .description = strtext("The format of each output line.")
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
+
+static const char *inputFile;
+
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+  { .name = "file",
+    .description = "the CLDR annotations file to process",
+    .setting = &inputFile,
+  },
+END_COMMAND_LINE_PARAMETERS(programParameters)
 
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "The output format is printf-like -",
@@ -71,9 +79,9 @@ END_COMMAND_LINE_NOTES
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "brltty-cldr",
   .purpose = strtext("List the characters defined within a CLDR (Common Locale Data Repository Project) annotations file."),
-  .oldParameters = "input-file",
 
   .options = &programOptions,
+  .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
@@ -95,22 +103,6 @@ onUnrecognizedCharacter (const char *type, int byte) {
 }
 
 static void
-onOutputError (void) {
-  logMessage(LOG_ERR, "output error %d: %s", errno, strerror(errno));
-  exit(PROG_EXIT_FATAL);
-}
-
-static void
-putByte (int byte) {
-  if (fputc(byte, stdout) == EOF) onOutputError();
-}
-
-static void
-putString (const char *string) {
-  if (fputs(string, stdout) == EOF) onOutputError();
-}
-
-static void
 putHexadecimal (const char *string) {
   size_t size = strlen(string) + 1;
   wchar_t characters[size];
@@ -121,7 +113,7 @@ putHexadecimal (const char *string) {
   convertUtf8ToWchars(&byte, &end, size);
 
   while (character < end) {
-    if (writeHexadecimalCharacter(stdout, *character) == EOF) onOutputError();
+    putHexadecimalCharacter(*character);
     character += 1;
   }
 }
@@ -237,19 +229,6 @@ CLDR_ANNOTATION_HANDLER(handleAnnotation) {
 int
 main (int argc, char *argv[]) {
   PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
-
-  if (argc < 1) {
-    logMessage(LOG_ERR, "missing annotations file name");
-    return PROG_EXIT_SYNTAX;
-  }
-
-  const char *inputFile = *argv++;
-  argc -= 1;
-
-  if (argc > 0) {
-    logMessage(LOG_ERR, "too many parameters");
-    return PROG_EXIT_SYNTAX;
-  }
 
   return cldrParseFile(inputFile, handleAnnotation, NULL)?
          PROG_EXIT_SUCCESS:

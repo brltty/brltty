@@ -57,6 +57,8 @@ extern void putBytes (const char *bytes, size_t count);
 extern void putByte (char byte);
 extern void putNewline (void);
 
+void putHexadecimalCharacter (wchar_t character);
+
 extern void putf (const char *format, ...) PRINTF(1, 2);
 extern void vputf (const char *format, va_list args);
 

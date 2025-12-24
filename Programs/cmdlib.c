@@ -26,6 +26,7 @@
 #include "log.h"
 #include "cmdlib.h"
 #include "file.h"
+#include "datafile.h"
 #include "parse.h"
 #include "queue.h"
 
@@ -201,6 +202,12 @@ putByte (char byte) {
 void
 putNewline (void) {
   putByte('\n');
+}
+
+void
+putHexadecimalCharacter (wchar_t character) {
+  writeHexadecimalCharacter(stdout, character);
+  checkForOutputError();
 }
 
 void
