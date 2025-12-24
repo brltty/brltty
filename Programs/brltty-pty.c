@@ -386,9 +386,9 @@ reapExitStatus (pid_t pid) {
   return PROG_EXIT_FATAL;
 }
 
-static int
+static ProgramExitStatus
 runParent (pid_t child) {
-  int exitStatus = PROG_EXIT_FATAL;
+  ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
   AsyncHandle ptyInputHandle;
 
   parentIsQuitting = 0;
