@@ -57,10 +57,8 @@ extern void putBytes (const char *bytes, size_t count);
 extern void putByte (char byte);
 extern void putNewline (void);
 
-void putHexadecimalCharacter (wchar_t character);
-
-extern void putf (const char *format, ...) PRINTF(1, 2);
 extern void vputf (const char *format, va_list args);
+extern void putf (const char *format, ...) PRINTF(1, 2);
 
 extern void putWrappedText (
   const char *text, char *line,
@@ -71,6 +69,10 @@ extern void putFormattedLines (
   const char *const *const *blocks,
   char *line, int lineWidth
 );
+
+extern void putHexadecimalCharacter (wchar_t character);
+extern void putHexadecimalCharacters (const wchar_t *characters, size_t count);
+extern void putHexadecimalString (const wchar_t *string);
 
 extern void beginInteractiveMode (void);
 extern void endInteractiveMode (void);

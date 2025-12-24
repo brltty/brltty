@@ -205,12 +205,6 @@ putNewline (void) {
 }
 
 void
-putHexadecimalCharacter (wchar_t character) {
-  writeHexadecimalCharacter(stdout, character);
-  checkForOutputError();
-}
-
-void
 vputf (const char *format, va_list args) {
   vprintf(format, args);
   checkForOutputError();
@@ -348,6 +342,24 @@ putFormattedLines (
 
 done:
   if (paragraphText) free(paragraphText);
+}
+
+void
+putHexadecimalCharacter (wchar_t character) {
+  writeHexadecimalCharacter(stdout, character);
+  checkForOutputError();
+}
+
+void
+putHexadecimalCharacters (const wchar_t *characters, size_t count) {
+  const wchar_t *character = characters;
+  const wchar_t *end = character + count;
+  while (character < end) putHexadecimalCharacter(*character++);
+}
+
+void
+putHexadecimalString (const wchar_t *string) {
+  putHexadecimalCharacters(string, wcslen(string));
 }
 
 void

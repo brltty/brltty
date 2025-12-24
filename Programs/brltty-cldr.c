@@ -110,12 +110,9 @@ putHexadecimal (const char *string) {
   const char *byte = string;
   wchar_t *character = characters;
   wchar_t *end = character;
-  convertUtf8ToWchars(&byte, &end, size);
 
-  while (character < end) {
-    putHexadecimalCharacter(*character);
-    character += 1;
-  }
+  convertUtf8ToWchars(&byte, &end, size);
+  putHexadecimalCharacters(character, (end - character));
 }
 
 static
