@@ -25,6 +25,7 @@
 
 #include "log.h"
 #include "cmdlib.h"
+#include "utf8.h"
 #include "file.h"
 #include "datafile.h"
 #include "parse.h"
@@ -342,6 +343,25 @@ putFormattedLines (
 
 done:
   if (paragraphText) free(paragraphText);
+}
+
+void
+putUtf8Character (wchar_t character) {
+  Utf8Buffer utf8;
+  size_t utfs = convertWcharToUtf8(character, utf8);
+  putf("%.*s", (int)utfs, utf8);
+}
+
+void
+putUtf8Characters (const wchar_t *characters, size_t count) {
+  const wchar_t *character = characters;
+  const wchar_t *end = character + count;
+  while (character < end) putUtf8Character(*character++);
+}
+
+void
+putUtf8String (const wchar_t *string) {
+  putUtf8Characters(string, wcslen(string));
 }
 
 void

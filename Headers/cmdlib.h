@@ -70,6 +70,10 @@ extern void putFormattedLines (
   char *line, int lineWidth
 );
 
+extern void putUtf8Character (wchar_t character);
+extern void putUtf8Characters (const wchar_t *characters, size_t count);
+extern void putUtf8String (const wchar_t *string);
+
 extern void putHexadecimalCharacter (wchar_t character);
 extern void putHexadecimalCharacters (const wchar_t *characters, size_t count);
 extern void putHexadecimalString (const wchar_t *string);
