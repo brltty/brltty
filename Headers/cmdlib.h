@@ -53,7 +53,7 @@ extern void putFlush (void);
 extern void putConsole (const char *bytes, size_t count);
 
 extern void putString (const char *string);
-extern void putBytes (const char *bytes, size_t count);
+extern void putBytes (const void *bytes, size_t count);
 extern void putByte (char byte);
 extern void putNewline (void);
 

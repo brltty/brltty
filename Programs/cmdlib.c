@@ -189,7 +189,7 @@ putString (const char *string) {
 }
 
 void
-putBytes (const char *bytes, size_t count) {
+putBytes (const void *bytes, size_t count) {
   fwrite(bytes, 1, count, stdout);
   checkForOutputError();
 }
@@ -347,9 +347,14 @@ done:
 
 void
 putUtf8Character (wchar_t character) {
-  Utf8Buffer utf8;
-  size_t utfs = convertWcharToUtf8(character, utf8);
-  putf("%.*s", (int)utfs, utf8);
+  if (character) {
+    Utf8Buffer utf8;
+    size_t utfs = convertWcharToUtf8(character, utf8);
+    putBytes(utf8, utfs);
+  } else {
+    static const unsigned char bytes[] = {0XC0, 0X80};
+    putBytes(bytes, ARRAY_COUNT(bytes));
+  }
 }
 
 void
