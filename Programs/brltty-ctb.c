@@ -108,6 +108,16 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "",
   "If no files are specified then standard input is translated.",
   "Translation isn't performed if a contraction table ii being verified.",
+  "",
+  "Each individual input line is translated into a separate output line.",
+  "If text reformatting has been requested then each sequence of unindented lines",
+  "is joined, separated from one another by a blank, into a single line thus",
+  "effectively treating each sequence of unindented lines as a single paragraph.",
+  "Empty lines and those which begin with whitespace aren't reformatted.",
+  "",
+  "The default is for each output lie to be as long as it needs to be.",
+  "If, however, an explicit output width has been specified",
+  "then longer output lines are word-wrapped at that width.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
@@ -221,11 +231,7 @@ flushCharacters (wchar_t end, void *data) {
 
 static int
 processCharacters (const wchar_t *characters, size_t count, wchar_t end, void *data) {
-  if (opt_reformatText && count) {
-    if (iswspace(characters[0]))
-      if (!flushCharacters('\n', data))
-        return 0;
-
+  if (opt_reformatText && count && !iswspace(characters[0])) {
     {
       unsigned int spaces = !inputLength? 0: 1;
       size_t newLength = inputLength + spaces + count;
