@@ -169,8 +169,14 @@ checkForOutputError (void) {
 }
 
 void
-flushOutput (void) {
+putFlush (void) {
   fflush(stdout);
+  checkForOutputError();
+}
+
+void
+putConsole (const char *bytes, size_t count) {
+  writeWithConsoleEncoding(stdout, bytes, count);
   checkForOutputError();
 }
 

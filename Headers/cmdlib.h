@@ -49,7 +49,9 @@ extern int parsePercent (float *value, const char *argument, const char *name);
 extern size_t getConsoleWidth (void);
 extern const char *getTranslatedText (const char *text);
 
-extern void flushOutput (void);
+extern void putFlush (void);
+extern void putConsole (const char *bytes, size_t count);
+
 extern void putString (const char *string);
 extern void putBytes (const char *bytes, size_t count);
 extern void putByte (char byte);

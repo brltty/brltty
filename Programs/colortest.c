@@ -1526,7 +1526,7 @@ doInteractiveMode (void) {
 
   while (1) {
     putf("%s> ", currentColorModel->name);
-    flushOutput();
+    putFlush();
 
     if (!readLine(stdin, &line, &lineSize, NULL)) {
       putf("\n");
