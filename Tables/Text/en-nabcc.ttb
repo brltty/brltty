@@ -414,6 +414,7 @@ char \XB5 (    567 )  # 181   µ  micro sign
 # nonbreaking spaces as a smooth low line segment.
 
      #Hex    Dots       Dec Char Description
+char \XA0 (      78)  # 160      no-break space
 char \X7F (   4567 )  # 127  ^?  delete
 
 include ltr-alias.tti
