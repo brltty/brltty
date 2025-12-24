@@ -68,16 +68,24 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
   },
 END_COMMAND_LINE_OPTIONS(programOptions)
 
+BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
+END_COMMAND_LINE_PARAMETERS(programParameters)
+
 BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "brltty-clip",
   .purpose = strtext("Manage brltty's clipboard from the command line."),
-  .oldParameters = "[{input-file | -} ...]",
 
   .options = &programOptions,
+  .parameters = &programParameters,
   .notes = COMMAND_LINE_NOTES(programNotes),
+
+  .extraParameters = {
+    .name = "file",
+    .description = "the files to paste (use - for standard input)",
+  },
 END_COMMAND_LINE_DESCRIPTOR
 
 static const brlapi_param_t apiParameter = BRLAPI_PARAM_CLIPBOARD_CONTENT;
@@ -191,7 +199,7 @@ main (int argc, char *argv[]) {
 
       exitStatus = processInputFiles(argv, argc, &parameters);
     } else if (argc > 0) {
-      logMessage(LOG_ERR, "too many arguments");
+      logMessage(LOG_ERR, "specifying files conflicts with specifying -g or -s");
       exitStatus = PROG_EXIT_SYNTAX;
     } else {
       exitStatus = PROG_EXIT_SUCCESS;
