@@ -112,6 +112,12 @@ BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
 BEGIN_COMMAND_LINE_NOTES(programNotes)
+  "If the -f option isn't specified then at least one argument must be specified.",
+  "Each argument is treated as a separate word.",
+  "",
+  "If the -f option is specified then each argument specifies a file.",
+  "If no arguments are specified then standard input is read.",
+  "If a file is specified as a minus sign (-) then standard input is read.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)

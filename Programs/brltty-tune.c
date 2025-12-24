@@ -89,9 +89,14 @@ BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
 BEGIN_COMMAND_LINE_NOTES(programNotes)
-  "If the tune is specified on the command line then each argument contains a command group.",
-  "If it's read from a file then each line contains a command group.",
-  "Each specified file contains a different tune.",
+  "If the -f option isn't specified then at least one argument must be specified.",
+  "Each argument contains a command group.",
+  "",
+  "If the -f option is specified then each argument specifies a file.",
+  "If no arguments are specified then standard input is read.",
+  "If a file is specified as a minus sign (-) then standard input is read.",
+  "Each file contains a different tune.",
+  "each line of each file contains a command group.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
@@ -103,7 +108,7 @@ BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .notes = COMMAND_LINE_NOTES(programNotes, tuneBuilderNotes),
 
   .extraParameters = {
-    .name = "tune",
+    .name = "arg",
     .description = "tune strings or, if -f is specified, tune files",
   },
 END_COMMAND_LINE_DESCRIPTOR
