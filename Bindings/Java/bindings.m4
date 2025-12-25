@@ -93,7 +93,7 @@ then
    JAVA_JNI_INC="${java_home_directory}/include"
    JAVA_JNI_HDR="jni.h"
    JAVA_JNI_FLAGS=""
-   AC_CHECK_HEADER([${JAVA_JNI_HDR}], [], [AC_CHECK_FILE(["${JAVA_JNI_INC}/${JAVA_JNI_HDR}"], [JAVA_JNI_FLAGS="-I${JAVA_JNI_INC}"], [JAVA_OK=false])])
+   AC_CHECK_HEADER([${JAVA_JNI_HDR}], [], [AS_IF([test -e "${JAVA_JNI_INC}/${JAVA_JNI_HDR}"], [JAVA_JNI_FLAGS="-I${JAVA_JNI_INC}"], [JAVA_OK=false])])
 
    "${JAVA_OK}" && {
       set -- "${JAVA_JNI_INC}"/*/jni_md.h
