@@ -1426,6 +1426,12 @@ setTranslationTable (int force) {
 }
 
 static int
+isPadCharacter (wchar_t character) {
+  if (character == UNICODE_ZERO_WIDTH_SPACE) return 1;
+  return iswspace(character);
+}
+
+static int
 readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) {
   off_t offset = row * size;
 
@@ -1455,7 +1461,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
       if (unicode) {
         wc = *unicode++;
 
-        if ((blanks > 0) && iswspace(wc)) {
+        if ((blanks > 0) && isPadCharacter(wc)) {
           blanks -= 1;
           wc = WEOF;
         } else if (widecharPadding) {
