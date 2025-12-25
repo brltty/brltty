@@ -31,6 +31,9 @@ $(DRIVER_OBJECTS): %.o: $(SRC_DIR)/%.c
 
 EU_TRANSFER_OBJECTS = eutp_brl.$O eutp_convert.$O eutp_debug.$O eutp_pc.$O eutp_tools.$O eutp_transfer.$O eutp_main.$O
 
+$(EU_TRANSFER_OBJECTS): %.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+
 EU_TRANSFER_TOOL = eutp$X
 EU_TRANSFER_MAN = $(SRC_DIR)/eutp.1
 
