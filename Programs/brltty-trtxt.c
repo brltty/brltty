@@ -18,12 +18,12 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
 #include "program.h"
 #include "cmdline.h"
+#include "cmdlib.h"
 #include "options.h"
 #include "log.h"
 #include "file.h"
@@ -48,7 +48,7 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .argument = strtext("file"),
     .setting.string = &opt_inputTable,
     .internal.setting = tableName_autoselect,
-    .description = strtext("Path to input text table.")
+    .description = strtext("The name of (or path to) the input text table.")
   },
 
   { .word = "output-table",
@@ -56,7 +56,7 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .argument = strtext("file"),
     .setting.string = &opt_outputTable,
     .internal.setting = tableName_unicode,
-    .description = strtext("Path to output text table.")
+    .description = strtext("The name of (or path to) the output text table.")
   },
 
   { .word = "six-dots",
@@ -86,6 +86,12 @@ END_COMMAND_LINE_PARAMETERS(programParameters)
 
 BEGIN_COMMAND_LINE_NOTES(programNotes)
   "If no files are specified then standard input is translated.",
+  "",
+  "Unicode braille patterns are always recognized as valid input characters..",
+  "If an input text table has been specified then the braille characters defined by that table are also recognized.",
+  "",
+  "If an output text table has been specified then the braille characters defined by that table are written.",
+  "If an output text table hasn't been specified then Unicode braille patterns are written.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
@@ -105,7 +111,6 @@ END_COMMAND_LINE_DESCRIPTOR
 static TextTable *inputTable;
 static TextTable *outputTable;
 
-static FILE *outputStream;
 static const char *outputName;
 
 static unsigned char (*toDots) (wchar_t character);
@@ -141,8 +146,8 @@ writeCharacter (const wchar_t *character, mbstate_t *state) {
   if (result == (size_t)-1) return 0;
   if (!character) result -= 1;
 
-  fwrite(bytes, 1, result, outputStream);
-  return !ferror(outputStream);
+  putBytes(bytes, result);
+  return 1;
 }
 
 static int
@@ -193,8 +198,7 @@ processStream (FILE *inputStream, const char *inputName) {
   }
 
   if (!writeCharacter(NULL, &outputState)) goto outputError;
-  fflush(outputStream);
-  if (ferror(outputStream)) goto outputError;
+  putFlush();
 
   if (!mbsinit(&inputState)) {
 #ifdef EILSEQ
@@ -256,7 +260,6 @@ main (int argc, char *argv[]) {
 
   if (getTable(&inputTable, opt_inputTable)) {
     if (getTable(&outputTable, opt_outputTable)) {
-      outputStream = stdout;
       outputName = standardOutputName;
 
       toDots = inputTable? toDots_mapped: toDots_unicode;
