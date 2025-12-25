@@ -18,11 +18,11 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
 #include <string.h>
 
 #include "program.h"
 #include "cmdline.h"
+#include "cmdlib.h"
 #include "options.h"
 #include "log.h"
 #include "file.h"
@@ -180,10 +180,8 @@ getKeyTableDescriptor (KeyTableDescriptor *ktd, const char *tableName) {
 
 static int
 writeLine (const wchar_t *line) {
-  FILE *stream = stdout;
-
-  fprintf(stream, "%" PRIws "\n", line);
-  return !ferror(stream);
+  putf("%" PRIws "\n", line);
+  return 1;
 }
 
 static int
