@@ -29,6 +29,7 @@
 #include "notes.h"
 #include "datafile.h"
 #include "morse.h"
+#include "program.h"
 
 static int opt_fromFiles;
 static char *opt_morsePitch;

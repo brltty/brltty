@@ -37,6 +37,7 @@
 #include "pty_terminal.h"
 #include "parse.h"
 #include "file.h"
+#include "program.h"
 #include "async_handle.h"
 #include "async_wait.h"
 #include "async_io.h"

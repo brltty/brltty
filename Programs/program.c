@@ -36,11 +36,6 @@
 #include "parse.h"
 #include "system.h"
 
-const char standardStreamArgument[] = "-";
-const char standardInputName[] = "<standard-input>";
-const char standardOutputName[] = "<standard-output>";
-const char standardErrorName[] = "<standard-error>";
-
 const char *programPath;
 const char *programName;
 

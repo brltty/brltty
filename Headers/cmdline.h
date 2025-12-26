@@ -20,7 +20,7 @@
 #define BRLTTY_INCLUDED_CMDLINE
 
 #include "cmdline_types.h"
-#include "program.h"
+#include "cmdprog.h"
 #include "datafile.h"
 
 #ifdef __cplusplus

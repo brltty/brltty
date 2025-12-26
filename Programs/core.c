@@ -73,6 +73,7 @@
 #include "prefs.h"
 #include "api_control.h"
 #include "options.h"
+#include "program.h"
 #include "core.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT

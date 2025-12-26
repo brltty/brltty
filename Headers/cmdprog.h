@@ -16,34 +16,28 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_PROGRAM
-#define BRLTTY_INCLUDED_PROGRAM
-
-#include "pid.h"
+#ifndef BRLTTY_INCLUDED_CMDPROG
+#define BRLTTY_INCLUDED_CMDPROG
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern const char *programPath;
-extern const char *programName;
+typedef enum {
+  PROG_EXIT_SUCCESS  = 0,
+  PROG_EXIT_FORCE    = 1,
+  PROG_EXIT_SYNTAX   = 2,
+  PROG_EXIT_SEMANTIC = 3,
+  PROG_EXIT_FATAL    = 4
+} ProgramExitStatus;
 
-extern void beginProgram (int argumentCount, char **argumentVector);
-extern void endProgram (void);
-
-typedef void ProgramExitHandler (void *data);
-extern void onProgramExit (const char *name, ProgramExitHandler *handler, void *data);
-extern void registerProgramMemory (const char *name, void *pointer);
-
-extern const char *getProgramDirectory (void);
-extern int toAbsoluteInstallPath (char **path);
-extern char *makeProgramPath (const char *name);
-
-extern int createPidFile (const char *path, ProcessIdentifier pid);
-extern int cancelProgram (const char *pidFile);
+extern const char standardStreamArgument[];
+extern const char standardInputName[];
+extern const char standardOutputName[];
+extern const char standardErrorName[];
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_PROGRAM */
+#endif /* BRLTTY_INCLUDED_CMDPROG */

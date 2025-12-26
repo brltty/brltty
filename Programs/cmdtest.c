@@ -18,7 +18,6 @@
 
 #include "prologue.h"
 
-#include "program.h"
 #include "cmdline.h"
 #include "log.h"
 #include "parse.h"
