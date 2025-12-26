@@ -208,29 +208,9 @@ parseQuantity (int *count, const char *quantity) {
   return 0;
 }
 
-static const char *
-nextParameter (char ***argv, int *argc, const char *description) {
-  if (*argc) {
-    *argc -= 1;
-    return *(*argv)++;
-  }
-
-  if (!description) return NULL;
-  logMessage(LOG_ERR, "missing %s", description);
-  exit(PROG_EXIT_SYNTAX);
-}
-
-static void
-noMoreParameters (char ***argv, int *argc) {
-  if (*argc) {
-    logMessage(LOG_ERR, "too many parameters");
-    exit(PROG_EXIT_SYNTAX);
-  }
-}
-
 static void
 beginAction (char ***argv, int *argc) {
-  noMoreParameters(argv, argc);
+  noMoreProgramArguments(argv, argc);
 
   {
     const char *directory = opt_localeDirectory;
@@ -257,11 +237,11 @@ main (int argc, char *argv[]) {
   int ok = 1;
 
   if (isAbbreviation("translation", requestedAction)) {
-    const char *message = nextParameter(&argv, &argc, "message");
-    const char *plural = nextParameter(&argv, &argc, NULL);
+    const char *message = nextProgramArgument(&argv, &argc, "message");
+    const char *plural = nextProgramArgument(&argv, &argc, NULL);
 
     if (plural) {
-      const char *quantity = nextParameter(&argv, &argc, "quantity");
+      const char *quantity = nextProgramArgument(&argv, &argc, "quantity");
 
       int count;
       if (!parseQuantity(&count, quantity)) return PROG_EXIT_SYNTAX;
@@ -282,8 +262,8 @@ main (int argc, char *argv[]) {
     beginAction(&argv, &argc);
     putf("%s\n", getMessagesMetadata());
   } else if (isAbbreviation("property", requestedAction)) {
-    const char *property = nextParameter(&argv, &argc, "property name");
-    const char *attribute = nextParameter(&argv, &argc, NULL);
+    const char *property = nextProgramArgument(&argv, &argc, "property name");
+    const char *attribute = nextProgramArgument(&argv, &argc, NULL);
 
     beginAction(&argv, &argc);
     ok = showProperty(property, attribute);

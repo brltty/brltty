@@ -18,9 +18,30 @@
 
 #include "prologue.h"
 
+#include "log.h"
 #include "cmdprog.h"
 
 const char standardStreamArgument[] = "-";
 const char standardInputName[] = "<standard-input>";
 const char standardOutputName[] = "<standard-output>";
 const char standardErrorName[] = "<standard-error>";
+
+const char *
+nextProgramArgument (char ***argv, int *argc, const char *description) {
+  if (*argc) {
+    *argc -= 1;
+    return *(*argv)++;
+  }
+
+  if (!description) return NULL;
+  logMessage(LOG_ERR, "missing %s", description);
+  exit(PROG_EXIT_SYNTAX);
+}
+
+void
+noMoreProgramArguments (char ***argv, int *argc) {
+  if (*argc) {
+    logMessage(LOG_ERR, "too many arguments: %s", (*argv)[0]);
+    exit(PROG_EXIT_SYNTAX);
+  }
+}
