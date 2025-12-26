@@ -31,6 +31,11 @@ const char standardOutputName[] = "<standard-output>";
 const char standardErrorName[] = "<standard-error>";
 
 const char *
+getProgramName (void) {
+  return programName;
+}
+
+const char *
 nextProgramArgument (char ***argv, int *argc, const char *description) {
   if (*argc) {
     *argc -= 1;

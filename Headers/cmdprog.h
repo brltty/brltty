@@ -36,6 +36,7 @@ extern const char standardInputName[];
 extern const char standardOutputName[];
 extern const char standardErrorName[];
 
+extern const char *getProgramName (void);
 extern const char *nextProgramArgument (char ***argv, int *argc, const char *description);
 extern void noMoreProgramArguments (char ***argv, int *argc);
 

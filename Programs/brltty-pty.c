@@ -37,7 +37,6 @@
 #include "pty_terminal.h"
 #include "parse.h"
 #include "file.h"
-#include "program.h"
 #include "async_handle.h"
 #include "async_wait.h"
 #include "async_io.h"
@@ -190,7 +189,7 @@ setEnvironmentInteger (const char *variable, int integer) {
 
 static int
 setEnvironmentVariables (size_t *width, size_t *height) {
-  if (!setEnvironmentString("TERM_PROGRAM", programName)) return 0;
+  if (!setEnvironmentString("TERM_PROGRAM", getProgramName())) return 0;
   if (!setEnvironmentString("TERM_PROGRAM_VERSION", PACKAGE_VERSION)) return 0;
 
   {
