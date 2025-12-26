@@ -21,7 +21,9 @@
 #include "log.h"
 #include "cmdprog.h"
 #include "file.h"
+#include "parse.h"
 #include "program.h"
+#include "options.h"
 
 const char standardStreamArgument[] = "-";
 const char standardInputName[] = "<standard-input>";
@@ -54,3 +56,21 @@ toAbsoluteInstallPath (char **path) {
   if (!programDirectory) programDirectory = CURRENT_DIRECTORY_NAME;
   return anchorRelativePath(path, programDirectory);
 }
+
+char *opt_helpersDirectory = HELPERS_DIRECTORY;
+
+char *
+makeHelperPath (const char *name) {
+  char *path = NULL;
+  char *directory = NULL;
+
+  if (changeStringSetting(&directory, opt_helpersDirectory)) {
+    if (toAbsoluteInstallPath(&directory)) {
+      path = makePath(directory, name);
+    }
+  }
+
+  if (directory) free(directory);
+  return path;
+}
+

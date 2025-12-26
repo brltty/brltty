@@ -54,7 +54,6 @@
 #include "async_wait.h"
 #include "utf8.h"
 #include "program.h"
-#include "cmdprog.h"
 
 
 static inline int
@@ -223,23 +222,6 @@ anchorRelativePath (char **path, const char *anchor) {
   }
 
   return ok;
-}
-
-char *opt_helpersDirectory = HELPERS_DIRECTORY;
-
-char *
-makeHelperPath (const char *name) {
-  char *path = NULL;
-  char *directory = NULL;
-
-  if (changeStringSetting(&directory, opt_helpersDirectory)) {
-    if (toAbsoluteInstallPath(&directory)) {
-      path = makePath(directory, name);
-    }
-  }
-
-  if (directory) free(directory);
-  return path;
 }
 
 int
