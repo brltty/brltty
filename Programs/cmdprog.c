@@ -36,6 +36,31 @@ getProgramName (void) {
 }
 
 const char *
+getProgramDirectory (void) {
+  static const char *programDirectory = NULL;
+
+  if (!programDirectory) {
+    if ((programDirectory = getPathDirectory(programPath))) {
+      logMessage(LOG_DEBUG, "program directory: %s", programDirectory);
+      registerProgramMemory("program-directory", &programDirectory);
+    } else {
+      logMessage(LOG_WARNING, gettext("cannot determine program directory"));
+      programDirectory = "";
+    }
+  }
+
+  if (!*programDirectory) return NULL;
+  return programDirectory;
+}
+
+char *
+makeProgramPath (const char *name) {
+   const char *directory = getProgramDirectory();
+   if (!directory) return NULL;
+   return makePath(directory, name);
+}
+
+const char *
 nextProgramArgument (char ***argv, int *argc, const char *description) {
   if (*argc) {
     *argc -= 1;
@@ -78,4 +103,3 @@ makeHelperPath (const char *name) {
   if (directory) free(directory);
   return path;
 }
-

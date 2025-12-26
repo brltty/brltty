@@ -35,9 +35,6 @@ typedef void ProgramExitHandler (void *data);
 extern void onProgramExit (const char *name, ProgramExitHandler *handler, void *data);
 extern void registerProgramMemory (const char *name, void *pointer);
 
-extern const char *getProgramDirectory (void);
-extern char *makeProgramPath (const char *name);
-
 extern int createPidFile (const char *path, ProcessIdentifier pid);
 extern int cancelProgram (const char *pidFile);
 

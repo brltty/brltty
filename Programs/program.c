@@ -134,31 +134,6 @@ beginProgram (int argumentCount, char **argumentVector) {
   pushLogPrefix(programName);
 }
 
-const char *
-getProgramDirectory (void) {
-  static const char *programDirectory = NULL;
-
-  if (!programDirectory) {
-    if ((programDirectory = getPathDirectory(programPath))) {
-      logMessage(LOG_DEBUG, "program directory: %s", programDirectory);
-      registerProgramMemory("program-directory", &programDirectory);
-    } else {
-      logMessage(LOG_WARNING, gettext("cannot determine program directory"));
-      programDirectory = "";
-    }
-  }
-
-  if (!*programDirectory) return NULL;
-  return programDirectory;
-}
-
-char *
-makeProgramPath (const char *name) {
-   const char *directory = getProgramDirectory();
-   if (!directory) return NULL;
-   return makePath(directory, name);
-}
-
 int
 createPidFile (const char *path, ProcessIdentifier pid) {
 #if defined(GRUB_RUNTIME)
