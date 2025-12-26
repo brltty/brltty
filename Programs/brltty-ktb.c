@@ -20,7 +20,6 @@
 
 #include <string.h>
 
-#include "program.h"
 #include "cmdline.h"
 #include "cmdput.h"
 #include "options.h"

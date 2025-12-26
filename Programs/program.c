@@ -152,13 +152,6 @@ getProgramDirectory (void) {
   return programDirectory;
 }
 
-int
-toAbsoluteInstallPath (char **path) {
-  const char *programDirectory = getProgramDirectory();
-  if (!programDirectory) programDirectory = CURRENT_DIRECTORY_NAME;
-  return anchorRelativePath(path, programDirectory);
-}
-
 char *
 makeProgramPath (const char *name) {
    const char *directory = getProgramDirectory();

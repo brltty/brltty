@@ -23,7 +23,6 @@
 #include <strings.h>
 #include <ctype.h>
 
-#include "program.h"
 #include "cmdline.h"
 #include "options.h"
 #include "log.h"

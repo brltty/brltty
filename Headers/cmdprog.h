@@ -39,6 +39,8 @@ extern const char standardErrorName[];
 extern const char *nextProgramArgument (char ***argv, int *argc, const char *description);
 extern void noMoreProgramArguments (char ***argv, int *argc);
 
+extern int toAbsoluteInstallPath (char **path);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

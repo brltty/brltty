@@ -26,7 +26,6 @@
 #include <strings.h>
 #include <errno.h>
 
-#include "program.h"
 #include "cmdline.h"
 #include "options.h"
 #include "log.h"

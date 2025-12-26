@@ -20,6 +20,8 @@
 
 #include "log.h"
 #include "cmdprog.h"
+#include "file.h"
+#include "program.h"
 
 const char standardStreamArgument[] = "-";
 const char standardInputName[] = "<standard-input>";
@@ -44,4 +46,11 @@ noMoreProgramArguments (char ***argv, int *argc) {
     logMessage(LOG_ERR, "too many arguments: %s", (*argv)[0]);
     exit(PROG_EXIT_SYNTAX);
   }
+}
+
+int
+toAbsoluteInstallPath (char **path) {
+  const char *programDirectory = getProgramDirectory();
+  if (!programDirectory) programDirectory = CURRENT_DIRECTORY_NAME;
+  return anchorRelativePath(path, programDirectory);
 }

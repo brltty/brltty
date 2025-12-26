@@ -23,7 +23,6 @@
 #include <search.h>
 
 #include "log.h"
-#include "program.h"
 #include "cmdline.h"
 #include "cmdput.h"
 #include "file.h"

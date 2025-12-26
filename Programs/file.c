@@ -54,6 +54,7 @@
 #include "async_wait.h"
 #include "utf8.h"
 #include "program.h"
+#include "cmdprog.h"
 
 
 static inline int

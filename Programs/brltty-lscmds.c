@@ -22,7 +22,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "program.h"
 #include "cmdline.h"
 #include "ktb_cmds.h"
 #include "cmd.h"
