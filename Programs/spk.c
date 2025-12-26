@@ -26,7 +26,6 @@
 
 #include "log.h"
 #include "parameters.h"
-#include "program.h"
 #include "file.h"
 #include "parse.h"
 #include "prefs.h"

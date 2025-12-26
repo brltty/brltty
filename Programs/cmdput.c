@@ -29,7 +29,6 @@
 #include "utf8.h"
 #include "file.h"
 #include "datafile.h"
-#include "program.h"
 
 size_t
 getConsoleWidth (void) {
