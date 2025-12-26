@@ -23,7 +23,7 @@
 
 #include "program.h"
 #include "cmdline.h"
-#include "cmdlib.h"
+#include "cmdput.h"
 #include "log.h"
 #include "cldr.h"
 #include "utf8.h"

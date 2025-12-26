@@ -25,7 +25,7 @@
 #include "log.h"
 #include "program.h"
 #include "cmdline.h"
-#include "cmdlib.h"
+#include "cmdput.h"
 #include "file.h"
 
 BEGIN_COMMAND_LINE_OPTIONS(programOptions)

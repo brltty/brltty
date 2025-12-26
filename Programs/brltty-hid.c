@@ -24,7 +24,7 @@
 
 #include "program.h"
 #include "cmdline.h"
-#include "cmdlib.h"
+#include "cmdput.h"
 #include "log.h"
 #include "strfmt.h"
 #include "parse.h"

@@ -77,8 +77,11 @@ $(SERVICE_OBJECT).$O:
 cmdline.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmdline.c
 
-cmdlib.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmdlib.c
+cmdput.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmdput.c
+
+cmdargs.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmdargs.c
 
 $(PARAMS_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(PARAMS_INCLUDES) -c $(SRC_DIR)/$(PARAMS_OBJECT).c

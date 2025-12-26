@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "cmdline.h"
-#include "cmdlib.h"
+#include "cmdput.h"
 #include "log.h"
 #include "file.h"
 
