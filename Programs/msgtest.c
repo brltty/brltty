@@ -208,8 +208,8 @@ parseQuantity (int *count, const char *quantity) {
 }
 
 static void
-beginAction (char ***argv, int *argc) {
-  noMoreProgramArguments(argv, argc);
+beginAction (char **argv, int argc) {
+  noMoreCommandArguments(argv, argc);
 
   {
     const char *directory = opt_localeDirectory;
@@ -236,35 +236,35 @@ main (int argc, char *argv[]) {
   int ok = 1;
 
   if (isAbbreviation("translation", requestedAction)) {
-    const char *message = nextProgramArgument(&argv, &argc, "message");
-    const char *plural = nextProgramArgument(&argv, &argc, NULL);
+    const char *message = nextCommandArgument(&argv, &argc, "message");
+    const char *plural = nextCommandArgument(&argv, &argc, NULL);
 
     if (plural) {
-      const char *quantity = nextProgramArgument(&argv, &argc, "quantity");
+      const char *quantity = nextCommandArgument(&argv, &argc, "quantity");
 
       int count;
       if (!parseQuantity(&count, quantity)) return PROG_EXIT_SYNTAX;
 
-      beginAction(&argv, &argc);
+      beginAction(argv, argc);
       showPluralTranslation(message, plural, count);
     } else {
-      beginAction(&argv, &argc);
+      beginAction(argv, argc);
       ok = showSimpleTranslation(message);
     }
   } else if (isAbbreviation("count", requestedAction)) {
-    beginAction(&argv, &argc);
+    beginAction(argv, argc);
     putf("%u\n", getMessageCount());
   } else if (isAbbreviation("list`", requestedAction)) {
-    beginAction(&argv, &argc);
+    beginAction(argv, argc);
     listAllTranslations();
   } else if (isAbbreviation("metadata", requestedAction)) {
-    beginAction(&argv, &argc);
+    beginAction(argv, argc);
     putf("%s\n", getMessagesMetadata());
   } else if (isAbbreviation("property", requestedAction)) {
-    const char *property = nextProgramArgument(&argv, &argc, "property name");
-    const char *attribute = nextProgramArgument(&argv, &argc, NULL);
+    const char *property = nextCommandArgument(&argv, &argc, "property name");
+    const char *attribute = nextCommandArgument(&argv, &argc, NULL);
 
-    beginAction(&argv, &argc);
+    beginAction(argv, argc);
     ok = showProperty(property, attribute);
   } else {
     logMessage(LOG_ERR, "unrecognized action: %s", requestedAction);

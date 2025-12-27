@@ -25,7 +25,7 @@
 
 #include "log.h"
 #include "cmdput.h"
-#include "cmdprog.h"
+#include "cmdbase.h"
 #include "utf8.h"
 #include "file.h"
 #include "datafile.h"

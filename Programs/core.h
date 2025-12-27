@@ -22,7 +22,7 @@
 #include "prologue.h"
 
 #include "strfmt_types.h"
-#include "cmdprog.h"
+#include "cmdbase.h"
 #include "timing.h"
 #include "cmd.h"
 #include "brl.h"

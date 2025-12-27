@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CMDPROG
-#define BRLTTY_INCLUDED_CMDPROG
+#ifndef BRLTTY_INCLUDED_CMDBASE
+#define BRLTTY_INCLUDED_CMDBASE
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,8 +40,8 @@ extern const char *getProgramName (void);
 extern const char *getProgramDirectory (void);
 extern char *makeProgramPath (const char *name);
 
-extern const char *nextProgramArgument (char ***argv, int *argc, const char *description);
-extern void noMoreProgramArguments (char ***argv, int *argc);
+extern const char *nextCommandArgument (char ***argv, int *argc, const char *description);
+extern void noMoreCommandArguments (char **argv, int argc);
 
 extern int toAbsoluteInstallPath (char **path);
 extern char *makeHelperPath (const char *name);
@@ -50,4 +50,4 @@ extern char *makeHelperPath (const char *name);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_CMDPROG */
+#endif /* BRLTTY_INCLUDED_CMDBASE */

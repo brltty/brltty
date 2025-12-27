@@ -77,8 +77,8 @@ $(SERVICE_OBJECT).$O:
 cmdline.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmdline.c
 
-cmdProg.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmdProg.c
+cmdbase.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmdbase.c
 
 cmdput.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmdput.c

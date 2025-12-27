@@ -429,7 +429,7 @@ int
 main (int argc, char *argv[]) {
   PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
-  int exitStatus = PROG_EXIT_FATAL;
+  ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
 
   ptySetLogTerminalInput(opt_logInput);
   ptySetLogTerminalOutput(opt_logOutput);

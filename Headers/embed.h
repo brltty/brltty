@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_EMBED
 #define BRLTTY_INCLUDED_EMBED
 
-#include "cmdprog.h"
+#include "cmdbase.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -19,7 +19,7 @@
 #include "prologue.h"
 
 #include "log.h"
-#include "cmdprog.h"
+#include "cmdbase.h"
 #include "file.h"
 #include "parse.h"
 #include "program.h"
@@ -61,7 +61,7 @@ makeProgramPath (const char *name) {
 }
 
 const char *
-nextProgramArgument (char ***argv, int *argc, const char *description) {
+nextCommandArgument (char ***argv, int *argc, const char *description) {
   if (*argc) {
     *argc -= 1;
     return *(*argv)++;
@@ -73,9 +73,9 @@ nextProgramArgument (char ***argv, int *argc, const char *description) {
 }
 
 void
-noMoreProgramArguments (char ***argv, int *argc) {
-  if (*argc) {
-    logMessage(LOG_ERR, "too many arguments: %s", (*argv)[0]);
+noMoreCommandArguments (char **argv, int argc) {
+  if (argc) {
+    logMessage(LOG_ERR, "too many arguments: %s", argv[0]);
     exit(PROG_EXIT_SYNTAX);
   }
 }
