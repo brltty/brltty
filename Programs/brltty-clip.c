@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "cmdline.h"
+#include "cmdput.h"
 #include "datafile.h"
 #include "utf8.h"
 #include "brlapi.h"
@@ -251,12 +252,7 @@ main (int argc, char *argv[]) {
           }
         }
 
-        printf("%s", oldContent);
-
-        if (ferror(stdout)) {
-          logMessage(LOG_ERR, "standard output write error: %s", strerror(errno));
-          exitStatus = PROG_EXIT_FATAL;
-        }
+        putf("%s", oldContent);
       }
 
       free(oldContent);
