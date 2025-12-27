@@ -35,6 +35,7 @@
 #include "scr_real.h"
 #include "driver.h"
 #include "color.h"
+#include "prefs.h"
 
 MainScreen mainScreen;
 BaseScreen *currentScreen = NULL;
@@ -97,10 +98,109 @@ refreshScreen (void) {
   return currentScreen->refresh();
 }
 
+static int detectSoftCursor (ScreenDescription *description);
+
 void
 describeScreen (ScreenDescription *description) {
   describeScreenObject(description, currentScreen);
   if (description->unreadable) description->quality = SCQ_NONE;
+  if (prefs.softCursorDetection) detectSoftCursor(description);
+}
+
+static int
+sameBackgroundColor (const ScreenColor *a, const ScreenColor *b) {
+  if (a->usingRGB != b->usingRGB) return 0;
+
+  if (a->usingRGB) {
+    return memcmp(&a->background, &b->background, sizeof(RGBColor)) == 0;
+  } else {
+    // Compare only background bits (4-6) of VGA attributes
+    return ((a->vgaAttributes ^ b->vgaAttributes) & 0x70) == 0;
+  }
+}
+
+// Maximum number of distinct background colors to track
+#define SOFT_CURSOR_MAX_COLORS 16
+
+typedef struct {
+  ScreenColor color;
+  short x, y;
+} SoftCursorCandidate;
+
+static int
+detectSoftCursor (ScreenDescription *description) {
+  // Only search for soft cursor if hardware cursor is at screen edge
+  // (column 0 or last column), which suggests the application is using
+  // a visual cursor instead of positioning the hardware cursor properly.
+  if ((description->posx != 0) && (description->posx != description->cols - 1)) {
+    return 0;
+  }
+
+  // Read the entire screen
+  unsigned int count = description->cols * description->rows;
+  ScreenCharacter *buffer = malloc(count * sizeof(*buffer));
+  if (!buffer) return 0;
+
+  int result = 0;
+
+  if (readScreen(0, 0, description->cols, description->rows, buffer)) {
+    // Track candidates (seen once) and discarded (seen multiple times)
+    SoftCursorCandidate candidates[SOFT_CURSOR_MAX_COLORS];
+    ScreenColor discarded[SOFT_CURSOR_MAX_COLORS];
+    int candidateCount = 0;
+    int discardedCount = 0;
+
+    for (unsigned int i = 0; i < count; i++) {
+      const ScreenColor *bg = &buffer[i].color;
+      int found = 0;
+
+      // Check discarded first (most common case)
+      for (int j = 0; j < discardedCount; j++) {
+        if (sameBackgroundColor(bg, &discarded[j])) {
+          found = 1;
+          break;
+        }
+      }
+      if (found) continue;
+
+      // Check if it's in candidates
+      found = 0;
+      for (int j = 0; j < candidateCount; j++) {
+        if (sameBackgroundColor(bg, &candidates[j].color)) {
+          // Move to discarded
+          if (discardedCount < SOFT_CURSOR_MAX_COLORS) {
+            discarded[discardedCount++] = candidates[j].color;
+          }
+          // Remove from candidates by shifting
+          for (int k = j; k < candidateCount - 1; k++) {
+            candidates[k] = candidates[k + 1];
+          }
+          candidateCount--;
+          found = 1;
+          break;
+        }
+      }
+      if (found) continue;
+
+      // New color - add to candidates if space available
+      if (candidateCount < SOFT_CURSOR_MAX_COLORS) {
+        candidates[candidateCount].color = *bg;
+        candidates[candidateCount].x = i % description->cols;
+        candidates[candidateCount].y = i / description->cols;
+        candidateCount++;
+      }
+    }
+
+    // If exactly one candidate remains, that's the soft cursor
+    if (candidateCount == 1) {
+      description->posx = candidates[0].x;
+      description->posy = candidates[0].y;
+      result = 1;
+    }
+  }
+
+  free(buffer);
+  return result;
 }
 
 int

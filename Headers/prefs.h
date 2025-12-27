@@ -222,6 +222,7 @@ typedef struct {
   unsigned char scrollAwareCursorNavigation;
   unsigned char cursorTrackingDelay;
   unsigned char trackScreenScroll;
+  unsigned char softCursorDetection;
 
   unsigned char saveOnExit;
   unsigned char showSubmenuSizes;

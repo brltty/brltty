@@ -39,6 +39,7 @@ extern "C" {
 
 #define DEFAULT_TRACK_SCREEN_CURSOR 1		/* 1 for on, 0 for off */
 #define DEFAULT_HIDE_SCREEN_CURSOR 0		/* 1 for yes, 0 for no */
+#define DEFAULT_SOFT_CURSOR_DETECTION 0		/* 1 for on, 0 for off */
 
 #define DEFAULT_SAVE_ON_EXIT 0
 #define DEFAULT_SHOW_SUBMENU_SIZES 0

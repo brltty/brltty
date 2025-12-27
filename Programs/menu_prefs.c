@@ -914,6 +914,11 @@ makePreferencesMenu (void) {
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.trackScreenScroll, &itemName));
     }
 
+    {
+      NAME(strtext("Soft Cursor Detection"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.softCursorDetection, &itemName));
+    }
+
   #ifdef HAVE_LIBGPM
     {
       NAME(strtext("Track Screen Pointer"));

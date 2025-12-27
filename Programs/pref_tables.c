@@ -387,6 +387,12 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.trackScreenScroll
   },
 
+  { .name = "soft-cursor-detection",
+    .defaultValue = DEFAULT_SOFT_CURSOR_DETECTION,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.softCursorDetection
+  },
+
   { .name = "track-screen-pointer",
     .defaultValue = DEFAULT_TRACK_SCREEN_POINTER,
     .settingNames = &preferenceStringTable_boolean,
