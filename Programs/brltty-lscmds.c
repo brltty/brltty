@@ -18,11 +18,11 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
 #include "cmdline.h"
+#include "cmdput.h"
 #include "ktb_cmds.h"
 #include "cmd.h"
 
@@ -44,29 +44,6 @@ BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .notes = COMMAND_LINE_NOTES(programNotes),
 END_COMMAND_LINE_DESCRIPTOR
 
-static void
-writeCharacter (char character) {
-  putc(character, stdout);
-}
-
-static void
-writeCharacters (char character, size_t count) {
-  while (count > 0) {
-    writeCharacter(character);
-    count -= 1;
-  }
-}
-
-static void
-endLine (void) {
-  writeCharacter('\n');
-}
-
-static void
-writeString (const char *string) {
-  while (*string) writeCharacter(*string++);
-}
-
 static const char headerCharacters[] = {'~', '=', '-'};
 static unsigned char headerLevel = 0;
 
@@ -85,17 +62,21 @@ writeHeader (const char *header) {
   char headerCharacter = headerCharacters[headerLevel];
   size_t headerLength = strlen(header);
 
+  char headerLine[headerLength + 1];
+  memset(headerLine, headerCharacter, headerLength);
+  headerLine[headerLength] = 0;
+
   if (headerLevel == 0) {
-    writeCharacters(headerCharacter, headerLength);
-    endLine();
+    putString(headerLine);
+    putNewline();
   }
 
-  writeString(header);
-  endLine();
+  putString(header);
+  putNewline();
 
-  writeCharacters(headerCharacter, headerLength);
-  endLine();
-  endLine();
+  putString(headerLine);
+  putNewline();
+  putNewline();
 }
 
 void
@@ -111,23 +92,23 @@ listModifiers (int include, const char *type, int *started, const CommandModifie
   if (include) {
     if (!*started) {
       *started = 1;
-      printf("The following modifiers may be specified:\n\n");
+      putf("The following modifiers may be specified:\n\n");
     }
 
-    printf("* %s", type);
+    putf("* %s", type);
 
     if (modifiers) {
       const CommandModifierEntry *modifier = modifiers;
       char punctuation = ':';
 
       while (modifier->name) {
-        printf("%c %s", punctuation, modifier->name);
+        putf("%c %s", punctuation, modifier->name);
         punctuation = ',';
         modifier += 1;
       }
     }
 
-    endLine();
+    putNewline();
   }
 }
 
@@ -136,11 +117,11 @@ putCommand (const CommandEntry *command) {
   {
     const char *description = command->description;
 
-    printf(".. _%s:\n\n", command->name);
-    printf("**%s** - ", command->name);
+    putf(".. _%s:\n\n", command->name);
+    putf("**%s** - ", command->name);
 
-    writeCharacter(toupper(*description++));
-    printf("%s.\n\n", description);
+    putByte(toupper(*description++));
+    putf("%s.\n\n", description);
   }
 
   {
@@ -190,7 +171,7 @@ putCommand (const CommandEntry *command) {
       commandModifierTable_keyboard
     );
 
-    if (started) endLine();
+    if (started) putNewline();
   }
 }
 
@@ -207,9 +188,9 @@ putGroup (const CommandGroupEntry *group) {
   }
 
   for (unsigned int index=0; index<count; index+=1) {
-    printf("* `%s`_\n", commands[index]->name);
+    putf("* `%s`_\n", commands[index]->name);
   }
-  printf("\n");
+  putf("\n");
 
   for (unsigned int index=0; index<count; index+=1) {
     putCommand(commands[index]);
@@ -250,10 +231,10 @@ putCommandIndex (void) {
   qsort(commands, count, sizeof(commands[0]), compareCommands);
 
   for (int index=0; index<count; index+=1) {
-    printf("* `%s`_\n", commands[index]->name);
+    putf("* `%s`_\n", commands[index]->name);
   }
 
-  printf("\n");
+  putf("\n");
   decrementHeaderLevel();
 }
 
@@ -262,7 +243,7 @@ main (int argc, char *argv[]) {
   PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
   writeHeader("The BRLTTY Command Reference");
-  writeString(".. contents::\n\n");
+  putString(".. contents::\n\n");
 
   putCommandIndex();
   putGroups();

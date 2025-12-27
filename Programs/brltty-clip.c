@@ -252,7 +252,7 @@ main (int argc, char *argv[]) {
           }
         }
 
-        putf("%s", oldContent);
+        putString(oldContent);
       }
 
       free(oldContent);
