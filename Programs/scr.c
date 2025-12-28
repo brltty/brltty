@@ -98,15 +98,20 @@ refreshScreen (void) {
   return currentScreen->refresh();
 }
 
-static int
-sameBackgroundColor (const ScreenColor *a, const ScreenColor *b) {
-  if (a->usingRGB != b->usingRGB) return 0;
+int
+sameScreenColors (const ScreenColor *color1, const ScreenColor *color2) {
+  return memcmp(color1, color2, sizeof(*color1)) == 0;
+}
 
-  if (a->usingRGB) {
-    return memcmp(&a->background, &b->background, sizeof(RGBColor)) == 0;
+int
+sameBackgroundColors (const ScreenColor *color1, const ScreenColor *color2) {
+  if (color1->usingRGB != color2->usingRGB) return 0;
+
+  if (color1->usingRGB) {
+    return memcmp(&color1->background, &color2->background, sizeof(color2->background)) == 0;
   } else {
     // Compare only background bits (4-6) of VGA attributes
-    return ((a->vgaAttributes ^ b->vgaAttributes) & 0x70) == 0;
+    return ((color1->vgaAttributes ^ color2->vgaAttributes) & VGA_MASK_BG) == 0;
   }
 }
 
@@ -147,7 +152,7 @@ detectSoftCursor (ScreenDescription *description) {
 
       // Check discarded first (most common case)
       for (int j = 0; j < discardedCount; j++) {
-        if (sameBackgroundColor(bg, &discarded[j])) {
+        if (sameBackgroundColors(bg, &discarded[j])) {
           found = 1;
           break;
         }
@@ -157,7 +162,7 @@ detectSoftCursor (ScreenDescription *description) {
       // Check if it's in candidates
       found = 0;
       for (int j = 0; j < candidateCount; j++) {
-        if (sameBackgroundColor(bg, &candidates[j].color)) {
+        if (sameBackgroundColors(bg, &candidates[j].color)) {
           // Move to discarded
           if (discardedCount < SOFT_CURSOR_MAX_COLORS) {
             discarded[discardedCount++] = candidates[j].color;
@@ -256,11 +261,6 @@ readScreenText (short left, short top, short width, short height, wchar_t *buffe
   }
 
   return 1;
-}
-
-int
-sameScreenColors (const ScreenColor *color1, const ScreenColor *color2) {
-  return memcmp(color1, color2, sizeof(*color1)) == 0;
 }
 
 unsigned char
