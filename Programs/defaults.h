@@ -39,7 +39,6 @@ extern "C" {
 
 #define DEFAULT_TRACK_SCREEN_CURSOR 1		/* 1 for on, 0 for off */
 #define DEFAULT_HIDE_SCREEN_CURSOR 0		/* 1 for yes, 0 for no */
-#define DEFAULT_SOFT_CURSOR_DETECTION 0		/* 1 for on, 0 for off */
 
 #define DEFAULT_SAVE_ON_EXIT 0
 #define DEFAULT_SHOW_SUBMENU_SIZES 0
@@ -77,6 +76,7 @@ extern "C" {
 #define DEFAULT_SCROLL_AWARE_CURSOR_NAVIGATION 0
 #define DEFAULT_CURSOR_TRACKING_DELAY ctd250ms
 #define DEFAULT_TRACK_SCREEN_SCROLL 0		/* 1 for on, 0 for off */
+#define DEFAULT_SOFT_CURSOR_DETECTION 0		/* 1 for on, 0 for off */
 #define DEFAULT_TRACK_SCREEN_POINTER 0		/* 1 for on, 0 for off */
 #define DEFAULT_HIGHLIGHT_BRAILLE_WINDOW_LOCATION 0		/* 1 for on, 0 for off */
 #define DEFAULT_START_SELECTION_WITH_ROUTING_KEY 0		/* 1 for on, 0 for off */

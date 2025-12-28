@@ -98,15 +98,6 @@ refreshScreen (void) {
   return currentScreen->refresh();
 }
 
-static int detectSoftCursor (ScreenDescription *description);
-
-void
-describeScreen (ScreenDescription *description) {
-  describeScreenObject(description, currentScreen);
-  if (description->unreadable) description->quality = SCQ_NONE;
-  if (prefs.softCursorDetection) detectSoftCursor(description);
-}
-
 static int
 sameBackgroundColor (const ScreenColor *a, const ScreenColor *b) {
   if (a->usingRGB != b->usingRGB) return 0;
@@ -201,6 +192,17 @@ detectSoftCursor (ScreenDescription *description) {
 
   free(buffer);
   return result;
+}
+
+void
+describeScreen (ScreenDescription *description) {
+  describeScreenObject(description, currentScreen);
+
+  if (description->unreadable) {
+    description->quality = SCQ_NONE;
+  } else if (prefs.softCursorDetection) {
+    detectSoftCursor(description);
+  }
 }
 
 int
