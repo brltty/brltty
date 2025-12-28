@@ -37,6 +37,81 @@
 #include "color.h"
 #include "prefs.h"
 
+int
+sameScreenColors (const ScreenColor *color1, const ScreenColor *color2) {
+  return memcmp(color1, color2, sizeof(*color1)) == 0;
+}
+
+int
+sameBackgroundColors (const ScreenColor *color1, const ScreenColor *color2) {
+  if (color1->usingRGB != color2->usingRGB) return 0;
+
+  if (color1->usingRGB) {
+    return memcmp(&color1->background, &color2->background, sizeof(color2->background)) == 0;
+  } else {
+    // Compare only background bits (4-6) of VGA attributes
+    return ((color1->vgaAttributes ^ color2->vgaAttributes) & VGA_MASK_BG) == 0;
+  }
+}
+
+unsigned char
+getScreenColorAttributes (const ScreenColor *color) {
+  if (!color->usingRGB) return color->vgaAttributes;
+
+  static ScreenColor cachedColor = {.usingRGB=0};
+  static unsigned char cachedAttributes = 0;
+
+  if (!sameScreenColors(color, &cachedColor))  {
+    ScreenColor c = *color;
+    toVGAScreenColor(&c);
+
+    cachedColor = *color;
+    cachedAttributes = c.vgaAttributes;
+  }
+
+  return cachedAttributes;
+}
+
+STR_BEGIN_FORMATTER(formatScreenColor, const ScreenColor *color)
+  const char *on = " on ";
+
+  const char *styleNames[8];
+  unsigned int styleCount = 0;
+
+  if (color->usingRGB) {
+    ColorNameBuffer foreground;
+    rgbColorToName(foreground, sizeof(foreground), color->foreground);
+
+    ColorNameBuffer background;
+    rgbColorToName(background, sizeof(background), color->background);
+
+    STR_PRINTF("%s%s%s", foreground, on, background);
+    if (color->isBlinking) styleNames[styleCount++] = "blink";
+    if (color->isBold) styleNames[styleCount++] = "bold";
+    if (color->isItalic) styleNames[styleCount++] = "italic";
+    if (color->hasUnderline) styleNames[styleCount++] = "underline";
+    if (color->hasStrikeThrough) styleNames[styleCount++] = "strike";
+  } else {
+    unsigned char attributes = color->vgaAttributes;
+    const char *foreground = vgaColorName(vgaGetForegroundColor(attributes));
+    const char *background = vgaColorName(vgaGetBackgroundColor(attributes));
+
+    STR_PRINTF("%s%s%s", foreground, on, background);
+    if (attributes & VGA_BIT_BLINK) styleNames[styleCount++] = "blink";
+  }
+
+  if (styleCount > 0) {
+    const char *delimiter = " (";
+
+    for (unsigned int i=0; i<styleCount; i+=1) {
+      STR_PRINTF("%s%s", delimiter, styleNames[i]);
+      delimiter = ", ";
+    }
+
+    STR_PRINTF(")");
+  }
+STR_END_FORMATTER
+
 MainScreen mainScreen;
 BaseScreen *currentScreen = NULL;
 
@@ -96,23 +171,6 @@ pollScreen (void) {
 int
 refreshScreen (void) {
   return currentScreen->refresh();
-}
-
-int
-sameScreenColors (const ScreenColor *color1, const ScreenColor *color2) {
-  return memcmp(color1, color2, sizeof(*color1)) == 0;
-}
-
-int
-sameBackgroundColors (const ScreenColor *color1, const ScreenColor *color2) {
-  if (color1->usingRGB != color2->usingRGB) return 0;
-
-  if (color1->usingRGB) {
-    return memcmp(&color1->background, &color2->background, sizeof(color2->background)) == 0;
-  } else {
-    // Compare only background bits (4-6) of VGA attributes
-    return ((color1->vgaAttributes ^ color2->vgaAttributes) & VGA_MASK_BG) == 0;
-  }
 }
 
 // Maximum number of distinct background colors to track
@@ -262,64 +320,6 @@ readScreenText (short left, short top, short width, short height, wchar_t *buffe
 
   return 1;
 }
-
-unsigned char
-getScreenColorAttributes (const ScreenColor *color) {
-  if (!color->usingRGB) return color->vgaAttributes;
-
-  static ScreenColor cachedColor = {.usingRGB=0};
-  static unsigned char cachedAttributes = 0;
-
-  if (!sameScreenColors(color, &cachedColor))  {
-    ScreenColor c = *color;
-    toVGAScreenColor(&c);
-
-    cachedColor = *color;
-    cachedAttributes = c.vgaAttributes;
-  }
-
-  return cachedAttributes;
-}
-
-STR_BEGIN_FORMATTER(formatScreenColor, const ScreenColor *color)
-  const char *on = " on ";
-
-  const char *styleNames[8];
-  unsigned int styleCount = 0;
-
-  if (color->usingRGB) {
-    ColorNameBuffer foreground;
-    rgbColorToName(foreground, sizeof(foreground), color->foreground);
-
-    ColorNameBuffer background;
-    rgbColorToName(background, sizeof(background), color->background);
-
-    STR_PRINTF("%s%s%s", foreground, on, background);
-    if (color->isBlinking) styleNames[styleCount++] = "blink";
-    if (color->isBold) styleNames[styleCount++] = "bold";
-    if (color->isItalic) styleNames[styleCount++] = "italic";
-    if (color->hasUnderline) styleNames[styleCount++] = "underline";
-    if (color->hasStrikeThrough) styleNames[styleCount++] = "strike";
-  } else {
-    unsigned char attributes = color->vgaAttributes;
-    const char *foreground = vgaColorName(vgaGetForegroundColor(attributes));
-    const char *background = vgaColorName(vgaGetBackgroundColor(attributes));
-
-    STR_PRINTF("%s%s%s", foreground, on, background);
-    if (attributes & VGA_BIT_BLINK) styleNames[styleCount++] = "blink";
-  }
-
-  if (styleCount > 0) {
-    const char *delimiter = " (";
-
-    for (unsigned int i=0; i<styleCount; i+=1) {
-      STR_PRINTF("%s%s", delimiter, styleNames[i]);
-      delimiter = ", ";
-    }
-
-    STR_PRINTF(")");
-  }
-STR_END_FORMATTER
 
 int
 insertScreenKey (ScreenKey key) {
