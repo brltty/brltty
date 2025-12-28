@@ -18,7 +18,7 @@
 
 all: all-commands all-tools $(ALL_API) $(ALL_API_BINDINGS)
 
-all-commands: all-brltty all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-tune all-brltty-morse all-brltty-cmdref all-brltty-hid $(ALL_BRLTTY_PTY)
+all-commands: all-brltty all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-tune all-brltty-morse all-brltty-hid all-brltty-cmdref $(ALL_BRLTTY_PTY)
 all-brltty: brltty$X | $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltty-trtxt: brltty-trtxt$X
 all-brltty-ttb: brltty-ttb$X
@@ -27,18 +27,20 @@ all-brltty-atb: brltty-atb$X
 all-brltty-ktb: brltty-ktb$X | $(BRAILLE_DRIVERS)
 all-brltty-tune: brltty-tune$X
 all-brltty-morse: brltty-morse$X
-all-brltty-cmdref: brltty-cmdref$X
 all-brltty-hid: brltty-hid$X
+all-brltty-cmdref: brltty-cmdref$X
 all-brltty-pty: brltty-pty$X
 
 all-tools: all-brltty-cldr all-brltty-lsinc
 all-brltty-cldr: brltty-cldr$X
 all-brltty-lsinc: brltty-lsinc$X
 
-everything: all all-brltest all-spktest all-scrtest all-crctest all-msgtest
+everything: all all-brltest all-spktest all-scrtest all-cmdtest all-colortest all-crctest all-msgtest
 all-brltest: brltest$X | $(BRAILLE_DRIVERS)
 all-spktest: spktest$X | $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X | $(SCREEN_DRIVERS)
+all-cmdtest: cmdtest$X
+all-colortest: colortest$X
 all-crctest: crctest$X
 all-msgtest: msgtest$X
 
