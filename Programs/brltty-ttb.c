@@ -1318,10 +1318,11 @@ convertTable (void) {
 
 #include "get_curses.h"
 #ifndef GOT_CURSES
-#define refresh() fflush(stdout)
-#define printw printf
-#define erase() printf("\r\n\v")
-#define beep() printf("\a")
+#include "cmdput.h"
+#define refresh() putFlush()
+#define printw putf
+#define erase() putString("\r\n\v")
+#define beep() putString("\a")
 
 static int inputAttributesChanged;
 
