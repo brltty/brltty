@@ -127,7 +127,7 @@ make -s -C Programs install-commands install-tables
 logTask "updating files"
 
 cd "${installDirectory}/bin"
-mv brltty-lscmds.exe brllscmd.exe
+mv brltty-cmdref.exe brllscmd.exe
 mv brltty-trtxt.exe brltrtxt.exe
 mv brltty-ttb.exe brlttb.exe
 mv brltty-ctb.exe brlctb.exe

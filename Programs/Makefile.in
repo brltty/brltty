@@ -18,7 +18,7 @@
 
 all: all-commands all-tools $(ALL_API) $(ALL_API_BINDINGS)
 
-all-commands: all-brltty all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-tune all-brltty-morse all-brltty-lscmds all-brltty-hid $(ALL_BRLTTY_PTY)
+all-commands: all-brltty all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-tune all-brltty-morse all-brltty-cmdref all-brltty-hid $(ALL_BRLTTY_PTY)
 all-brltty: brltty$X | $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltty-trtxt: brltty-trtxt$X
 all-brltty-ttb: brltty-ttb$X
@@ -27,7 +27,7 @@ all-brltty-atb: brltty-atb$X
 all-brltty-ktb: brltty-ktb$X | $(BRAILLE_DRIVERS)
 all-brltty-tune: brltty-tune$X
 all-brltty-morse: brltty-morse$X
-all-brltty-lscmds: brltty-lscmds$X
+all-brltty-cmdref: brltty-cmdref$X
 all-brltty-hid: brltty-hid$X
 all-brltty-pty: brltty-pty$X
 
@@ -945,13 +945,13 @@ brltty-trtxt.$O:
 
 ###############################################################################
 
-BRLTTY_LSCMDS_OBJECTS = brltty-lscmds.$O $(PROGRAM_OBJECTS) ktb_cmds.$O cmd.$O
+BRLTTY_CMDREF_OBJECTS = brltty-cmdref.$O $(PROGRAM_OBJECTS) ktb_cmds.$O cmd.$O
 
-brltty-lscmds$X: $(BRLTTY_LSCMDS_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_LSCMDS_OBJECTS) $(LDLIBS)
+brltty-cmdref$X: $(BRLTTY_CMDREF_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CMDREF_OBJECTS) $(LDLIBS)
 
-brltty-lscmds.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-lscmds.c
+brltty-cmdref.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-cmdref.c
 
 ###############################################################################
 
@@ -1195,7 +1195,7 @@ install-commands: all-commands install-program-directories $(INSTALL_BRLTTY_PTY)
 	$(INSTALL_PROGRAM) brltty-ktb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-tune$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-morse$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_PROGRAM) brltty-lscmds$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-cmdref$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-hid$X $(INSTALL_PROGRAM_DIRECTORY) 
 
 install-brltty-pty: install-helpers-directory
@@ -1397,7 +1397,7 @@ clean::
 	-rm -f brltty$X
 	-rm -f brltty-trtxt$X brltty-ttb$X brltty-ctb$X brltty-atb$X brltty-ktb$X
 	-rm -f brltty-tune$X brltty-morse$X brltty-pty$X
-	-rm -f brltty-cldr$X brltty-hid$X brltty-lscmds$X brltty-lsinc$X
+	-rm -f brltty-cldr$X brltty-cmdref$X brltty-hid$X brltty-lsinc$X
 	-rm -f brltty-clip$X xbrlapi$X
 	-rm -f tbl2hex$(X_FOR_BUILD) *test$X *-static$X
 	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(LIB_EXT).* *.$(ARC_EXT) *.def *.class *.jar

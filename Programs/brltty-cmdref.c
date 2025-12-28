@@ -36,7 +36,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .name = "brltty-lscmds",
+  .name = "brltty-cmdref",
   .purpose = strtext("Write a brltty command reference in reStructuredText."),
 
   .options = &programOptions,

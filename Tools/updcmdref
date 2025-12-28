@@ -24,8 +24,8 @@ setSourceRoot
 set -e
 
 cd "${sourceRoot}/${programsSubdirectory}"
-make --silent brltty-lscmds
-newText="$(./brltty-lscmds)"
+make --silent brltty-cmdref
+newText="$(./brltty-cmdref)"
 
 cd "${sourceRoot}/${documentsSubdirectory}"
 outputFile="README.CommandReference"

@@ -28,7 +28,7 @@ makeTargets=(
    brltty braille-drivers speech-drivers screen-drivers
    brltty-trtxt brltty-ttb brltty-ctb brltty-atb brltty-ktb
    brltty-tune brltty-morse brltty-pty
-   brltty-lscmds brltty-hid
+   brltty-cmdref brltty-hid
    brltty-cldr brltty-lsinc
    brltest spktest scrtest cmdtest colortest crctest msgtest
    all-api-bindings brltty-clip xbrlapi apitest
