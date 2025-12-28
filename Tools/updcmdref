@@ -23,31 +23,32 @@ parseProgramArguments "${@}"
 setSourceRoot
 set -e
 
+documentsDirectory="${sourceRoot}/${documentsSubdirectory}"
+oldOutputFile="README.CommandReference"
+newOutputFile="${oldOutputFile}.new"
+
 cd "${sourceRoot}/${programsSubdirectory}"
 make --silent brltty-cmdref
-newText="$(./brltty-cmdref)"
+./brltty-cmdref >"${documentsDirectory}/${newOutputFile}"
+cd "${documentsDirectory}"
 
-cd "${sourceRoot}/${documentsSubdirectory}"
-outputFile="README.CommandReference"
-
-if [ -e "${outputFile}" ]
+if [ -e "${oldOutputFile}" ]
 then
-   [ -f "${outputFile}" ] || semanticError "not a file: ${outputFile}"
-   [ -r "${outputFile}" ] || semanticError "file not readable: ${outputFile}"
-   oldText="$(cat "${outputFile}")"
+   [ -f "${oldOutputFile}" ] || semanticError "not a file: ${oldOutputFile}"
+   [ -r "${oldOutputFile}" ] || semanticError "file not readable: ${oldOutputFile}"
 
-   if [ "${oldText}" = "${newText}" ]
-   then
-      logTask "not updated"
+   cmp --quiet "${oldOutputFile}" "${newOutputFile}" && {
+      logTask "file not updated: ${oldOutputFile}"
+      rm "${newOutputFile}"
       exit 0
-   fi
+   }
 
-   [ -w "${outputFile}" ] || semanticError "file not writable: ${outputFile}"
+   [ -w "${oldOutputFile}" ] || semanticError "file not writable: ${oldOutputFile}"
    fileVerb="updating"
 else
    fileVerb="adding"
 fi
 
-logNotice "${fileVerb} file: ${outputFile}"
-echo "${newText}" >"${outputFile}"
+logNotice "${fileVerb} file: ${oldOutputFile}"
+mv "${newOutputFile}" "${oldOutputFile}"
 exit 0
