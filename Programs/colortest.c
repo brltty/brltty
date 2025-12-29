@@ -625,9 +625,9 @@ cmdGrayscale (CommandArguments *arguments) {
       const char *color = gsColorName((float)percent / 100.0f);
 
       if (count > 0) {
-        if (strcmp(color, ranges[count-1].color) == 0) {
-          goto next;
-        }
+        unsigned int previous = count - 1;
+        if (strcmp(color, ranges[previous].color) == 0) goto next;
+        ranges[previous].to = percent;
       }
 
       if (count == ARRAY_COUNT(ranges)) break;
@@ -686,9 +686,9 @@ cmdHue (CommandArguments *arguments) {
       const char *color = hueColorName((float)angle);
 
       if (count > 0) {
-        if (strcmp(color, ranges[count-1].color) == 0) {
-          goto next;
-        }
+        unsigned int previous = count - 1;
+        if (strcmp(color, ranges[previous].color) == 0) goto next;
+        ranges[previous].to = angle;
       }
 
       if (count == ARRAY_COUNT(ranges)) break;
@@ -732,7 +732,7 @@ cmdHue (CommandArguments *arguments) {
 }
 
 static void
-hsvListModifiers (const HSVModifier *(*getModifier) (float level)) {
+listPercentageModifiers (const HSVModifier *(*getModifier) (float level)) {
   typedef struct {
     const HSVModifier *modifier;
     unsigned char from;
@@ -746,9 +746,9 @@ hsvListModifiers (const HSVModifier *(*getModifier) (float level)) {
     const HSVModifier *modifier = getModifier((float)percent / 100.0f);
 
     if (count > 0) {
-      if (strcmp(modifier->name, ranges[count-1].modifier->name) == 0) {
-        goto next;
-      }
+      unsigned int previous = count - 1;
+      if (strcmp(modifier->name, ranges[previous].modifier->name) == 0) goto next;
+      ranges[previous].to = percent;
     }
 
     if (count == ARRAY_COUNT(ranges)) break;
@@ -776,7 +776,7 @@ hsvListModifiers (const HSVModifier *(*getModifier) (float level)) {
 static int
 cmdSaturation (CommandArguments *arguments) {
   if (checkNoMoreArguments(arguments)) {
-    hsvListModifiers(hsvSaturationModifier);
+    listPercentageModifiers(hsvSaturationModifier);
     return 1;
   }
 
@@ -801,7 +801,7 @@ cmdSaturation (CommandArguments *arguments) {
 static int
 cmdBrightness (CommandArguments *arguments) {
   if (checkNoMoreArguments(arguments)) {
-    hsvListModifiers(hsvBrightnessModifier);
+    listPercentageModifiers(hsvBrightnessModifier);
     return 1;
   }
 
