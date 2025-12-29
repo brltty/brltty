@@ -625,18 +625,16 @@ cmdGrayscale (CommandArguments *arguments) {
       const char *color = gsColorName((float)percent / 100.0f);
 
       if (count > 0) {
-        unsigned int previous = count - 1;
-        if (strcmp(color, ranges[previous].color) == 0) goto next;
-        ranges[previous].to = percent;
+        Range *previous = &ranges[count - 1];
+        previous->to = percent;
+        if (strcmp(color, previous->color) == 0) continue;
       }
 
       if (count == ARRAY_COUNT(ranges)) break;
-      ranges[count].color = color;
-      ranges[count].from = percent;
-      count += 1;
-
-    next:
-      ranges[count-1].to = percent;
+      Range *range = &ranges[count++];
+      range->color = color;
+      range->from = percent;
+      range->to = percent;
     }
 
     for (unsigned int i=0; i<count; i+=1) {
@@ -686,18 +684,16 @@ cmdHue (CommandArguments *arguments) {
       const char *color = hueColorName((float)angle);
 
       if (count > 0) {
-        unsigned int previous = count - 1;
-        if (strcmp(color, ranges[previous].color) == 0) goto next;
-        ranges[previous].to = angle;
+        Range *previous = &ranges[count - 1];
+        previous->to = angle;
+        if (strcmp(color, previous->color) == 0) continue;
       }
 
       if (count == ARRAY_COUNT(ranges)) break;
-      ranges[count].color = color;
-      ranges[count].from = angle;
-      count += 1;
-
-    next:
-      ranges[count-1].to = angle;
+      Range *range = &ranges[count++];
+      range->color = color;
+      range->from = angle;
+      range->to = angle;
     }
 
     for (unsigned int i=0; i<count; i+=1) {
@@ -746,18 +742,16 @@ listPercentageModifiers (const HSVModifier *(*getModifier) (float level)) {
     const HSVModifier *modifier = getModifier((float)percent / 100.0f);
 
     if (count > 0) {
-      unsigned int previous = count - 1;
-      if (strcmp(modifier->name, ranges[previous].modifier->name) == 0) goto next;
-      ranges[previous].to = percent;
+      Range *previous = &ranges[count - 1];
+      previous->to = percent;
+      if (strcmp(modifier->name, previous->modifier->name) == 0) continue;
     }
 
     if (count == ARRAY_COUNT(ranges)) break;
-    ranges[count].modifier = modifier;
-    ranges[count].from = percent;
-    count += 1;
-
-  next:
-    ranges[count-1].to = percent;
+    Range *range = &ranges[count++];
+    range->modifier = modifier;
+    range->from = percent;
+    range->to = percent;
   }
 
   for (unsigned int i=0; i<count; i+=1) {
