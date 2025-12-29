@@ -903,6 +903,12 @@ const HSVColorEntry hsvColorTable[] = {
     .sat = {.minimum=0.70, .maximum=0.90},
     .val = {.minimum=0.70, .maximum=0.90},
   },
+
+  { .name = "Ebony",
+    .hue = {.minimum=10, .maximum=12},
+    .sat = {.minimum=0.05, .maximum=0.25},
+    .val = {.minimum=0.10, .maximum=0.20},
+  },
 };
 
 const size_t hsvColorCount = ARRAY_COUNT(hsvColorTable);
@@ -1031,20 +1037,20 @@ hsvColorToName(char *buffer, size_t bufferSize, HSVColor hsv) {
 
   if (hsv.v < 0.08f) {
     name = "Black";
-  } else if (hsv.s < 0.05f) {
-    if ((hsv.s > 0.01f) && (hsv.v >= 0.95f)) {
-      name = "Off-White";
-    } else {
-      name = gsColorName(hsv.v);
-    }
+  } else if (hsv.s < 0.01f) {
+    name = gsColorName(hsv.v);
   } else {
     const HSVColorEntry *color = hsvColorEntry(hsv);
     if (color) name = color->name;
   }
 
   if (!name) {
-    if (hsv.v < 0.1f) {
-      name = gsColorName(hsv.v);
+    if (hsv.s <= 0.05f) {
+      if ((hsv.s > 0.01f) && (hsv.v >= 0.95f)) {
+        name = "Off-White";
+      } else {
+        name = gsColorName(hsv.v);
+      }
     }
   }
 

@@ -231,9 +231,6 @@ putTestResult (const char *name, int count, int passes) {
 typedef struct {
   const char *name;
   unsigned char r, g, b;
-  const char *expectedName;
-  const char *alternateName;  /* Optional alternate acceptable name */
-  const char *alternateReason;       /* Reason why alternate is acceptable */
 } ColorTest;
 
 /* Test VGA palette round-trip conversion */
@@ -284,16 +281,16 @@ listVGAColors (const char *testName) {
 static int
 testRGBtoHSVtoRGB (const char *testName) {
   static const ColorTest tests[] = {
-    {"Pure Red",     255, 0,   0,   NULL, NULL, NULL},
-    {"Pure Green",   0,   255, 0,   NULL, NULL, NULL},
-    {"Pure Blue",    0,   0,   255, NULL, NULL, NULL},
-    {"White",        255, 255, 255, NULL, NULL, NULL},
-    {"Black",        0,   0,   0,   NULL, NULL, NULL},
-    {"Gray",         128, 128, 128, NULL, NULL, NULL},
-    {"Yellow",       255, 255, 0,   NULL, NULL, NULL},
-    {"Cyan",         0,   255, 255, NULL, NULL, NULL},
-    {"Magenta",      255, 0,   255, NULL, NULL, NULL},
-    {"Orange",       255, 165, 0,   NULL, NULL, NULL},
+    {"Pure Red",     255, 0,   0},
+    {"Pure Green",   0,   255, 0},
+    {"Pure Blue",    0,   0,   255},
+    {"White",        255, 255, 255},
+    {"Black",        0,   0,   0},
+    {"Gray",         128, 128, 128},
+    {"Yellow",       255, 255, 0},
+    {"Cyan",         0,   255, 255},
+    {"Magenta",      255, 0,   255},
+    {"Orange",       255, 165, 0},
   };
 
   const int testCount = ARRAY_COUNT(tests);
@@ -330,14 +327,14 @@ testRGBtoHSVtoRGB (const char *testName) {
 static int
 showRGBtoVGA (const char *testName) {
   static const ColorTest tests[] = {
-    {"Bright Red",       255, 0,   0,   NULL, NULL, NULL},  /* Should be 12 (Light Red) */
-    {"Dark Red",         128, 0,   0,   NULL, NULL, NULL},  /* Should be 4 (Red) */
-    {"Bright Green",     0,   255, 0,   NULL, NULL, NULL},  /* Should be 10 (Light Green) */
-    {"Dark Green",       0,   128, 0,   NULL, NULL, NULL},  /* Should be 2 (Green) */
-    {"Bright Blue",      0,   0,   255, NULL, NULL, NULL},  /* Should be 9 (Light Blue) */
-    {"Dark Blue",        0,   0,   128, NULL, NULL, NULL},  /* Should be 1 (Blue) */
-    {"Orange",           255, 165, 0,   NULL, NULL, NULL},  /* Should be 6 (Brown) or 11 (Yellow) */
-    {"Purple",           128, 0,   128, NULL, NULL, NULL},  /* Should be 5 (Magenta) */
+    {"Bright Red",       255, 0,   0},  /* Should be 12 (Light Red) */
+    {"Dark Red",         128, 0,   0},  /* Should be 4 (Red) */
+    {"Bright Green",     0,   255, 0},  /* Should be 10 (Light Green) */
+    {"Dark Green",       0,   128, 0},  /* Should be 2 (Green) */
+    {"Bright Blue",      0,   0,   255},  /* Should be 9 (Light Blue) */
+    {"Dark Blue",        0,   0,   128},  /* Should be 1 (Blue) */
+    {"Orange",           255, 165, 0},  /* Should be 6 (Brown) or 11 (Yellow) */
+    {"Purple",           128, 0,   128},  /* Should be 5 (Magenta) */
   };
 
   if (opt_quietness <= OPTQ_PASS) {
