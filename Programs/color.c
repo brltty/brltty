@@ -378,23 +378,23 @@ hlsColorToRgb(HLSColor hls) {
 /* Return the name of the color for the specified grayscale brightness */
 const char *
 gsColorName(float brightness) {
-  if (brightness < 0.05f) {
+  if (brightness < 0.04f) {
     return "Black";
   }
 
-  if (brightness < 0.1f) {
+  if (brightness < 0.12f) {
     return "Near-Black";
   }
 
-  if (brightness < 0.2f) {
+  if (brightness < 0.20f) {
     return "coal";
   }
 
-  if (brightness < 0.3f) {
+  if (brightness < 0.28f) {
     return "Charcoal";
   }
 
-  if (brightness < 0.5f) {
+  if (brightness < 0.38f) {
     return "Dark Gray";
   }
 
@@ -406,11 +406,15 @@ gsColorName(float brightness) {
     return "White";
   }
 
-  if (brightness > 0.9f) {
+  if (brightness > 0.75f) {
+    return "Near-White";
+  }
+
+  if (brightness > 0.60f) {
     return "Very Light Gray";
   }
 
-  if (brightness > 0.7f) {
+  if (brightness > 0.48f) {
     return "Light Gray";
   }
 
@@ -458,7 +462,7 @@ hueColorName(float hue) {
 /* Return the HSV modifier for the specified saturation leel */
 const HSVModifier *
 hsvSaturationModifier (float saturation) {
-  if (saturation < 0.1f) {
+  if (saturation < 0.11f) {
     static const HSVModifier modifier = {
       .name = "Faint",
       .comment = "obscure, almost indistinguishable from gray",
@@ -468,7 +472,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation < 0.25f) {
+  if (saturation < 0.22f) {
     static const HSVModifier modifier = {
       .name = "Pale",
       .comment = "gentle, delicate",
@@ -477,7 +481,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation < 0.4f) {
+  if (saturation < 0.33f) {
     static const HSVModifier modifier = {
       .name = "Weak",
       .comment = "subtle, understated",
@@ -486,7 +490,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation < 0.55f) {
+  if (saturation < 0.44f) {
     static const HSVModifier modifier = {
       .name = "Soft",
       .comment = "balanced, pleasant",
@@ -495,7 +499,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation > 0.99f) {
+  if (saturation > 0.88f) {
     static const HSVModifier modifier = {
       .name = "Pure",
       .comment = "absolute, undiluted",
@@ -505,7 +509,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation > 0.93f) {
+  if (saturation > 0.77f) {
     static const HSVModifier modifier = {
       .name = "Rich",
       .comment = "deep, full-bodied",
@@ -514,7 +518,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation > 0.85f) {
+  if (saturation > 0.66f) {
     static const HSVModifier modifier = {
       .name = "Vivid",
       .comment = "striking, intense",
@@ -523,7 +527,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation > 0.7f) {
+  if (saturation > 0.55f) {
     static const HSVModifier modifier = {
       .name = "Vibrant",
       .comment = "lively, energetc",
@@ -596,354 +600,318 @@ hsvBrightnessModifier (float brightness) {
 }
 
 const HSVColorEntry hsvColorTable[] = {
-  { .name = "Olive",
-    .hue = {.minimum=55, .maximum=65},
-    .saturation = {.minimum=0.50, .maximum=0.70},
-    .value = {.minimum=0.40, .maximum=0.60},
-  },
-
-  { .name = "Dark Brown",
-    .hue = {.minimum=20, .maximum=30},
-    .saturation = {.minimum=0.60, .maximum=0.80},
-    .value = {.minimum=0.20, .maximum=0.40},
-  },
-
-  { .name = "Brown",
-    .hue = {.minimum=20, .maximum=30},
-    .saturation = {.minimum=0.60, .maximum=0.80},
-    .value = {.minimum=0.40, .maximum=0.60},
-  },
-
-  { .name = "Tan",
-    .hue = {.minimum=30, .maximum=40},
-    .saturation = {.minimum=0.30, .maximum=0.50},
-    .value = {.minimum=0.70, .maximum=0.90},
-  },
-
-  { .name = "Rose",
-    .hue = {.minimum=330, .maximum=350},
-    .saturation = {.minimum=0.40, .maximum=0.60},
-    .value = {.minimum=0.80, .maximum=1.00},
-  },
-
-  { .name = "Light Pink",
-    .hue = {.minimum=330, .maximum=345},
-    .saturation = {.minimum=0.20, .maximum=0.35},
-    .value = {.minimum=0.85, .maximum=1.00},
-  },
-
   { .name = "Pink",
     .hue = {.minimum=320, .maximum=330},
-    .saturation = {.minimum=0.40, .maximum=0.60},
-    .value = {.minimum=0.80, .maximum=1.00},
-  },
-
-  { .name = "Coral",
-    .hue = {.minimum=0, .maximum=10},
-    .saturation = {.minimum=0.40, .maximum=0.60},
-    .value = {.minimum=0.85, .maximum=0.95},
-  },
-
-  { .name = "Lime",
-    .hue = {.minimum=75, .maximum=85},
-    .saturation = {.minimum=0.80, .maximum=1.00},
-    .value = {.minimum=0.80, .maximum=1.00},
-  },
-
-  { .name = "Dark Teal",
-    .hue = {.minimum=170, .maximum=200},
-    .saturation = {.minimum=0.40, .maximum=0.60},
-    .value = {.minimum=0.30, .maximum=0.50},
-  },
-
-  { .name = "Teal",
-    .hue = {.minimum=170, .maximum=190},
-    .saturation = {.minimum=0.40, .maximum=0.60},
-    .value = {.minimum=0.50, .maximum=0.70},
-  },
-
-  { .name = "Turquoise",
-    .hue = {.minimum=160, .maximum=170},
-    .saturation = {.minimum=0.40, .maximum=0.60},
-    .value = {.minimum=0.70, .maximum=0.90},
-  },
-
-  { .name = "Maroon",
-    .hue = {.minimum=0, .maximum=10},
-    .saturation = {.minimum=0.50, .maximum=0.70},
-    .value = {.minimum=0.30, .maximum=0.50},
-  },
-
-  { .name = "Navy",
-    .hue = {.minimum=210, .maximum=230},
-    .saturation = {.minimum=0.50, .maximum=0.70},
-    .value = {.minimum=0.20, .maximum=0.40},
-  },
-
-  { .name = "Indigo",
-    .hue = {.minimum=230, .maximum=250},
-    .saturation = {.minimum=0.50, .maximum=0.70},
-    .value = {.minimum=0.30, .maximum=0.50},
-  },
-
-  { .name = "Lavender",
-    .hue = {.minimum=250, .maximum=270},
-    .saturation = {.minimum=0.30, .maximum=0.50},
-    .value = {.minimum=0.80, .maximum=0.95},
-  },
-
-  { .name = "Gold",
-    .hue = {.minimum=40, .maximum=50},
-    .saturation = {.minimum=0.70, .maximum=0.90},
-    .value = {.minimum=0.80, .maximum=1.00},
-  },
-
-  { .name = "Purple",
-    .hue = {.minimum=270, .maximum=290},
-    .saturation = {.minimum=0.40, .maximum=0.60},
-    .value = {.minimum=0.40, .maximum=0.60},
-  },
-
-  { .name = "Cream",
-    .hue = {.minimum=55, .maximum=65},
-    .saturation = {.minimum=0.20, .maximum=0.30},
-    .value = {.minimum=0.90, .maximum=1.00},
-  },
-
-  { .name = "Beige",
-    .hue = {.minimum=30, .maximum=40},
-    .saturation = {.minimum=0.10, .maximum=0.20},
-    .value = {.minimum=0.80, .maximum=0.90},
-  },
-
-  { .name = "Eggshell",
-    .hue = {.minimum=40, .maximum=50},
-    .saturation = {.minimum=0.05, .maximum=0.15},
-    .value = {.minimum=0.90, .maximum=1.00},
-  },
-
-  { .name = "Alabaster",
-    .hue = {.minimum=0, .maximum=30},
-    .saturation = {.minimum=0.05, .maximum=0.10},
-    .value = {.minimum=0.95, .maximum=1.00},
-  },
-
-  { .name = "Vanilla",
-    .hue = {.minimum=50, .maximum=55},
-    .saturation = {.minimum=0.10, .maximum=0.20},
-    .value = {.minimum=0.95, .maximum=1.00},
-  },
-
-  { .name = "Chartreuse",
-    .hue = {.minimum=85, .maximum=95},
-    .saturation = {.minimum=0.70, .maximum=0.90},
-    .value = {.minimum=0.80, .maximum=1.00},
+    .sat = {.minimum=0.40, .maximum=0.60},
+    .val = {.minimum=0.80, .maximum=1.00},
   },
 
   { .name = "Burgundy",
-    .hue = {.minimum=330, .maximum=350},
-    .saturation = {.minimum=0.50, .maximum=0.70},
-    .value = {.minimum=0.30, .maximum=0.50},
+    .hue = {.minimum=330, .maximum=335},
+    .sat = {.minimum=0.50, .maximum=0.70},
+    .val = {.minimum=0.30, .maximum=0.50},
   },
 
-  { .name = "Peach",
-    .hue = {.minimum=20, .maximum=30},
-    .saturation = {.minimum=0.30, .maximum=0.50},
-    .value = {.minimum=0.80, .maximum=1.00},
+  { .name = "Rose",
+    .hue = {.minimum=335, .maximum=340},
+    .sat = {.minimum=0.40, .maximum=0.60},
+    .val = {.minimum=0.80, .maximum=1.00},
   },
 
-  { .name = "Mint",
-    .hue = {.minimum=150, .maximum=170},
-    .saturation = {.minimum=0.20, .maximum=0.40},
-    .value = {.minimum=0.80, .maximum=1.00},
+  { .name = "Light Pink",
+    .hue = {.minimum=340, .maximum=345},
+    .sat = {.minimum=0.20, .maximum=0.35},
+    .val = {.minimum=0.85, .maximum=1.00},
   },
 
-  { .name = "Salmon",
-    .hue = {.minimum=10, .maximum=20},
-    .saturation = {.minimum=0.40, .maximum=0.60},
-    .value = {.minimum=0.85, .maximum=0.95},
-  },
-
-  { .name = "Periwinkle",
-    .hue = {.minimum=220, .maximum=240},
-    .saturation = {.minimum=0.20, .maximum=0.40},
-    .value = {.minimum=0.80, .maximum=1.00},
+  { .name = "Blush",
+    .hue = {.minimum=345, .maximum=350},
+    .sat = {.minimum=0.10, .maximum=0.25},
+    .val = {.minimum=0.85, .maximum=0.95},
   },
 
   { .name = "Crimson",
     .instance = 1,
     .hue = {.minimum=0, .maximum=10},
-    .saturation = {.minimum=0.60, .maximum=0.80},
-    .value = {.minimum=0.60, .maximum=0.80},
+    .sat = {.minimum=0.60, .maximum=0.80},
+    .val = {.minimum=0.60, .maximum=0.80},
   },
 
   { .name = "Crimson",
     .instance = 2,
     .hue = {.minimum=350, .maximum=360},
-    .saturation = {.minimum=0.60, .maximum=0.80},
-    .value = {.minimum=0.60, .maximum=0.80},
+    .sat = {.minimum=0.60, .maximum=0.80},
+    .val = {.minimum=0.60, .maximum=0.80},
+  },
+
+  { .name = "Coral",
+    .hue = {.minimum=10, .maximum=15},
+    .sat = {.minimum=0.40, .maximum=0.60},
+    .val = {.minimum=0.85, .maximum=0.95},
+  },
+
+  { .name = "Maroon",
+    .hue = {.minimum=15, .maximum=19},
+    .sat = {.minimum=0.50, .maximum=0.70},
+    .val = {.minimum=0.30, .maximum=0.50},
+  },
+
+  { .name = "Terracotta",
+    .hue = {.minimum=19, .maximum=22},
+    .sat = {.minimum=0.50, .maximum=0.65},
+    .val = {.minimum=0.70, .maximum=0.80},
+  },
+
+  { .name = "Warm Blush",
+    .hue = {.minimum=22, .maximum=25},
+    .sat = {.minimum=0.20, .maximum=0.30},
+    .val = {.minimum=0.85, .maximum=0.95},
+  },
+
+  { .name = "Salmon",
+    .hue = {.minimum=25, .maximum=28},
+    .sat = {.minimum=0.40, .maximum=0.60},
+    .val = {.minimum=0.85, .maximum=0.95},
+  },
+
+  { .name = "Rust",
+    .hue = {.minimum=28, .maximum=31},
+    .sat = {.minimum=0.60, .maximum=0.80},
+    .val = {.minimum=0.60, .maximum=0.75},
+  },
+
+  { .name = "Dark Brown",
+    .hue = {.minimum=31, .maximum=34},
+    .sat = {.minimum=0.60, .maximum=0.80},
+    .val = {.minimum=0.20, .maximum=0.40},
+  },
+
+  { .name = "Peach",
+    .hue = {.minimum=34, .maximum=37},
+    .sat = {.minimum=0.30, .maximum=0.50},
+    .val = {.minimum=0.80, .maximum=1.00},
+  },
+
+  { .name = "Copper",
+    .hue = {.minimum=37, .maximum=39},
+    .sat = {.minimum=0.60, .maximum=0.80},
+    .val = {.minimum=0.70, .maximum=0.85},
+  },
+
+  { .name = "Brown",
+    .hue = {.minimum=39, .maximum=42},
+    .sat = {.minimum=0.60, .maximum=0.80},
+    .val = {.minimum=0.40, .maximum=0.60},
+  },
+
+  { .name = "Tan",
+    .hue = {.minimum=42, .maximum=45},
+    .sat = {.minimum=0.30, .maximum=0.50},
+    .val = {.minimum=0.70, .maximum=0.90},
   },
 
   { .name = "Amber",
-    .hue = {.minimum=30, .maximum=40},
-    .saturation = {.minimum=0.70, .maximum=0.90},
-    .value = {.minimum=0.80, .maximum=1.00},
+    .hue = {.minimum=45, .maximum=47},
+    .sat = {.minimum=0.70, .maximum=0.90},
+    .val = {.minimum=0.80, .maximum=1.00},
   },
 
-  { .name = "Khaki",
-    .hue = {.minimum=40, .maximum=60},
-    .saturation = {.minimum=0.20, .maximum=0.40},
-    .value = {.minimum=0.60, .maximum=0.80},
-  },
-
-  { .name = "Aqua",
-    .hue = {.minimum=180, .maximum=190},
-    .saturation = {.minimum=0.40, .maximum=0.60},
-    .value = {.minimum=0.80, .maximum=1.00},
-  },
-
-  { .name = "Fuchsia",
-    .hue = {.minimum=300, .maximum=320},
-    .saturation = {.minimum=0.70, .maximum=0.90},
-    .value = {.minimum=0.70, .maximum=0.90},
+  { .name = "Beige",
+    .hue = {.minimum=47, .maximum=49},
+    .sat = {.minimum=0.10, .maximum=0.20},
+    .val = {.minimum=0.80, .maximum=0.90},
   },
 
   { .name = "Ivory",
-    .hue = {.minimum=30, .maximum=40},
-    .saturation = {.minimum=0.05, .maximum=0.10},
-    .value = {.minimum=0.95, .maximum=1.00},
+    .hue = {.minimum=49, .maximum=51},
+    .sat = {.minimum=0.05, .maximum=0.10},
+    .val = {.minimum=0.95, .maximum=1.00},
   },
 
-  { .name = "Off-White",
-    .hue = {.minimum=0, .maximum=360},
-    .saturation = {.minimum=0.01, .maximum=0.05},
-    .value = {.minimum=0.95, .maximum=1.00},
+  { .name = "Alabaster",
+    .hue = {.minimum=51, .maximum=54},
+    .sat = {.minimum=0.04, .maximum=0.08},
+    .val = {.minimum=0.96, .maximum=1.00},
   },
 
-  { .name = "Sienna",
-    .hue = {.minimum=10, .maximum=20},
-    .saturation = {.minimum=0.60, .maximum=0.80},
-    .value = {.minimum=0.40, .maximum=0.60},
+  { .name = "Eggshell",
+    .hue = {.minimum=54, .maximum=57},
+    .sat = {.minimum=0.05, .maximum=0.15},
+    .val = {.minimum=0.90, .maximum=1.00},
   },
 
-  { .name = "Plum",
-    .hue = {.minimum=290, .maximum=310},
-    .saturation = {.minimum=0.30, .maximum=0.50},
-    .value = {.minimum=0.40, .maximum=0.60},
+  { .name = "Vanilla",
+    .hue = {.minimum=57, .maximum=59},
+    .sat = {.minimum=0.10, .maximum=0.20},
+    .val = {.minimum=0.95, .maximum=1.00},
   },
 
-  { .name = "Orchid",
-    .hue = {.minimum=270, .maximum=290},
-    .saturation = {.minimum=0.40, .maximum=0.60},
-    .value = {.minimum=0.60, .maximum=0.80},
+  { .name = "Mustard",
+    .hue = {.minimum=59, .maximum=61},
+    .sat = {.minimum=0.70, .maximum=0.90},
+    .val = {.minimum=0.70, .maximum=0.90},
   },
 
-  { .name = "Sky Blue",
-    .hue = {.minimum=195, .maximum=205},
-    .saturation = {.minimum=0.30, .maximum=0.50},
-    .value = {.minimum=0.80, .maximum=1.00},
+  { .name = "Olive",
+    .hue = {.minimum=61, .maximum=64},
+    .sat = {.minimum=0.50, .maximum=0.70},
+    .val = {.minimum=0.40, .maximum=0.60},
   },
 
-  { .name = "Cerulean",
-    .hue = {.minimum=200, .maximum=210},
-    .saturation = {.minimum=0.50, .maximum=0.70},
-    .value = {.minimum=0.70, .maximum=0.90},
+  { .name = "Lemon",
+    .hue = {.minimum=64, .maximum=67},
+    .sat = {.minimum=0.80, .maximum=1.00},
+    .val = {.minimum=0.90, .maximum=1.00},
+  },
+
+  { .name = "Khaki",
+    .hue = {.minimum=67, .maximum=71},
+    .sat = {.minimum=0.20, .maximum=0.40},
+    .val = {.minimum=0.60, .maximum=0.80},
+  },
+
+  { .name = "Chartreuse",
+    .hue = {.minimum=85, .maximum=95},
+    .sat = {.minimum=0.70, .maximum=0.90},
+    .val = {.minimum=0.80, .maximum=1.00},
   },
 
   { .name = "Forest Green",
     .hue = {.minimum=120, .maximum=140},
-    .saturation = {.minimum=0.50, .maximum=0.70},
-    .value = {.minimum=0.40, .maximum=0.60},
-  },
-
-  { .name = "Mauve",
-    .hue = {.minimum=270, .maximum=280},
-    .saturation = {.minimum=0.20, .maximum=0.40},
-    .value = {.minimum=0.70, .maximum=0.85},
-  },
-
-  { .name = "Slate Gray",
-    .hue = {.minimum=210, .maximum=230},
-    .saturation = {.minimum=0.10, .maximum=0.20},
-    .value = {.minimum=0.40, .maximum=0.60},
-  },
-
-  { .name = "Azure",
-    .hue = {.minimum=210, .maximum=220},
-    .saturation = {.minimum=0.40, .maximum=0.60},
-    .value = {.minimum=0.70, .maximum=0.90},
-  },
-
-  { .name = "Scarlet",
-    .hue = {.minimum=0, .maximum=10},
-    .saturation = {.minimum=0.80, .maximum=1.00},
-    .value = {.minimum=0.70, .maximum=0.90},
-  },
-
-  { .name = "Aquamarine",
-    .hue = {.minimum=170, .maximum=180},
-    .saturation = {.minimum=0.40, .maximum=0.60},
-    .value = {.minimum=0.80, .maximum=1.00},
+    .sat = {.minimum=0.50, .maximum=0.70},
+    .val = {.minimum=0.40, .maximum=0.60},
   },
 
   { .name = "Emerald",
-    .hue = {.minimum=140, .maximum=160},
-    .saturation = {.minimum=0.60, .maximum=0.80},
-    .value = {.minimum=0.60, .maximum=0.80},
+    .hue = {.minimum=140, .maximum=150},
+    .sat = {.minimum=0.60, .maximum=0.80},
+    .val = {.minimum=0.60, .maximum=0.80},
   },
 
-  { .name = "Mustard",
-    .hue = {.minimum=50, .maximum=60},
-    .saturation = {.minimum=0.70, .maximum=0.90},
-    .value = {.minimum=0.70, .maximum=0.90},
+  { .name = "Mint",
+    .hue = {.minimum=150, .maximum=160},
+    .sat = {.minimum=0.20, .maximum=0.40},
+    .val = {.minimum=0.80, .maximum=1.00},
   },
 
-  { .name = "Terracotta",
-    .hue = {.minimum=10, .maximum=18},
-    .saturation = {.minimum=0.50, .maximum=0.65},
-    .value = {.minimum=0.70, .maximum=0.80},
+  { .name = "Turquoise",
+    .hue = {.minimum=160, .maximum=165},
+    .sat = {.minimum=0.40, .maximum=0.60},
+    .val = {.minimum=0.70, .maximum=0.90},
   },
 
-  { .name = "Copper",
-    .hue = {.minimum=25, .maximum=30},
-    .saturation = {.minimum=0.60, .maximum=0.80},
-    .value = {.minimum=0.70, .maximum=0.85},
+  { .name = "Aquamarine",
+    .hue = {.minimum=165, .maximum=170},
+    .sat = {.minimum=0.40, .maximum=0.60},
+    .val = {.minimum=0.80, .maximum=1.00},
   },
 
-  { .name = "Ebony",
-    .hue = {.minimum=0, .maximum=40},
-    .saturation = {.minimum=0.05, .maximum=0.25},
-    .value = {.minimum=0.10, .maximum=0.20},
+  { .name = "Teal",
+    .hue = {.minimum=170, .maximum=178},
+    .sat = {.minimum=0.40, .maximum=0.60},
+    .val = {.minimum=0.50, .maximum=0.70},
   },
 
-  { .name = "Rust",
-    .hue = {.minimum=18, .maximum=25},
-    .saturation = {.minimum=0.60, .maximum=0.80},
-    .value = {.minimum=0.60, .maximum=0.75},
+  { .name = "Dark Teal",
+    .hue = {.minimum=178, .maximum=190},
+    .sat = {.minimum=0.40, .maximum=0.60},
+    .val = {.minimum=0.30, .maximum=0.50},
   },
 
-  { .name = "Blush",
-    .hue = {.minimum=345, .maximum=355},
-    .saturation = {.minimum=0.10, .maximum=0.25},
-    .value = {.minimum=0.85, .maximum=0.95},
+  { .name = "Aqua",
+    .hue = {.minimum=190, .maximum=195},
+    .sat = {.minimum=0.40, .maximum=0.60},
+    .val = {.minimum=0.80, .maximum=1.00},
   },
 
-  { .name = "Warm Blush",
-    .hue = {.minimum=10, .maximum=20},
-    .saturation = {.minimum=0.20, .maximum=0.30},
-    .value = {.minimum=0.85, .maximum=0.95},
+  { .name = "Sky Blue",
+    .hue = {.minimum=195, .maximum=198},
+    .sat = {.minimum=0.30, .maximum=0.50},
+    .val = {.minimum=0.80, .maximum=1.00},
+  },
+
+  { .name = "Cerulean",
+    .hue = {.minimum=198, .maximum=205},
+    .sat = {.minimum=0.50, .maximum=0.70},
+    .val = {.minimum=0.70, .maximum=0.90},
+  },
+
+  { .name = "Azure",
+    .hue = {.minimum=205, .maximum=210},
+    .sat = {.minimum=0.40, .maximum=0.60},
+    .val = {.minimum=0.70, .maximum=0.90},
+  },
+
+  { .name = "Navy",
+    .hue = {.minimum=210, .maximum=215},
+    .sat = {.minimum=0.50, .maximum=0.70},
+    .val = {.minimum=0.20, .maximum=0.40},
+  },
+
+  { .name = "Slate Gray",
+    .hue = {.minimum=215, .maximum=218},
+    .sat = {.minimum=0.10, .maximum=0.20},
+    .val = {.minimum=0.40, .maximum=0.60},
   },
 
   { .name = "Denim",
-    .hue = {.minimum=225, .maximum=230},
-    .saturation = {.minimum=0.50, .maximum=0.70},
-    .value = {.minimum=0.60, .maximum=0.80},
+    .hue = {.minimum=218, .maximum=222},
+    .sat = {.minimum=0.50, .maximum=0.70},
+    .val = {.minimum=0.60, .maximum=0.80},
   },
 
-  { .name = "Lemon",
-    .hue = {.minimum=55, .maximum=65},
-    .saturation = {.minimum=0.80, .maximum=1.00},
-    .value = {.minimum=0.90, .maximum=1.00},
+  { .name = "Periwinkle",
+    .hue = {.minimum=222, .maximum=230},
+    .sat = {.minimum=0.20, .maximum=0.40},
+    .val = {.minimum=0.80, .maximum=1.00},
+  },
+
+  { .name = "Indigo",
+    .hue = {.minimum=230, .maximum=240},
+    .sat = {.minimum=0.50, .maximum=0.70},
+    .val = {.minimum=0.30, .maximum=0.50},
+  },
+
+  { .name = "Lavender",
+    .hue = {.minimum=250, .maximum=260},
+    .sat = {.minimum=0.30, .maximum=0.50},
+    .val = {.minimum=0.80, .maximum=0.95},
+  },
+
+  { .name = "Mauve",
+    .hue = {.minimum=260, .maximum=270},
+    .sat = {.minimum=0.20, .maximum=0.40},
+    .val = {.minimum=0.70, .maximum=0.85},
+  },
+
+  { .name = "Purple",
+    .hue = {.minimum=270, .maximum=280},
+    .sat = {.minimum=0.40, .maximum=0.60},
+    .val = {.minimum=0.40, .maximum=0.60},
+  },
+
+  { .name = "Orchid",
+    .hue = {.minimum=280, .maximum=290},
+    .sat = {.minimum=0.40, .maximum=0.60},
+    .val = {.minimum=0.60, .maximum=0.80},
+  },
+
+  { .name = "Plum",
+    .hue = {.minimum=290, .maximum=300},
+    .sat = {.minimum=0.30, .maximum=0.50},
+    .val = {.minimum=0.40, .maximum=0.60},
+  },
+
+  { .name = "Fuchsia",
+    .hue = {.minimum=300, .maximum=315},
+    .sat = {.minimum=0.70, .maximum=0.90},
+    .val = {.minimum=0.70, .maximum=0.90},
+  },
+
+  { .name = "Off-White",
+    .hue = {.minimum=0, .maximum=360},
+    .sat = {.minimum=0.01, .maximum=0.04},
+    .val = {.minimum=0.95, .maximum=1.00},
   },
 };
 
@@ -991,10 +959,10 @@ hsvSortComparer (const void *item1, const void *item2) {
   relation = hsvCompareRanges(&(*color1)->hue, &(*color2)->hue);
   if (relation != 0) return relation;
 
-  relation = hsvCompareRanges(&(*color1)->saturation, &(*color2)->saturation);
+  relation = hsvCompareRanges(&(*color1)->sat, &(*color2)->sat);
   if (relation != 0) return relation;
 
-  relation = hsvCompareRanges(&(*color1)->value, &(*color2)->value);
+  relation = hsvCompareRanges(&(*color1)->val, &(*color2)->val);
   if (relation != 0) return relation;
 
   return 0;
@@ -1016,10 +984,10 @@ hsvSearchComparer (const void *target, const void *item) {
   relation = hsvRangeContains(&(*color)->hue, hsv->h);
   if (relation != 0) return relation;
 
-  relation = hsvRangeContains(&(*color)->saturation, hsv->s);
+  relation = hsvRangeContains(&(*color)->sat, hsv->s);
   if (relation != 0) return relation;
 
-  relation = hsvRangeContains(&(*color)->value, hsv->v);
+  relation = hsvRangeContains(&(*color)->val, hsv->v);
   if (relation != 0) return relation;
 
   return 0;
@@ -1054,11 +1022,11 @@ hsvColorEntry (HSVColor hsv) {
       if (hsv.h < color->hue.minimum) continue;
       if (hsv.h > color->hue.maximum) continue;
 
-      if (hsv.s < color->saturation.minimum) continue;
-      if (hsv.s > color->saturation.maximum) continue;
+      if (hsv.s < color->sat.minimum) continue;
+      if (hsv.s > color->sat.maximum) continue;
 
-      if (hsv.v < color->value.minimum) continue;
-      if (hsv.v > color->value.maximum) continue;
+      if (hsv.v < color->val.minimum) continue;
+      if (hsv.v > color->val.maximum) continue;
 
       return color;
     }

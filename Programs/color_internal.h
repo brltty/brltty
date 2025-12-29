@@ -31,8 +31,8 @@ typedef struct {
 typedef struct {
   const char *name;
   HSVComponentRange hue;
-  HSVComponentRange saturation;
-  HSVComponentRange value;
+  HSVComponentRange sat;
+  HSVComponentRange val;
   unsigned char instance;
 } HSVColorEntry;
 

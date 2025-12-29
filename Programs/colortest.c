@@ -360,8 +360,8 @@ testColorRecognition (const char *testName) {
     {"Black",            0,   0,   0,   "black", NULL, NULL},
 
     /* Grays */
-    {"Light Gray",       200, 200, 200, "light gray", NULL, NULL},
-    {"Medium Gray",      128, 128, 128, "natural gray", NULL, NULL},
+    {"Near-White",       200, 200, 200, "near-white", NULL, NULL},
+    {"Light Gray",      128, 128, 128, "light gray", NULL, NULL},
     {"Dark Gray",        64,  64,  64,  "dark gray", "charcoal",
      "grayscale analysis is more granular"},
 
@@ -388,11 +388,11 @@ testColorRecognition (const char *testName) {
 
     /* Light blue (173,216,230) has H=197° which is in the cyan range (180-210°).
      * "light cyan" is actually more accurate than "light blue" based on HSV analysis. */
-    {"Light Blue",       173, 216, 230, "light blue", "bright pale cyan",
+    {"Light Blue",       173, 216, 230, "light blue", "bright weak cyan",
      "H=197° is in cyan range; HSV analysis gives more accurate result"},
 
     {"Dark Green",       0,   100, 0,   "dark pure green", NULL, NULL},
-    {"Light Green",      144, 238, 144, "bright weak green", NULL, NULL},
+    {"Light Green",      144, 238, 144, "bright soft green", NULL, NULL},
   };
 
   const int testCount = ARRAY_COUNT(tests);
@@ -999,8 +999,8 @@ showHSVColorEntry (const HSVColorEntry *color) {
     "%s%s: Hue:%.0f°-%.0f° Sat:%.0f%%-%.0f%% Val:%.0f%%-%.0f%%\n",
     blockIndent, color->name,
     color->hue.minimum, color->hue.maximum,
-    color->saturation.minimum*100.0f, color->saturation.maximum*100.0f,
-    color->value.minimum*100.0f, color->value.maximum*100.0f
+    color->sat.minimum*100.0f, color->sat.maximum*100.0f,
+    color->val.minimum*100.0f, color->val.maximum*100.0f
   );
 }
 
@@ -1080,8 +1080,8 @@ hsvRangesOverlap (const HSVComponentRange *range1, const HSVComponentRange *rang
 static int
 hsvColorsOverlap (const HSVColorEntry *color1, const HSVColorEntry *color2) {
   return hsvRangesOverlap(&color1->hue, &color2->hue) &&
-         hsvRangesOverlap(&color1->saturation, &color2->saturation) &&
-         hsvRangesOverlap(&color1->value, &color2->value);
+         hsvRangesOverlap(&color1->sat, &color2->sat) &&
+         hsvRangesOverlap(&color1->val, &color2->val);
 }
 
 static int
@@ -1093,8 +1093,8 @@ hsvRangeContains (const HSVComponentRange *outer, const HSVComponentRange *inner
 static int
 hsvColorContains (const HSVColorEntry *outer, const HSVColorEntry *inner) {
   return hsvRangeContains(&outer->hue, &inner->hue) &&
-         hsvRangeContains(&outer->saturation, &inner->saturation) &&
-         hsvRangeContains(&outer->value, &inner->value);
+         hsvRangeContains(&outer->sat, &inner->sat) &&
+         hsvRangeContains(&outer->val, &inner->val);
 }
 
 static void putColorProblem (const HSVColorEntry *color, const char *format, ...) PRINTF(2, 3);
@@ -1142,19 +1142,19 @@ cmdProblems (CommandArguments *arguments) {
         );
       }
 
-      if (!hsvValidLevelRange(&color1->saturation)) {
+      if (!hsvValidLevelRange(&color1->sat)) {
         problemCount += 1;
         putColorProblem(
           color1, "invalid saturation range: %.2f-%.2f",
-          color1->saturation.minimum, color1->saturation.maximum
+          color1->sat.minimum, color1->sat.maximum
         );
       }
 
-      if (!hsvValidLevelRange(&color1->value)) {
+      if (!hsvValidLevelRange(&color1->val)) {
         problemCount += 1;
         putColorProblem(
           color1, "invalid value range: %.2f-%.2f",
-          color1->value.minimum, color1->value.maximum
+          color1->val.minimum, color1->val.maximum
         );
       }
 
@@ -1163,8 +1163,8 @@ cmdProblems (CommandArguments *arguments) {
 
         HSVColor hsv = {
           .h = color1->hue.minimum + increment,
-          .s = color1->saturation.minimum + increment,
-          .v = color1->value.minimum + increment,
+          .s = color1->sat.minimum + increment,
+          .v = color1->val.minimum + increment,
         };
 
         const HSVColorEntry *color = hsvColorEntry(hsv);
@@ -1183,8 +1183,8 @@ cmdProblems (CommandArguments *arguments) {
 
         HSVColor hsv = {
           .h = color1->hue.maximum - decrement,
-          .s = color1->saturation.maximum - decrement,
-          .v = color1->value.maximum - decrement,
+          .s = color1->sat.maximum - decrement,
+          .v = color1->val.maximum - decrement,
         };
 
         const HSVColorEntry *color = hsvColorEntry(hsv);
