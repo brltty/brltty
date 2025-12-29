@@ -899,11 +899,19 @@ hsvColorContains (const HSVColorEntry *outer, const HSVColorEntry *inner) {
          hsvRangeContains(&outer->val, &inner->val);
 }
 
+static void
+putColor (const HSVColorEntry *color) {
+  putString(color->name);
+  if (color->instance) putf("[%u]", color->instance);
+}
+
 static void putColorProblem (const HSVColorEntry *color, const char *format, ...) PRINTF(2, 3);
 
 static void
 putColorProblem (const HSVColorEntry *color, const char *format, ...) {
-  putf("%s%s[%u]: ", blockIndent, color->name, color->instance);
+  putString(blockIndent);
+  putColor(color);
+  putString(": ");
 
   {
     va_list args;
@@ -912,16 +920,16 @@ putColorProblem (const HSVColorEntry *color, const char *format, ...) {
     va_end(args);
   }
 
-  putf("\n");
+  putNewline();
 }
 
 static void
 putColorsProblem (const HSVColorEntry *color1, const HSVColorEntry *color2, const char *relation) {
-  putf(
-    "%s%s[%u] %s %s[%u]\n",
-    blockIndent, color1->name, color1->instance,
-    relation, color2->name, color2->instance
-  );
+  putString(blockIndent);
+  putColor(color1);
+  putf(" %s ", relation);
+  putColor(color2);
+  putNewline();
 }
 
 

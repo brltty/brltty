@@ -598,14 +598,14 @@ hsvBrightnessModifier (float brightness) {
 const HSVColorEntry hsvColorTable[] = {
   { .name = "Crimson",
     .instance = 1,
-    .hue = {.minimum=355, .maximum=360},
+    .hue = {.minimum=350, .maximum=360},
     .sat = {.minimum=0.60, .maximum=0.80},
     .val = {.minimum=0.60, .maximum=0.75},
   },
 
   { .name = "Crimson",
     .instance = 2,
-    .hue = {.minimum=0, .maximum=3},
+    .hue = {.minimum=0, .maximum=6},
     .sat = {.minimum=0.60, .maximum=0.80},
     .val = {.minimum=0.60, .maximum=0.75},
   },
@@ -614,6 +614,12 @@ const HSVColorEntry hsvColorTable[] = {
     .hue = {.minimum=3, .maximum=6},
     .sat = {.minimum=0.85, .maximum=1.00},
     .val = {.minimum=0.75, .maximum=0.90},
+  },
+
+  { .name = "Blood Red",
+    .hue = {.minimum=6, .maximum=9},
+    .sat = {.minimum=0.60, .maximum=0.70},
+    .val = {.minimum=0.70, .maximum=0.85},
   },
 
   { .name = "Ruby Red",
