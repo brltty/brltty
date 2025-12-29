@@ -609,44 +609,67 @@ getColorModel (const char *name) {
   return NULL;
 }
 
+static void
+showRanges (
+  const char *(*getName) (unsigned int value),
+  unsigned int from, unsigned int to, const char *unit
+) {
+  typedef struct {
+    const char *name;
+    unsigned int from;
+    unsigned int to;
+  } Range;
+
+  Range ranges[20];
+  unsigned int count = 0;
+
+  for (unsigned int value=from; value<=to; value+=1) {
+    const char *name = getName(value);
+
+    if (count > 0) {
+      Range *previous = &ranges[count - 1];
+      previous->to = value;
+      if (strcmp(name, previous->name) == 0) continue;
+    }
+
+    if (count == ARRAY_COUNT(ranges)) break;
+    Range *range = &ranges[count++];
+    range->name = name;
+    range->from = value;
+    range->to = value;
+  }
+
+  for (unsigned int i=0; i<count; i+=1) {
+    const Range *range = &ranges[i];
+
+    putf(
+      "%s%s: %u%s-%u%s\n",
+      blockIndent, range->name,
+      range->from, unit,
+      range->to, unit
+    );
+  }
+}
+
+static void
+showAngleRanges (const char *(*getName) (unsigned int value)) {
+  showRanges(getName, 0, 360, "°");
+}
+
+static void
+showPercentRanges (const char *(*getName) (unsigned int value)) {
+  showRanges(getName, 0, 100, "%");
+}
+
+static const char *
+getGrayscaleColorName (unsigned int value) {
+  return gsColorName((float)value / 100.0f);
+}
+
 static int
 cmdGrayscale (CommandArguments *arguments) {
   if (checkNoMoreArguments(arguments)) {
-    typedef struct {
-      const char *color;
-      unsigned char from;
-      unsigned char to;
-    } Range;
-
-    Range ranges[20];
-    unsigned int count = 0;
-
-    for (unsigned int percent=0; percent<=100; percent+=1) {
-      const char *color = gsColorName((float)percent / 100.0f);
-
-      if (count > 0) {
-        Range *previous = &ranges[count - 1];
-        previous->to = percent;
-        if (strcmp(color, previous->color) == 0) continue;
-      }
-
-      if (count == ARRAY_COUNT(ranges)) break;
-      Range *range = &ranges[count++];
-      range->color = color;
-      range->from = percent;
-      range->to = percent;
-    }
-
-    for (unsigned int i=0; i<count; i+=1) {
-      const Range *range = &ranges[i];
-
-      putf(
-        "%s%s: %u%%-%u%%\n",
-        blockIndent, range->color,
-        range->from, range->to
-      );
-    }
-
+    showPercentRanges(getGrayscaleColorName);
     return 1;
   }
 
@@ -668,44 +691,15 @@ cmdGrayscale (CommandArguments *arguments) {
   return 0;
 }
 
+static const char *
+getHueColorName (unsigned int value) {
+  return hueColorName((float)value);
+}
+
 static int
 cmdHue (CommandArguments *arguments) {
   if (checkNoMoreArguments(arguments)) {
-    typedef struct {
-      const char *color;
-      unsigned int from;
-      unsigned int to;
-    } Range;
-
-    Range ranges[20];
-    unsigned int count = 0;
-
-    for (unsigned int angle=0; angle<=360; angle+=1) {
-      const char *color = hueColorName((float)angle);
-
-      if (count > 0) {
-        Range *previous = &ranges[count - 1];
-        previous->to = angle;
-        if (strcmp(color, previous->color) == 0) continue;
-      }
-
-      if (count == ARRAY_COUNT(ranges)) break;
-      Range *range = &ranges[count++];
-      range->color = color;
-      range->from = angle;
-      range->to = angle;
-    }
-
-    for (unsigned int i=0; i<count; i+=1) {
-      const Range *range = &ranges[i];
-
-      putf(
-        "%s%s: %u°-%u°\n",
-        blockIndent, range->color,
-        range->from, range->to
-      );
-    }
-
+    showAngleRanges(getHueColorName);
     return 1;
   }
 
@@ -727,50 +721,15 @@ cmdHue (CommandArguments *arguments) {
   return 0;
 }
 
-static void
-listPercentageModifiers (const HSVModifier *(*getModifier) (float level)) {
-  typedef struct {
-    const HSVModifier *modifier;
-    unsigned char from;
-    unsigned char to;
-  } Range;
-
-  Range ranges[20];
-  unsigned int count = 0;
-
-  for (unsigned int percent=0; percent<=100; percent+=1) {
-    const HSVModifier *modifier = getModifier((float)percent / 100.0f);
-
-    if (count > 0) {
-      Range *previous = &ranges[count - 1];
-      previous->to = percent;
-      if (strcmp(modifier->name, previous->modifier->name) == 0) continue;
-    }
-
-    if (count == ARRAY_COUNT(ranges)) break;
-    Range *range = &ranges[count++];
-    range->modifier = modifier;
-    range->from = percent;
-    range->to = percent;
-  }
-
-  for (unsigned int i=0; i<count; i+=1) {
-    const Range *range = &ranges[i];
-    const HSVModifier *modifier = range->modifier;
-
-    putf(
-      "%s%s: %u%%-%u%%: %s\n",
-      blockIndent, modifier->name,
-      range->from, range->to,
-      modifier->comment
-    );
-  }
+static const char *
+getSaturationModifierName (unsigned int value) {
+  return hsvSaturationModifier((float)value / 100.0f)->name;
 }
 
 static int
 cmdSaturation (CommandArguments *arguments) {
   if (checkNoMoreArguments(arguments)) {
-    listPercentageModifiers(hsvSaturationModifier);
+    showPercentRanges(getSaturationModifierName);
     return 1;
   }
 
@@ -792,10 +751,15 @@ cmdSaturation (CommandArguments *arguments) {
   return 0;
 }
 
+static const char *
+getBrightnessModifierName (unsigned int value) {
+  return hsvBrightnessModifier((float)value / 100.0f)->name;
+}
+
 static int
 cmdBrightness (CommandArguments *arguments) {
   if (checkNoMoreArguments(arguments)) {
-    listPercentageModifiers(hsvBrightnessModifier);
+    showPercentRanges(getBrightnessModifierName);
     return 1;
   }
 
