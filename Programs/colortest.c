@@ -67,7 +67,6 @@ static int opt_performAllTests;
 static int opt_testVGAtoRGBtoVGA;
 static int opt_listVGAColors;
 static int opt_testRGBtoHSVtoRGB;
-static int opt_testColorRecognition;
 static int opt_showRGBtoVGA;
 
 BEGIN_COMMAND_LINE_OPTIONS(programOptions)
@@ -100,12 +99,6 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .letter = 'r',
     .setting.flag = &opt_testRGBtoHSVtoRGB,
     .description = "test the RGB to HSV to RGB round-trip - conflicts with requesting all tests",
-  },
-
-  { .word = "color-recognition",
-    .letter = 'c',
-    .setting.flag = &opt_testColorRecognition,
-    .description = "test the recognition of common colors - conflicts with requesting all tests",
   },
 
   { .word = "vga-mappings",
@@ -333,120 +326,6 @@ testRGBtoHSVtoRGB (const char *testName) {
   return putTestResult(testName, testCount, passCount);
 }
 
-/* Test color recognition
- *
- * Color Reference: Most test colors are taken from the CSS/HTML Named Colors
- * specification (W3C CSS Color Module Level 3):
- * https://www.w3.org/TR/css-color-3/#svg-color
- *
- * These are standard web colors used across browsers, design tools, and the X11
- * color system. Using standard colors ensures our detection algorithms work with
- * commonly recognized color names.
- */
-static int
-testColorRecognition (const char *testName) {
-  static const ColorTest tests[] = {
-    /* Basic colors - Note: NULL in last two fields means no alternate */
-    {"Pure Red",         255, 0,   0,   "bright pure red", NULL, NULL},
-
-    /* Pure green (0,255,0) is at H=120° S=1.0 V=1.0, which matches our lime detection
-     * criteria (H 90-135°, V>0.75, S>0.75). Both names are technically correct.
-     * Note: CSS "Lime" is rgb(0,255,0), this is also tested here. */
-    {"Pure Green/Lime",  0,   255, 0,   "vivid green", "lime",
-     "H=120° matches lime criteria (bright saturated yellow-green)"},
-
-    {"Pure Blue",        0,   0,   255, "bright pure blue", NULL, NULL},
-    {"White",            255, 255, 255, "white", NULL, NULL},
-    {"Black",            0,   0,   0,   "black", NULL, NULL},
-
-    /* Grays */
-    {"Near-White",       200, 200, 200, "near-white", NULL, NULL},
-    {"Light Gray",      128, 128, 128, "light gray", NULL, NULL},
-    {"Dark Gray",        64,  64,  64,  "dark gray", "charcoal",
-     "grayscale analysis is more granular"},
-
-    /* Named colors - CSS/HTML color standard */
-    {"Brown",            170, 85,  0,   "brown", NULL, NULL},  /* VGA Brown RGB values */
-    {"Dark Brown",       101, 67,  33,  "dark brown", NULL, NULL},
-    {"Pink",             255, 192, 203, "pink", NULL, NULL},     /* CSS Pink */
-    {"Light Pink",       255, 182, 193, "light pink", NULL, NULL}, /* CSS LightPink */
-    {"Coral",            255, 127, 80,  "coral", NULL, NULL},    /* CSS Coral */
-    {"Olive",            128, 128, 0,   "olive", NULL, NULL},    /* CSS Olive */
-    {"LimeGreen",        50,  205, 50,  "lime", NULL, NULL},     /* CSS LimeGreen */
-    {"Teal",             0,   128, 128, "teal", NULL, NULL},     /* CSS Teal */
-    {"Turquoise",        64,  224, 208, "turquoise", NULL, NULL}, /* CSS Turquoise */
-    {"Maroon",           128, 0,   0,   "maroon", NULL, NULL},   /* CSS Maroon */
-    {"Navy",             0,   0,   128, "navy", NULL, NULL},     /* CSS Navy */
-    {"Indigo",           75,  0,   130, "indigo", NULL, NULL},   /* CSS Indigo */
-    {"Lavender",         230, 230, 250, "lavender", NULL, NULL}, /* CSS Lavender */
-    {"Gold",             255, 215, 0,   "gold", NULL, NULL},     /* CSS Gold */
-    {"Tan",              210, 180, 140, "tan", NULL, NULL},      /* CSS Tan */
-    {"Beige",            245, 245, 220, "beige", NULL, NULL},    /* CSS Beige */
-
-    /* Compound names */
-    {"Dark Blue",        0,   0,   139, "navy", NULL, NULL},
-
-    /* Light blue (173,216,230) has H=197° which is in the cyan range (180-210°).
-     * "light cyan" is actually more accurate than "light blue" based on HSV analysis. */
-    {"Light Blue",       173, 216, 230, "light blue", "bright weak cyan",
-     "H=197° is in cyan range; HSV analysis gives more accurate result"},
-
-    {"Dark Green",       0,   100, 0,   "dark pure green", NULL, NULL},
-    {"Light Green",      144, 238, 144, "bright soft green", NULL, NULL},
-  };
-
-  const int testCount = ARRAY_COUNT(tests);
-  int passCount = 0;
-
-  for (int i=0; i<testCount; i+=1) {
-    const ColorTest *test = &tests[i];
-
-    ColorNameBuffer rgbName;
-    rgbToName(rgbName, sizeof(rgbName), test->r, test->g, test->b);
-
-    /* Check if result matches expected or alternate name */
-    int matchExpected = strcasecmp(rgbName, test->expectedName) == 0;
-    int matchAlternate = test->alternateName &&
-                         (strcasecmp(rgbName, test->alternateName) == 0);
-
-    int passed = matchExpected || matchAlternate;
-    if (passed) passCount += 1;
-
-    /* Determine status display */
-    int quietnessLevel;
-    const char *status;
-
-    if (matchExpected) {
-      quietnessLevel = OPTQ_PASS;
-      status = "OK";
-    } else if (matchAlternate) {
-      quietnessLevel = OPTQ_WARN;
-      status = "OK (alternate)";
-    } else {
-      quietnessLevel = OPTQ_FAIL;
-      status = "FAIL";
-    }
-
-    if (opt_quietness <= quietnessLevel) {
-      putf("%-20s " RGB_COLOR_FORMAT " -> %-20s [%s]\n",
-           test->name, test->r, test->g, test->b, rgbName, status);
-
-      if (!passed) {
-        putf("  Expected: \"%s\"\n", test->expectedName);
-
-        if (test->alternateName) {
-          putf("  Alternate: \"%s\"\n", test->alternateName);
-        }
-      } else if (matchAlternate) {
-        /* Show why alternate was accepted */
-        putf("  Note: %s\n", test->alternateReason);
-      }
-    }
-  }
-
-  return putTestResult(testName, testCount, passCount);
-}
-
 /* Test RGB to VGA mapping with various colors */
 static int
 showRGBtoVGA (const char *testName) {
@@ -490,45 +369,13 @@ showColor (RGBColor rgb, HSVColor hsv) {
   putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", blockIndent, hsv.h, hsv.s*100.0f, hsv.v*100.0f);
 
   {
-    unsigned char wasUsingTable = useHSVColorTable;
     unsigned char wasUsingSorting = useHSVColorSorting;
-
-    useHSVColorTable = 0;
     useHSVColorSorting = 0;
 
-    ColorNameBuffer inlineName;
-    hsvColorToName(inlineName, sizeof(inlineName), hsv);
+    ColorNameBuffer colorName;
+    hsvColorToName(colorName, sizeof(colorName), hsv);
+    putf("%sName: %s\n", blockIndent, colorName);
 
-    ColorNameBuffer searchName;
-    unsigned char showSearchName = 0;
-
-    ColorNameBuffer sortedName;
-    unsigned char showSortedName = 0;
-
-    if (wasUsingTable) {
-      useHSVColorTable = 1;
-      hsvColorToName(searchName, sizeof(searchName), hsv);
-      showSearchName = strcasecmp(inlineName, searchName) != 0;
-
-      if (wasUsingSorting) {
-        useHSVColorSorting = 1;
-        hsvColorToName(sortedName, sizeof(sortedName), hsv);
-        showSortedName = strcasecmp(searchName, sortedName) != 0;
-      }
-    }
-
-    if (showSearchName || showSortedName) {
-      putf("%sName (inline): %s\n", blockIndent, inlineName);
-      putf("%sName (search): %s\n", blockIndent, searchName);
-
-      if (showSortedName) {
-        putf("%sName (sorted): %s\n", blockIndent, sortedName);
-      }
-    } else {
-      putf("%sName: %s\n", blockIndent, inlineName);
-    }
-
-    useHSVColorTable = wasUsingTable;
     useHSVColorSorting = wasUsingSorting;
   }
 
@@ -1252,10 +1099,6 @@ cmdOptions (CommandArguments *arguments) {
     { .name = "sorting",
       .setting = &useHSVColorSorting,
     },
-
-    { .name = "table",
-      .setting = &useHSVColorTable,
-    },
   };
 
   if (checkNoMoreArguments(arguments)) {
@@ -1579,12 +1422,6 @@ static const RequestableTest requetableTestTable[] = {
     .objective = "Verify the successful conversion of some RGB colors to HSV and then back to RGB",
     .requested = &opt_testRGBtoHSVtoRGB,
     .perform = testRGBtoHSVtoRGB,
-  },
-
-  { .name = "Color Recognition Test",
-    .objective = "Verify the recognition of some common colors",
-    .requested = &opt_testColorRecognition,
-    .perform = testColorRecognition,
   },
 
   { .name = "RGB to Nearest VGA Mappings",

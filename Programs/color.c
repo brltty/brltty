@@ -398,23 +398,19 @@ gsColorName(float brightness) {
     return "Dark Gray";
   }
 
-  if (brightness > 0.99f) {
+  if (brightness >= 0.95f) {
     return "White";
   }
 
-  if (brightness > 0.95f) {
-    return "White";
-  }
-
-  if (brightness > 0.75f) {
+  if (brightness >= 0.75f) {
     return "Near-White";
   }
 
-  if (brightness > 0.60f) {
+  if (brightness >= 0.60f) {
     return "Very Light Gray";
   }
 
-  if (brightness > 0.48f) {
+  if (brightness >= 0.48f) {
     return "Light Gray";
   }
 
@@ -499,7 +495,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation > 0.88f) {
+  if (saturation >= 0.88f) {
     static const HSVModifier modifier = {
       .name = "Pure",
       .comment = "absolute, undiluted",
@@ -509,7 +505,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation > 0.77f) {
+  if (saturation >= 0.77f) {
     static const HSVModifier modifier = {
       .name = "Rich",
       .comment = "deep, full-bodied",
@@ -518,7 +514,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation > 0.66f) {
+  if (saturation >= 0.66f) {
     static const HSVModifier modifier = {
       .name = "Vivid",
       .comment = "striking, intense",
@@ -527,7 +523,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation > 0.55f) {
+  if (saturation >= 0.55f) {
     static const HSVModifier modifier = {
       .name = "Vibrant",
       .comment = "lively, energetc",
@@ -569,7 +565,7 @@ hsvBrightnessModifier (float brightness) {
     return &modifier;
   }
 
-  if (brightness > 0.85f) {
+  if (brightness >= 0.8f) {
     static const HSVModifier modifier = {
       .name = "Bright",
       .comment = "lots of light, vivid and fully illuminated",
@@ -579,7 +575,7 @@ hsvBrightnessModifier (float brightness) {
     return &modifier;
   }
 
-  if (brightness > 0.7f) {
+  if (brightness >= 0.6f) {
     static const HSVModifier modifier = {
       .name = "Light",
       .comment = "high light, clear and easily distinguishable",
@@ -730,7 +726,7 @@ const HSVColorEntry hsvColorTable[] = {
 
   { .name = "Alabaster",
     .hue = {.minimum=51, .maximum=54},
-    .sat = {.minimum=0.04, .maximum=0.08},
+    .sat = {.minimum=0.02, .maximum=0.08},
     .val = {.minimum=0.96, .maximum=1.00},
   },
 
@@ -907,16 +903,9 @@ const HSVColorEntry hsvColorTable[] = {
     .sat = {.minimum=0.70, .maximum=0.90},
     .val = {.minimum=0.70, .maximum=0.90},
   },
-
-  { .name = "Off-White",
-    .hue = {.minimum=0, .maximum=360},
-    .sat = {.minimum=0.01, .maximum=0.04},
-    .val = {.minimum=0.95, .maximum=1.00},
-  },
 };
 
 const size_t hsvColorCount = ARRAY_COUNT(hsvColorTable);
-unsigned char useHSVColorTable = 0;
 unsigned char useHSVColorSorting = 0;
 
 static inline float
@@ -1035,94 +1024,6 @@ hsvColorEntry (HSVColor hsv) {
   return NULL;
 }
 
-static const char *
-hsvInlineColorName(HSVColor hsv) {
-  /* Special case for olive: dark yellow-green - check BEFORE brown */
-  if ((hsv.h >= 60.0f && hsv.h < 120.0f) && hsv.v >= 0.48f && hsv.v < 0.55f && hsv.s > 0.85f) {
-    return "Olive";
-  }
-
-  /* Special case for brown: dark orange/yellow with low brightness */
-  if ((hsv.h >= 15.0f && hsv.h < 90.0f) && hsv.v < 0.7f && hsv.s > 0.3f) {
-    if (hsv.v < 0.42f) {
-      return "Dark Brown";
-    } else {
-      return "Brown";
-    }
-  }
-
-  /* Special case for tan/beige: very desaturated brown/orange */
-  if ((hsv.h >= 15.0f && hsv.h < 75.0f) && hsv.v > 0.6f && hsv.s < 0.35f && hsv.s > 0.08f) {
-    if (hsv.v > 0.85f) {
-      return "Beige";
-    } else {
-      return "Tan";
-    }
-  }
-
-  /* Special case for pink: light/desaturated red */
-  if ((hsv.h < 15.0f || hsv.h >= 345.0f) && hsv.v > 0.7f && hsv.s < 0.5f && hsv.s > 0.15f) {
-    /* Web color standards: Pink (255,192,203) S=0.247, LightPink (255,182,193) S=0.286
-     * Counterintuitively, "LightPink" has higher saturation than "Pink" */
-    if (hsv.s > 0.27f) {
-      return "Light Pink";
-    } else {
-      return "Pink";
-    }
-  }
-
-  /* Special case for coral: orangish-pink */
-  if ((hsv.h >= 5.0f && hsv.h < 25.0f) && hsv.v > 0.7f && hsv.s > 0.4f && hsv.s < 0.75f) {
-    return "Coral";
-  }
-
-  /* Special case for lime: bright yellow-green */
-  if ((hsv.h >= 90.0f && hsv.h < 135.0f) && hsv.v > 0.75f && hsv.s > 0.75f) {
-    return "Lime";
-  }
-
-  /* Special case for teal: cyan with moderate saturation and value */
-  if ((hsv.h >= 165.0f && hsv.h < 195.0f) && hsv.v > 0.35f && hsv.v < 0.75f && hsv.s > 0.4f) {
-    if (hsv.v < 0.5f) {
-      return "Dark Teal";
-    } else {
-      return "Teal";
-    }
-  }
-
-  /* Special case for turquoise: bright cyan */
-  if ((hsv.h >= 170.0f && hsv.h < 200.0f) && hsv.v > 0.75f && hsv.s > 0.6f) {
-    return "Turquoise";
-  }
-
-  /* Special case for maroon: very dark red */
-  if ((hsv.h < 15.0f || hsv.h >= 345.0f) && hsv.v >= 0.45f && hsv.v <= 0.55f && hsv.s > 0.9f) {
-    return "Maroon";
-  }
-
-  /* Special case for navy: very dark blue */
-  if ((hsv.h >= 210.0f && hsv.h < 270.0f) && hsv.v >= 0.45f && hsv.v <= 0.55f && hsv.s > 0.9f) {
-    return "Navy";
-  }
-
-  /* Special case for indigo: between blue and violet */
-  if ((hsv.h >= 255.0f && hsv.h < 285.0f) && hsv.v > 0.35f && hsv.v < 0.75f && hsv.s > 0.5f) {
-    return "Indigo";
-  }
-
-  /* Special case for lavender: pale violet/magenta */
-  if ((hsv.h >= 230.0f && hsv.h < 280.0f) && hsv.v > 0.85f && hsv.s < 0.2f && hsv.s > 0.05f) {
-    return "Lavender";
-  }
-
-  /* Special case for gold: saturated yellow with orange tint */
-  if ((hsv.h >= 40.0f && hsv.h < 60.0f) && hsv.v > 0.7f && hsv.s > 0.6f) {
-    return "Gold";
-  }
-
-  return NULL;
-}
-
 const char *
 hsvColorToName(char *buffer, size_t bufferSize, HSVColor hsv) {
   hsvNormalize(&hsv.h, &hsv.s, &hsv.v);
@@ -1131,12 +1032,14 @@ hsvColorToName(char *buffer, size_t bufferSize, HSVColor hsv) {
   if (hsv.v < 0.08f) {
     name = "Black";
   } else if (hsv.s < 0.05f) {
-    name = gsColorName(hsv.v);
-  } else if (useHSVColorTable) {
+    if ((hsv.s > 0.01f) && (hsv.v >= 0.95f)) {
+      name = "Off-White";
+    } else {
+      name = gsColorName(hsv.v);
+    }
+  } else {
     const HSVColorEntry *color = hsvColorEntry(hsv);
     if (color) name = color->name;
-  } else {
-    name = hsvInlineColorName(hsv);
   }
 
   if (!name) {

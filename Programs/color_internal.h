@@ -40,7 +40,6 @@ extern const HSVColorEntry hsvColorTable[];
 extern const size_t hsvColorCount;
 extern const HSVColorEntry *hsvColorEntry (HSVColor hsv);
 
-extern unsigned char useHSVColorTable;
 extern unsigned char useHSVColorSorting;
 
 #ifdef __cplusplus
