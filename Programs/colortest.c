@@ -177,7 +177,7 @@ END_COMMAND_LINE_DESCRIPTOR
 #define HSV_COLOR_FORMAT "HSV(%5.1f°, %3.0f%%, %3.0f%%)"
 
 static void
-putNotice (const char *notice) {
+showNotice (const char *notice) {
   size_t dividerWidth = 50;
   unsigned int noticeIndent;
 
@@ -204,14 +204,14 @@ putNotice (const char *notice) {
 }
 
 static void
-putTestHeader (const char *name) {
+showHeader (const char *name) {
   if (opt_quietness <= OPTQ_TEST) {
     putf("=== %s ===\n", name);
   }
 }
 
 static int
-putTestResult (const char *name, int count, int passes) {
+showResult (const char *name, int count, int passes) {
   int hasPassed = passes == count;
 
   if (!hasPassed) {
@@ -255,7 +255,7 @@ testVGAtoRGBtoVGA (const char *testName) {
     }
   }
 
-  return putTestResult(testName, testCount, passCount);
+  return showResult(testName, testCount, passCount);
 }
 
 /* List VGA colors */
@@ -320,7 +320,7 @@ testRGBtoHSVtoRGB (const char *testName) {
     }
   }
 
-  return putTestResult(testName, testCount, passCount);
+  return showResult(testName, testCount, passCount);
 }
 
 /* Test RGB to VGA mapping with various colors */
@@ -566,7 +566,7 @@ typedef struct {
 } ColorModel;
 
 static void
-putColorModelSyntax (const ColorModel *model) {
+showColorModelSyntax (const ColorModel *model) {
   if (opt_quietness <= OPTQ_TEST) {
     putf("\n%s color model syntax: %s\n", model->name, model->syntax);
   }
@@ -607,6 +607,12 @@ getColorModel (const char *name) {
   }
 
   return NULL;
+}
+
+static void
+putColorName (const HSVColorEntry *color) {
+  putString(color->name);
+  if (color->instance) putf("[%u]", color->instance);
 }
 
 static void
@@ -782,7 +788,7 @@ cmdBrightness (CommandArguments *arguments) {
 }
 
 static int
-sortHSVColorEntries (const void *item1, const void *item2) {
+sortColorsByName (const void *item1, const void *item2) {
   const HSVColorEntry *const *color1 = item1;
   const HSVColorEntry *const *color2 = item2;
 
@@ -793,12 +799,6 @@ sortHSVColorEntries (const void *item1, const void *item2) {
   if ((*color1)->instance > (*color2)->instance) return 1;
 
   return 0;
-}
-
-static void
-putColorName (const HSVColorEntry *color) {
-  putString(color->name);
-  if (color->instance) putf("[%u]", color->instance);
 }
 
 static void
@@ -823,7 +823,7 @@ cmdColors (CommandArguments *arguments) {
       colors[i] = &hsvColorTable[i];
     }
 
-    qsort(colors, hsvColorCount, sizeof(colors[0]), sortHSVColorEntries);
+    qsort(colors, hsvColorCount, sizeof(colors[0]), sortColorsByName);
   }
 
   if (checkNoMoreArguments(arguments)) {
@@ -907,10 +907,10 @@ hsvColorContains (const HSVColorEntry *outer, const HSVColorEntry *inner) {
          hsvRangeContains(&outer->val, &inner->val);
 }
 
-static void putColorProblem (const HSVColorEntry *color, const char *format, ...) PRINTF(2, 3);
+static void showColorProblem (const HSVColorEntry *color, const char *format, ...) PRINTF(2, 3);
 
 static void
-putColorProblem (const HSVColorEntry *color, const char *format, ...) {
+showColorProblem (const HSVColorEntry *color, const char *format, ...) {
   putString(blockIndent);
   putColorName(color);
   putString(": ");
@@ -926,7 +926,7 @@ putColorProblem (const HSVColorEntry *color, const char *format, ...) {
 }
 
 static void
-putColorConflict (const HSVColorEntry *color1, const HSVColorEntry *color2, const char *relation) {
+showColorConflict (const HSVColorEntry *color1, const HSVColorEntry *color2, const char *relation) {
   putString(blockIndent);
   putColorName(color1);
   putf(" %s ", relation);
@@ -948,7 +948,7 @@ cmdProblems (CommandArguments *arguments) {
 
       if (!hsvValidAngleRange(&color1->hue)) {
         problemCount += 1;
-        putColorProblem(
+        showColorProblem(
           color1, "invalid hue range: %.0f-%.0f",
           color1->hue.minimum, color1->hue.maximum
         );
@@ -956,7 +956,7 @@ cmdProblems (CommandArguments *arguments) {
 
       if (!hsvValidLevelRange(&color1->sat)) {
         problemCount += 1;
-        putColorProblem(
+        showColorProblem(
           color1, "invalid saturation range: %.2f-%.2f",
           color1->sat.minimum, color1->sat.maximum
         );
@@ -964,7 +964,7 @@ cmdProblems (CommandArguments *arguments) {
 
       if (!hsvValidLevelRange(&color1->val)) {
         problemCount += 1;
-        putColorProblem(
+        showColorProblem(
           color1, "invalid value range: %.2f-%.2f",
           color1->val.minimum, color1->val.maximum
         );
@@ -983,7 +983,7 @@ cmdProblems (CommandArguments *arguments) {
 
         if (color1 != color) {
           problemCount += 1;
-          putColorProblem(
+          showColorProblem(
             color1, "sorted search failed (minimum) -> %s",
             color? color->name: "none"
           );
@@ -1003,7 +1003,7 @@ cmdProblems (CommandArguments *arguments) {
 
         if (color1 != color) {
           problemCount += 1;
-          putColorProblem(
+          showColorProblem(
             color1, "sorted search failed (maximum) -> %s",
             color? color->name: "none"
           );
@@ -1017,19 +1017,19 @@ cmdProblems (CommandArguments *arguments) {
         if (strcasecmp(color1->name, color2->name) == 0) {
           if (color1->instance == color2->instance) {
             problemCount += 1;
-            putColorProblem(color1, "duplicate definition");
+            showColorProblem(color1, "duplicate definition");
           }
         }
 
         if (hsvColorContains(color1, color2)) {
           problemCount += 1;
-          putColorConflict(color1, color2, "contains");
+          showColorConflict(color1, color2, "contains");
         } else if (hsvColorContains(color2, color1)) {
           problemCount += 1;
-          putColorConflict(color1, color2, "is within");
+          showColorConflict(color1, color2, "is within");
         } else if (hsvColorsOverlap(color1, color2)) {
           problemCount += 1;
-          putColorConflict(color1, color2,"overlaps");
+          showColorConflict(color1, color2,"overlaps");
         }
       }
     }
@@ -1229,7 +1229,7 @@ doCommand (const char *name, CommandArguments *arguments, const ColorModel **cur
     if (model) {
       if (currentModel && checkNoMoreArguments(arguments)) {
         *currentModel = model;
-        putColorModelSyntax(model);
+        showColorModelSyntax(model);
         return 1;
       }
 
@@ -1325,9 +1325,9 @@ doInteractiveMode (void) {
   beginInteractiveMode();
   const ColorModel *currentColorModel = defaultColorModel;
 
-  putTestHeader("Interactive Mode");
+  showHeader("Interactive Mode");
   if (opt_quietness <= OPTQ_INFO) showHelp(0);
-  putColorModelSyntax(currentColorModel);
+  showColorModelSyntax(currentColorModel);
 
   CommandArguments *arguments = newCommandArguments();
   char *line = NULL;
@@ -1404,7 +1404,7 @@ performRequestedTests (void) {
   int allPassed = 1;
 
   if (opt_quietness <= OPTQ_INFO) {
-    putNotice("BRLTTY Color Conversion Test Suite");
+    showNotice("BRLTTY Color Conversion Test Suite");
     putf("\n");
   }
 
@@ -1412,7 +1412,7 @@ performRequestedTests (void) {
     const RequestableTest *test = &requetableTestTable[i];
 
     if (*test->requested) {
-      putTestHeader(test->name);
+      showHeader(test->name);
 
       if (test->objective) {
         if (opt_quietness <= OPTQ_PASS) {
@@ -1431,7 +1431,7 @@ performRequestedTests (void) {
   }
 
   if (opt_quietness <= OPTQ_INFO) {
-    putNotice("Tests Complete");
+    showNotice("Tests Complete");
   }
 
   return allPassed;
