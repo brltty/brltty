@@ -796,10 +796,18 @@ sortHSVColorEntries (const void *item1, const void *item2) {
 }
 
 static void
+putColorName (const HSVColorEntry *color) {
+  putString(color->name);
+  if (color->instance) putf("[%u]", color->instance);
+}
+
+static void
 showHSVColorEntry (const HSVColorEntry *color) {
+  putString(blockIndent);
+  putColorName(color);
+
   putf(
-    "%s%s: Hue:%.0f°-%.0f° Sat:%.0f%%-%.0f%% Val:%.0f%%-%.0f%%\n",
-    blockIndent, color->name,
+    ": Hue:%.0f°-%.0f° Sat:%.0f%%-%.0f%% Val:%.0f%%-%.0f%%\n",
     color->hue.minimum, color->hue.maximum,
     color->sat.minimum*100.0f, color->sat.maximum*100.0f,
     color->val.minimum*100.0f, color->val.maximum*100.0f
@@ -899,18 +907,12 @@ hsvColorContains (const HSVColorEntry *outer, const HSVColorEntry *inner) {
          hsvRangeContains(&outer->val, &inner->val);
 }
 
-static void
-putColor (const HSVColorEntry *color) {
-  putString(color->name);
-  if (color->instance) putf("[%u]", color->instance);
-}
-
 static void putColorProblem (const HSVColorEntry *color, const char *format, ...) PRINTF(2, 3);
 
 static void
 putColorProblem (const HSVColorEntry *color, const char *format, ...) {
   putString(blockIndent);
-  putColor(color);
+  putColorName(color);
   putString(": ");
 
   {
@@ -924,11 +926,11 @@ putColorProblem (const HSVColorEntry *color, const char *format, ...) {
 }
 
 static void
-putColorsProblem (const HSVColorEntry *color1, const HSVColorEntry *color2, const char *relation) {
+putColorConflict (const HSVColorEntry *color1, const HSVColorEntry *color2, const char *relation) {
   putString(blockIndent);
-  putColor(color1);
+  putColorName(color1);
   putf(" %s ", relation);
-  putColor(color2);
+  putColorName(color2);
   putNewline();
 }
 
@@ -1021,13 +1023,13 @@ cmdProblems (CommandArguments *arguments) {
 
         if (hsvColorContains(color1, color2)) {
           problemCount += 1;
-          putColorsProblem(color1, color2, "contains");
+          putColorConflict(color1, color2, "contains");
         } else if (hsvColorContains(color2, color1)) {
           problemCount += 1;
-          putColorsProblem(color1, color2, "is within");
+          putColorConflict(color1, color2, "is within");
         } else if (hsvColorsOverlap(color1, color2)) {
           problemCount += 1;
-          putColorsProblem(color1, color2,"overlaps");
+          putColorConflict(color1, color2,"overlaps");
         }
       }
     }
