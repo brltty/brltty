@@ -458,7 +458,7 @@ hueColorName(float hue) {
 /* Return the HSV modifier for the specified saturation leel */
 const HSVModifier *
 hsvSaturationModifier (float saturation) {
-  if (saturation < 0.11f) {
+  if (saturation < 0.05f) {
     static const HSVModifier modifier = {
       .name = "Faint",
       .comment = "obscure, almost indistinguishable from gray",
@@ -468,7 +468,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation < 0.22f) {
+  if (saturation < 0.15f) {
     static const HSVModifier modifier = {
       .name = "Pale",
       .comment = "gentle, delicate",
@@ -477,7 +477,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation < 0.33f) {
+  if (saturation < 0.25f) {
     static const HSVModifier modifier = {
       .name = "Weak",
       .comment = "subtle, understated",
@@ -486,7 +486,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation < 0.44f) {
+  if (saturation < 0.40f) {
     static const HSVModifier modifier = {
       .name = "Soft",
       .comment = "balanced, pleasant",
@@ -495,7 +495,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation >= 0.88f) {
+  if (saturation >= 0.98f) {
     static const HSVModifier modifier = {
       .name = "Pure",
       .comment = "absolute, undiluted",
@@ -505,7 +505,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation >= 0.77f) {
+  if (saturation >= 0.90f) {
     static const HSVModifier modifier = {
       .name = "Rich",
       .comment = "deep, full-bodied",
@@ -514,7 +514,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation >= 0.66f) {
+  if (saturation >= 0.75f) {
     static const HSVModifier modifier = {
       .name = "Vivid",
       .comment = "striking, intense",
@@ -523,7 +523,7 @@ hsvSaturationModifier (float saturation) {
     return &modifier;
   }
 
-  if (saturation >= 0.55f) {
+  if (saturation >= 0.60f) {
     static const HSVModifier modifier = {
       .name = "Vibrant",
       .comment = "lively, energetc",
