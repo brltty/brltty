@@ -360,10 +360,22 @@ static const char hueName[] = "hue angle";
 static const char lightnessName[] = "lightness percent";
 static const char saturationName[] = "saturation percent";
 
-static void
-showColor (RGBColor rgb, HSVColor hsv) {
-  putf("%sRGB: (%d, %d, %d)\n", blockIndent, rgb.r, rgb.g, rgb.b);
-  putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", blockIndent, hsv.h, hsv.s*100.0f, hsv.v*100.0f);
+static int
+showColor (const RGBColor *rgbp, const HSVColor *hsvp, const HLSColor *hlsp) {
+  RGBColor rgb;
+
+  if (rgbp) {
+    rgb = *rgbp;
+  } else if (hsvp) {
+    rgb = hsvColorToRgb(*hsvp);
+  } else if (hlsp) {
+    rgb = hlsColorToRgb(*hlsp);
+  } else {
+    return 0;
+  }
+
+  HSVColor hsv = hsvp? *hsvp: rgbColorToHsv(rgb);
+  HLSColor hls = hlsp? *hlsp: rgbColorToHls(rgb);
 
   {
     unsigned char wasUsingSorting = useHSVColorSorting;
@@ -376,48 +388,22 @@ showColor (RGBColor rgb, HSVColor hsv) {
     useHSVColorSorting = wasUsingSorting;
   }
 
-  {
-    HLSColor hls = rgbColorToHls(rgb);
-    putf("%sHLS: (%.1f°, %.0f%%, %.0f%%)\n", blockIndent, hls.h, hls.l*100.0f, hls.s*100.0f);
-  }
+  putf("%sRGB: (%d, %d, %d)\n", blockIndent, rgb.r, rgb.g, rgb.b);
+  putf("%sHSV: (%.1f°, %.0f%%, %.0f%%)\n", blockIndent, hsv.h, hsv.s*100.0f, hsv.v*100.0f);
+  putf("%sHLS: (%.1f°, %.0f%%, %.0f%%)\n", blockIndent, hls.h, hls.l*100.0f, hls.s*100.0f);
 
   {
     int vga = rgbToVga(rgb.r, rgb.g, rgb.b, 0);
     const char *name = vgaColorName(vga);
     putf("%sNearest VGA: %d \"%s\"\n", blockIndent, vga, name);
   }
+
+  return 1;
 }
 
 static void
-showRGB (unsigned char r, unsigned char g, unsigned char b) {
-  RGBColor rgb = {.r=r, .g=g, .b=b};
-  showColor(rgb, rgbColorToHsv(rgb));
-}
-
-static void
-showHSV (float h, float s, float v) {
-  HSVColor hsv = {.h=h, .s=s, .v=v};
-  showColor(hsvColorToRgb(hsv), hsv);
-}
-
-static void
-showHLS (float h, float l, float s) {
-  RGBColor rgb = hlsToRgb(h, l, s);
-  showRGB(rgb.r, rgb.g, rgb.b);
-}
-
-static void
-showVGA (int vga) {
-  putf("%sVGA: %d\n", blockIndent, vga);
-  RGBColor rgb = vgaToRgb(vga);
-  showRGB(rgb.r, rgb.g, rgb.b);
-}
-
-static void
-showANSI (int ansi) {
-  putf("%sANSI: %d\n", blockIndent, ansi);
-  RGBColor rgb = ansiToRgb(ansi);
-  showRGB(rgb.r, rgb.g, rgb.b);
+showRGBColor (RGBColor rgb) {
+  showColor(&rgb, NULL, NULL);
 }
 
 static int
@@ -446,7 +432,8 @@ rgbHandler (CommandArguments *arguments) {
           if (parseIntensity(&redIntensity, redArgument, redName)) {
             if (parseIntensity(&greenIntensity, greenArgument, greenName)) {
               if (parseIntensity(&blueIntensity, blueArgument, blueName)) {
-                showRGB(redIntensity, greenIntensity, blueIntensity);
+                RGBColor rgb = {.r=redIntensity, .g=greenIntensity, .b=blueIntensity};
+                showRGBColor(rgb);
                 return 1;
               }
             }
@@ -477,7 +464,8 @@ hsvHandler (CommandArguments *arguments) {
           if (parseDegrees(&hueAngle, hueArgument, hueName)) {
             if (parsePercent(&saturationLevel, saturationArgument, saturationName)) {
               if (parsePercent(&brightnessLevel, brightnessArgument, brightnessName)) {
-                showHSV(hueAngle, saturationLevel, brightnessLevel);
+                HSVColor hsv = {.h=hueAngle, .s=saturationLevel, .v=brightnessLevel};
+                showColor(NULL, &hsv, NULL);
                 return 1;
               }
             }
@@ -508,7 +496,8 @@ hlsHandler (CommandArguments *arguments) {
           if (parseDegrees(&hueAngle, hueArgument, hueName)) {
             if (parsePercent(&lightnessLevel, lightnessArgument, lightnessName)) {
               if (parsePercent(&saturationLevel, saturationArgument, saturationName)) {
-                showHLS(hueAngle, lightnessLevel, saturationLevel);
+                HLSColor hls = {.h=hueAngle, .l=lightnessLevel, .s=saturationLevel};
+                showColor(NULL, NULL, &hls);
                 return 1;
               }
             }
@@ -531,7 +520,8 @@ vgaHandler (CommandArguments *arguments) {
       int vgaColor;
 
       if (parseInteger(&vgaColor, vgaArgument, 0, (VGA_COLOR_COUNT - 1), vgaName)) {
-        showVGA(vgaColor);
+        putf("%sVGA: %d\n", blockIndent, vgaColor);
+        showRGBColor(vgaToRgb(vgaColor));
         return 1;
       }
     }
@@ -550,7 +540,8 @@ ansiHandler (CommandArguments *arguments) {
       int ansiColor;
 
       if (parseInteger(&ansiColor, ansiArgument, 0, UINT8_MAX, ansiName)) {
-        showANSI(ansiColor);
+        putf("%sANSI: %d\n", blockIndent, ansiColor);
+        showRGBColor(ansiToRgb(ansiColor));
         return 1;
       }
     }
@@ -607,12 +598,6 @@ getColorModel (const char *name) {
   }
 
   return NULL;
-}
-
-static void
-putColorName (const HSVColorEntry *color) {
-  putString(color->name);
-  if (color->instance) putf("[%u]", color->instance);
 }
 
 static void
@@ -802,7 +787,13 @@ sortColorsByName (const void *item1, const void *item2) {
 }
 
 static void
-showHSVColorEntry (const HSVColorEntry *color) {
+putColorName (const HSVColorEntry *color) {
+  putString(color->name);
+  if (color->instance) putf("[%u]", color->instance);
+}
+
+static void
+showColorEntry (const HSVColorEntry *color) {
   putString(blockIndent);
   putColorName(color);
 
@@ -829,7 +820,7 @@ cmdColors (CommandArguments *arguments) {
   if (checkNoMoreArguments(arguments)) {
 
     for (int i=0; i<hsvColorCount; i+=1) {
-      showHSVColorEntry(colors[i]);
+      showColorEntry(colors[i]);
     }
 
     return 1;
@@ -846,7 +837,7 @@ cmdColors (CommandArguments *arguments) {
           const HSVColorEntry *color = colors[i];
 
           if (isAbbreviation(color->name, name)) {
-            showHSVColorEntry(color);
+            showColorEntry(color);
             found = 1;
           }
         }
