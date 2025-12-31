@@ -378,39 +378,39 @@ hlsColorToRgb(HLSColor hls) {
 /* Return the name of the color for the specified grayscale brightness */
 const char *
 gsColorName(float brightness) {
-  if (brightness < 0.04f) {
+  if (brightness < 0.03f) {
     return "Black";
   }
 
-  if (brightness < 0.12f) {
+  if (brightness < 0.08f) {
     return "Near-Black";
   }
 
-  if (brightness < 0.20f) {
+  if (brightness < 0.13f) {
     return "coal";
   }
 
-  if (brightness < 0.28f) {
+  if (brightness < 0.25f) {
     return "Charcoal";
   }
 
-  if (brightness < 0.38f) {
+  if (brightness < 0.40f) {
     return "Dark Gray";
   }
 
-  if (brightness >= 0.95f) {
+  if (brightness >= 0.97f) {
     return "White";
   }
 
-  if (brightness >= 0.75f) {
+  if (brightness >= 0.92f) {
     return "Near-White";
   }
 
-  if (brightness >= 0.60f) {
+  if (brightness >= 0.80f) {
     return "Very Light Gray";
   }
 
-  if (brightness >= 0.48f) {
+  if (brightness >= 0.55f) {
     return "Light Gray";
   }
 
