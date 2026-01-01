@@ -893,9 +893,9 @@ const HSVColorEntry hsvColorTable[] = {
   },
 
   { .name = "Pewter",
-    .hue = {.minimum=215, .maximum=218},
+    .hue = {.minimum=200, .maximum=220},
     .sat = {.minimum=0.05, .maximum=0.15},
-    .val = {.minimum=0.40, .maximum=0.55},
+    .val = {.minimum=0.50, .maximum=0.65},
   },
 
   { .name = "Pale Blue",
@@ -904,9 +904,47 @@ const HSVColorEntry hsvColorTable[] = {
     .val = {.minimum=0.90, .maximum=1.00},
   },
 
+  { .name = "Blue-Gray",
+    .hue = {.minimum=220, .maximum=240},
+    .sat = {.minimum=0.15, .maximum=0.30},
+    .val = {.minimum=0.60, .maximum=0.75},
+  },
+
+  { .name = "Green-Gray",
+    .hue = {.minimum=100, .maximum=140},
+    .sat = {.minimum=0.10, .maximum=0.30},
+    .val = {.minimum=0.50, .maximum=0.75},
+  },
+
+  { .name = "Rose-Gray",
+    .instance = 1,
+    .hue = {.minimum=330, .maximum=360},
+    .sat = {.minimum=0.10, .maximum=0.25},
+    .val = {.minimum=0.50, .maximum=0.75},
+  },
+
+  { .name = "Rose-Gray",
+    .instance = 2,
+    .hue = {.minimum=0, .maximum=10},
+    .sat = {.minimum=0.10, .maximum=0.25},
+    .val = {.minimum=0.50, .maximum=0.75},
+  },
+
+  { .name = "Lavender-Gray",
+    .hue = {.minimum=250, .maximum=280},
+    .sat = {.minimum=0.10, .maximum=0.25},
+    .val = {.minimum=0.50, .maximum=0.75},
+  },
+
+  { .name = "Taupe",
+    .hue = {.minimum=20, .maximum=45},
+    .sat = {.minimum=0.10, .maximum=0.30},
+    .val = {.minimum=0.40, .maximum=0.60},
+  },
+
   { .name = "Slate Gray",
-    .hue = {.minimum=220, .maximum=222},
-    .sat = {.minimum=0.10, .maximum=0.20},
+    .hue = {.minimum=210, .maximum=230},
+    .sat = {.minimum=0.15, .maximum=0.25},
     .val = {.minimum=0.40, .maximum=0.60},
   },
 
@@ -941,7 +979,7 @@ const HSVColorEntry hsvColorTable[] = {
   },
 
   { .name = "Mauve",
-    .hue = {.minimum=270, .maximum=272},
+    .hue = {.minimum=280, .maximum=300},
     .sat = {.minimum=0.20, .maximum=0.40},
     .val = {.minimum=0.70, .maximum=0.85},
   },
@@ -1137,9 +1175,7 @@ hsvColorToName(char *buffer, size_t bufferSize, HSVColor hsv) {
   hsvNormalize(&hsv.h, &hsv.s, &hsv.v);
   const char *name = NULL;
 
-  if (hsv.v < 0.08f) {
-    name = "Black";
-  } else if (hsv.s < 0.01f) {
+  if (hsv.s < 0.01f) {
     name = gsColorName(hsv.v);
   } else {
     const HSVColorEntry *color = hsvColorEntry(hsv);
@@ -1147,12 +1183,29 @@ hsvColorToName(char *buffer, size_t bufferSize, HSVColor hsv) {
   }
 
   if (!name) {
-    if (hsv.s <= 0.05f) {
-      if ((hsv.s > 0.01f) && (hsv.v >= 0.95f)) {
+    if (hsv.v < 0.02) {
+      name = "Black";
+    } else if (hsv.s < 0.05f) {
+      if (hsv.v >= 0.95f) {
         name = "Off-White";
       } else {
         name = gsColorName(hsv.v);
       }
+    } else if (hsv.v < 0.15) {
+      const char *modifier = NULL;
+
+      if (hsv.s >= 0.75) {
+        modifier = "Inky";
+      } else if (hsv.s >= 0.60) {
+        modifier = "Murky";
+      } else if (hsv.s >= 0.25) {
+        modifier = "Smoky";
+      } else {
+        modifier = "Ashen";
+      }
+
+      snprintf(buffer, bufferSize, "%s %s", modifier, hueColorName(hsv.h));
+      return buffer;
     }
   }
 
