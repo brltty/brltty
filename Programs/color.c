@@ -378,41 +378,16 @@ hlsColorToRgb(HLSColor hls) {
 /* Return the name of the color for the specified grayscale brightness */
 const char *
 gsColorName(float brightness) {
-  if (brightness < 0.03f) {
-    return "Black";
-  }
+  if (brightness < 0.03f) return "Black";
+  if (brightness < 0.08f) return "Near-Black";
+  if (brightness < 0.13f) return "coal";
+  if (brightness < 0.25f) return "Charcoal";
+  if (brightness < 0.40f) return "Dark Gray";
 
-  if (brightness < 0.08f) {
-    return "Near-Black";
-  }
-
-  if (brightness < 0.13f) {
-    return "coal";
-  }
-
-  if (brightness < 0.25f) {
-    return "Charcoal";
-  }
-
-  if (brightness < 0.40f) {
-    return "Dark Gray";
-  }
-
-  if (brightness >= 0.97f) {
-    return "White";
-  }
-
-  if (brightness >= 0.92f) {
-    return "Near-White";
-  }
-
-  if (brightness >= 0.80f) {
-    return "Very Light Gray";
-  }
-
-  if (brightness >= 0.55f) {
-    return "Light Gray";
-  }
+  if (brightness >= 0.97f) return "White";
+  if (brightness >= 0.92f) return "Near-White";
+  if (brightness >= 0.80f) return "Very Light Gray";
+  if (brightness >= 0.55f) return "Light Gray";
 
   return "Natural Gray";
 }
@@ -593,6 +568,25 @@ hsvBrightnessModifier (float brightness) {
 
     return &modifier;
   }
+}
+
+int
+hsvWithinRange (const HSVComponentRange *range, float value, int isCyclic) {
+  if (isCyclic && (range->minimum >= range->maximum)) {
+    if (value >= range->minimum) return 1;
+  } else if (value < range->minimum) {
+    return 0;
+  }
+
+  return value <= range->maximum;
+}
+
+int
+hsvTestColor (const HSVColorEntry *color, HSVColor hsv) {
+  if (!hsvWithinRange(&color->hue, hsv.h, 1)) return 0;
+  if (!hsvWithinRange(&color->sat, hsv.s, 0)) return 0;
+  if (!hsvWithinRange(&color->val, hsv.v, 0)) return 0;
+  return 1;
 }
 
 const HSVColorEntry hsvColorTable[] = {
@@ -1153,17 +1147,7 @@ hsvColorEntry (HSVColor hsv) {
   } else {
     for (int i=0; i<ARRAY_COUNT(hsvColorTable); i+=1) {
       const HSVColorEntry *color = &hsvColorTable[i];
-
-      if (hsv.h < color->hue.minimum) continue;
-      if (hsv.h > color->hue.maximum) continue;
-
-      if (hsv.s < color->sat.minimum) continue;
-      if (hsv.s > color->sat.maximum) continue;
-
-      if (hsv.v < color->val.minimum) continue;
-      if (hsv.v > color->val.maximum) continue;
-
-      return color;
+      if (hsvTestColor(color, hsv)) return color;
     }
   }
 
@@ -1175,7 +1159,9 @@ hsvColorToName(char *buffer, size_t bufferSize, HSVColor hsv) {
   hsvNormalize(&hsv.h, &hsv.s, &hsv.v);
   const char *name = NULL;
 
-  if (hsv.s < 0.01f) {
+  if (hsv.v < 0.02) {
+    name = "Black";
+  } else if (hsv.s < 0.01f) {
     name = gsColorName(hsv.v);
   } else {
     const HSVColorEntry *color = hsvColorEntry(hsv);
@@ -1183,9 +1169,7 @@ hsvColorToName(char *buffer, size_t bufferSize, HSVColor hsv) {
   }
 
   if (!name) {
-    if (hsv.v < 0.02) {
-      name = "Black";
-    } else if (hsv.s < 0.05f) {
+    if (hsv.s < 0.05f) {
       if (hsv.v >= 0.95f) {
         name = "Off-White";
       } else {

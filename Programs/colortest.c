@@ -853,7 +853,7 @@ cmdColors (CommandArguments *arguments) {
 }
 
 static int
-hsvValidRange (const HSVComponentRange *range, float minimum, float maximum) {
+hsvValidRange (const HSVComponentRange *range, float minimum, float maximum, int isCyclic) {
   if (range->maximum < range->minimum) return 0;
   if (range->minimum < minimum) return 0;
   if (range->maximum > maximum) return 0;
@@ -864,38 +864,38 @@ static int
 hsvValidAngleRange (const HSVComponentRange *range) {
   if ((float)(int)range->minimum != range->minimum) return 0;
   if ((float)(int)range->maximum != range->maximum) return 0;
-  return hsvValidRange(range, 0.0f, 360.0f);
+  return hsvValidRange(range, 0.0f, 360.0f, 1);
 }
 
 static int
 hsvValidLevelRange (const HSVComponentRange *range) {
-  return hsvValidRange(range, 0.0f, 1.0f);
+  return hsvValidRange(range, 0.0f, 1.0f, 0);
 }
 
 static int
-hsvRangesOverlap (const HSVComponentRange *range1, const HSVComponentRange *range2) {
+hsvRangesOverlap (const HSVComponentRange *range1, const HSVComponentRange *range2, int isCyclic) {
   return (range2->minimum < range1->maximum) &&
          (range2->maximum > range1->minimum);
 }
 
 static int
 hsvColorsOverlap (const HSVColorEntry *color1, const HSVColorEntry *color2) {
-  return hsvRangesOverlap(&color1->hue, &color2->hue) &&
-         hsvRangesOverlap(&color1->sat, &color2->sat) &&
-         hsvRangesOverlap(&color1->val, &color2->val);
+  return hsvRangesOverlap(&color1->hue, &color2->hue, 1) &&
+         hsvRangesOverlap(&color1->sat, &color2->sat, 0) &&
+         hsvRangesOverlap(&color1->val, &color2->val, 0);
 }
 
 static int
-hsvRangeContains (const HSVComponentRange *outer, const HSVComponentRange *inner) {
+hsvRangeContains (const HSVComponentRange *outer, const HSVComponentRange *inner, int isCyclic) {
   return (outer->minimum <= inner->minimum) &&
          (outer->maximum >= inner->maximum);
 }
 
 static int
 hsvColorContains (const HSVColorEntry *outer, const HSVColorEntry *inner) {
-  return hsvRangeContains(&outer->hue, &inner->hue) &&
-         hsvRangeContains(&outer->sat, &inner->sat) &&
-         hsvRangeContains(&outer->val, &inner->val);
+  return hsvRangeContains(&outer->hue, &inner->hue, 1) &&
+         hsvRangeContains(&outer->sat, &inner->sat, 0) &&
+         hsvRangeContains(&outer->val, &inner->val, 0);
 }
 
 static void showColorProblem (const HSVColorEntry *color, const char *format, ...) PRINTF(2, 3);
@@ -924,7 +924,6 @@ showColorConflict (const HSVColorEntry *color1, const HSVColorEntry *color2, con
   putColorName(color2);
   putNewline();
 }
-
 
 static int
 cmdProblems (CommandArguments *arguments) {
