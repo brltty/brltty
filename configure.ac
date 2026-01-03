@@ -952,6 +952,25 @@ AC_CHECK_FUNCS([shmget shm_open])
 AC_CHECK_FUNCS([getpeereid getpeerucred getzoneid])
 AC_CHECK_FUNCS([mempcpy wmempcpy])
 
+dnl sys/io.h might provide ioperm but not inb,outb (like for
+dnl non i386/x32/x86_64 with musl libc)
+if test "${ac_cv_header_sys_io_h}" = "yes"; then
+  AC_MSG_CHECKING([for inb,outb (provided by sys/io.h)])
+  AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM([[#include <sys/io.h>]],
+      [[inb(0);outb(0,0);]])],
+    [AC_MSG_RESULT([yes])
+      brltty_cv_have_sys_io_h_with_inb_outb="yes"],
+    [AC_MSG_RESULT([no])
+      brltty_cv_have_sys_io_h_with_inb_outb="no"
+      AC_MSG_WARN([sys/io.h does not provide inb,outb (non i386/x32/x86_64 arch?)])])
+  if test "$brltty_cv_have_sys_io_h_with_inb_outb" = "yes"; then
+    AC_DEFINE(BRLTTY_HAVE_SYS_IO_H_WITH_INB_OUTB, 1, [Define to 1 if you have the <sys/io.h> providing inb,outb.])
+  fi
+else
+  brltty_cv_have_sys_io_h_with_inb_outb="no"
+fi
+
 case "${host_os}"
 in
    cygwin*|mingw*)

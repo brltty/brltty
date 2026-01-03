@@ -331,6 +331,9 @@ extern "C" {
 /* Define this if the header file sys/io.h exists. */
 #undef HAVE_SYS_IO_H
 
+/* Define to 1 if you have the <sys/io.h> providing inb,outb. */
+#undef BRLTTY_HAVE_SYS_IO_H_WITH_INB_OUTB
+
 /* Define this if the header file sys/modem.h exists. */
 #undef HAVE_SYS_MODEM_H
 

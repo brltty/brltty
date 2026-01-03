@@ -50,7 +50,7 @@ disablePorts (unsigned short int base, unsigned short int count) {
 
 unsigned char
 readPort1 (unsigned short int port) {
-#ifdef HAVE_SYS_IO_H
+#ifdef BRLTTY_HAVE_SYS_IO_H_WITH_INB_OUTB
   return inb(port);
 #else /* HAVE_SYS_IO_H */
   return 0;
@@ -59,7 +59,7 @@ readPort1 (unsigned short int port) {
 
 void
 writePort1 (unsigned short int port, unsigned char value) {
-#ifdef HAVE_SYS_IO_H
+#ifdef BRLTTY_HAVE_SYS_IO_H_WITH_INB_OUTB
   outb(value, port);
 #endif /* HAVE_SYS_IO_H */
 }
