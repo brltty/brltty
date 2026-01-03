@@ -776,29 +776,14 @@ static int
 sortColorsByName (const void *item1, const void *item2) {
   const HSVColorEntry *const *color1 = item1;
   const HSVColorEntry *const *color2 = item2;
-
-  int relation = strcasecmp((*color1)->name, (*color2)->name);
-  if (relation != 0) return relation;
-
-  if ((*color1)->instance < (*color2)->instance) return -1;
-  if ((*color1)->instance > (*color2)->instance) return 1;
-
-  return 0;
-}
-
-static void
-putColorName (const HSVColorEntry *color) {
-  putString(color->name);
-  if (color->instance) putf("[%u]", color->instance);
+  return strcasecmp((*color1)->name, (*color2)->name);
 }
 
 static void
 showColorEntry (const HSVColorEntry *color) {
-  putString(blockIndent);
-  putColorName(color);
-
   putf(
-    ": Hue:%.0f°-%.0f° Sat:%.0f%%-%.0f%% Val:%.0f%%-%.0f%%\n",
+    "%s%s: Hue:%.0f°-%.0f° Sat:%.0f%%-%.0f%% Val:%.0f%%-%.0f%%\n",
+    blockIndent, color->name,
     color->hue.minimum, color->hue.maximum,
     color->sat.minimum*100.0f, color->sat.maximum*100.0f,
     color->val.minimum*100.0f, color->val.maximum*100.0f
@@ -818,7 +803,6 @@ cmdColors (CommandArguments *arguments) {
   }
 
   if (checkNoMoreArguments(arguments)) {
-
     for (int i=0; i<hsvColorCount; i+=1) {
       showColorEntry(colors[i]);
     }
@@ -854,10 +838,12 @@ cmdColors (CommandArguments *arguments) {
 
 static int
 hsvValidRange (const HSVComponentRange *range, float minimum, float maximum, int isCyclic) {
-  if (range->maximum < range->minimum) return 0;
+  if (maximum < minimum) return 0;
   if (range->minimum < minimum) return 0;
   if (range->maximum > maximum) return 0;
-  return 1;
+
+  if (isCyclic) return 1;
+  return range->minimum < range->maximum;
 }
 
 static int
@@ -873,9 +859,29 @@ hsvValidLevelRange (const HSVComponentRange *range) {
 }
 
 static int
+hsvCyclicOverlap (const HSVComponentRange *range1, const HSVComponentRange *range2) {
+  if (range2->minimum >= range1->minimum) return 1;
+  if (range2->maximum > range1->minimum) return 1;
+  if (range2->minimum < range1->maximum) return 1;
+
+  if (hsvCyclicRange(range2)) {
+    if ((range2->minimum <= range1->minimum) && (range2->maximum >= range1->maximum)) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
 hsvRangesOverlap (const HSVComponentRange *range1, const HSVComponentRange *range2, int isCyclic) {
-  return (range2->minimum < range1->maximum) &&
-         (range2->maximum > range1->minimum);
+  if (isCyclic) {
+    if (hsvCyclicRange(range1)) return hsvCyclicOverlap(range1, range2);
+    if (hsvCyclicRange(range2)) return hsvCyclicOverlap(range2, range1);
+  }
+
+  if (range2->minimum >= range1->maximum) return 0;
+  return range2->maximum > range1->minimum;
 }
 
 static int
@@ -887,8 +893,17 @@ hsvColorsOverlap (const HSVColorEntry *color1, const HSVColorEntry *color2) {
 
 static int
 hsvRangeContains (const HSVComponentRange *outer, const HSVComponentRange *inner, int isCyclic) {
-  return (outer->minimum <= inner->minimum) &&
-         (outer->maximum >= inner->maximum);
+  if (isCyclic) {
+    if (hsvCyclicRange(outer)) {
+      if (!hsvCyclicRange(inner)) {
+        return (inner->minimum >= outer->minimum) || (inner->maximum <= outer->maximum);
+      }
+    } else if (hsvCyclicRange(inner)) {
+      return 0;
+    }
+  }
+
+  return (inner->minimum >= outer->minimum) && (inner->maximum <= outer->maximum);
 }
 
 static int
@@ -902,9 +917,7 @@ static void showColorProblem (const HSVColorEntry *color, const char *format, ..
 
 static void
 showColorProblem (const HSVColorEntry *color, const char *format, ...) {
-  putString(blockIndent);
-  putColorName(color);
-  putString(": ");
+  putf("%s%s: ", blockIndent, color->name);
 
   {
     va_list args;
@@ -918,11 +931,7 @@ showColorProblem (const HSVColorEntry *color, const char *format, ...) {
 
 static void
 showColorConflict (const HSVColorEntry *color1, const HSVColorEntry *color2, const char *relation) {
-  putString(blockIndent);
-  putColorName(color1);
-  putf(" %s ", relation);
-  putColorName(color2);
-  putNewline();
+  putf("%s%s %s %s\n", blockIndent, color1->name, relation, color2->name);
 }
 
 static int
@@ -1005,10 +1014,8 @@ cmdProblems (CommandArguments *arguments) {
         pairCount += 1;
 
         if (strcasecmp(color1->name, color2->name) == 0) {
-          if (color1->instance == color2->instance) {
-            problemCount += 1;
-            showColorProblem(color1, "duplicate definition");
-          }
+          problemCount += 1;
+          showColorProblem(color1, "duplicate definition");
         }
 
         if (hsvColorContains(color1, color2)) {

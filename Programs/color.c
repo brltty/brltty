@@ -571,8 +571,13 @@ hsvBrightnessModifier (float brightness) {
 }
 
 int
+hsvCyclicRange (const HSVComponentRange *range) {
+  return range->minimum >= range->maximum;
+}
+
+int
 hsvWithinRange (const HSVComponentRange *range, float value, int isCyclic) {
-  if (isCyclic && (range->minimum >= range->maximum)) {
+  if (isCyclic && hsvCyclicRange(range)) {
     if (value >= range->minimum) return 1;
   } else if (value < range->minimum) {
     return 0;
@@ -591,15 +596,7 @@ hsvTestColor (const HSVColorEntry *color, HSVColor hsv) {
 
 const HSVColorEntry hsvColorTable[] = {
   { .name = "Crimson",
-    .instance = 1,
-    .hue = {.minimum=350, .maximum=360},
-    .sat = {.minimum=0.60, .maximum=0.80},
-    .val = {.minimum=0.60, .maximum=0.75},
-  },
-
-  { .name = "Crimson",
-    .instance = 2,
-    .hue = {.minimum=0, .maximum=6},
+    .hue = {.minimum=350, .maximum=6},
     .sat = {.minimum=0.60, .maximum=0.80},
     .val = {.minimum=0.60, .maximum=0.75},
   },
@@ -911,15 +908,7 @@ const HSVColorEntry hsvColorTable[] = {
   },
 
   { .name = "Rose-Gray",
-    .instance = 1,
-    .hue = {.minimum=330, .maximum=360},
-    .sat = {.minimum=0.10, .maximum=0.25},
-    .val = {.minimum=0.50, .maximum=0.75},
-  },
-
-  { .name = "Rose-Gray",
-    .instance = 2,
-    .hue = {.minimum=0, .maximum=10},
+    .hue = {.minimum=330, .maximum=10},
     .sat = {.minimum=0.10, .maximum=0.25},
     .val = {.minimum=0.50, .maximum=0.75},
   },

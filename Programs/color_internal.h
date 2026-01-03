@@ -33,9 +33,9 @@ typedef struct {
   HSVComponentRange hue;
   HSVComponentRange sat;
   HSVComponentRange val;
-  unsigned char instance;
 } HSVColorEntry;
 
+extern int hsvCyclicRange (const HSVComponentRange *range);
 extern int hsvWithinRange (const HSVComponentRange *range, float value, int isCyclic);
 extern int hsvTestColor (const HSVColorEntry *color, HSVColor hsv);
 
