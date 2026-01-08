@@ -30,7 +30,8 @@
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
-static iconv_t conversionDescriptor = NULL;
+#define ICONV_NULL ((iconv_t)-1)
+static iconv_t conversionDescriptor = ICONV_NULL;
 #endif /* HAVE_ICONV_H */
 
 #include "log.h"
@@ -211,7 +212,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     logSystemError("iconv_open");
   }
 
-  conversionDescriptor = NULL;
+  conversionDescriptor = ICONV_NULL;
 #endif /* HAVE_ICONV_H */
 
   return 0;
@@ -240,7 +241,7 @@ brl_destruct (BrailleDisplay *brl) {
 #ifdef HAVE_ICONV_H
   if (conversionDescriptor) {
     iconv_close(conversionDescriptor);
-    conversionDescriptor = NULL;
+    conversionDescriptor = ICONV_NULL;
   }
 #endif /* HAVE_ICONV_H */
 }
