@@ -173,10 +173,11 @@ tmux UI elements are not accessible through this driver:
 - **Command prompt**: When entering commands with `:` (Ctrl-b :), the prompt
   is not visible
 - **Copy mode UI**: While in copy-mode, selection indicators and position
-  info are not shown
+  info are not shown and scrollback buffer can not be used
 - **Pane borders**: Visual separators between panes are not displayed
 - **Window list**: Cannot navigate or view the list of windows
 - **Session information**: Cannot view or switch between sessions
+- **Overlays**: choose-tree and display-menu do not work
 
 ### Workaround: Nested Tmux
 
