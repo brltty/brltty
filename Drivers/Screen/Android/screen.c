@@ -40,6 +40,13 @@ static jint locationLeft, locationTop, locationRight, locationBottom;
 static jint selectionLeft, selectionTop, selectionRight, selectionBottom;
 
 static const char *problemText;
+static ScreenCharacter defaultCharacter;
+static RGBColor selectColor;
+
+#define CHAR_FLAG_BOLD           UINT64_C(0X10000)
+#define CHAR_FLAG_ITALIC         UINT64_C(0X20000)
+#define CHAR_FLAG_UNDERLINE      UINT64_C(0X40000)
+#define CHAR_FLAG_STRIKE_THROUGH UINT64_C(0X80000)
 
 static int
 findScreenDriverClass (void) {
@@ -112,6 +119,10 @@ static ReportEntry reportEntries[] = {
 
 static int
 construct_AndroidScreen (void) {
+  defaultCharacter = defaultScreenCharacter;
+  toRGBScreenColor(&defaultCharacter.color);
+  selectColor.r = selectColor.g = selectColor.b = UINT8_MAX;
+
   for (ReportEntry *rpt=reportEntries; rpt->character; rpt+=1) {
     rpt->listener = registerReportListener(
       rpt->identifier, androidScreenDriverReportListener, &rpt->character
@@ -232,7 +243,7 @@ describe_AndroidScreen (ScreenDescription *description) {
 }
 
 static int
-getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jcharArray jRowText, jint rowIndex, jint columnIndex, jint columnCount) {
+getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jlongArray jRowText, jint rowIndex, jint columnIndex, jint columnCount) {
   jint rowLength = (*env)->GetArrayLength(env, jRowText);
   if (clearJavaException(env, 1)) return 0;
   int toColumn[rowLength + 1];
@@ -243,15 +254,16 @@ getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jcharArray jRowText,
     int currentColumn = 0;
 
     if (rowLength > 0) {
-      jchar cRowText[rowLength];
-      (*env)->GetCharArrayRegion(env, jRowText, 0, rowLength, cRowText);
+      jlong cRowText[rowLength];
+      (*env)->GetLongArrayRegion(env, jRowText, 0, rowLength, cRowText);
       if (clearJavaException(env, 1)) return 0;
 
       for (int current=0; current<rowLength; current+=1) {
         if (sc == scEnd) break;
 
         toColumn[current] = currentColumn;
-        wchar_t text = cRowText[current];
+        uint64_t element = cRowText[current];
+        wchar_t text = element & UINT16_MAX;
 
         if (isSurrogateCodepoint(text)) {
           wchar_t high = text;
@@ -259,7 +271,7 @@ getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jcharArray jRowText,
           int next = current + 1;
 
           if (next < rowLength) {
-            wchar_t low = cRowText[next];
+            wchar_t low = cRowText[next] & UINT16_MAX;
             wchar_t codepoint = makeSupplementaryCodepoint(high, low);
 
             if (codepoint) {
@@ -271,8 +283,14 @@ getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jcharArray jRowText,
         }
 
         if (currentColumn >= columnIndex) {
+          *sc = defaultCharacter;
           sc->text = text;
-          sc->color.vgaAttributes = VGA_COLOR_DEFAULT;
+
+          if (element & CHAR_FLAG_BOLD) sc->color.isBold = 1;
+          if (element & CHAR_FLAG_ITALIC) sc->color.isItalic = 1;
+          if (element & CHAR_FLAG_UNDERLINE) sc->color.hasUnderline = 1;
+          if (element & CHAR_FLAG_STRIKE_THROUGH) sc->color.hasStrikeThrough = 1;
+
           sc += 1;
         }
 
@@ -310,7 +328,7 @@ getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jcharArray jRowText,
       const ScreenCharacter *scEnd = characters + to;
 
       while (sc < scEnd) {
-        sc->color.vgaAttributes = VGA_COLOR_FG_BLACK | VGA_COLOR_BG_LIGHT_GRAY;
+        sc->color.foreground = selectColor;
         sc += 1;
       }
     }
@@ -325,10 +343,10 @@ readRowCharacters (ScreenCharacter *characters, jint rowIndex, jint columnIndex,
     static jmethodID method = 0;
 
     if (findJavaStaticMethod(env, &method, screenDriverClass, "getRowText",
-                             JAVA_SIG_METHOD(JAVA_SIG_ARRAY(JAVA_SIG_CHAR),
+                             JAVA_SIG_METHOD(JAVA_SIG_ARRAY(JAVA_SIG_LONG),
                                              JAVA_SIG_INT // row
                                             ))) {
-      jcharArray jRowText = (*env)->CallStaticObjectMethod(
+      jlongArray jRowText = (*env)->CallStaticObjectMethod(
         env, screenDriverClass, method, rowIndex
       );
 
