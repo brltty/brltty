@@ -559,11 +559,16 @@ public abstract class ScreenDriver {
     return 0;
   }
 
-  public static char[] getRowText (int row) {
+  public static final long CHAR_BOLD           = 0X1_0000L;
+  public static final long CHAR_ITALIC         = 0X2_0000L;
+  public static final long CHAR_UNDERLINE      = 0X4_0000L;
+  public static final long CHAR_STRIKE_THROUGH = 0X8_0000L;
+
+  public static long[] getRowText (int row) {
     RenderedScreen screen = getCurrentRenderedScreen();
     CharSequence text = (row < screen.getScreenHeight())? screen.getScreenRow(row): "";
     int length = text.length();
-    char[] characters = new char[length];
+    long[] characters = new long[length];
 
     for (int i=0; i<length; i+=1) {
       characters[i] = text.charAt(i);
@@ -575,6 +580,38 @@ public abstract class ScreenDriver {
 
       if (spans != null) {
         for (Object span : spans) {
+          long flags = 0;
+
+          if (span instanceof StyleSpan) {
+            StyleSpan style = (StyleSpan)span;
+
+            switch (style.getStyle()) {
+              case Typeface.BOLD:
+                flags = CHAR_BOLD;
+                break;
+
+              case Typeface.ITALIC:
+                flags = CHAR_ITALIC;
+                break;
+
+              case Typeface.BOLD_ITALIC:
+                flags = CHAR_BOLD | CHAR_ITALIC;
+                break;
+            }
+          } else if (span instanceof UnderlineSpan) {
+            flags = CHAR_UNDERLINE;
+          } else if (span instanceof StrikethroughSpan) {
+            flags = CHAR_STRIKE_THROUGH;
+          }
+
+          if (flags != 0) {
+            int start = spannedText.getSpanStart(span);
+            int end = spannedText.getSpanEnd(span);
+
+            for (int i=start; i<end; i+=1) {
+              characters[i] |= flags;
+            }
+          }
         }
       }
     }
