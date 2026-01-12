@@ -1806,7 +1806,7 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, const i
 	    }
 	  }
 
-	  if (chosen >= 0) sd_session_get_vt(sessions[i], &vtnr);
+	  if (chosen >= 0) sd_session_get_vt(sessions[chosen], &vtnr);
 
 	  for (i = 0; i < nsessions; i++) free(sessions[i]);
 	  free(sessions);
