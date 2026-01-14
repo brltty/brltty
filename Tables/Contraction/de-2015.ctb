@@ -68,6 +68,9 @@ always barrier 12-356-1235-24-12456 shouldn't use the ie-contraction
 always bankier 12-235-13-24-12456 shouldn't use the ie-contraction
 midendword iell 24-15-12345 shouldn't use the ie-contraction
 always indien 35-145-24-14 shouldn't use the ie-contraction
+always indienststell 35-145-346-1345-23456-2-13456
+always magazindienst 134-1-1245-1-1356-35-145-346-1345-23456
+always termindienst 2345-12456-134-35-145-346-1345-23456
 always karrier 13-356-1235-24-12456
 always medien 134-15-145-24-14 shouldn't use the ie-contraction
 always prämie 1234-1235-345-134-24-15
@@ -122,6 +125,7 @@ before t always einstrumen 15-35-23456-1235-136-134-14
 before t midword teinstrumen 236-35-23456-1235-136-134-14
 always eintoleranz 15-35-2345-135-123-12456-235-1356
 always nukleinsäur 1345-136-13-123-15-35-234-34-1235
+always dateinam 145-1-2345-146-1345-1-134
 
 always el 13456
 begmidword elineal 15-123-35-15-25
@@ -230,6 +234,8 @@ begword lungen 123-256-1245-14 shouldn't use the ge-contraction
 begword magen 134-1-1245-14 shouldn't use the ge-contraction
 
 before konsonant always ten 2345-14
+midendword tenergie 2345-14-12456-1245-346
+endword tenergien 2345-14-12456-1245-24-14
 always angestellten 235-12346-2-13456-2345-14
 always architekten 356-1456-24-236-13-2345-14
 sufword arten 356-2345-14
@@ -237,27 +243,51 @@ always astronauten 1-23456-1235-135-1345-16-2345-14
 always blüten 12-123-1256-2345-14
 always breiten 12-1235-146-2345-14
 always dienstboten 145-346-1345-23456-12-135-2345-14
+begmidword dirigenten 145-24-1235-45-14-2345-14
 always dokumenten 145-135-13-136-134-14-2345-14
+begmidword dozenten 145-135-1356-14-2345-14
 always elefant 13456-15-124-235-2345
 always geburten 12346-12-136-1235-2345-14
+always geflüchteten 12346-124-123-1256-1456-236-2345-14
+begmidword geschichten 12346-156-3456-2345-14
+always hintenüber 125-35-2345-14-2-1256
 always insekten 35-234-15-13-2345-14
 always instrumenten 35-23456-1235-136-134-14-2345-14
+begmidword interessenten 2-35-14-2345-14
 always kanten 13-235-2345-14
+begmidword klienten 13-123-24-14-2345-14
 always kometen 13-135-134-15-2345-14
+always komponenten 13-135-134-1234-135-1345-14-2345-14
+always konsumenten 13-135-1345-234-136-134-14-2345-14
 always konten 13-135-1345-2345-14
+begmidword koordinaten 13-135-26-145-35-1-2345-14
+begmidword mandanten 134-235-145-235-2345-14
 always medikamenten 134-15-145-24-13-1-134-14-2345-14
 always piloten 1234-24-123-135-2345-14
 always piraten 1234-24-1235-1-2345-14
 always piraterie 1234-24-1235-1-2345-12456-346
+always planeten 1234-123-235-15-2345-14
+begmidword präsidenten 1234-1235-345-234-24-145-14-2345-14
 always quanten 6-12345-136-235-2345-14
+begmidword quoten 6-12345-136-135-2345-14
+begmidword regelrenten 1235-15-1245-13456-1235-14-2345-14
 always satelliten 234-1-236-12345-24-2345-14
+begmidword saiten 234-1-24-2345-14
+begword seiten 234-146-2345-14
+always breitseiten 12-1235-146-2345-234-146-2345-14
+always musterseiten 134-136-23456-12456-234-146-2345-14
+begmidword rückseiten 123-46-234-146-2345-14
+always unterseiten 2-256-234-146-2345-14
+begmidword spalten 234-1234-25-2345-14
 
 before konsonant always ter 2345-12456
+always geschlechter 12346-156-123-15-1456-2345-12456
 always güter 1245-1256-2345-12456 should use the er-contraction
 always güteregel 1245-1256-236-1235-15-1245-13456
 always gütericht 1245-1256-236-2-3456
 begmidword veteran 1236-15-2345-12456-235
 prfword veteran 1236-15-2345-12456-1-1345
+always veterinär 1236-15-2345-12456-35-345-1235
 
 midendword ich 3456
 always clavichord 6-14-123-1-1236-24-1456-26-145
@@ -568,6 +598,7 @@ always euthanasie 126-2345-125-235-1-234-346
 always antasie 235-2345-1-234-346
 endword antasien 235-2345-1-234-24-14
 midendword ien 24-14 shouldn't use the ie-contraction
+always energieniveau 14-12456-1245-346-1345-24-1236-15-16
 always erschien 12456-156-346-1345
 prfword industrien 35-145-136-23456-1235-24-14
 before n always industrie 35-145-136-23456-1235-346 industrienation shouldn't use the en-contraction
@@ -774,6 +805,8 @@ always drungen 145-1235-256-1245-14
 sufword dung 145-256-1245
 always geklungen 12346-13-123-256-1245-14
 always gelungen 12346-123-256-1245-14
+sufword versiegelungen 36-234-346-1245-13456-136-14
+always versiegelungen 1236-12456-234-346-1245-13456-136-14
 always geschlungen 12346-156-123-256-1245-14
 always riegelung 1235-346-1245-13456-136
 always gesungen 12346-234-256-1245-14
@@ -788,6 +821,22 @@ always ungeheuer 256-12346-125-126-12456
 always schwung 156-2456-256-1245 shouldn't use the ung-contraction
 always sprung 234-1234-1235-256-1245 shouldn't use the ung-contraction
 always ssprung 234-234-1234-1235-256-1245
+prfword zunge 1356-256-12346 shouldn't use the ung-contraction
+prfword zungen 1356-256-1245-14 shouldn't use the ung-contraction
+before g always gaumenzun 1245-16-134-14-1356-256
+before g always gletscherzun 1245-123-15-2345-156-12456-1356-256
+before g always griffzun 1245-1235-24-124-124-1356-256
+before g always hinterzun 125-35-2345-12456-1356-256
+before g always hirschzun 125-24-1235-156-1356-256
+before g always katzenzun 13-1-2345-1356-14-1356-256
+before g always langzun 123-1245-1356-256
+before g always metallzun 134-15-2345-1-12345-1356-256
+before g always mittelzun 134-2345-1356-256
+before g always seezun 234-15-15-1356-256
+before g always stimmzun 23456-24-1346-1356-256
+before g always unterzun 2-256-1356-256
+before g always vorderzun 2-26-145-12456-1356-256
+before g always weichenzun 2456-146-1456-14-1356-256
 
 
 endword wärts 2456
@@ -927,6 +976,7 @@ prfword laufst 123-16-124-23456
 prfword lauft 123-16-124-2345
 always lauffläch 123-16-124-124-123-345-1456
 always laufkäfer 123-16-124-13-345-124-12456
+always laufricht 123-16-124-2-3456
 always laufsohl 123-16-124-234-135-125-123
 always laufzahl 123-16-124-1356-123
 always laufzeit 123-16-124-1356-2345
@@ -967,7 +1017,36 @@ prfword taufe 2345-16-124-15
 prfword taufen 2345-16-124-14
 before t always auforma 16-124-26-134-1
 always aufrequenz 16-124-1235-15-6-12345-136-14-1356
-
+before f always ackerbau 1-46-12456-12-16
+before f always altbau 25-2345-12-16
+before f always anbau 235-12-16
+before f always aufbau 2-16-12-16
+before f always ausbau 16-234-12-16
+before f always bergbau 12-12456-1245-12-16
+before f always deichbau 145-146-1456-12-16
+before f always eigenbau 146-1245-14-12-16
+before f always einbau 1246-12-16
+before f always gartenbau 1245-356-2345-14-12-16
+before f always gesamtbau 12346-234-1-134-2345-12-16
+before f always hauptbau 125-1234-12-16
+before f always kristallbau 13-1235-24-23456-1-12345-12-16
+before f always landbau 123-235-145-12-16
+before f always maschinenbau 134-156-14-12-16
+before f always mdellbau 134-135-145-15-12345-12-16
+before f always neubau 1345-126-12-16
+before f always orgelbau 26-1245-13456-12-16
+before f always rohbau 1235-135-125-12-16
+before f always satzbau 234-1356-12-16
+before f always schulbau 156-136-123-12-16
+before f always selbstbau 234-23456-12-16
+before f always sonderbau 234-135-1345-145-12456-12-16
+before f always straßenbau 23456-1235-1-6-2346-14-12-16
+before f always städtebau 23456-345-145-236-12-16
+before f always tiefbau 2345-346-124-12-16
+before f always umbau 136-134-12-16
+before f always weinbau 2456-1246-12-16
+before f always wohnbau 2456-135-125-1345-12-16
+before f always wohnungsbau 2456-135-125-1345-136-234-12-16
 
 always abfragerate 1-12-124-1235-1-12346-1235-1-236 shouldn't use the er-contraction
 always abfrageraten 1-12-124-1235-1-12346-1235-1-2345-14
@@ -1029,6 +1108,7 @@ word zudem 2-1356-2-12356
 always demask = demaskiert shouldn't use the dem-contraction
 always dembleme 145-12356-12-123-12356-15
 always dempfänger 145-12356-1234-124-345-1345-1245-12456
+always dempfindlich 145-12356-1234-124-35-145-456
 always demilit = shouldn't use the dem-contraction
 always demonstr 145-12356-135-1345-23456-1235 shouldn't use the dem-contraction
 sufword demo 145-12356-135 shouldn't use the dem-contraction
@@ -1284,17 +1364,37 @@ always mund 134-256-145 shouldn't use the und-contraction
 class tz tz
 before tz always redundan 1235-15-145-256-145-235
 always rundbau 1235-256-145-12-16
+always rundenspiel 1235-256-145-14-2-346
 always rundfahrt 1235-256-145-2-1235-2345
 always rundfunk 1235-256-145-124-256-13 shouldn't use the und-contraction
 always rundgang 1235-256-145-1245-235-1245
 always rundgäng 1235-256-145-1245-345-1345-1245
+prfword rundgänge 1235-256-145-1245-345-1345-12346
 always rundholz 1235-256-145-125-135-123-1356
+always rundkurs 1235-256-145-13-136-1235-234
 always rundschau 1235-256-145-156-16
+always rundschleif 1235-256-145-156-123-146-124
+always rundschreib 1235-256-145-156-12
 always rundstab 1235-256-145-23456-1-12
 always rundstäb 1235-256-145-23456-345-12
+always endrund 14-145-1235-256-145
+always erstrund 12456-23456-1235-256-145
+always finalrund 124-35-25-1235-256-145
+always funkrund 124-256-13-1235-256-145
+always halbrund 125-25-12-1235-256-145
+always hauptrund 125-1234-1235-256-145
+always hinrund 125-35-1235-256-145
 always kreisrund 13-1235-146-234-1235-256-145
+always messerundgang 134-15-2346-15-1235-256-145-1245-235-1245
+before g always messerundgän 134-15-2346-15-1235-256-145-1245-345-1345
+always rückrund 1235-46-1235-256-145
 always schlund 156-123-256-145
+always schlussrund 156-123-136-2346-1235-256-145
 sufword schrund 156-1235-256-145
+always überrund 2-1256-1235-256-145
+always vorrund 2-26-1235-256-145
+always zweitrund 1356-2456-146-2345-1235-256-145
+always zwischenrund 1356-2456-1235-256-145
 
 always stundung 23456-256-145-136
 always sstundung 234-23456-256-145-136
@@ -1716,8 +1816,16 @@ word ei 6-146
 always eigen 146-1245-14 Eigennutz shouldn't use the ge-contraction
 always eigenossen 146-12346-1345-135-2346-14
 always einander 2-1246
+
+always einanderbrecht 2-1246-12-1235-15-1456-2345
+always einanderbricht 2-1246-12-1235-3456-2345
 always einanderge 2-1246-12346
+always einandergebunden 2-1246-12346-12-256-145-14
+always einandergekleb 2-1246-12346-13-123-15-12
+always einandergelauf 2-1246-12346-123-16-124
 always einandergelegen 2-1246-1245-1245
+always einanderkleb 2-1246-13-123-15-12
+always einanderzugleiten 2-1246-2-1356-1245-123-146-2345-14
 word en 15-1345 en passant
 always enig 14-45
 always erkenn 12456-13-14-1345
@@ -1959,7 +2067,14 @@ contraction lg
 before g sufword schlan 156-123-235 shouldn't use the lang-contraction
 prfword schlange 156-123-235-12346
 prfword schlangen 156-123-235-1245-14
+always schlangenartig 156-123-235-1245-14-356-2345-45
 always schläng 156-123-345-1345-1245
+before g always giftschlan 1245-24-124-2345-156-123-235
+before g always kühlschlan 13-1256-125-123-156-123-235
+before g always luftschlan 123-136-124-2345-156-123-235
+before g always meeresschlan 134-15-15-1235-123456-156-123-235
+before g always riesenschlan 1235-346-234-14-156-123-235
+before g always seeschlan 234-15-15-156-123-235
 
 before g always warteschlan 2456-356-236-156-123-235
 always langelegenheit 123-235-1245-1245-125
