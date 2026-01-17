@@ -216,10 +216,6 @@ static const IdentityEntry assumePanIdentity = {
   .keyTable = &KEY_TABLE_DEFINITION(pan)
 };
 
-static const IdentityEntry assumeScrollIdentity = {
-  .keyTable = &KEY_TABLE_DEFINITION(scroll)
-};
-
 static const IdentityEntry panIdentity = {
   .description = "Braille Sense PLUS (pan)",
   .id1 = 0X42, .id2 = 0X53,
@@ -260,7 +256,7 @@ typedef struct {
   const char *modelName;
   const char *resourceNamePrefix;
   const KeyTableDefinition *keyTable;
-  const KeyTableDefinition * (*testIdentities) (BrailleDisplay *brl);
+  const KeyTableDefinition * (*probeIdentity) (BrailleDisplay *brl);
   int (*getDefaultCellCount) (BrailleDisplay *brl, unsigned int *count);
   const InputOutputOperations *io;
 } ProtocolEntry;
@@ -351,7 +347,7 @@ writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
 }
 
 static int
-testIdentity (BrailleDisplay *brl, unsigned char id1, unsigned char id2) {
+probeIdentity (BrailleDisplay *brl, unsigned char id1, unsigned char id2) {
   const unsigned char sequence[] = {0X1C, id1, id2, 0X1F};
   const size_t length = sizeof(sequence);
 
@@ -371,7 +367,7 @@ testIdentity (BrailleDisplay *brl, unsigned char id1, unsigned char id2) {
 }
 
 static const KeyTableDefinition *
-testIdentities (BrailleDisplay *brl, const IdentityEntry *const *identities) {
+probeIdentities (BrailleDisplay *brl, const IdentityEntry *const *identities) {
   while (*identities) {
     const IdentityEntry *identity = *identities;
     const char *name = identity->keyTable->bindings;
@@ -379,9 +375,9 @@ testIdentities (BrailleDisplay *brl, const IdentityEntry *const *identities) {
     if (!identity->id1 && !identity->id2) {
       logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "assuming identity: %s", name);
     } else {
-      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "testing identity: %s", name);
+      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "probing identity: %s", name);
 
-      if (!testIdentity(brl, identity->id1, identity->id2)) {
+      if (!probeIdentity(brl, identity->id1, identity->id2)) {
         identities += 1;
         continue;
       }
@@ -394,7 +390,7 @@ testIdentities (BrailleDisplay *brl, const IdentityEntry *const *identities) {
 }
 
 static const KeyTableDefinition *
-testIdentities_BrailleSense (BrailleDisplay *brl) {
+probeIdentity_BrailleSense (BrailleDisplay *brl) {
   static const IdentityEntry *const identities[] = {
     &qwerty2Identity,
     &qwerty1Identity,
@@ -404,27 +400,28 @@ testIdentities_BrailleSense (BrailleDisplay *brl) {
     NULL
   };
 
-  return testIdentities(brl, identities);
+  return probeIdentities(brl, identities);
 }
 
 static const KeyTableDefinition *
-testIdentities_BrailleSense6 (BrailleDisplay *brl) {
+probeIdentity_BrailleSense6 (BrailleDisplay *brl) {
   static const IdentityEntry *const identities[] = {
-    &assumeScrollIdentity,
+    &scrollIdentity,
+    &assumePanIdentity,
     NULL
   };
 
-  return testIdentities(brl, identities);
+  return probeIdentities(brl, identities);
 }
 
 static const KeyTableDefinition *
-testIdentities_BrailleEdge (BrailleDisplay *brl) {
+probeIdentity_BrailleEdge (BrailleDisplay *brl) {
   static const IdentityEntry *const identities[] = {
     &edgeIdentity,
     NULL
   };
 
-  return testIdentities(brl, identities);
+  return probeIdentities(brl, identities);
 }
 
 static int
@@ -775,16 +772,16 @@ getDefaultCellCount_BrailleSense (BrailleDisplay *brl, unsigned int *count) {
 static const ProtocolEntry protocol_BrailleSense = {
   .modelName = "Braille Sense",
   .keyTable = &KEY_TABLE_DEFINITION(pan),
-  .testIdentities = testIdentities_BrailleSense,
+  .probeIdentity = probeIdentity_BrailleSense,
   .getDefaultCellCount = getDefaultCellCount_BrailleSense,
   .io = &serialOperations
 };
 
 static const ProtocolEntry protocol_BrailleSense6 = {
   .modelName = "BrailleSense 6",
-  .resourceNamePrefix = "H632B",
+  .resourceNamePrefix = "BrailleSense6",
   .keyTable = &KEY_TABLE_DEFINITION(scroll),
-  .testIdentities = testIdentities_BrailleSense6,
+  .probeIdentity = probeIdentity_BrailleSense6,
   .getDefaultCellCount = getDefaultCellCount_BrailleSense,
   .io = &serialOperations
 };
@@ -813,7 +810,7 @@ static const ProtocolEntry protocol_BrailleEdge = {
   .modelName = "Braille Edge",
   .resourceNamePrefix = "BrailleEDGE",
   .keyTable = &KEY_TABLE_DEFINITION(edge),
-  .testIdentities = testIdentities_BrailleEdge,
+  .probeIdentity = probeIdentity_BrailleEdge,
   .getDefaultCellCount = getDefaultCellCount_BrailleEdge,
   .io = &serialOperations
 };
@@ -825,7 +822,7 @@ getDefaultCellCount_eMotion (BrailleDisplay *brl, unsigned int *count) {
   return 1;
 }
 
-static const ProtocolEntry protocol_eMotion = {
+static const ProtocolEntry protocol_eMotionLegacy = {
   .modelName = "eMotion (legacy)",
   .keyTable = &KEY_TABLE_DEFINITION(emotion),
   .getDefaultCellCount = getDefaultCellCount_eMotion,
@@ -967,7 +964,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=2, .outputEndpoint=2,
       .serial = &serialParameters,
       .disableAutosuspend=1,
-      .data=&protocol_eMotion
+      .data=&protocol_eMotionLegacy
     },
 
     { /* eMotion (HID) */
@@ -1002,6 +999,7 @@ getProtocol (BrailleDisplay *brl) {
   char *name = gioGetResourceName(brl->gioEndpoint);
 
   if (name) {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "resource name: %s", name);
     const ProtocolEntry *const *protocolAddress = protocolTable;
 
     while (*protocolAddress) {
@@ -1018,6 +1016,8 @@ getProtocol (BrailleDisplay *brl) {
     }
 
     free(name);
+  } else {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "no resource name");
   }
 
   return &protocol_BrailleSense;
@@ -1035,19 +1035,18 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       logMessage(LOG_INFO, "detected: %s", brl->data->protocol->modelName);
 
+      // Identity probing must be the very first interaction with the device.
+      const KeyTableDefinition *ktd =
+        brl->data->protocol->probeIdentity?
+        brl->data->protocol->probeIdentity(brl):
+        NULL;
+
       if (getCellCount(brl, &brl->textColumns)) {
         brl->textRows = 1;
 
-        {
-          const KeyTableDefinition *ktd =
-            brl->data->protocol->testIdentities?
-            brl->data->protocol->testIdentities(brl):
-            NULL;
-
-          setKeyTable(brl, ktd);
-        }
-
+        setKeyTable(brl, ktd);
         makeOutputTable(dotsTable_ISO11548_1);
+
         if (clearCells(brl)) return 1;
       }
 
