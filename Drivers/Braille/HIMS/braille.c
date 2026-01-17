@@ -1002,6 +1002,7 @@ getProtocol (BrailleDisplay *brl) {
   char *name = gioGetResourceName(brl->gioEndpoint);
 
   if (name) {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "resource name: %s", name);
     const ProtocolEntry *const *protocolAddress = protocolTable;
 
     while (*protocolAddress) {
@@ -1018,6 +1019,8 @@ getProtocol (BrailleDisplay *brl) {
     }
 
     free(name);
+  } else {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "no resource name");
   }
 
   return &protocol_BrailleSense;
@@ -1035,19 +1038,18 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       logMessage(LOG_INFO, "detected: %s", brl->data->protocol->modelName);
 
+      // Determining the identity must be the very first interaction with the device.
+      const KeyTableDefinition *ktd =
+        brl->data->protocol->testIdentities?
+        brl->data->protocol->testIdentities(brl):
+        NULL;
+
       if (getCellCount(brl, &brl->textColumns)) {
         brl->textRows = 1;
 
-        {
-          const KeyTableDefinition *ktd =
-            brl->data->protocol->testIdentities?
-            brl->data->protocol->testIdentities(brl):
-            NULL;
-
-          setKeyTable(brl, ktd);
-        }
-
+        setKeyTable(brl, ktd);
         makeOutputTable(dotsTable_ISO11548_1);
+
         if (clearCells(brl)) return 1;
       }
 
