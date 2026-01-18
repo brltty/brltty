@@ -347,7 +347,7 @@ writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
 }
 
 static int
-testIdentity (BrailleDisplay *brl, unsigned char id1, unsigned char id2) {
+probeIdentity (BrailleDisplay *brl, unsigned char id1, unsigned char id2) {
   const unsigned char sequence[] = {0X1C, id1, id2, 0X1F};
   const size_t length = sizeof(sequence);
 
@@ -367,7 +367,7 @@ testIdentity (BrailleDisplay *brl, unsigned char id1, unsigned char id2) {
 }
 
 static const KeyTableDefinition *
-probeIdentity (BrailleDisplay *brl, const IdentityEntry *const *identities) {
+probeIdentities (BrailleDisplay *brl, const IdentityEntry *const *identities) {
   while (*identities) {
     const IdentityEntry *identity = *identities;
     const char *name = identity->keyTable->bindings;
@@ -375,9 +375,9 @@ probeIdentity (BrailleDisplay *brl, const IdentityEntry *const *identities) {
     if (!identity->id1 && !identity->id2) {
       logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "assuming identity: %s", name);
     } else {
-      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "testing identity: %s", name);
+      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "probing identity: %s", name);
 
-      if (!testIdentity(brl, identity->id1, identity->id2)) {
+      if (!probeIdentity(brl, identity->id1, identity->id2)) {
         identities += 1;
         continue;
       }
@@ -400,7 +400,7 @@ probeIdentity_BrailleSense (BrailleDisplay *brl) {
     NULL
   };
 
-  return probeIdentity(brl, identities);
+  return probeIdentities(brl, identities);
 }
 
 static const KeyTableDefinition *
@@ -411,7 +411,7 @@ probeIdentity_BrailleSense6 (BrailleDisplay *brl) {
     NULL
   };
 
-  return probeIdentity(brl, identities);
+  return probeIdentities(brl, identities);
 }
 
 static const KeyTableDefinition *
@@ -421,7 +421,7 @@ probeIdentity_BrailleEdge (BrailleDisplay *brl) {
     NULL
   };
 
-  return probeIdentity(brl, identities);
+  return probeIdentities(brl, identities);
 }
 
 static int
