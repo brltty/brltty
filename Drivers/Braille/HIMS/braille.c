@@ -822,7 +822,7 @@ getDefaultCellCount_eMotion (BrailleDisplay *brl, unsigned int *count) {
   return 1;
 }
 
-static const ProtocolEntry protocol_eMotion = {
+static const ProtocolEntry protocol_eMotionLegacy = {
   .modelName = "eMotion (legacy)",
   .keyTable = &KEY_TABLE_DEFINITION(emotion),
   .getDefaultCellCount = getDefaultCellCount_eMotion,
@@ -964,7 +964,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=2, .outputEndpoint=2,
       .serial = &serialParameters,
       .disableAutosuspend=1,
-      .data=&protocol_eMotion
+      .data=&protocol_eMotionLegacy
     },
 
     { /* eMotion (HID) */
@@ -1035,7 +1035,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       logMessage(LOG_INFO, "detected: %s", brl->data->protocol->modelName);
 
-      // Probing its identity must be the very first interaction with the device.
+      // Identity probing must be the very first interaction with the device.
       const KeyTableDefinition *ktd =
         brl->data->protocol->probeIdentity?
         brl->data->protocol->probeIdentity(brl):
