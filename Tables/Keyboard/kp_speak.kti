@@ -16,28 +16,35 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-bind \{kpSpeak}+!\{kpTwo} SPEAK_CURR_CHAR
-bind \{kpSpeak}+\{kpAlt}+!\{kpTwo} DESC_CURR_CHAR
 bind \{kpSpeak}+!\{kpOne} SPEAK_PREV_CHAR
-bind \{kpSpeak}+\{kpAlt}+!\{kpOne} SPEAK_FRST_CHAR
+bind \{kpSpeak}+!\{kpTwo} SPEAK_CURR_CHAR
 bind \{kpSpeak}+!\{kpThree} SPEAK_NEXT_CHAR
+
+bind \{kpSpeak}+\{kpAlt}+!\{kpOne} SPEAK_FRST_CHAR
+bind \{kpSpeak}+\{kpAlt}+!\{kpTwo} DESC_CURR_CHAR
 bind \{kpSpeak}+\{kpAlt}+!\{kpThree} SPEAK_LAST_CHAR
 
-bind \{kpSpeak}+!\{kpFive} SPEAK_CURR_WORD
-bind \{kpSpeak}+\{kpAlt}+!\{kpFive} SPELL_CURR_WORD
-bind \{kpSpeak}+!\{kpFour} SPEAK_PREV_WORD
-bind \{kpSpeak}+!\{kpSix} SPEAK_NEXT_WORD
+bind \{kpSpeak}+!\{kpFour} SPEAK_PREV_PWRD
+bind \{kpSpeak}+!\{kpFive} SPEAK_CURR_PWRD
+bind \{kpSpeak}+!\{kpSix} SPEAK_NEXT_PWRD
 
-bind \{kpSpeak}+!\{kpEight} SPEAK_CURR_LINE
+bind \{kpSpeak}+\{kpAlt}+!\{kpFour} SPEAK_PREV_WORD
+bind \{kpSpeak}+\{kpAlt}+!\{kpFive} SPEAK_CURR_WORD
+bind \{kpSpeak}+\{kpAlt}+!\{kpSix} SPEAK_NEXT_WORD
+
 bind \{kpSpeak}+!\{kpSeven} SPEAK_PREV_LINE
-bind \{kpSpeak}+\{kpAlt}+!\{kpSeven} SPEAK_FRST_LINE
+bind \{kpSpeak}+!\{kpEight} SPEAK_CURR_LINE
 bind \{kpSpeak}+!\{kpNine} SPEAK_NEXT_LINE
+
+bind \{kpSpeak}+\{kpAlt}+!\{kpSeven} SPEAK_FRST_LINE
+bind \{kpSpeak}+\{kpAlt}+!\{kpEight} SPELL_CURR_LINE
 bind \{kpSpeak}+\{kpAlt}+!\{kpNine} SPEAK_LAST_LINE
 
-bind \{kpSpeak}+!\{kpDivide} SPEAK_CURR_LOCN
-bind \{kpSpeak}+\{kpAlt}+!\{kpDivide} SHOW_CURR_LOCN
-bind \{kpSpeak}+!\{kpMultiply} ROUTE_CURR_LOCN
+bind \{kpSpeak}+!\{kpDivide} SPELL_CURR_PWRD
+bind \{kpSpeak}+\{kpAlt}+!\{kpDivide} SPELL_CURR_WORD
 
-bind \{kpSpeak}+!\{kpMinus} SPEAK_INDENT
-bind \{kpSpeak}+\{kpAlt}+!\{kpMinus} ASPK_INDENT
+bind \{kpSpeak}+!\{kpMultiply} SPEAK_INDENT
+
+bind \{kpSpeak}+!\{kpMinus} SPEAK_CURR_LOCN
+bind \{kpSpeak}+\{kpAlt}+!\{kpMinus} ROUTE_CURR_LOCN
 

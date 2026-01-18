@@ -85,8 +85,8 @@ bind CapsLock+!Space SAY_LINE
 bind CapsLock+!PageUp SAY_ABOVE
 bind CapsLock+!PageDown SAY_BELOW
 
-bind ShiftRight+!ArrowLeft SPEAK_PREV_WORD
-bind ShiftRight+!ArrowRight SPEAK_NEXT_WORD
+bind ShiftRight+!ArrowLeft SPEAK_PREV_PWRD
+bind ShiftRight+!ArrowRight SPEAK_NEXT_PWRD
 bind ShiftRight+!ArrowUp SPEAK_PREV_LINE
 bind ShiftRight+!ArrowDown SPEAK_NEXT_LINE
 bind ControlRight+!ArrowLeft SPEAK_FRST_CHAR
@@ -107,8 +107,8 @@ assign kpSeven U
 assign kpEight I
 assign kpNine O
 assign kpDivide Eight
-assign kpMultiply Nine
-assign kpMinus Zero
+assign kpMultiply Seven
+assign kpMinus Nine
 
 assign kpSay CapsLock+ShiftLeft
 include kp_say.kti

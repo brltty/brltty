@@ -189,9 +189,9 @@ typedef enum {
   BRL_CMD_SPEAK_CURR_CHAR /* speak current character */,
   BRL_CMD_SPEAK_PREV_CHAR /* go to and speak previous character */,
   BRL_CMD_SPEAK_NEXT_CHAR /* go to and speak next character */,
-  BRL_CMD_SPEAK_CURR_WORD /* speak current word */,
-  BRL_CMD_SPEAK_PREV_WORD /* go to and speak previous word */,
-  BRL_CMD_SPEAK_NEXT_WORD /* go to and speak next word */,
+  BRL_CMD_SPEAK_CURR_WORD /* speak current whitespace-delimited word */,
+  BRL_CMD_SPEAK_PREV_WORD /* go to and speak previous whitespace-delimited word */,
+  BRL_CMD_SPEAK_NEXT_WORD /* go to and speak next whitespace-delimited word */,
   BRL_CMD_SPEAK_CURR_LINE /* speak current line */,
   BRL_CMD_SPEAK_PREV_LINE /* go to and speak previous line */,
   BRL_CMD_SPEAK_NEXT_LINE /* go to and speak next line */,
@@ -200,7 +200,7 @@ typedef enum {
   BRL_CMD_SPEAK_FRST_LINE /* go to and speak first non-blank line on screen */,
   BRL_CMD_SPEAK_LAST_LINE /* go to and speak last non-blank line on screen */,
   BRL_CMD_DESC_CURR_CHAR /* describe current character */,
-  BRL_CMD_SPELL_CURR_WORD /* spell current word */,
+  BRL_CMD_SPELL_CURR_WORD /* spell current whitespace-delimited word */,
   BRL_CMD_ROUTE_CURR_LOCN /* bring screen cursor to speech cursor */,
   BRL_CMD_SPEAK_CURR_LOCN /* speak speech cursor location */,
   BRL_CMD_SHOW_CURR_LOCN /* set speech cursor visibility on/off */,
@@ -272,6 +272,12 @@ typedef enum {
   BRL_CMD_ASPK_EMP_LINE /* set autospeak empty line on/off */,
   BRL_CMD_SPK_PUNCT_LEVEL /* cycle speech punctuation level */,
   BRL_CMD_PASTE_ALTMODE /* insert the clipboard content before the screen cursor using the alternate paste mode */,
+
+  BRL_CMD_SPEAK_CURR_PWRD /* speak current partial (identifier or symbols) word */,
+  BRL_CMD_SPEAK_PREV_PWRD /* go to and speak previous partial (identifier or symbols) word */,
+  BRL_CMD_SPEAK_NEXT_PWRD /* go to and speak next partial (identifier or symbols) word */,
+  BRL_CMD_SPELL_CURR_PWRD /* spell current partial (identifier or symbols) word */,
+  BRL_CMD_SPELL_CURR_LINE /* spell current line */,
 
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;

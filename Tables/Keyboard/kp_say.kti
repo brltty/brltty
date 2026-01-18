@@ -19,13 +19,16 @@
 bind \{kpSay}+!\{kpFive} SAY_LINE
 bind \{kpSay}+!\{kpEight} SAY_ABOVE
 bind \{kpSay}+!\{kpTwo} SAY_BELOW
-bind \{kpSay}+!\{kpFour} MUTE
-bind \{kpSay}+!\{kpSix} AUTOSPEAK
-bind \{kpSay}+!\{kpSeven} SAY_SLOWER
-bind \{kpSay}+!\{kpNine} SAY_FASTER
+
 bind \{kpSay}+!\{kpOne} SAY_SOFTER
 bind \{kpSay}+!\{kpThree} SAY_LOUDER
-bind \{kpSay}+!\{kpDivide} SPKHOME
+bind \{kpSay}+!\{kpFour} SAY_SLOWER
+bind \{kpSay}+!\{kpSix} SAY_FASTER
+bind \{kpSay}+!\{kpSeven} SAY_LOWER
+bind \{kpSay}+!\{kpNine} SAY_HIGHER
+
+bind \{kpSay}+!\{kpDivide} MUTE
+bind \{kpSay}+!\{kpMultiply} AUTOSPEAK
 
 bind \{kpSay}+\{kpAlt}+!\{kpOne} ASPK_DEL_CHARS
 bind \{kpSay}+\{kpAlt}+!\{kpTwo} ASPK_REP_CHARS
@@ -33,4 +36,7 @@ bind \{kpSay}+\{kpAlt}+!\{kpThree} ASPK_INS_CHARS
 bind \{kpSay}+\{kpAlt}+!\{kpFour} ASPK_SEL_CHAR
 bind \{kpSay}+\{kpAlt}+!\{kpFive} ASPK_SEL_LINE
 bind \{kpSay}+\{kpAlt}+!\{kpSix} ASPK_CMP_WORDS
+bind \{kpSay}+\{kpAlt}+!\{kpSeven} ASPK_INDENT
+bind \{kpSay}+\{kpAlt}+!\{kpEight} SPK_PUNCT_LEVEL
+bind \{kpSay}+\{kpAlt}+!\{kpNine} ASPK_EMP_LINE
 

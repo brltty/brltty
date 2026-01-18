@@ -188,6 +188,7 @@ Alphabetical Command Index
 * `SPEAK_CURR_CHAR`_
 * `SPEAK_CURR_LINE`_
 * `SPEAK_CURR_LOCN`_
+* `SPEAK_CURR_PWRD`_
 * `SPEAK_CURR_WORD`_
 * `SPEAK_FRST_CHAR`_
 * `SPEAK_FRST_LINE`_
@@ -196,10 +197,14 @@ Alphabetical Command Index
 * `SPEAK_LAST_LINE`_
 * `SPEAK_NEXT_CHAR`_
 * `SPEAK_NEXT_LINE`_
+* `SPEAK_NEXT_PWRD`_
 * `SPEAK_NEXT_WORD`_
 * `SPEAK_PREV_CHAR`_
 * `SPEAK_PREV_LINE`_
+* `SPEAK_PREV_PWRD`_
 * `SPEAK_PREV_WORD`_
+* `SPELL_CURR_LINE`_
+* `SPELL_CURR_PWRD`_
 * `SPELL_CURR_WORD`_
 * `SPKHOME`_
 * `SPK_PUNCT_LEVEL`_
@@ -1383,11 +1388,16 @@ Speech Navigation
 * `SPEAK_NEXT_CHAR`_
 * `SPEAK_FRST_CHAR`_
 * `SPEAK_LAST_CHAR`_
+* `SPEAK_CURR_PWRD`_
+* `SPELL_CURR_PWRD`_
+* `SPEAK_PREV_PWRD`_
+* `SPEAK_NEXT_PWRD`_
 * `SPEAK_CURR_WORD`_
 * `SPELL_CURR_WORD`_
 * `SPEAK_PREV_WORD`_
 * `SPEAK_NEXT_WORD`_
 * `SPEAK_CURR_LINE`_
+* `SPELL_CURR_LINE`_
 * `SPEAK_PREV_LINE`_
 * `SPEAK_NEXT_LINE`_
 * `SPEAK_FRST_LINE`_
@@ -1444,17 +1454,41 @@ The following modifiers may be specified:
 
 * Motion: route
 
+.. _SPEAK_CURR_PWRD:
+
+**SPEAK_CURR_PWRD** - Speak current partial (identifier or symbols) word.
+
+.. _SPELL_CURR_PWRD:
+
+**SPELL_CURR_PWRD** - Spell current partial (identifier or symbols) word.
+
+.. _SPEAK_PREV_PWRD:
+
+**SPEAK_PREV_PWRD** - Go to and speak previous partial (identifier or symbols) word.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+.. _SPEAK_NEXT_PWRD:
+
+**SPEAK_NEXT_PWRD** - Go to and speak next partial (identifier or symbols) word.
+
+The following modifiers may be specified:
+
+* Motion: route
+
 .. _SPEAK_CURR_WORD:
 
-**SPEAK_CURR_WORD** - Speak current word.
+**SPEAK_CURR_WORD** - Speak current whitespace-delimited word.
 
 .. _SPELL_CURR_WORD:
 
-**SPELL_CURR_WORD** - Spell current word.
+**SPELL_CURR_WORD** - Spell current whitespace-delimited word.
 
 .. _SPEAK_PREV_WORD:
 
-**SPEAK_PREV_WORD** - Go to and speak previous word.
+**SPEAK_PREV_WORD** - Go to and speak previous whitespace-delimited word.
 
 The following modifiers may be specified:
 
@@ -1462,7 +1496,7 @@ The following modifiers may be specified:
 
 .. _SPEAK_NEXT_WORD:
 
-**SPEAK_NEXT_WORD** - Go to and speak next word.
+**SPEAK_NEXT_WORD** - Go to and speak next whitespace-delimited word.
 
 The following modifiers may be specified:
 
@@ -1471,6 +1505,10 @@ The following modifiers may be specified:
 .. _SPEAK_CURR_LINE:
 
 **SPEAK_CURR_LINE** - Speak current line.
+
+.. _SPELL_CURR_LINE:
+
+**SPELL_CURR_LINE** - Spell current line.
 
 .. _SPEAK_PREV_LINE:
 

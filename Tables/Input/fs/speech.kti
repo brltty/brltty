@@ -21,18 +21,22 @@ bind PanLeft+LeftShift SPEAK_PREV_CHAR
 bind PanLeft+RightShift SPEAK_NEXT_CHAR
 bind PanLeft+LeftShift+Space SPEAK_FRST_CHAR
 bind PanLeft+RightShift+Space SPEAK_LAST_CHAR
+bind PanLeft+LeftShift+RightShift SPEAK_CURR_LOCN
+bind PanLeft+LeftShift+RightShift+Space ROUTE_CURR_LOCN
 
-bind LeftSelector+Space SPEAK_CURR_WORD:SPELL_CURR_WORD
-bind LeftSelector+LeftShift SPEAK_PREV_WORD
-bind LeftSelector+RightShift SPEAK_NEXT_WORD
-bind LeftSelector+LeftShift+Space SPEAK_CURR_LOCN
-bind LeftSelector+RightShift+Space ROUTE_CURR_LOCN
+bind LeftSelector+Space SPEAK_CURR_PWRD:SPELL_CURR_PWRD
+bind LeftSelector+LeftShift SPEAK_PREV_PWRD
+bind LeftSelector+RightShift SPEAK_NEXT_PWRD
+bind LeftSelector+LeftShift+Space SPEAK_PREV_WORD
+bind LeftSelector+RightShift+Space SPEAK_NEXT_WORD
+bind LeftSelector+LeftShift+RightShift+Space SPEAK_CURR_WORD:SPELL_CURR_WORD
 
-bind RightSelector+Space SPEAK_CURR_LINE
+bind RightSelector+Space SPEAK_CURR_LINE:SPELL_CURR_LINE
 bind RightSelector+LeftShift SPEAK_PREV_LINE
 bind RightSelector+RightShift SPEAK_NEXT_LINE
 bind RightSelector+LeftShift+Space SPEAK_FRST_LINE
 bind RightSelector+RightShift+Space SPEAK_LAST_LINE
+bind RightSelector+LeftShift+RightShift+Space SPEAK_INDENT
 
 bind PanRight+Space AUTOSPEAK
 bind PanRight+LeftShift MUTE
@@ -41,6 +45,7 @@ bind PanRight+RightShift SAY_LINE
 bind PanRight+LeftShift+Space SAY_ABOVE
 bind PanRight+RightShift+Space SAY_BELOW
 bind PanRight+LeftShift+RightShift+Space SAY_ALL
+bind PanRight+LeftShift+RightShift SPK_PUNCT_LEVEL
 
 bind Space+Left\{navKeyType}Down SAY_SOFTER
 bind Space+Left\{navKeyType}Up SAY_Louder

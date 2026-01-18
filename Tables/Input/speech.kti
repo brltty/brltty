@@ -16,9 +16,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-bind \{speech}Dot1 AUTOSPEAK+on
+bind \{speech}Dot1 AUTOSPEAK
 bind \{speech}Dot2 MUTE
-bind \{speech}Dot3 AUTOSPEAK+off
+bind \{speech}Dot3 SPEAK_INDENT
 bind \{speech}Dot7 SPEAK_CURR_LOCN
 
 bind \{speech}Dot4 SAY_ABOVE
@@ -29,12 +29,17 @@ bind \{speech}Dot8 SAY_ALL
 bind \{speech}Dot1+Dot4 SPEAK_PREV_LINE
 bind \{speech}Dot1+Dot5 SPEAK_CURR_LINE
 bind \{speech}Dot1+Dot6 SPEAK_NEXT_LINE
-bind \{speech}Dot1+Dot8 SPEAK_INDENT
+bind \{speech}Dot1+Dot8 SPELL_CURR_LINE
 
-bind \{speech}Dot2+Dot4 SPEAK_PREV_WORD
-bind \{speech}Dot2+Dot5 SPEAK_CURR_WORD
-bind \{speech}Dot2+Dot6 SPEAK_NEXT_WORD
-bind \{speech}Dot2+Dot8 SPELL_CURR_WORD
+bind \{speech}Dot2+Dot4 SPEAK_PREV_PWRD
+bind \{speech}Dot2+Dot5 SPEAK_CURR_PWRD
+bind \{speech}Dot2+Dot6 SPEAK_NEXT_PWRD
+bind \{speech}Dot2+Dot8 SPELL_CURR_PWRD
+
+bind \{speech}Space+Dot2+Dot4 SPEAK_PREV_WORD
+bind \{speech}Space+Dot2+Dot5 SPEAK_CURR_WORD
+bind \{speech}Space+Dot2+Dot6 SPEAK_NEXT_WORD
+bind \{speech}Space+Dot2+Dot8 SPELL_CURR_WORD
 
 bind \{speech}Dot3+Dot4 SPEAK_PREV_CHAR
 bind \{speech}Dot3+Dot5 SPEAK_CURR_CHAR
@@ -53,5 +58,5 @@ bind \{speech}Space+Dot5 SAY_FASTER
 bind \{speech}Space+Dot3 SAY_LOWER
 bind \{speech}Space+Dot6 SAY_HIGHER
 bind \{speech}Space+Dot7 ROUTE_CURR_LOCN
-bind \{speech}Space+Dot8 RETURN
+bind \{speech}Space+Dot8 SPK_PUNCT_LEVEL
 

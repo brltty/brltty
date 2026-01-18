@@ -531,12 +531,13 @@ isRepeatableCommand (int command) {
 
           case BRL_CMD_SPEAK_PREV_CHAR:
           case BRL_CMD_SPEAK_NEXT_CHAR:
+          case BRL_CMD_SPEAK_PREV_PWRD:
+          case BRL_CMD_SPEAK_NEXT_PWRD:
+          case BRL_CMD_SPEAK_PREV_WORD:
+          case BRL_CMD_SPEAK_NEXT_WORD:
           case BRL_CMD_SPEAK_PREV_LINE:
           case BRL_CMD_SPEAK_NEXT_LINE:
             return 1;
-
-          case BRL_CMD_SPEAK_PREV_WORD:
-          case BRL_CMD_SPEAK_NEXT_WORD:
 
           case BRL_CMD_FWINLT:
           case BRL_CMD_FWINRT:

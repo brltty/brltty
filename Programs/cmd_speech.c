@@ -93,8 +93,8 @@ speakCurrentCharacter (void) {
 }
 
 static void
-speakCurrentLine (void) {
-  speakDone(NULL, 0, scr.cols, 0);
+speakCurrentLine (int spell) {
+  speakDone(NULL, 0, scr.cols, spell);
 }
 
 static const char *const phoneticWords[] = {
@@ -288,6 +288,21 @@ sayPhoneticPhrase (int column, int row) {
   sayString(&spk, description, SAY_OPT_MUTE_FIRST);
 }
 
+typedef enum {
+  SCT_SPACE,
+  SCT_WORD,
+  SCT_SYMBOL,
+} ScreenCharacterType;
+
+static ScreenCharacterType
+getScreenCharacterType (const ScreenCharacter *character, int partialWord) {
+  if (iswspace(character->text)) return SCT_SPACE;
+  if (!partialWord) return SCT_WORD;
+  if (character->text == WC_C('_')) return SCT_WORD;
+  if (iswalnum(character->text)) return SCT_WORD;
+  return SCT_SYMBOL;
+}
+
 static int
 handleSpeechCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
@@ -472,25 +487,54 @@ handleSpeechCommands (int command, void *data) {
 
     {
       int direction;
+      int partial;
       int spell;
 
     case BRL_CMD_SPEAK_PREV_WORD:
       direction = -1;
+      partial = 0;
       spell = 0;
       goto speakWord;
 
     case BRL_CMD_SPEAK_NEXT_WORD:
       direction = 1;
+      partial = 0;
       spell = 0;
       goto speakWord;
 
     case BRL_CMD_SPEAK_CURR_WORD:
       direction = 0;
+      partial = 0;
       spell = 0;
       goto speakWord;
 
     case BRL_CMD_SPELL_CURR_WORD:
       direction = 0;
+      partial = 0;
+      spell = 1;
+      goto speakWord;
+
+    case BRL_CMD_SPEAK_PREV_PWRD:
+      direction = -1;
+      partial = 1;
+      spell = 0;
+      goto speakWord;
+
+    case BRL_CMD_SPEAK_NEXT_PWRD:
+      direction = 1;
+      partial = 1;
+      spell = 0;
+      goto speakWord;
+
+    case BRL_CMD_SPEAK_CURR_PWRD:
+      direction = 0;
+      partial = 1;
+      spell = 0;
+      goto speakWord;
+
+    case BRL_CMD_SPELL_CURR_PWRD:
+      direction = 0;
+      partial = 1;
       spell = 1;
       goto speakWord;
 
@@ -500,21 +544,21 @@ handleSpeechCommands (int command, void *data) {
         int column = ses->spkx;
 
         ScreenCharacter characters[scr.cols];
+        ScreenCharacterType type;
         int onCurrentWord;
-        int onSpace;
 
         int from = column;
         int to = from + 1;
 
       findWord:
         readScreenRow(row, scr.cols, characters);
-        onCurrentWord = (row == ses->spky) && !iswspace(characters[column].text);
-        onSpace = !onCurrentWord;
+        type = (row == ses->spky)? getScreenCharacterType(&characters[column], partial): SCT_SPACE;
+        onCurrentWord = type != SCT_SPACE;
 
         if (direction < 0) {
           while (1) {
             if (column == 0) {
-              if (!onSpace && !onCurrentWord) {
+              if ((type != SCT_SPACE) && !onCurrentWord) {
                 ses->spkx = from = column;
                 ses->spky = row;
                 break;
@@ -527,26 +571,26 @@ handleSpeechCommands (int command, void *data) {
             }
 
             {
-              int isSpace = iswspace(characters[--column].text);
+              ScreenCharacterType newType = getScreenCharacterType(&characters[--column], partial);
 
-              if (isSpace != onSpace) {
+              if (newType != type) {
                 if (onCurrentWord) {
                   onCurrentWord = 0;
-                } else if (!onSpace) {
+                } else if (type != SCT_SPACE) {
                   ses->spkx = from = column + 1;
                   ses->spky = row;
                   break;
                 }
 
-                if (!isSpace) to = column + 1;
-                onSpace = isSpace;
+                if (newType != SCT_SPACE) to = column + 1;
+                type = newType;
               }
             }
           }
         } else if (direction > 0) {
           while (1) {
             if (++column == scr.cols) {
-              if (!onSpace && !onCurrentWord) {
+              if ((type != SCT_SPACE) && !onCurrentWord) {
                 to = column;
                 ses->spkx = from;
                 ses->spky = row;
@@ -560,33 +604,33 @@ handleSpeechCommands (int command, void *data) {
             }
 
             {
-              int isSpace = iswspace(characters[column].text);
+              ScreenCharacterType newType = getScreenCharacterType(&characters[column], partial);
 
-              if (isSpace != onSpace) {
+              if (newType != type) {
                 if (onCurrentWord) {
                   onCurrentWord = 0;
-                } else if (!onSpace) {
+                } else if (type != SCT_SPACE) {
                   to = column;
                   ses->spkx = from;
                   ses->spky = row;
                   break;
                 }
 
-                if (!isSpace) from = column;
-                onSpace = isSpace;
+                if (newType != SCT_SPACE) from = column;
+                type = newType;
               }
             }
           }
-        } else if (!onSpace) {
+        } else if (type != SCT_SPACE) {
           while (from > 0) {
-            if (iswspace(characters[--from].text)) {
+            if (getScreenCharacterType(&characters[--from], partial) != type) {
               from += 1;
               break;
             }
           }
 
           while (to < scr.cols) {
-            if (iswspace(characters[to].text)) break;
+            if (getScreenCharacterType(&characters[to], partial) != type) break;
             to += 1;
           }
         }
@@ -601,7 +645,11 @@ handleSpeechCommands (int command, void *data) {
     }
 
     case BRL_CMD_SPEAK_CURR_LINE:
-      speakCurrentLine();
+      speakCurrentLine(0);
+      break;
+
+    case BRL_CMD_SPELL_CURR_LINE:
+      speakCurrentLine(1);
       break;
 
     {
@@ -638,7 +686,7 @@ handleSpeechCommands (int command, void *data) {
           ses->spky += increment;
         }
 
-        speakCurrentLine();
+        speakCurrentLine(0);
       }
 
       break;
@@ -657,7 +705,7 @@ handleSpeechCommands (int command, void *data) {
       if (row < scr.rows) {
         ses->spky = row;
         ses->spkx = 0;
-        speakCurrentLine();
+        speakCurrentLine(0);
       } else {
         alert(ALERT_COMMAND_REJECTED);
       }
@@ -678,7 +726,7 @@ handleSpeechCommands (int command, void *data) {
       if (row >= 0) {
         ses->spky = row;
         ses->spkx = 0;
-        speakCurrentLine();
+        speakCurrentLine(0);
       } else {
         alert(ALERT_COMMAND_REJECTED);
       }
