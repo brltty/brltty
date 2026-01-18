@@ -2223,9 +2223,9 @@ setBrailleOn (void) {
 }
 
 void
-setBrailleOff (const char *message) {
+setBrailleOff (const char *reason) {
   canEnableBrailleDriver = 0;
-  disableBrailleDriver(message);
+  disableBrailleDriver(reason);
 }
 
 void
