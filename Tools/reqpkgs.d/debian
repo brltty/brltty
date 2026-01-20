@@ -25,7 +25,7 @@ libicu-dev
 liblouis-dev
 liblua5.4-dev
 libncursesw5-dev
-libpcre3-dev
+libpcre2-dev
 libpolkit-gobject-1-dev
 libspeechd-dev
 libsystemd-dev
