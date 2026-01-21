@@ -168,7 +168,7 @@ struct KeyTableStruct {
   struct {
     AsyncHandle alarm;
     int command;
-    unsigned repeat:1;
+    unsigned char autorepeat;
 
     const char *keyAction;
     unsigned char keyContext;

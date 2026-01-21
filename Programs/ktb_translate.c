@@ -481,9 +481,13 @@ ASYNC_ALARM_CALLBACK(handleLongPressAlarm) {
               &table->longPress.keyValue,
               command);
 
-  if (table->longPress.repeat) {
-    table->longPress.keyAction = "repeat";
-    setLongPressAlarm(table, prefs.autorepeatInterval);
+  if (prefs.autorepeatInterval) {
+    unsigned char autorepeat = table->longPress.autorepeat;
+
+    if (autorepeat) {
+      table->longPress.keyAction = "repeat";
+      setLongPressAlarm(table, MAX(autorepeat, prefs.autorepeatInterval));
+    }
   }
 
   table->release.command = BRL_CMD_NOOP;
@@ -498,59 +502,61 @@ setLongPressAlarm (KeyTable *table, unsigned char when) {
                         handleLongPressAlarm, table);
 }
 
-static int
-isRepeatableCommand (int command) {
-  if (prefs.autorepeatEnabled) {
-    switch (command & BRL_MSK_BLK) {
-      case BRL_CMD_BLK(PASSCHAR):
-      case BRL_CMD_BLK(PASSDOTS):
-        return 1;
+static unsigned char
+getAutorepeatInterval (int command) {
+  if (!prefs.autorepeatEnabled) return 0;
 
-      default:
-        switch (command & BRL_MSK_CMD) {
-          case BRL_CMD_LNUP:
-          case BRL_CMD_LNDN:
-          case BRL_CMD_PRDIFLN:
-          case BRL_CMD_NXDIFLN:
-          case BRL_CMD_CHRLT:
-          case BRL_CMD_CHRRT:
+  switch (command & BRL_MSK_BLK) {
+    case BRL_CMD_BLK(PASSCHAR):
+    case BRL_CMD_BLK(PASSDOTS):
+      return prefs.autorepeatInterval;
 
-          case BRL_CMD_MENU_PREV_ITEM:
-          case BRL_CMD_MENU_NEXT_ITEM:
-          case BRL_CMD_MENU_PREV_SETTING:
-          case BRL_CMD_MENU_NEXT_SETTING:
+    default:
+      switch (command & BRL_MSK_CMD) {
+        case BRL_CMD_FWINLT:
+        case BRL_CMD_FWINRT:
+          if (!prefs.autorepeatPanning) return 0;
 
-          case BRL_CMD_KEY(BACKSPACE):
-          case BRL_CMD_KEY(DELETE):
-          case BRL_CMD_KEY(PAGE_UP):
-          case BRL_CMD_KEY(PAGE_DOWN):
-          case BRL_CMD_KEY(CURSOR_UP):
-          case BRL_CMD_KEY(CURSOR_DOWN):
-          case BRL_CMD_KEY(CURSOR_LEFT):
-          case BRL_CMD_KEY(CURSOR_RIGHT):
+        case BRL_CMD_LNUP:
+        case BRL_CMD_LNDN:
+        case BRL_CMD_PRDIFLN:
+        case BRL_CMD_NXDIFLN:
+        case BRL_CMD_CHRLT:
+        case BRL_CMD_CHRRT:
 
-          case BRL_CMD_SPEAK_PREV_CHAR:
-          case BRL_CMD_SPEAK_NEXT_CHAR:
-          case BRL_CMD_SPEAK_PREV_PWRD:
-          case BRL_CMD_SPEAK_NEXT_PWRD:
-          case BRL_CMD_SPEAK_PREV_WORD:
-          case BRL_CMD_SPEAK_NEXT_WORD:
-          case BRL_CMD_SPEAK_PREV_LINE:
-          case BRL_CMD_SPEAK_NEXT_LINE:
-            return 1;
+        case BRL_CMD_MENU_PREV_ITEM:
+        case BRL_CMD_MENU_NEXT_ITEM:
+        case BRL_CMD_MENU_PREV_SETTING:
+        case BRL_CMD_MENU_NEXT_SETTING:
 
-          case BRL_CMD_FWINLT:
-          case BRL_CMD_FWINRT:
-            if (prefs.autorepeatPanning) return 1;
+        case BRL_CMD_KEY(BACKSPACE):
+        case BRL_CMD_KEY(DELETE):
+        case BRL_CMD_KEY(PAGE_UP):
+        case BRL_CMD_KEY(PAGE_DOWN):
+        case BRL_CMD_KEY(CURSOR_UP):
+        case BRL_CMD_KEY(CURSOR_DOWN):
+        case BRL_CMD_KEY(CURSOR_LEFT):
+        case BRL_CMD_KEY(CURSOR_RIGHT):
+          return prefs.autorepeatInterval;
 
-          default:
-            break;
-        }
-        break;
-    }
+        case BRL_CMD_SPEAK_PREV_CHAR:
+        case BRL_CMD_SPEAK_NEXT_CHAR:
+          return MSECS2PREFS(250);
+
+        case BRL_CMD_SPEAK_PREV_PWRD:
+        case BRL_CMD_SPEAK_NEXT_PWRD:
+        case BRL_CMD_SPEAK_PREV_WORD:
+        case BRL_CMD_SPEAK_NEXT_WORD:
+          return MSECS2PREFS(400);
+
+        case BRL_CMD_SPEAK_PREV_LINE:
+        case BRL_CMD_SPEAK_NEXT_LINE:
+          return MSECS2PREFS(500);
+
+        default:
+          return 0;
+      }
   }
-
-  return 0;
 }
 
 static int
@@ -698,7 +704,7 @@ processKeyEvent (
         }
 
         if (secondaryCommand == BRL_CMD_NOOP) {
-          if (isRepeatableCommand(command)) {
+          if (getAutorepeatInterval(command)) {
             secondaryCommand = command;
           }
         }
@@ -712,7 +718,7 @@ processKeyEvent (
 
         if (secondaryCommand != BRL_CMD_NOOP) {
           table->longPress.command = secondaryCommand;
-          table->longPress.repeat = isRepeatableCommand(secondaryCommand);
+          table->longPress.autorepeat = getAutorepeatInterval(secondaryCommand);
 
           table->longPress.keyAction = "long";
           table->longPress.keyContext = context;

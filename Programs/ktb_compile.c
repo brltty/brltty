@@ -1641,7 +1641,7 @@ resetLongPressData (KeyTable *table) {
   }
 
   table->longPress.command = BRL_CMD_NOOP;
-  table->longPress.repeat = 0;
+  table->longPress.autorepeat = 0;
 
   table->longPress.keyAction = NULL;
   table->longPress.keyContext = KTB_CTX_DEFAULT;
