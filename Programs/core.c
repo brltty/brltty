@@ -1139,6 +1139,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
       character += 1;
     }
 
+    sayOptions |= SAY_OPT_ALL_PUNCTUATION;
     sayWideCharacters(&spk, textBuffer, attributesBuffer, length-1, sayOptions);
   } else {
     sayScreenCharacters(characters, count, sayOptions);
