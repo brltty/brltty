@@ -167,96 +167,6 @@ always rockbeat 1235-135-46-12-15-1-2345
 always befund 23-124-256-145
 always behindert 23-125-35-145-12456-2345
 prfword behinderte 23-125-35-145-12456-236
-always beicht 12-146-1456-2345
-prfword beichte 12-146-1456-236
-prfword beichtest 12-146-1456-236-23456
-prfword beichtet 12-146-1456-236-2345
-prfword beichtete 12-146-1456-236-236
-prfword gebeichtetem 12346-12-146-1456-236-2345-12356
-prfword beichteten 12-146-1456-236-2345-14
-prfword gebeichteter 12346-12-146-1456-236-2345-12456
-prfword gebeichtetes 12346-12-146-1456-236-2345-123456
-prfword beichtetest 12-146-1456-236-236-23456
-prfword beichtetet 12-146-1456-236-236-2345
-sufword beidreh 2-12-145-1235-2356 shouldn't use the beid-contraction
-
-sufword bein 12-1246 shouldn't use the bei-contraction
-prfword bein 12-1246 shouldn't use the bei-contraction
-prfword beine 12-1246-15 shouldn't use the bei-contraction
-prfword beines 12-1246-123456 shouldn't use the bei-contraction
-prfword beins 12-1246-234 shouldn't use the bei-contraction
-always beinchen 12-1246-1456-14
-always beindex 23-35-145-15-6-1346
-always beinheit 12-1246-125
-always beinricht 12-1246-2-3456
-always beinsetz 12-1246-2-15
-always beinstell 12-1246-2-13456
-always beinteil 12-1246-2345-146-123
-always beinterview 23-35-2345-12456-1236-24-15-2456
-always einbein 1246-12-1246 shouldn't use the bei-contraction
-always zweibein 1356-2456-146-12-1246 shouldn't use the bei-contraction
-always dreibein 145-1235-146-12-1246 shouldn't use the bei-contraction
-always vierbein 1236-346-1235-12-1246 shouldn't use the bei-contraction
-always fünfbein 124-1256-1345-124-12-1246
-always sechsbein 234-15-1456-234-12-1246
-always achtbein 1-1456-2345-12-1246 shouldn't use the bei-contraction
-always bauchbein 12-16-1456-12-1246 shouldn't use the bei-contraction
-always beidbein 12-145-12-1246
-always breitbein 12-1235-146-2345-12-1246
-always brustbein 12-1235-136-23456-12-1246 shouldn't use the bei-contraction
-always dackelbein 145-1-46-13456-12-1246
-always drachenbein 145-1235-56-14-12-1246
-always drahtbein 145-1235-1-125-2345-12-1246 shouldn't use the bei-contraction
-always drehbein 145-1235-2356-12-1246
-always dünnbein 145-1256-1345-1345-12-1246
-always eisbein 146-234-12-1246
-before st begword eis 146-234
-always elfenbein 13456-124-14-12-1246 shouldn't use the bei-contraction
-always telfenbein 2345-13456-124-14-12-1246 shouldn't use the bei-contraction
-always federbein 124-15-145-12456-12-1246
-always felsenbein 124-13456-234-14-12-1246
-always fersenbein 124-12456-234-14-12-1246
-always fischbein 124-24-156-12-1246
-always fliegenbein 124-123-346-1245-14-12-1246
-always gaumenbein 1245-16-134-14-12-1246
-always grätschbein 1245-1235-345-2345-156-12-1246
-always hinterbein 125-35-2345-12456-12-1246
-always hirnbein 125-24-1235-1345-12-1246
-always hochbein 125-135-1456-12-1246
-always holzbein 125-135-123-1356-12-1246
-always hufbein 125-136-124-12-1246
-always hüftbein 125-1256-124-2345-12-1246
-always hühnerbein 125-1256-125-1345-12456-12-1246
-always jochbein 245-135-1456-12-1246
-always keilbein 13-146-123-12-1246
-always kreuzbein 13-1235-126-1356-12-1246
-always krummbein 13-1235-136-1346-12-1246
-always kurzbein 13-1356-12-1246 shouldn't use the bei-contraction
-always langbein 123-1245-12-1246
-always laufbein 123-16-124-12-1246
-always mittelbein 134-2345-12-1246
-always nasenbein 1345-1-234-14-12-1246
-always raucherbein 1235-16-1456-12456-12-1246
-always rinderbein 1235-35-145-12456-12-1246
-always schambein 156-1-134-12-1246
-always schienbein 156-346-1345-12-1246
-always sitzbein 2-24-12-1246
-always spielbein 2-346-12-1246
-always spinnenbein 234-1234-35-1345-14-12-1246
-always spreizbein 234-1234-1235-146-1356-12-1246
-always sprungbein 234-1234-1235-256-1245-12-1246
-always standbein 2-23456-12-1246
-always steifbein 23456-146-124-12-1246
-always steißbein 23456-146-6-2346-12-1246
-always stirnbein 23456-24-1235-1345-12-1246
-always stuhlbein 23456-136-125-123-12-1246
-always tischbein 2345-24-156-12-1246
-always überbein 2-1256-12-1246
-always vielbein 1236-123-12-1246
-always vorderbein 2-26-145-12456-12-1246
-always wadenbein 2456-1-145-14-12-1246
-always zahnbein 1356-1-125-1345-12-1246
-always zungenbein 1356-256-1245-14-12-1246
 
 
 
@@ -302,6 +212,10 @@ always schätzung 156-345-2345-1356-136
 
 
 
+word beinah 2-12-1345-1-125
+word beiname 2-12-1345-1-134-15
+word beinamen 2-12-1345-1-134-14
+word beinamens 2-12-1345-1-134-14-234
 sufword beinahe 2-12-1345-1-125-15
 sufword beinerv 2-12-1345-12456-1236
 always beinsatz 12-1246-234-1356
@@ -678,7 +592,7 @@ always kavallerist 13-1-1236-1-12345-12456-24-23456 shouldn't use the aller-cont
 always board =
 always mainboard =
 always kitaleit 13-24-2345-1-123-146-2345 shouldn't use the al-contraction
-always klageruf 13-123-1-12346-123-136-124
+always klageruf 13-123-1-12346-1235-136-124
 sufword klang 13-123-235-1245 shouldn't use the lang-contraction
 sufword klebe 13-123-15-23 shouldn't use the leb-contraction
 endword klebe = shouldn't use the leb-contraction
@@ -1507,7 +1421,7 @@ always firmware 124-24-1235-134-2456-356-15
 always hardcore 125-356-145-6-14-26-15
 always hardware 125-356-145-2456-356-15
 always lactose =
-always renaissance 1235-14-1-24-2346-235-6-14-15
+before e always renaissanc 1235-14-1-24-2346-235-6-14
 always software 234-135-124-2345-2456-356-15
 
 before cost always kreis 13-1235-146-234

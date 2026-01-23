@@ -65,7 +65,18 @@ always austern 16-23456-12456-1345
 # Ausnahmen für Vokalgruppen aus de-g1.ctb
 before e always arteri 356-2345-12456-24
 always barrier 12-356-1235-24-12456 shouldn't use the ie-contraction
+
+prfword atelier 1-2345-13456-24-12456
+prfword ateliers 1-2345-13456-24-12456-234
 always bankier 12-235-13-24-12456 shouldn't use the ie-contraction
+prfword collier 6-14-135-12345-24-12456
+prfword colliers 6-14-135-12345-24-12456-234
+prfword croupier 6-14-1235-135-136-1234-24-12456
+prfword croupiers 6-14-1235-135-136-1234-24-12456-234
+prfword finanzier 124-35-235-1356-24-12456
+prfword finanziers 124-35-235-1356-24-12456-234
+prfword kollier 13-135-12345-24-12456
+prfword kolliers 13-135-12345-24-12456-234
 midendword iell 24-15-12345 shouldn't use the ie-contraction
 always indien 35-145-24-14 shouldn't use the ie-contraction
 always indienststell 35-145-346-1345-23456-2-13456
@@ -122,6 +133,15 @@ always einformation 15-35-124-26-134-5-1345
 always einitiativ 15-35-24-2345-24-5-1236
 before t always einstitu 15-35-23456-24-2345-136
 before t always einstrumen 15-35-23456-1235-136-134-14
+
+always teindex 236-35-145-15-6-1346
+always teindustr 236-35-145-136-23456-1235
+before i always teinfanter 236-35-124-235-2345-12456
+always teinformation 236-35-124-26-134-6-1345
+always steinformation 23456-1246-124-26-134-6-1345
+before t always teinstitu 236-35-23456-24-2345-136
+always teinitiativ 236-35-24-2345-24-5-1236
+before t always teinterna 236-35-2345-12456-1345-1
 before t midword teinstrumen 236-35-23456-1235-136-134-14
 always eintoleranz 15-35-2345-135-123-12456-235-1356
 always nukleinsäur 1345-136-13-123-15-35-234-34-1235
@@ -224,7 +244,10 @@ before konsonant always ber 12-12456
 always schrauber 156-1235-16-12-12456
 always zauber 1356-16-12-12456
 before konsonant always gel 1245-13456 klingelton shouldn't use the ge-contraction
+prfword gelei 1245-13456-146
+prfword geleien 1245-13456-146-14
 always evangel 15-1236-235-1245-13456
+always kegel 13-15-1245-13456
 
 before konsonant always gen 1245-14
 always genetik 1245-14-15-2345-24-13
@@ -281,10 +304,24 @@ always unterseiten 2-256-234-146-2345-14
 begmidword spalten 234-1234-25-2345-14
 
 before konsonant always ter 2345-12456
+begmidword anbieter 235-12-346-2345-12456
+begmidword ämter 345-134-2345-12456
+begmidword behälter 23-125-345-123-2345-12456
+begmidword beobachter 23-135-12-56-2345-12456
+begmidword callcenter 6-14-1-12345-6-14-14-2345-12456
 always geschlechter 12346-156-123-15-1456-2345-12456
 always güter 1245-1256-2345-12456 should use the er-contraction
 always güteregel 1245-1256-236-1235-15-1245-13456
 always gütericht 1245-1256-236-2-3456
+begmidword helikopter 125-13456-24-13-135-1234-2345-12456
+always iteration 24-2345-12456-5-1345
+always iterier 24-2345-12456-346-1235
+begmidword katheter 13-1-2345-125-15-2345-12456
+always kauterisier 13-16-2345-12456-24-234-346-1235
+begmidword kollateral 13-135-12345-1-2345-12456-25
+begmidword lateralisier 123-1-2345-12456-25-24-234-346-1235
+begmidword presbyterian 1234-1235-123456-12-6-13456-2345-12456-24-235
+begmidword tochter 2345-135-1456-2345-12456
 begmidword veteran 1236-15-2345-12456-235
 prfword veteran 1236-15-2345-12456-1-1345
 always veterinär 1236-15-2345-12456-35-345-1235
@@ -397,6 +434,17 @@ midendword ss 2346
 
 midendword te 236
 sufword atem 1-2345-12356 shouldn't use the te-contraction
+midword atembar 1-2345-12356-12-356
+endword atembar 1-2345-12356-12-1-1235
+before t always atemgerä 1-2345-12356-12346-1235-345
+always atemloch 1-2345-12356-123-135-1456
+always atemluft 1-2345-12356-123-136-124-2345
+always atemschutz 1-2345-12356-156-136-2345-1356
+always atemsystem 1-2345-12356-234-6-13456-23456-12356
+always atemtest 1-2345-12356-236-23456
+always atemzentrum 1-2345-12356-1356-14-2345-1235-136-134
+before g always atemzu 1-2345-12356-1356-136
+before g always atemzü 1-2345-12356-1356-1256
 always tempfang 2345-12356-1234-124-235-1245
 always tempfehl 2345-12356-1234-124-2356-123
 always tempfind 2345-12356-1234-124-35-145
@@ -565,7 +613,12 @@ midendword gend 1245-14-145 shouldn't use the ge-contraction
 always regendurch 1235-15-1245-14-2-1456
 endword gens 1245-14-234 shouldn't use the ge-contraction
 midendword ger 1245-12456 should use er-contraction if not part of a word intro
+before t always geraff 12346-1235-1-124-124
 always gerammel 12346-1235-1-1346-13456
+before t always gerann 12346-1235-235-1345
+always gerassel 12346-1235-1-2346-13456
+before t always geräucher 12346-1235-34-1456-12456
+before t always geräum 12346-1235-34-134
 always gerechne 12346-1235-15-1456-1345-15
 always gerinnsel 12346-1235-35-1345-234-13456
 always gerinnung 12346-1235-35-1345-136
@@ -575,8 +628,11 @@ always geritten 12346-1235-24-2345-2345-14
 always geroll 12346-1235-135-12345
 always geröll 12346-1235-246-12345
 always geroste 12346-1235-135-23456-15
+before t always gerotte 12346-1235-135-2345-236
+always gerubbel 12346-1235-136-12-12-13456
 always gerutsch 12346-1235-136-2345-156
 always gerüttel 12346-1235-1256-2345-2345-13456
+always gerufen 12346-1235-136-124-14
 
 before r begword abge 1-12-12346
 before r begword ange 235-12346
@@ -803,6 +859,7 @@ always bungalow 12-256-1245-25-135-2456
 always dschungel 145-156-256-1245-13456 shouldn't use the ung-contraction
 always drungen 145-1235-256-1245-14
 sufword dung 145-256-1245
+always abgerungen 1-12-12346-1235-256-1245-14
 always geklungen 12346-13-123-256-1245-14
 always gelungen 12346-123-256-1245-14
 sufword versiegelungen 36-234-346-1245-13456-136-14
@@ -1068,6 +1125,98 @@ always eislauf 146-234-123-16-124
 
 word bei 12
 always bei 2-12
+always beicht 12-146-1456-2345
+prfword beichte 12-146-1456-236
+prfword beichtest 12-146-1456-236-23456
+prfword beichtet 12-146-1456-236-2345
+prfword beichtete 12-146-1456-236-236
+prfword gebeichtetem 12346-12-146-1456-236-2345-12356
+prfword beichteten 12-146-1456-236-2345-14
+prfword gebeichteter 12346-12-146-1456-236-2345-12456
+prfword gebeichtetes 12346-12-146-1456-236-2345-123456
+prfword beichtetest 12-146-1456-236-236-23456
+prfword beichtetet 12-146-1456-236-236-2345
+sufword beidreh 2-12-145-1235-2356 shouldn't use the beid-contraction
+
+sufword bein 12-1246 shouldn't use the bei-contraction
+prfword bein 12-1246 shouldn't use the bei-contraction
+prfword beine 12-1246-15 shouldn't use the bei-contraction
+prfword beines 12-1246-123456 shouldn't use the bei-contraction
+prfword beins 12-1246-234 shouldn't use the bei-contraction
+always beinchen 12-1246-1456-14
+always beindex 23-35-145-15-6-1346
+always beinheit 12-1246-125
+always beinricht 12-1246-2-3456
+always beinsetz 12-1246-2-15
+always beinstell 12-1246-2-13456
+always beinteil 12-1246-2345-146-123
+always beinterview 23-35-2345-12456-1236-24-15-2456
+
+always einbein 1246-12-1246 shouldn't use the bei-contraction
+always zweibein 1356-2456-146-12-1246 shouldn't use the bei-contraction
+always dreibein 145-1235-146-12-1246 shouldn't use the bei-contraction
+always vierbein 1236-346-1235-12-1246 shouldn't use the bei-contraction
+always fünfbein 124-1256-1345-124-12-1246
+always sechsbein 234-15-1456-234-12-1246
+always achtbein 1-1456-2345-12-1246 shouldn't use the bei-contraction
+always bauchbein 12-16-1456-12-1246 shouldn't use the bei-contraction
+always beidbein 12-145-12-1246
+always breitbein 12-1235-146-2345-12-1246
+always brustbein 12-1235-136-23456-12-1246 shouldn't use the bei-contraction
+always dackelbein 145-1-46-13456-12-1246
+always drachenbein 145-1235-56-14-12-1246
+always drahtbein 145-1235-1-125-2345-12-1246 shouldn't use the bei-contraction
+always drehbein 145-1235-2356-12-1246
+always dünnbein 145-1256-1345-1345-12-1246
+always eisbein 146-234-12-1246
+before st begword eis 146-234
+always elfenbein 13456-124-14-12-1246 shouldn't use the bei-contraction
+always telfenbein 2345-13456-124-14-12-1246 shouldn't use the bei-contraction
+always federbein 124-15-145-12456-12-1246
+always felsenbein 124-13456-234-14-12-1246
+always fersenbein 124-12456-234-14-12-1246
+always fischbein 124-24-156-12-1246
+always fliegenbein 124-123-346-1245-14-12-1246
+always gaumenbein 1245-16-134-14-12-1246
+always grätschbein 1245-1235-345-2345-156-12-1246
+always hinterbein 125-35-2345-12456-12-1246
+always hirnbein 125-24-1235-1345-12-1246
+always hochbein 125-135-1456-12-1246
+always holzbein 125-135-123-1356-12-1246
+always hufbein 125-136-124-12-1246
+always hüftbein 125-1256-124-2345-12-1246
+always hühnerbein 125-1256-125-1345-12456-12-1246
+always jochbein 245-135-1456-12-1246
+always keilbein 13-146-123-12-1246
+always kreuzbein 13-1235-126-1356-12-1246
+always krummbein 13-1235-136-1346-12-1246
+always kurzbein 13-1356-12-1246 shouldn't use the bei-contraction
+always langbein 123-1245-12-1246
+always laufbein 123-16-124-12-1246
+always mittelbein 134-2345-12-1246
+always nasenbein 1345-1-234-14-12-1246
+always raucherbein 1235-16-1456-12456-12-1246
+always rinderbein 1235-35-145-12456-12-1246
+always schambein 156-1-134-12-1246
+always schienbein 156-346-1345-12-1246
+always sitzbein 2-24-12-1246
+always spielbein 2-346-12-1246
+always spinnenbein 234-1234-35-1345-14-12-1246
+always spreizbein 234-1234-1235-146-1356-12-1246
+always sprungbein 234-1234-1235-256-1245-12-1246
+always standbein 2-23456-12-1246
+always steifbein 23456-146-124-12-1246
+always steißbein 23456-146-6-2346-12-1246
+always stirnbein 23456-24-1235-1345-12-1246
+always stuhlbein 23456-136-125-123-12-1246
+always tischbein 2345-24-156-12-1246
+always überbein 2-1256-12-1246
+always vielbein 1236-123-12-1246
+always vorderbein 2-26-145-12456-12-1246
+always wadenbein 2456-1-145-14-12-1246
+always zahnbein 1356-1-125-1345-12-1246
+always zungenbein 1356-256-1245-14-12-1246
+
 always beizung 12-146-1356-136 shouldn't use the bei-contraction
 always beiß 12-146-6-2346 shouldn't use the bei-contraction
 prfword beil 12-146-123
@@ -1077,20 +1226,55 @@ prfword beils 12-146-123-234
 endword bein 12-1246 shouldn't use the bei-contraction
 endword beine 12-1246-15 shouldn't use the bei-contraction
 endword beinen 12-1246-14 shouldn't use the bei-contraction
+endword beinend 12-1246-14-145 shouldn't use the bei-contraction
+endword beinende 12-1246-14-145-15 shouldn't use the bei-contraction
+endword beinendem 12-1246-14-145-12356 shouldn't use the bei-contraction
+endword beinenden 12-1246-14-145-14 shouldn't use the bei-contraction
+endword beinender 12-1246-14-145-12456 shouldn't use the bei-contraction
+endword beinendes 12-1246-14-145-123456 shouldn't use the bei-contraction
 endword beines 12-1246-123456 shouldn't use the bei-contraction
+endword beinig 12-1246-45
+endword beinige 12-1246-45-15
+endword beinigem 12-1246-45-12356
+endword beinigen 12-1246-45-14
+endword beiniger 12-1246-45-12456
+endword beiniges 12-1246-45-123456
+always beinbruch 12-1246-12-1235-136-1456
+always beindruck 12-1246-145-46
+always beindustr 23-35-145-136-23456-1235
+always beinitiativ 23-35-24-2345-24-5-1236
+always beinsel 23-35-234-13456
+always beinpaar 12-1246-1234-1-1-1235
+before t always beinsegmen 12-1246-234-15-1245-134-14
+always beinterfac 23-35-2345-12456-124-1-6-14
+always beintrag 12-1246-2345-1245
+always beinträg 12-1246-5-2345-1245
+always beinwirkung 12-1246-2456-13-136
 endword beins 12-1246-234 shouldn't use the bei-contraction
+endword beinst 12-1246-23456 shouldn't use the bei-contraction
+endword beint 12-1246-2345 shouldn't use the bei-contraction
+endword beinte 12-1246-236 shouldn't use the bei-contraction
+endword beintem 12-1246-2345-12356
+endword beinten 12-1246-2345-14 shouldn't use the bei-contraction
+endword beinter 12-1246-2345-12456
+endword beintes 12-1246-2345-123456
+endword beintest 12-1246-236-23456 shouldn't use the bei-contraction
 before t always beinhal 23-35-125-25 shouldn't use the bei-contraction
 always beinhalter 12-1246-125-25-2345-12456 should use the ei-contraction
 sufword beirr 23-24-1235-1235
 always darmbein 145-356-134-12-1246
 always gabeinvent 1245-1-23-35-1236-14-2345 Übergabeinventar shouldn't use the bei-contraction
 before t always gebeiz 12346-12-146-1356
+always kahnbein 13-1-125-1345-12-1246
+always kalkbein 13-1-123-13-12-1246
 always kreuzbein 13-1235-126-1356-12-1246
 always schienbein 156-346-1345-12-1246
 always schlüsselbein 156-123-1256-2346-13456-12-1246 shouldn't use the bei-contraction
+always sesambein 234-123456-1-134-12-1246
+always sitzbein 2-24-12-1246 shouldn't use the bei-contraction
 always reibeisen 1235-146-12-146-234-14
 before a always beinform 23-35-124-26-134
-always beinfra 23-35-124-1235-1
+always beinfrast 23-35-124-1235-1-23456
 before t always beinspek 23-35-234-1234-15-13
 before t always beinstitu 23-35-23456-24-2345-136
 before t always beinstrumen 23-35-23456-1235-136-134-14
@@ -1170,6 +1354,7 @@ always mehr 2-2356
 
 word mit 2345
 always mit 2-2345
+always dynamit =
 always mittl =
 always mittwoch 134-24-2345-2345-2456-135-1456
 always primitiv =
@@ -1377,6 +1562,8 @@ always rundschleif 1235-256-145-156-123-146-124
 always rundschreib 1235-256-145-156-12
 always rundstab 1235-256-145-23456-1-12
 always rundstäb 1235-256-145-23456-345-12
+always rundturm 1235-256-145-2345-136-1235-134
+always rundtürm 1235-256-145-2345-1256-1235-134
 always endrund 14-145-1235-256-145
 always erstrund 12456-23456-1235-256-145
 always finalrund 124-35-25-1235-256-145
@@ -1567,6 +1754,9 @@ word wär's 5-356-6-234
 
 # Einformige Kürzungen, alleinstehend, mit Endungen oder in Wortverbindungen
 always hatt 125
+always innehatt 35-1345-15-125 shouldn't use the eh-contraction
+prfword manhattan 134-235-125-1-2345-2345-1-1345
+always manhattan 134-235-125-1-2345-2345-235
 always hätt 345
 always haett 345
 always welch 13456
@@ -1967,6 +2157,13 @@ always halten 125-25-2345-14 shouldn't use the te-contraction
 always hast 125-23456
 always hat 125-2345
 contraction ht
+always aliphatisch 25-24-1234-125-1-2345-24-156
+before st always buddha = buddhastatue buddhatempel
+always daihatsu =
+always emphatisch 12356-1234-125-1-2345-24-156
+always lymphatisch 123-6-13456-134-1234-125-1-2345-24-156
+always triumphat =
+always whatsapp =
 word hattest 125-15-23456 shouldn't use the es-contraction
 word hattrick 125-1-2345-2345-24-46 shouldn't use the hatt-contraction
 before t always phospha =
@@ -2064,6 +2261,7 @@ always kürz 5-13-1356
 
 always lang 123-1245
 contraction lg
+before e always langust 123-235-1245-136-23456
 before g sufword schlan 156-123-235 shouldn't use the lang-contraction
 prfword schlange 156-123-235-12346
 prfword schlangen 156-123-235-1245-14
@@ -2095,6 +2293,7 @@ always nebenklang 1345-12-13-123-235-1245
 always vielklang 1236-123-13-123-235-1245
 always wohlklang 2456-123-13-123-235-1245
 before g always wohlklän 2456-123-13-123-345-1345
+always zusammenklang 1356-234-13-123-235-1245
 
 always dreiklang 145-1235-146-13-123-235-1245
 always vierklang 1236-346-1235-13-123-235-1245
@@ -2234,6 +2433,8 @@ before e always makedoni =
 before e always malaysi 134-25-1-6-13456-234-24
 before e always malawi =
 before e always materi 134-1-2345-12456-24 materie shouldn't use the te- nor the ie-contraction
+before e always mauretani 134-16-1235-15-2345-235-24
+before e always mauriti 134-16-1235-24-2345-24
 before e always mazedoni =
 before e always mikronesi 134-24-13-1235-135-1345-123456-24
 before e always moldawi =
@@ -2242,8 +2443,10 @@ before e always orgi 26-1245-24
 always parlamentarier 1234-356-123-1-134-14-2345-356-24-12456
 always patrizier 1234-1-2345-1235-24-1356-24-12456
 before e always petersili 1234-15-2345-12456-234-24-123-24
+before e always philadelphi 1234-125-24-123-1-145-13456-1234-125-24
 before e always polynesi 1234-135-123-6-13456-1345-123456-24
 before e always prinzipi 1234-1235-35-1356-24-1234-24
+before e begword proletari 12345-123-15-2345-356-24
 before e always skandinavi 234-13-235-145-35-1-1236-24
 before e always somali 234-135-134-25-24
 before e always spani 234-1234-235-24
@@ -2540,7 +2743,6 @@ always gesindest 12346-234-35-145-15-23456
 
 always sitz 2-24
 always esitz 15-2-24
-always sitzbein 2-24-12-1246 shouldn't use the bei-contraction
 
 always solch 234-1456
 always soll 2-234
@@ -2568,6 +2770,7 @@ always stell 2-13456
 before l sufword bastel 12-1-23456-13456
 always sstell 234-2-13456 shouldn't use the ss-contraction
 always kastell 13-1-23456-15-12345
+always pastellfarb 1234-1-23456-13456-124-356-12
 
 
 word stets 23456-234
@@ -2691,7 +2894,17 @@ word Wolle 2456-135-12345-15 shouldn't use the woll-contraction
 always wollfad 2456-135-12345-124-1-145 shouldn't use the woll-contraction
 word worden 135-14
 sufword wurd 136
-sufword würd 1256
+
+begword würd 1256
+sufword würdig 2456-1256-1235-145-45
+prfword würde 1256-15
+always menschenwürde 134-14-156-14-1256-15
+prfword menschenwürden 134-14-156-14-1256-14
+always würdelos 1256-15-123-135-234
+prfword würden 1256-14
+always würdenträg 1256-14-5-2345-1245
+prfword würdest 1256-15-23456
+prfword würdet 1256-15-2345
 
 always young 6-13456-135-136-1345-1245 shouldn't use the u-contraction
 
