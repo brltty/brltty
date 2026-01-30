@@ -449,7 +449,7 @@ newTimeMenuItem (
   Menu *menu, unsigned char *setting,
   const MenuString *name
 ) {
-  return newNumericMenuItem(menu, setting, name, 10, 250, 10, strtext("seconds"), formatTime);
+  return newNumericMenuItem(menu, setting, name, 10, 250, 5, strtext("seconds"), formatTime);
 }
 
 MenuItem *
