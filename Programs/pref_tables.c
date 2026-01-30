@@ -582,6 +582,21 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.speechWhitespaceIndicator
   },
 
+  { .name = "speech-char-autorepeat-interval",
+    .defaultValue = DEFAULT_SPEECH_CHAR_AUTOREPEAT_INTERVAL,
+    .setting = &prefs.speechCharAutorepeatInterval
+  },
+
+  { .name = "speech-word-autorepeat-interval",
+    .defaultValue = DEFAULT_SPEECH_WORD_AUTOREPEAT_INTERVAL,
+    .setting = &prefs.speechWordAutorepeatInterval
+  },
+
+  { .name = "speech-line-autorepeat-interval",
+    .defaultValue = DEFAULT_SPEECH_LINE_AUTOREPEAT_INTERVAL,
+    .setting = &prefs.speechLineAutorepeatInterval
+  },
+
   { .name = "say-line-mode",
     .defaultValue = DEFAULT_SAY_LINE_MODE,
     .settingNames = &preferenceStringTable_sayLineMode,

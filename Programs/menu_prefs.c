@@ -1199,21 +1199,21 @@ makePreferencesMenu (void) {
     SUBMENU(speechSubmenu, rootMenu, strtext("Speech Options"));
 
     {
-      NAME(strtext("Speech Volume"));
+      NAME(strtext("Volume"));
       ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &itemName, 0, SPK_VOLUME_MAXIMUM, 1, "%", formatSpeechVolume));
       TEST(SpeechVolume);
       CHANGED(SpeechVolume);
     }
 
     {
-      NAME(strtext("Speech Rate"));
+      NAME(strtext("Rate"));
       ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &itemName, 0, SPK_RATE_MAXIMUM, 1, NULL, formatSpeechRate));
       TEST(SpeechRate);
       CHANGED(SpeechRate);
     }
 
     {
-      NAME(strtext("Speech Pitch"));
+      NAME(strtext("Pitch"));
       ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &itemName, 0, SPK_PITCH_MAXIMUM, 1, NULL, formatSpeechPitch));
       TEST(SpeechPitch);
       CHANGED(SpeechPitch);
@@ -1226,7 +1226,7 @@ makePreferencesMenu (void) {
       strings[SPK_PUNCTUATION_MOST].label = getSpeechPunctuation(SPK_PUNCTUATION_MOST);
       strings[SPK_PUNCTUATION_ALL].label = getSpeechPunctuation(SPK_PUNCTUATION_ALL);
 
-      NAME(strtext("Speech Punctuation"));
+      NAME(strtext("Punctuation Level"));
       ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechPunctuation, &itemName, strings));
       TEST(SpeechPunctuation);
       CHANGED(SpeechPunctuation);
@@ -1241,7 +1241,7 @@ makePreferencesMenu (void) {
         [sucRaisePitch] = {.label=strtext("Raise Pitch")},
       };
 
-      NAME(strtext("Speech Uppercase Indicator"));
+      NAME(strtext("Uppercase Indicator"));
       ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechUppercaseIndicator, &itemName, strings));
     }
 
@@ -1251,8 +1251,26 @@ makePreferencesMenu (void) {
         [swsSaySpace] = {.label=strtext("Say Space")},
       };
 
-      NAME(strtext("Speech Whitespace Indicator"));
+      NAME(strtext("Whitespace Indicator"));
       ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechWhitespaceIndicator, &itemName, strings));
+    }
+
+    {
+      NAME(strtext("Character Autorepeat Interval"));
+      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechCharAutorepeatInterval, &itemName));
+      TEST(AutorepeatEnabled);
+    }
+
+    {
+      NAME(strtext("Word Autorepeat Interval"));
+      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechWordAutorepeatInterval, &itemName));
+      TEST(AutorepeatEnabled);
+    }
+
+    {
+      NAME(strtext("Line Autorepeat Interval"));
+      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechLineAutorepeatInterval, &itemName));
+      TEST(AutorepeatEnabled);
     }
 
     {

@@ -185,6 +185,9 @@ typedef struct {
 
   unsigned char speechUppercaseIndicator;
   unsigned char speechWhitespaceIndicator;
+  unsigned char speechCharAutorepeatInterval;
+  unsigned char speechWordAutorepeatInterval;
+  unsigned char speechLineAutorepeatInterval;
 
   unsigned char autospeakSelectedLine;
   unsigned char autospeakEmptyLine;

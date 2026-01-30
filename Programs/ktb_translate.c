@@ -541,17 +541,17 @@ getAutorepeatInterval (int command) {
 
         case BRL_CMD_SPEAK_PREV_CHAR:
         case BRL_CMD_SPEAK_NEXT_CHAR:
-          return MSECS2PREFS(250);
+          return prefs.speechCharAutorepeatInterval;
 
         case BRL_CMD_SPEAK_PREV_PWRD:
         case BRL_CMD_SPEAK_NEXT_PWRD:
         case BRL_CMD_SPEAK_PREV_WORD:
         case BRL_CMD_SPEAK_NEXT_WORD:
-          return MSECS2PREFS(400);
+          return prefs.speechWordAutorepeatInterval;
 
         case BRL_CMD_SPEAK_PREV_LINE:
         case BRL_CMD_SPEAK_NEXT_LINE:
-          return MSECS2PREFS(500);
+          return prefs.speechLineAutorepeatInterval;
 
         default:
           return 0;
