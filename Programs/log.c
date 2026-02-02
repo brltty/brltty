@@ -338,7 +338,7 @@ openLogFile (const char *path) {
     writeUtf8ByteOrderMark(stream);
 
     logFile = stream;
-    writePreviousLogEntries(getNewestLogMessage(1));
+    writePreviousLogEntries(getNewestLogEntry(1));
   }
 }
 

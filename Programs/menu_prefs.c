@@ -657,7 +657,7 @@ addNewLogMessages (const LogEntry *message) {
 
 int
 updateLogMessagesSubmenu (void) {
-  return addNewLogMessages(getNewestLogMessage(1));
+  return addNewLogMessages(getNewestLogEntry(1));
 }
 
 static Menu *

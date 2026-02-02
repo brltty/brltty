@@ -111,7 +111,7 @@ unlockLogMessages (void) {
 static LogEntry *logMessageStack = NULL;
 
 const LogEntry *
-getNewestLogMessage (int freeze) {
+getNewestLogEntry (int freeze) {
   lockLogMessages();
   LogEntry *message = logMessageStack;
   if (freeze && message) message->noSquash = 1;

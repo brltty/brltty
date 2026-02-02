@@ -40,7 +40,7 @@ extern unsigned int getLogEntryCount (const LogEntry *entry);
 extern int pushLogEntry (LogEntry **head, const char *text, LogEntryPushOptions options);
 extern int popLogEntry (LogEntry **head);
 
-extern const LogEntry *getNewestLogMessage (int freeze);
+extern const LogEntry *getNewestLogEntry (int freeze);
 extern void pushLogMessage (const char *message);
 
 #ifdef __cplusplus
