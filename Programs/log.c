@@ -277,6 +277,49 @@ popLogPrefix (void) {
   return popLogEntry(&logPrefixStack);
 }
 
+static void
+writeLogRecord (const TimeValue *when, const char *record) {
+  if (logFile) {
+    lockStream(logFile);
+
+    {
+      TimeValue now;
+
+      if (!when) {
+        getCurrentTime(&now);
+        when = &now;
+      }
+
+      char buffer[0X20];
+      size_t length = formatSeconds(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S", when->seconds);
+      unsigned int milliseconds = when->nanoseconds / NSECS_PER_MSEC;
+
+      fprintf(logFile, "%.*s.%03u ", (int)length, buffer, milliseconds);
+    }
+
+    {
+      char name[0X40];
+      size_t length = formatThreadName(name, sizeof(name));
+
+      if (length) fprintf(logFile, "[%s] ", name);
+    }
+
+    fputs(record, logFile);
+    fputc('\n', logFile);
+    flushStream(logFile);
+    unlockStream(logFile);
+  }
+}
+
+static int
+writePreviousLogEntries (const LogEntry *message) {
+  if (!message) return 1;
+  if (!writePreviousLogEntries(getPreviousLogEntry(message))) return 0;
+
+  writeLogRecord(getLogEntryTime(message), getLogEntryText(message));
+  return 1;
+}
+
 void
 closeLogFile (void) {
   if (logFile) {
@@ -293,39 +336,9 @@ openLogFile (const char *path) {
   if (stream) {
   //setCloseOnExec(fileno(stream), 1);
     writeUtf8ByteOrderMark(stream);
+
     logFile = stream;
-  }
-}
-
-static void
-writeLogRecord (const char *record) {
-  if (logFile) {
-    lockStream(logFile);
-
-    {
-      TimeValue now;
-      char buffer[0X20];
-      size_t length;
-      unsigned int milliseconds;
-
-      getCurrentTime(&now);
-      length = formatSeconds(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S", now.seconds);
-      milliseconds = now.nanoseconds / NSECS_PER_MSEC;
-
-      fprintf(logFile, "%.*s.%03u ", (int)length, buffer, milliseconds);
-    }
-
-    {
-      char name[0X40];
-      size_t length = formatThreadName(name, sizeof(name));
-
-      if (length) fprintf(logFile, "[%s] ", name);
-    }
-
-    fputs(record, logFile);
-    fputc('\n', logFile);
-    flushStream(logFile);
-    unlockStream(logFile);
+    writePreviousLogEntries(getNewestLogMessage(1));
   }
 }
 
@@ -412,7 +425,7 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
   STR_END;
 
   if (write) {
-    writeLogRecord(record);
+    writeLogRecord(NULL, record);
 
 #if defined(WINDOWS)
     if (windowsEventLog != INVALID_HANDLE_VALUE) {
