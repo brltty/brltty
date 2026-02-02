@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "strfmt.h"
 #include "log.h"
 #include "log_history.h"
 #include "embed.h"
@@ -634,7 +635,12 @@ addNewLogMessages (const LogEntry *entry) {
 
   if (time) {
     char buffer[0X20];
-    formatSeconds(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S", time->seconds);
+    STR_BEGIN(buffer, sizeof(buffer));
+
+    STR_FORMAT(formatSeconds, "%Y-%m-%d@%H:%M:%S", time->seconds);
+    STR_PRINTF(".%03u", (time->nanoseconds / NSECS_PER_MSEC));
+
+    STR_END;
     name.label = strdup(buffer);
   } else {
     name.label = NULL;
