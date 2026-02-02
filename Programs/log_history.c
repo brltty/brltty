@@ -27,9 +27,11 @@
 struct LogEntryStruct {
   struct LogEntryStruct *previous;
   TimeValue time;
-  unsigned int count;
-  unsigned noSquash:1;
-  char text[0];
+  uint16_t count;
+
+  unsigned char noSquash:1;
+
+  char text[];
 };
 
 const LogEntry *
@@ -108,13 +110,13 @@ unlockLogEntries (void) {
   leaveCriticalSection(&logEntriesLock);
 }
 
-static LogEntry *logEntryStack = NULL;
+static LogEntry *logEntriesStack = NULL;
 
 const LogEntry *
-getNewestLogEntry (int freeze) {
+getNewestLogEntry (int endSquash) {
   lockLogEntries();
-  LogEntry *entry = logEntryStack;
-  if (freeze && entry) entry->noSquash = 1;
+  LogEntry *entry = logEntriesStack;
+  if (endSquash && entry) entry->noSquash = 1;
   unlockLogEntries();
   return entry;
 }
@@ -122,6 +124,6 @@ getNewestLogEntry (int freeze) {
 void
 pushLogMessage (const char *text) {
   lockLogEntries();
-  pushLogEntry(&logEntryStack, text, (LPO_NOLOG | LPO_SQUASH));
+  pushLogEntry(&logEntriesStack, text, (LPO_NOLOG | LPO_SQUASH));
   unlockLogEntries();
 }
