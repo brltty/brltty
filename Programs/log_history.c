@@ -96,32 +96,32 @@ popLogEntry (LogEntry **head) {
   return 1;
 }
 
-static CriticalSectionLock logMessageLock = CRITICAL_SECTION_LOCK_INITIALIZER;
+static CriticalSectionLock logEntriesLock = CRITICAL_SECTION_LOCK_INITIALIZER;
 
 static void
-lockLogMessages (void) {
-  enterCriticalSection(&logMessageLock);
+lockLogEntries (void) {
+  enterCriticalSection(&logEntriesLock);
 }
 
 static void
-unlockLogMessages (void) {
-  leaveCriticalSection(&logMessageLock);
+unlockLogEntries (void) {
+  leaveCriticalSection(&logEntriesLock);
 }
 
-static LogEntry *logMessageStack = NULL;
+static LogEntry *logEntryStack = NULL;
 
 const LogEntry *
 getNewestLogEntry (int freeze) {
-  lockLogMessages();
-  LogEntry *message = logMessageStack;
-  if (freeze && message) message->noSquash = 1;
-  unlockLogMessages();
-  return message;
+  lockLogEntries();
+  LogEntry *entry = logEntryStack;
+  if (freeze && entry) entry->noSquash = 1;
+  unlockLogEntries();
+  return entry;
 }
 
 void
-pushLogMessage (const char *message) {
-  lockLogMessages();
-  pushLogEntry(&logMessageStack, message, (LPO_NOLOG | LPO_SQUASH));
-  unlockLogMessages();
+pushLogMessage (const char *text) {
+  lockLogEntries();
+  pushLogEntry(&logEntryStack, text, (LPO_NOLOG | LPO_SQUASH));
+  unlockLogEntries();
 }

@@ -621,16 +621,16 @@ makeMidiInstrumentMenuStrings (void) {
 #endif /* HAVE_MIDI_SUPPORT */
 
 static Menu *logMessagesMenu = NULL;
-static const LogEntry *newestLogMessage = NULL;
+static const LogEntry *newestLogEntry = NULL;
 
 static int
-addNewLogMessages (const LogEntry *message) {
-  if (message == newestLogMessage) return 1;
-  if (!addNewLogMessages(getPreviousLogEntry(message))) return 0;
+addNewLogMessages (const LogEntry *entry) {
+  if (entry == newestLogEntry) return 1;
+  if (!addNewLogMessages(getPreviousLogEntry(entry))) return 0;
 
   MenuString name;
-  const TimeValue *time = getLogEntryTime(message);
-  unsigned int count = getLogEntryCount(message);
+  const TimeValue *time = getLogEntryTime(entry);
+  unsigned int count = getLogEntryCount(entry);
 
   if (time) {
     char buffer[0X20];
@@ -648,10 +648,10 @@ addNewLogMessages (const LogEntry *message) {
     name.comment = NULL;
   }
 
-  MenuItem *item = newTextMenuItem(logMessagesMenu, &name, getLogEntryText(message));
+  MenuItem *item = newTextMenuItem(logMessagesMenu, &name, getLogEntryText(entry));
   if (!item) return 0;
 
-  newestLogMessage = message;
+  newestLogEntry = entry;
   return 1;
 }
 

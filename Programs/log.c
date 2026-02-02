@@ -312,11 +312,11 @@ writeLogRecord (const TimeValue *when, const char *record) {
 }
 
 static int
-writePreviousLogEntries (const LogEntry *message) {
-  if (!message) return 1;
-  if (!writePreviousLogEntries(getPreviousLogEntry(message))) return 0;
+writePreviousLogEntries (const LogEntry *entry) {
+  if (!entry) return 1;
+  if (!writePreviousLogEntries(getPreviousLogEntry(entry))) return 0;
 
-  writeLogRecord(getLogEntryTime(message), getLogEntryText(message));
+  writeLogRecord(getLogEntryTime(entry), getLogEntryText(entry));
   return 1;
 }
 
