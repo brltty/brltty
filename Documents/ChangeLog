@@ -1,6 +1,102 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+February 17, 2026:
+ - BRLTTY 6.9 released:
+   General changes:
+      Cursor routing no longer spawns an additional process or thread.
+      Soft cursor detection (for applications that use a visual cursor) has been added
+      (must be enabled within the Navigation Options submenu).
+      Multi-line cursor routing has been fixed.
+      A screen driver can now provide full (RGB) color for each character.
+      The DESCCHAR command now shows actual color names if RGB is provided.
+      Time selectors within the Preferences Menu now adjust by 0.05 (rather than 0.1) seconds.
+      Timestamps within the Log Messages submenu now contain their milliseconds component.
+      Command line and configuration file parsing errors are now written to the log file.
+      Failure to connect to a Bluetooth device no longer spams the log.
+      Failure to open a HID device no longer spams the log.
+   New braille navigation commands:
+      COLOR: Show just the VGA or RGB color of the selected character.
+      It's been bound to a long press of a routing key.
+      Use this command, rather than DESCCHAR, if you just want to know the color.
+   New speech navigation commands:
+      SPEAK_CURR_PWRD: Say the current partial word.
+      SPEAK_PREV_PWRD: Move to and say the previous partial word.
+      SPEAK_NEXT_PWRD: Move to and say the next partial word.
+      SPELL_CURR_PWRD: Spell the current partial word.
+      SPELL_CURR_LINE: Spell the current line.
+      See the laptop and keypad keyboard tables for related binding changes
+      (more specifically, see the kp_speak and kp_say keyboard subtables).
+   EuroBraille braille driver changes:
+      The b.note and b.book models are now supported.
+      Missing dependency rules for building the eutp command have been added.
+   HandyTech braille driver changes:
+      The Android-specific key bindings now work.
+   HIMS braille driver:
+      The BrailleSense 6 is now detected properly when using Bluetooth.
+   HumanWare braille driver changes:
+      All of the models that support Bluetooth HID are now recognized by Udev.
+   Virtual braille driver:
+      This driver has been removed.
+   AtSpi2 screen driver changes:
+      Helpful text is now shown for widgets that don't have a text interface.
+   Linux screen driver changes:
+      Disabling wide character padding now actually works when using a newer kernel.
+   Tmux screen driver:
+      This is a new screen driver.
+      Its two-letter code is tx.
+      It supports full (RGB) color.
+      The scrollback buffer, choose-tree, and display-menu features aren't supported.
+      The brltty-tmux command has been added.
+   Speech changes:
+      Navigating by partial words has been restored to the original bindings.
+      Navigating by full words has been retained with different bindings.
+      A command to spell the current line has been added.
+      Spelling a word or line now speaks all of the punctuation symbols.
+      Autorepeat for navigating by character, word, and line has bee slowed down so it can be heard.
+      These selectors have been added to the Speech Options submenu:
+         Character Autorepeat Interval: defaults to 0.25 seconds
+         Word Autorepeat Interval:      defaults to 0.4 seconds
+         Line Autorepeat Interval:      defaults to 0.6 seconds
+   BrlAPI changes:
+      The version is now 0.8.8 (it was 0.8.7).
+      Pending braille output is now flushed whenever a client leaves a tty.
+      A problem when determining the tty number for a client session has been resolved.
+   Text table changes:
+      The no-break space - U+00A0 - has been added to en-nabcc as dots 7,8.
+   Contraction table changes:
+      de-1998 is now deprecated and has been removed.
+      de-2015 is now folded into de-g2 and has been removed.
+      de-g2 has been updated.
+   Linux changes:
+      Missing special devices are now created within an isolated file system.
+   Windows changes:
+      64-bit builds using Msys2 are now supported.
+      The speech drivers for the Alva, BrailleLite, and CombiBraille are now included.
+   Android changes:
+      The targeted API level has been increased to 36 (Android 16).
+      The minimum API level has been increased to 27 (Android 8.1).
+      The NDK (native development kit) now being used is r27b.
+      The new 16-kilobyte page size requirement is now supported.
+      The top-level build is now configured for arm 64-bit (rather than for arm 32-bit).
+      The edge-to-edge screen rendering model is now supported.
+      The DESCCHAR command now includes the character's name.
+      The Canute braille driver is now included.
+   brltty-pty changes:
+      The screen, screen-256color, tmux, and tmux-256color terminal types are now supported.
+      The RGB escape sequence - 38;2 - is now supported.
+      The bright color escape sequences - 90-97 and 100-107 - are now supported.
+   Build Changes:
+      Scripts now use the screen's width (rather than assume 72) for help (-h) output.
+      The brltty-lscmds command has been renamed to brltty-cmdref.
+      brltty-ctb's --reformat-text [-r] option has been fixed and is now documented.
+      The brltty-tmux command has been added.
+      The cmdtest command has been added.
+      The colortest command has been added.
+      The all action of the msgtest command has been renamed to list.
+      Cross-compiling the Java bindings is now supported.
+      The Lua bindings are no longer installed in a local directory unless there's no other alternative.
+
 July 5, 2025:
  - BRLTTY 6.8 released:
    General changes:
