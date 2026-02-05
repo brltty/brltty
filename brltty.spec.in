@@ -777,9 +777,9 @@ Speech changes:
    Spelling a word or line now speaks all of the punctuation symbols.
    Autorepeat for navigating by character, word, and line has bee slowed down so it can be heard.
    These selectors have been added to the Speech Options submenu:
-      Character Autorepeat Interval: default is 0.25 seconds
-      Word Autorepeat Interval:      default is 0.4 seconds
-      Line Autorepeat Interval:      default is 0.6 seconds
+      Character Autorepeat Interval: defaults to 0.25 seconds
+      Word Autorepeat Interval:      defaults to 0.4 seconds
+      Line Autorepeat Interval:      defaults to 0.6 seconds
 BrlAPI changes:
    The version is now 0.8.8 (it was 0.8.7).
    Pending braille output is now flushed whenever a client leaves a tty.
