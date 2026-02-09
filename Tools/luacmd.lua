@@ -27,6 +27,7 @@ function showLibraryDirectory ()
 
     if directory:sub(1,1) ~= "/" then goto next end
     if stringContains(directory, "?") then goto next end
+    if stringContains(directory, "/local/") then goto next end
 
     print(directory)
     break
