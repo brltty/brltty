@@ -779,7 +779,7 @@ static const ProtocolEntry protocol_BrailleSense = {
 
 static const ProtocolEntry protocol_BrailleSense6 = {
   .modelName = "BrailleSense 6",
-  .resourceNamePrefix = "H632B",
+  .resourceNamePrefix = "BrailleSense6",
   .keyTable = &KEY_TABLE_DEFINITION(scroll),
   .probeIdentity = probeIdentity_BrailleSense6,
   .getDefaultCellCount = getDefaultCellCount_BrailleSense,
