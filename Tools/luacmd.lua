@@ -18,6 +18,8 @@
 require("brltty-prologue")
 
 function showLibraryDirectory ()
+  local localDirectory = nil
+
   for number, component in ipairs(splitString(package.cpath, ";")) do
     local directory, name = component:match("^(.*)/(.-)$")
     if name ~= "?.so" then goto next end
@@ -27,12 +29,21 @@ function showLibraryDirectory ()
 
     if directory:sub(1,1) ~= "/" then goto next end
     if stringContains(directory, "?") then goto next end
-    if stringContains(directory, "/local/") then goto next end
 
-    print(directory)
-    break
+    if not stringContains(directory, "/local/") then
+      print(directory)
+      break
+    end
+
+    if not localDirectory then
+      localDirectory = directory
+    end
 
   ::next::
+  end
+
+  if localDirectory then
+    print(localDirectory)
   end
 end
 
