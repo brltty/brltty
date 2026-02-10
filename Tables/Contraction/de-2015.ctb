@@ -34,7 +34,6 @@ class hilmnrsu hilmnrsu
 class l l
 class lnr lnr
 class cegn cegn
-class cost cost
 class st st
 class konsonant bcdfghjklmnpqrstvwxyz
 
@@ -231,7 +230,7 @@ always geinträg 1245-1246-5-2345-1245
 always geinwirk 1245-1246-2456-13
 always gelektro 1245-13456-15-13-2345-1235-135
 
-
+always geißel 1245-146-6-2346-13456
 
 
 
@@ -241,13 +240,17 @@ word bel 12-13456
 before konsonant always bem 12-12356
 before konsonant always ben 12-14
 before konsonant always ber 12-12456
+always säuber 234-34-12-12456
 always schrauber 156-1235-16-12-12456
 always zauber 1356-16-12-12456
+
 before konsonant always gel 1245-13456 klingelton shouldn't use the ge-contraction
 prfword gelei 1245-13456-146
 prfword geleien 1245-13456-146-14
 always evangel 15-1236-235-1245-13456
 always kegel 13-15-1245-13456
+always kugel 13-136-1245-13456
+always segel 234-15-1245-13456
 
 before konsonant always gen 1245-14
 always genetik 1245-14-15-2345-24-13
@@ -299,7 +302,7 @@ begmidword saiten 234-1-24-2345-14
 begword seiten 234-146-2345-14
 always breitseiten 12-1235-146-2345-234-146-2345-14
 always musterseiten 134-136-23456-12456-234-146-2345-14
-begmidword rückseiten 123-46-234-146-2345-14
+begmidword rückseiten 1235-46-234-146-2345-14
 always unterseiten 2-256-234-146-2345-14
 begmidword spalten 234-1234-25-2345-14
 
@@ -394,6 +397,7 @@ always sschläg 234-5-156-1245
 always sschlaeg 234-5-156-1245
 always sschließ 234-156-2346
 always sschmuck 234-156-134-136-46
+always eschnur 15-156-1345-136-1235 shouldn't use the nur-contraction
 always sschnur 234-156-1345-136-1235 shouldn't use the nur-contraction
 always sschool 234-234-1456-135-135-123 foreign word, sch-contraction not allowed
 always sschreib 234-156-12
@@ -556,7 +560,7 @@ endword bels 12-13456-234 shouldn't use the be-contraction
 midword belläng 12-13456-5-123-1245 kabellänge shouldn't use the ll-contraction
 midword bellaeng 12-13456-5-123-1245
 midendword belung 12-13456-136
-before st midendword belungs 12-13456-136-234
+before cost midendword belungs 12-13456-136-234
 always belveder 12-13456-1236-15-145-12456 shouldn't use the be-contraction
 always wirbel 2456-24-1235-12-13456 shouldn't use the be-contraction
 endword ben 12-14 shouldn't use the be-contraction
@@ -606,7 +610,7 @@ prfword geln 1245-13456-1345
 prfword gelns 1245-13456-1345-234
 prfword gels 1245-13456-234
 midendword gelung 1245-13456-136
-before st midendword gelungs 1245-13456-136-234
+before cost midendword gelungs 1245-13456-136-234
 prfword gem 1245-12356 shouldn't use the ge-contraction
 prfword gen 1245-14 shouldn't use the ge-contraction
 midendword gend 1245-14-145 shouldn't use the ge-contraction
@@ -722,13 +726,13 @@ endword ungsfalls 136-234-124-12345-234
 endword zerfalls 1356-12456-124-12345-234
 
 midendword heit 125
-before s midword heits 125-234
+before cost midword heits 125-234
 always aufheiter 2-16-125-146-2345-12456
 always aufzuheiter 2-16-2-1356-125-146-2345-12456
 before t always geheiter 12346-125-146-2345-12456
 
 midendword keit 13
-before st midword keits 13-234
+before cost midword keits 13-234
 endword mal 134
 endword males 134-123456
 endword malig 134-45
@@ -783,6 +787,7 @@ sufword ansamm 235-234-1-1346
 always besamung 23-234-1-134-136
 begword gesam 12346-234-1-134 shouldn't use the sam-contraction
 begword gesamm 12346-234-1-1346 shouldn't use the sam-contraction
+always mosambik =
 midendword samariter 234-1-134-356-24-2345-12456
 midendword sammel 234-1-1346-13456 shouldn't use the sam-contraction
 always samml 234-1-1346-123 shouldn't use the sam-contraction
@@ -837,6 +842,7 @@ always beisammen 2-12-234-1-1346-14
 
 midendword schaft 156
 always barschaft 12-356-156-1-124-2345
+always nachbarschaft 1345-56-12-356-156
 always betonschaft 23-2345-135-1345-156-1-124-2345
 always federschaft 124-15-145-12456-156-1-124-2345
 always gummischaft 1245-136-1346-24-156-1-124-2345
@@ -872,7 +878,7 @@ before g always erzwun 12456-1356-2456-256
 before g always gezwun 12346-1356-2456-256
 prfword lunge 123-256-12346
 midendword terung 2345-12456-136
-before cst midword ungs 136-234 Bindungscharakter, Regierungschef
+before cost midword ungs 136-234 Bindungscharakter, Regierungschef
 always ungenau 256-12346-1345-16
 always ungeheuer 256-12346-125-126-12456
 always schwung 156-2456-256-1245 shouldn't use the ung-contraction
@@ -935,7 +941,6 @@ before g begword lun 123-256 shouldn't use the ung-contraction
 prfword maximal = shouldn't use the mal-contraction
 begmidword maximal 134-1-6-1346-24-134-25 shouldn't use the mal-contraction
 always tennis 2345-14-1345-24-234 shouldn't use the nis-contraction
-midendword ungscharakter 136-234-1456-13
 midendword zung 1356-136 auseinandersetzung shouldn't use the zu-contraction
 begword zung 1356-256-1245 shouldn't use the ung-contraction
 
@@ -1033,8 +1038,10 @@ prfword laufst 123-16-124-23456
 prfword lauft 123-16-124-2345
 always lauffläch 123-16-124-124-123-345-1456
 always laufkäfer 123-16-124-13-345-124-12456
+always laufleistung 123-16-124-123-146-23456-136
 always laufricht 123-16-124-2-3456
 always laufsohl 123-16-124-234-135-125-123
+always laufstreck 123-16-124-23456-1235-15-46
 always laufzahl 123-16-124-1356-123
 always laufzeit 123-16-124-1356-2345
 always ablauf 1-12-123-16-124 shouldn't use the auf-contraction
@@ -1051,20 +1058,25 @@ sufword entlauf 2346-123-16-124
 always erstlauf 12456-23456-123-16-124
 always feuerlauf 124-126-12456-123-16-124
 always flusslauf 124-123-136-2346-123-16-124
+always freilauf 124-1235-146-123-16-124
 always gleichlauf 1245-1456-123-16-124
 always handlauf 125-145-123-16-124
 always hinlauf 125-35-123-16-124
 always hochlauf 125-135-1456-123-16-124
 always kunstlauf 13-256-23456-123-16-124
+always langlauf 123-1245-123-16-124
 always lebenslauf 123-12-14-234-123-16-124
 always leerlauf 123-15-15-1235-123-16-124
 always leichtlauf 123-1456-123-16-124
 always mehrlauf 2-2356-123-16-124
+always nachlauf 1345-56-123-16-124
 always notlauf 1345-135-2345-123-16-124
+always rücklauf 1235-46-123-16-124
 always schnelllauf 156-1345-15-12345-123-16-124
 always suchlauf 234-136-1456-123-16-124
 always unterlauf 2-256-123-16-124
 always volkslauf 1236-13-234-123-16-124
+always vorlauf 2-26-123-16-124
 always gelaufen 12346-123-16-124-14
 always schlauf 156-123-16-124 shouldn't use the auf-contraction
 always schnauf 156-1345-16-124 shouldn't use the auf-contraction
@@ -1299,6 +1311,7 @@ sufword demo 145-12356-135 shouldn't use the dem-contraction
 prfword demo 145-12356-135
 prfword demos 145-12356-135-234
 always epidem 15-1234-24-145-12356
+always feldemission 124-13456-145-12356-24-2346-24-135-1345
 always ödem 246-145-12356
 always remmidemmi 1235-15-1346-24-145-15-1346-24
 always sendemast 234-14-145-15-134-1-23456
@@ -1390,6 +1403,17 @@ before i always masoch 134-1-234-135-1456
 word sofia =
 word sofias =
 word sofie 234-135-124-346
+prfword sog =
+prfword sogen 234-135-1245-14
+prfword sogene 234-135-1245-14-15
+prfword sogenem 234-135-1245-14-12356
+prfword sogenen 234-135-1245-14-14
+prfword sogener 234-135-1245-14-12456
+prfword sogenes 234-135-1245-14-123456
+prfword soges 234-135-1245-123456
+prfword sogs =
+prfword sogst 234-135-1245-23456
+prfword sogt =
 always sokrat =
 before i always solips =
 always solist 234-135-123-24-23456
@@ -1840,6 +1864,13 @@ always allesamt 1-15-234-1-134-2345 shouldn't use the es-contraction
 before t always alphabe 25-1234-125-1-23 shouldn't use the hab-contraction
 word also 1-135
 always ander 2-12456
+always landeraum 123-235-145-15-1235-16-134
+always landeroboter 123-235-145-15-1235-135-12-135-2345-12456
+always landerschließ 123-235-145-12456-156-2346
+always landerwerb 123-235-145-12456-2456-12456-12
+always landerweiter 123-235-145-12456-2456-2345-12456
+always landerzieh 123-235-145-12456-1356-346-125
+always mäander 134-345-235-145-12456
 always wander 2456-235-145-12456 wandern shouldn't use the ander-contraction
 sufword zander 1356-235-145-12456
 always änder 5-12456
@@ -2344,14 +2375,24 @@ before b always bekle 23-13-123-15
 before b always einkle 1246-13-123-15
 before b always festkle 124-15-23456-13-123-15
 before t always gekleb 12346-13-123-15-12
+before b always heißkle 125-146-6-2346-13-123-15
+always huckleberry 125-136-46-123-15-12-12456-1235-6-13456
+before b always kaltkle 13-25-2345-13-123-15
 before b begword kle =
+always klebenbleib 13-123-15-12-14-12-12
+always klebenblieb 13-123-15-12-14-12-123-346-12
 always klebeband 13-123-15-23-12-235-145 shouldn't use the leb-contraction
 always klebebänder 13-123-15-23-12-345-1345-145-12456 shouldn't use the leb- nor änder-contraction
 always klebebild 13-123-15-23-12-24-123-145
 always klebstoff 13-123-15-12-23456-135-124-124
+always klebung 13-123-15-12-136
+before b always selbstkle 234-23456-13-123-15
 before b always überkle 2-1256-13-123-15
 before b begword verkle 36-13-123-15
 before b midword verkle 1236-12456-13-123-15
+before b always hinkle 125-35-13-123-15
+before b always zukle 2-1356-13-123-15
+before b always zusammenkle 1356-234-13-123-15
 
 always leicht 123-1456
 before t begword bleich 12-123-146-1456
@@ -2368,6 +2409,7 @@ always demaschin 145-15-134-156
 always emaschin 15-134-156
 always mmaschin 134-134-156
 always nähmaschin 1345-345-125-134-156
+always parmaschinken 1234-356-134-1-156-35-13-14
 always zugmaschin 1356-136-1245-134-156
 
 before e always abchasi 1-12-1456-1-234-24
@@ -2402,6 +2444,8 @@ before e always eurasi 126-1235-1-234-24
 before e always evangeli 15-1236-235-1245-13456-24
 before e always fäkali 124-345-13-25-24
 before e always flexitari 124-123-15-6-1346-24-2345-356-24
+before e always foli =
+always folier 124-135-123-346-1235
 before e always galici 1245-25-24-6-14-24
 before e always galli 1245-1-12345-24
 before e always georgi 1245-15-26-1245-24
@@ -2765,6 +2809,7 @@ always stand 2-23456
 always ständ 5-23456
 always staend 5-23456
 always dienständer 145-346-1345-23456-5-12456
+sufword laständer 123-1-23456-5-12456
 
 always stell 2-13456
 before l sufword bastel 12-1-23456-13456

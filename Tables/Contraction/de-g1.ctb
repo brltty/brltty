@@ -22,6 +22,7 @@
 include de-g0.ctb
 
 class cst cst
+class cost cost
 class e e
 class g g
 class s s
@@ -55,7 +56,7 @@ begmidword dien 145-346-1345
 always indien = shouldn't use the ie-contraction
 midendword ietät =
 always spezies =
-before cst midword ungs = Bindungscharakter, Regierungschef
+before cost midword ungs = Bindungscharakter, Regierungschef
 
 # unsolvable problems:
 # die Premiere vs. ich premiere

@@ -594,13 +594,15 @@ always mainboard =
 always kitaleit 13-24-2345-1-123-146-2345 shouldn't use the al-contraction
 always klageruf 13-123-1-12346-1235-136-124
 sufword klang 13-123-235-1245 shouldn't use the lang-contraction
-sufword klebe 13-123-15-23 shouldn't use the leb-contraction
+word klebe = shouldn't use the leb-contraction
+begword klebe 13-123-15-23 shouldn't use the leb-contraction
 endword klebe = shouldn't use the leb-contraction
 endword kleber 13-123-15-12-12456 shouldn't use the leb-contraction
 endword klebern 13-123-15-12-12456-1345 shouldn't use the leb-contraction
 endword klebers 13-123-15-12-12456-234 shouldn't use the leb-contraction
 prfword kleben 13-123-15-12-14
 prfword klebens 13-123-15-12-14-234
+always fabrikleben 124-1-12-1235-24-13-123-12-14
 always klebend 13-123-15-12-14-145
 before e always komödi = shouldn't use the ie-contraction
 prfword komödien 13-135-134-246-145-24-14
@@ -1132,7 +1134,6 @@ always terungleich 2345-12456-256-1245-1456 shouldn't use the ung-contraction
 always unglimpf 256-1245-123-24-134-1234-124
 always unglück 256-1245-46
 always terunglück 2345-12456-256-1245-46
-midendword ungsobjek 136-234-135-12-245-15-13 shouldn't use the so-contraction
 always überbrück 2-1256-12-1235-1256-46
 sufword vasallen 1236-1-234-1-12345-14 shouldn't use the allen-contraction
 always vegetarier 1236-15-12346-2345-356-24-12456
