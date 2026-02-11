@@ -1,0 +1,54 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2025 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+assignGlobal dot1 Dot1
+assignGlobal dot2 Dot2
+assignGlobal dot3 Dot3
+assignGlobal dot4 Dot4
+assignGlobal dot5 Dot5
+assignGlobal dot6 Dot6
+assignGlobal dot7 Dot7
+assignGlobal dot8 Dot8
+
+assignGlobal a \{dot1}
+assignGlobal b \{dot1}+\{dot2}
+assignGlobal c \{dot1}+\{dot4}
+assignGlobal d \{dot1}+\{dot4}+\{dot5}
+assignGlobal e \{dot1}+\{dot5}
+assignGlobal f \{dot1}+\{dot2}+\{dot4}
+assignGlobal g \{dot1}+\{dot2}+\{dot4}+\{dot5}
+assignGlobal h \{dot1}+\{dot2}+\{dot5}
+assignGlobal i \{dot2}+\{dot4}
+assignGlobal j \{dot2}+\{dot4}+\{dot5}
+assignGlobal k \{dot1}+\{dot3}
+assignGlobal l \{dot1}+\{dot2}+\{dot3}
+assignGlobal m \{dot1}+\{dot3}+\{dot4}
+assignGlobal n \{dot1}+\{dot3}+\{dot4}+\{dot5}
+assignGlobal o \{dot1}+\{dot3}+\{dot5}
+assignGlobal p \{dot1}+\{dot2}+\{dot3}+\{dot4}
+assignGlobal q \{dot1}+\{dot2}+\{dot3}+\{dot4}+\{dot5}
+assignGlobal r \{dot1}+\{dot2}+\{dot3}+\{dot5}
+assignGlobal s \{dot2}+\{dot3}+\{dot4}
+assignGlobal t \{dot2}+\{dot3}+\{dot4}+\{dot5}
+assignGlobal u \{dot1}+\{dot3}+\{dot6}
+assignGlobal v \{dot1}+\{dot2}+\{dot3}+\{dot6}
+assignGlobal w \{dot2}+\{dot4}+\{dot5}+\{dot6}
+assignGlobal x \{dot1}+\{dot3}+\{dot4}+\{dot6}
+assignGlobal y \{dot1}+\{dot3}+\{dot4}+\{dot5}+\{dot6}
+assignGlobal z \{dot1}+\{dot3}+\{dot5}+\{dot6}
+

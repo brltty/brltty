@@ -16,32 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-assign a Dot1
-assign b Dot1+Dot2
-assign c Dot1+Dot4
-assign d Dot1+Dot4+Dot5
-assign e Dot1+Dot5
-assign f Dot1+Dot2+Dot4
-assign g Dot1+Dot2+Dot4+Dot5
-assign h Dot1+Dot2+Dot5
-assign i Dot2+Dot4
-assign j Dot2+Dot4+Dot5
-assign k Dot1+Dot3
-assign l Dot1+Dot2+Dot3
-assign m Dot1+Dot3+Dot4
-assign n Dot1+Dot3+Dot4+Dot5
-assign o Dot1+Dot3+Dot5
-assign p Dot1+Dot2+Dot3+Dot4
-assign q Dot1+Dot2+Dot3+Dot4+Dot5
-assign r Dot1+Dot2+Dot3+Dot5
-assign s Dot2+Dot3+Dot4
-assign t Dot2+Dot3+Dot4+Dot5
-assign u Dot1+Dot3+Dot6
-assign v Dot1+Dot2+Dot3+Dot6
-assign w Dot2+Dot4+Dot5+Dot6
-assign x Dot1+Dot3+Dot4+Dot6
-assign y Dot1+Dot3+Dot4+Dot5+Dot6
-assign z Dot1+Dot3+Dot5+Dot6
+include chords-global.kti
 
 assign toggleOff Dot7
 assign toggleOn Dot8
@@ -171,5 +146,5 @@ include menu.kti
 endIf
 
 ifPlatform android
-include android-chords.kti
+include chords-android.kti
 endif
