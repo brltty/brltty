@@ -33,15 +33,19 @@ import android.view.accessibility.AccessibilityWindowInfo;
 
 import android.graphics.Rect;
 import android.graphics.Point;
-import android.graphics.Typeface;
 
 import android.text.TextUtils;
 import android.text.Spanned;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
+
 import android.text.style.StrikethroughSpan;
-import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
+
+import android.text.style.StyleSpan;
+import android.graphics.Typeface;
+
+import android.text.style.ForegroundColorSpan;
+import android.text.style.BackgroundColorSpan;
+import android.graphics.Color;
 
 import java.io.IOException;
 
@@ -559,10 +563,41 @@ public abstract class ScreenDriver {
     return 0;
   }
 
-  public static final long CHAR_BOLD           = 0X1_0000L;
-  public static final long CHAR_ITALIC         = 0X2_0000L;
-  public static final long CHAR_UNDERLINE      = 0X4_0000L;
-  public static final long CHAR_STRIKE_THROUGH = 0X8_0000L;
+  public static final long CHAR_FLAG_BOLD       = 0X01_0000L;
+  public static final long CHAR_FLAG_ITALIC     = 0X02_0000L;
+  public static final long CHAR_FLAG_UNDERLINE  = 0X04_0000L;
+  public static final long CHAR_FLAG_STRIKE     = 0X08_0000L;
+  public static final long CHAR_FLAG_FOREGROUND = 0X10_0000L;
+  public static final long CHAR_FLAG_BACKGROUND = 0X20_0000L;
+
+  private static long makeColorFlags (int color) {
+    long flags = Color.red(color) >> 1;
+    flags <<= 7;
+    flags |= Color.green(color) >> 1;
+    flags <<= 7;
+    flags |= Color.blue(color) >> 1;
+    return flags;
+  }
+
+  private static long getCharacterFlags (Object span) {
+    if (span instanceof StyleSpan) {
+      switch (((StyleSpan)span).getStyle()) {
+        case Typeface.BOLD:        return CHAR_FLAG_BOLD;
+        case Typeface.ITALIC:      return CHAR_FLAG_ITALIC;
+        case Typeface.BOLD_ITALIC: return CHAR_FLAG_BOLD | CHAR_FLAG_ITALIC;
+      }
+    } else if (span instanceof UnderlineSpan) {
+      return CHAR_FLAG_UNDERLINE;
+    } else if (span instanceof StrikethroughSpan) {
+      return CHAR_FLAG_STRIKE;
+    } else if (span instanceof ForegroundColorSpan) {
+      return CHAR_FLAG_FOREGROUND | (makeColorFlags(((ForegroundColorSpan)span).getForegroundColor()) << 22);
+    } else if (span instanceof BackgroundColorSpan) {
+      return CHAR_FLAG_BACKGROUND | (makeColorFlags(((BackgroundColorSpan)span).getBackgroundColor()) << 43);
+    }
+
+    return 0;
+  }
 
   public static long[] getRowText (int row) {
     RenderedScreen screen = getCurrentRenderedScreen();
@@ -580,29 +615,7 @@ public abstract class ScreenDriver {
 
       if (spans != null) {
         for (Object span : spans) {
-          long flags = 0;
-
-          if (span instanceof StyleSpan) {
-            StyleSpan style = (StyleSpan)span;
-
-            switch (style.getStyle()) {
-              case Typeface.BOLD:
-                flags = CHAR_BOLD;
-                break;
-
-              case Typeface.ITALIC:
-                flags = CHAR_ITALIC;
-                break;
-
-              case Typeface.BOLD_ITALIC:
-                flags = CHAR_BOLD | CHAR_ITALIC;
-                break;
-            }
-          } else if (span instanceof UnderlineSpan) {
-            flags = CHAR_UNDERLINE;
-          } else if (span instanceof StrikethroughSpan) {
-            flags = CHAR_STRIKE_THROUGH;
-          }
+          long flags = getCharacterFlags(span);
 
           if (flags != 0) {
             int start = spannedText.getSpanStart(span);
