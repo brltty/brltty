@@ -43,10 +43,12 @@ static const char *problemText;
 static ScreenCharacter defaultCharacter;
 static RGBColor selectColor;
 
-#define CHAR_FLAG_BOLD           UINT64_C(0X10000)
-#define CHAR_FLAG_ITALIC         UINT64_C(0X20000)
-#define CHAR_FLAG_UNDERLINE      UINT64_C(0X40000)
-#define CHAR_FLAG_STRIKE_THROUGH UINT64_C(0X80000)
+#define CHAR_FLAG_BOLD       UINT64_C(0X010000)
+#define CHAR_FLAG_ITALIC     UINT64_C(0X020000)
+#define CHAR_FLAG_UNDERLINE  UINT64_C(0X040000)
+#define CHAR_FLAG_STRIKE     UINT64_C(0X080000)
+#define CHAR_FLAG_FOREGROUND UINT64_C(0X100000)
+#define CHAR_FLAG_BACKGROUND UINT64_C(0X200000)
 
 static int
 findScreenDriverClass (void) {
@@ -242,6 +244,17 @@ describe_AndroidScreen (ScreenDescription *description) {
   }
 }
 
+static RGBColor
+colorToRGB (uint64_t color) {
+  RGBColor rgb;
+  rgb.b = (color & 0X7F) << 1;
+  color >>= 7;
+  rgb.g = (color & 0X7F) << 1;
+  color >>= 7;
+  rgb.r = (color & 0X7F) << 1;
+  return rgb;
+}
+
 static int
 getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jlongArray jRowText, jint rowIndex, jint columnIndex, jint columnCount) {
   jint rowLength = (*env)->GetArrayLength(env, jRowText);
@@ -286,10 +299,29 @@ getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jlongArray jRowText,
           *sc = defaultCharacter;
           sc->text = text;
 
-          if (element & CHAR_FLAG_BOLD) sc->color.isBold = 1;
-          if (element & CHAR_FLAG_ITALIC) sc->color.isItalic = 1;
-          if (element & CHAR_FLAG_UNDERLINE) sc->color.hasUnderline = 1;
-          if (element & CHAR_FLAG_STRIKE_THROUGH) sc->color.hasStrikeThrough = 1;
+          if (element & CHAR_FLAG_BOLD) {
+            sc->color.isBold = 1;
+          }
+
+          if (element & CHAR_FLAG_ITALIC) {
+            sc->color.isItalic = 1;
+          }
+
+          if (element & CHAR_FLAG_UNDERLINE) {
+            sc->color.hasUnderline = 1;
+          }
+
+          if (element & CHAR_FLAG_STRIKE) {
+            sc->color.hasStrikeThrough = 1;
+          }
+
+          if (element & CHAR_FLAG_FOREGROUND) {
+            sc->color.foreground = colorToRGB((element >> 22));
+          }
+
+          if (element & CHAR_FLAG_BACKGROUND) {
+            sc->color.background = colorToRGB((element >> 43));
+          }
 
           sc += 1;
         }
