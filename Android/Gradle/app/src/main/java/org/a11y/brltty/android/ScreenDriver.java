@@ -605,6 +605,7 @@ public abstract class ScreenDriver {
     int length = text.length();
     long[] characters = new long[length];
 
+Log.i(LOG_TAG, String.format("scr row: %s", text));
     for (int i=0; i<length; i+=1) {
       characters[i] = text.charAt(i);
     }
@@ -617,6 +618,7 @@ public abstract class ScreenDriver {
         for (Object span : spans) {
           long flags = getCharacterFlags(span);
 
+Log.i(LOG_TAG, String.format("scr clr: %lx %s \"%s\"", flags, span.getClass().getSimpleName(), text));
           if (flags != 0) {
             int start = spannedText.getSpanStart(span);
             int end = spannedText.getSpanEnd(span);
