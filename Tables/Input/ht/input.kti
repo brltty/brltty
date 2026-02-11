@@ -35,3 +35,18 @@ bind \{brailleOff} CONTEXT+default
 context default
 bind \{brailleOn} CONTEXT+braille
 bind \{brailleOff} CONTEXT+default
+
+ifPlatform android
+  assign dot1 B4
+  assign dot2 B3
+  assign dot3 B2
+  assign dot4 B5
+  assign dot5 B6
+  assign dot6 B7
+  assign dot7 B1
+  assign dot8 B8
+  include ../chords-global.kti
+
+  assign chord \{space}+
+  include ../chords-android.kti
+endif
