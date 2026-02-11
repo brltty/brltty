@@ -18,8 +18,8 @@
 
 include chords-global.kti
 
-assign toggleOff Dot7
-assign toggleOn Dot8
+assign toggleOff \{dot7}
+assign toggleOn \{dot8}
 
 beginVariables
 assign toggleKeys \{chord}\{b}
@@ -100,47 +100,47 @@ bind \{chord}\{x} PASTE:PASTE_ALTMODE
 bind \{chord}\{x}+\{toggleOff} CLIP_RESTORE
 bind \{chord}\{x}+\{toggleOn} CLIP_SAVE
 
-bind \{chord}Dot2+Dot3+Dot5 COMPBRL6+on
-bind \{chord}Dot2+Dot3+Dot6 COMPBRL6+off
+bind \{chord}\{dot2}+\{dot3}+\{dot5} COMPBRL6+on
+bind \{chord}\{dot2}+\{dot3}+\{dot6} COMPBRL6+off
 
-bind \{chord}Dot1+Dot3+\{toggleOff} BRLKBD+off
-bind \{chord}Dot1+Dot3+\{toggleOn} BRLKBD+on
+bind \{chord}\{dot1}+\{dot3}+\{toggleOff} BRLKBD+off
+bind \{chord}\{dot1}+\{dot3}+\{toggleOn} BRLKBD+on
 
-bind \{chord}Dot4+Dot6+\{toggleOff} BRLUCDOTS+off
-bind \{chord}Dot4+Dot6+\{toggleOn} BRLUCDOTS+on
+bind \{chord}\{dot4}+\{dot6}+\{toggleOff} BRLUCDOTS+off
+bind \{chord}\{dot4}+\{dot6}+\{toggleOn} BRLUCDOTS+on
 
-bind \{chord}Dot3 KEY_CURSOR_LEFT
-bind \{chord}Dot6 KEY_CURSOR_RIGHT
-bind \{chord}Dot2 KEY_HOME
-bind \{chord}Dot5 KEY_END
-bind \{chord}Dot1 KEY_CURSOR_UP
-bind \{chord}Dot4 KEY_CURSOR_DOWN
+bind \{chord}\{dot3} KEY_CURSOR_LEFT
+bind \{chord}\{dot6} KEY_CURSOR_RIGHT
+bind \{chord}\{dot2} KEY_HOME
+bind \{chord}\{dot5} KEY_END
+bind \{chord}\{dot1} KEY_CURSOR_UP
+bind \{chord}\{dot4} KEY_CURSOR_DOWN
 
-bind \{chord}Dot2+Dot3 KEY_PAGE_UP
-bind \{chord}Dot5+Dot6 KEY_PAGE_DOWN
-bind \{chord}Dot4+Dot5 KEY_TAB
+bind \{chord}\{dot2}+\{dot3} KEY_PAGE_UP
+bind \{chord}\{dot5}+\{dot6} KEY_PAGE_DOWN
+bind \{chord}\{dot4}+\{dot5} KEY_TAB
 
-bind \{chord}Dot2+Dot5+Dot6 KEY_DELETE
-bind \{chord}Dot2+Dot6 KEY_ESCAPE
-bind \{chord}Dot3+Dot5 KEY_INSERT
+bind \{chord}\{dot2}+\{dot5}+\{dot6} KEY_DELETE
+bind \{chord}\{dot2}+\{dot6} KEY_ESCAPE
+bind \{chord}\{dot3}+\{dot5} KEY_INSERT
 
-bind \{chord}Dot1+Dot8 GUI
-bind \{chord}Dot4+Dot8 SHIFT
-bind \{chord}Dot2+Dot8 META
-bind \{chord}Dot5+Dot8 ALTGR
-bind \{chord}Dot3+Dot8 CONTROL
-bind \{chord}Dot6+Dot8 UPPER
-bind \{chord}Dot7+Dot8 UNSTICK
+bind \{chord}\{dot1}+\{dot8} GUI
+bind \{chord}\{dot4}+\{dot8} SHIFT
+bind \{chord}\{dot2}+\{dot8} META
+bind \{chord}\{dot5}+\{dot8} ALTGR
+bind \{chord}\{dot3}+\{dot8} CONTROL
+bind \{chord}\{dot6}+\{dot8} UPPER
+bind \{chord}\{dot7}+\{dot8} UNSTICK
 
 ifNotVar noUnchorded
 assignDefault commandDot7 KEY_BACKSPACE
 assignDefault commandDot8 KEY_ENTER
 
-bind Dot7 \{commandDot7}
-bind Dot8 \{commandDot8}
+bind \{dot7} \{commandDot7}
+bind \{dot8} \{commandDot8}
 
-bind \{chord}Dot7 PASSDOTS+dot7
-bind \{chord}Dot8 PASSDOTS+dot8
+bind \{chord}\{dot7} PASSDOTS+dot7
+bind \{chord}\{dot8} PASSDOTS+dot8
 
 include menu.kti
 endIf

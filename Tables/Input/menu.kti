@@ -18,15 +18,15 @@
 
 context menu
 
-bind Dot1 MENU_PREV_ITEM
-bind Dot4 MENU_NEXT_ITEM
+bind \{dot1} MENU_PREV_ITEM
+bind \{dot4} MENU_NEXT_ITEM
 
-bind Dot2 MENU_FIRST_ITEM
-bind Dot5 MENU_LAST_ITEM
+bind \{dot2} MENU_FIRST_ITEM
+bind \{dot5} MENU_LAST_ITEM
 
-bind Dot3 MENU_PREV_SETTING
-bind Dot6 MENU_NEXT_SETTING
+bind \{dot3} MENU_PREV_SETTING
+bind \{dot6} MENU_NEXT_SETTING
 
-bind Dot7 MENU_PREV_LEVEL
-bind Dot8 PREFMENU
+bind \{dot7} MENU_PREV_LEVEL
+bind \{dot8} PREFMENU
 

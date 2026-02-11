@@ -48,4 +48,5 @@ bind PanRight FWINRT
 
 bind RoutingKey ROUTE
 
+include ../chords-global.kti
 include ../menu.kti
