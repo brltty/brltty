@@ -123,6 +123,7 @@ static int
 construct_AndroidScreen (void) {
   defaultCharacter = defaultScreenCharacter;
   toRGBScreenColor(&defaultCharacter.color);
+  defaultCharacter.color.foreground.r = 0;
   selectColor.r = selectColor.g = selectColor.b = UINT8_MAX;
 
   for (ReportEntry *rpt=reportEntries; rpt->character; rpt+=1) {
@@ -278,6 +279,7 @@ getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jlongArray jRowText,
         uint64_t element = cRowText[current];
         wchar_t text = element & UINT16_MAX;
 
+logBytes(LOG_NOTICE, "scr elem", &element, sizeof(element));
         if (isSurrogateCodepoint(text)) {
           wchar_t high = text;
           text = UNICODE_REPLACEMENT_CHARACTER;
@@ -323,6 +325,7 @@ getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jlongArray jRowText,
             sc->color.background = colorToRGB((element >> 43));
           }
 
+logBytes(LOG_NOTICE, "scr char", sc, sizeof(*sc));
           sc += 1;
         }
 
