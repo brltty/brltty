@@ -756,6 +756,10 @@ New speech navigation commands:
 EuroBraille braille driver changes:
    The b.note and b.book models are now supported.
    Missing dependency rules for building the eutp command have been added.
+HandyTech braille driver changes:
+   The Android-specific key bindings now work.
+HIMS braille driver:
+   The BrailleSense 6 is now detected properly when using Bluetooth.
 HumanWare braille driver changes:
    All of the models that support Bluetooth HID are now recognized by Udev.
 Virtual braille driver:
@@ -814,4 +818,5 @@ Build Changes:
    The colortest command has been added.
    The all action of the msgtest command has been renamed to list.
    Cross-compiling the Java bindings is now supported.
+   The Lua bindings are no longer installed in a local directory unless there's no other alternative.
 
