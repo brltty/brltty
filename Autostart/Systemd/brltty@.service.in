@@ -28,6 +28,8 @@ RequiresMountsFor=@BRLAPI_SOCKETPATH@
 Wants=sound.target
 After=sound.target
 
+After=speech-dispatcher.service
+
 After=local-fs.target
 ConditionPathExists=%I
 
@@ -105,4 +107,3 @@ SupplementaryGroups=root
 
 # for reading the BrlAPI authorization key file
 SupplementaryGroups=brlapi
-
