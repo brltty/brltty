@@ -114,7 +114,7 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
   "effectively treating each sequence of unindented lines as a single paragraph.",
   "Empty lines and those which begin with whitespace aren't reformatted.",
   "",
-  "The default is for each output lie to be as long as it needs to be.",
+  "The default is for each output line to be as long as it needs to be.",
   "If, however, an explicit output width has been specified",
   "then longer output lines are word-wrapped at that width.",
 END_COMMAND_LINE_NOTES
