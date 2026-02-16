@@ -47,6 +47,9 @@ ifPlatform android
   assign dot8 B8
   include ../chords-global.kti
 
+  note For Android-specific navigation, use Left Space with the specified dot combination when in Navigation Mode.
+  note For web page structural navigation, use Right Space with the specified dot combination when in Input Mode.
+
   assign chord \{space}+
   include ../chords-android.kti
 endif
