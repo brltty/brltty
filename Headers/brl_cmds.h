@@ -278,6 +278,7 @@ typedef enum {
   BRL_CMD_SPEAK_NEXT_PWRD /* go to and speak next partial (identifier or symbols) word */,
   BRL_CMD_SPELL_CURR_PWRD /* spell current partial (identifier or symbols) word */,
   BRL_CMD_SPELL_CURR_LINE /* spell current line */,
+  BRL_CMD_COPY_SMART /* smart copy (URL, email, etc.) at character marked by CLIP_NEW or CLIP_ADD to clipboard */,
 
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;

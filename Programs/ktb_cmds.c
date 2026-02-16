@@ -111,6 +111,7 @@ static const CommandListEntry commandList_clipboard[] = {
   { .code = BRL_CMD_BLK(COPY_RECT) },
   { .code = BRL_CMD_BLK(CLIP_COPY) },
   { .code = BRL_CMD_BLK(CLIP_APPEND) },
+  { .code = BRL_CMD_COPY_SMART },
   { .code = BRL_CMD_PASTE },
   { .code = BRL_CMD_PASTE_ALTMODE },
   { .code = BRL_CMD_BLK(PASTE_HISTORY) },

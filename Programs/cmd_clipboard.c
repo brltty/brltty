@@ -484,6 +484,346 @@ findCharacters (const wchar_t **address, size_t *length, const wchar_t *characte
 }
 
 static int
+isURLChar (wchar_t ch) {
+  if (iswalnum(ch)) return 1;
+
+  switch (ch) {
+    /* unreserved */
+    case WC_C('-'): case WC_C('_'): case WC_C('.'): case WC_C('~'):
+    /* reserved (gen-delims + sub-delims) */
+    case WC_C(':'): case WC_C('/'): case WC_C('?'): case WC_C('#'):
+    case WC_C('['): case WC_C(']'): case WC_C('@'):
+    case WC_C('!'): case WC_C('$'): case WC_C('&'): case WC_C('\''):
+    case WC_C('('): case WC_C(')'): case WC_C('*'): case WC_C('+'):
+    case WC_C(','): case WC_C(';'): case WC_C('='): case WC_C('%'):
+      return 1;
+
+    default:
+      return 0;
+  }
+}
+
+static int
+isEmailLocalChar (wchar_t ch) {
+  if (iswalnum(ch)) return 1;
+
+  switch (ch) {
+    case WC_C('.'): case WC_C('_'): case WC_C('%'):
+    case WC_C('+'): case WC_C('-'):
+      return 1;
+
+    default:
+      return 0;
+  }
+}
+
+static int
+isEmailDomainChar (wchar_t ch) {
+  if (iswalnum(ch)) return 1;
+
+  switch (ch) {
+    case WC_C('.'): case WC_C('-'):
+      return 1;
+
+    default:
+      return 0;
+  }
+}
+
+static wchar_t *
+cpbLinearize (
+  ClipboardCommandData *ccd,
+  int *linearLen, int *targetOffset
+) {
+  int column = ccd->begin.column;
+  int row = ccd->begin.row;
+
+  int scanRadius = 5;
+  int startRow = row - scanRadius;
+  if (startRow < 0) startRow = 0;
+
+  int endRow = row + scanRadius;
+  if (endRow >= scr.rows) endRow = scr.rows - 1;
+
+  int numRows = endRow - startRow + 1;
+  int cols = scr.cols;
+  int totalCells = numRows * cols;
+
+  wchar_t *buf = allocateCharacters(totalCells);
+  if (!buf) return NULL;
+
+  if (!readScreenText(0, startRow, cols, numRows, buf)) {
+    free(buf);
+    return NULL;
+  }
+
+  /* collapse multiple spaces into one in place,
+   * tracking the target offset */
+  int rawTarget = ((row - startRow) * cols) + column;
+  int inSpace = 0;
+
+  *linearLen = 0;
+  *targetOffset = -1;
+
+  for (int i = 0; i < totalCells; i += 1) {
+    wchar_t ch = buf[i];
+
+    if (ch == WC_C(' ')) {
+      if (inSpace) {
+        if (i == rawTarget) *targetOffset = *linearLen - 1;
+        continue;
+      }
+
+      inSpace = 1;
+    } else {
+      inSpace = 0;
+    }
+
+    if (i == rawTarget) *targetOffset = *linearLen;
+    buf[*linearLen] = ch;
+    *linearLen += 1;
+  }
+
+  if (*targetOffset < 0) {
+    free(buf);
+    return NULL;
+  }
+
+  return buf;
+}
+
+static int
+tryURLCopy (ClipboardCommandData *ccd, wchar_t *buf, int len, int target) {
+  /* scan backward and forward for URL characters */
+  int start = target;
+  while (start > 0 && isURLChar(buf[start - 1])) start -= 1;
+
+  int end = target;
+  while (end < len - 1 && isURLChar(buf[end + 1])) end += 1;
+
+  int count = end - start + 1;
+  wchar_t *text = &buf[start];
+
+  /* strip trailing punctuation that is typically not part of URLs */
+  while (count > 0) {
+    wchar_t last = text[count - 1];
+
+    if (last == WC_C('.') || last == WC_C(',') || last == WC_C(';')) {
+      count -= 1;
+    } else if (last == WC_C(')') && !wmemchr(text, WC_C('('), count)) {
+      count -= 1;
+    } else {
+      break;
+    }
+  }
+
+  if (count < 1) return 0;
+
+  /* validate: must contain "://" with a valid scheme before it */
+  for (int i = 0; i < count - 2; i += 1) {
+    if (text[i] == WC_C(':') &&
+        text[i + 1] == WC_C('/') &&
+        text[i + 2] == WC_C('/')) {
+      if (i > 0 && iswalpha(text[0])) {
+        int valid = 1;
+
+        for (int j = 1; j < i; j += 1) {
+          wchar_t sc = text[j];
+
+          if (!iswalnum(sc) &&
+              sc != WC_C('+') &&
+              sc != WC_C('-') &&
+              sc != WC_C('.')) {
+            valid = 0;
+            break;
+          }
+        }
+
+        if (valid) return cpbEndOperation(ccd, text, count, 0);
+      }
+
+      break;
+    }
+  }
+
+  return 0;
+}
+
+static int
+tryEmailCopy (ClipboardCommandData *ccd, wchar_t *buf, int len, int target) {
+  /* find the '@' sign: scan outward from the target */
+  int at = -1;
+
+  if (buf[target] == WC_C('@')) {
+    at = target;
+  } else {
+    for (int dist = 1; ; dist += 1) {
+      int left = target - dist;
+      int right = target + dist;
+      int done = 1;
+
+      if (left >= 0) {
+        done = 0;
+        if (buf[left] == WC_C('@')) { at = left; break; }
+        if (!isEmailLocalChar(buf[left])) done = 1;
+      }
+
+      if (right < len) {
+        done = 0;
+        if (buf[right] == WC_C('@')) { at = right; break; }
+        if (!isEmailDomainChar(buf[right])) break;
+      }
+
+      if (done) break;
+    }
+  }
+
+  if (at < 1 || at >= len - 1) return 0;
+
+  /* scan backward from '@' for the local part */
+  int start = at - 1;
+  while (start > 0 && isEmailLocalChar(buf[start - 1])) start -= 1;
+  if (!iswalnum(buf[start])) return 0;
+
+  /* scan forward from '@' for the domain part */
+  int end = at + 1;
+  while (end < len - 1 && isEmailDomainChar(buf[end + 1])) end += 1;
+
+  /* strip trailing dots and hyphens from domain */
+  while (end > at + 1 && (buf[end] == WC_C('.') || buf[end] == WC_C('-'))) end -= 1;
+  if (!iswalnum(buf[end])) return 0;
+
+  /* domain must contain at least one dot */
+  {
+    int hasDot = 0;
+
+    for (int i = at + 1; i <= end; i += 1) {
+      if (buf[i] == WC_C('.')) { hasDot = 1; break; }
+    }
+
+    if (!hasDot) return 0;
+  }
+
+  int count = end - start + 1;
+  return cpbEndOperation(ccd, &buf[start], count, 0);
+}
+
+static int
+hasKnownTLD (const wchar_t *text, int len) {
+  static const char *const knownTLDs[] = {
+    "com", "org", "net", "edu", "gov",
+    "mil", "int",
+    "io", "dev", "app", "info", "biz",
+    "name", "pro", "coop", "museum",
+    NULL
+  };
+
+  /* find the last dot */
+  int lastDot = -1;
+  for (int i = len - 1; i >= 0; i -= 1) {
+    if (text[i] == WC_C('.')) { lastDot = i; break; }
+  }
+
+  if (lastDot < 0 || lastDot >= len - 1) return 0;
+
+  const wchar_t *tld = &text[lastDot + 1];
+  int tldLen = len - lastDot - 1;
+
+  /* two-letter TLDs are country codes - accept them all */
+  if (tldLen == 2 && iswalpha(tld[0]) && iswalpha(tld[1])) return 1;
+
+  for (const char *const *t = knownTLDs; *t; t += 1) {
+    int knownLen = strlen(*t);
+    if (knownLen != tldLen) continue;
+
+    int match = 1;
+    for (int i = 0; i < knownLen; i += 1) {
+      if (towlower(tld[i]) != (*t)[i]) { match = 0; break; }
+    }
+
+    if (match) return 1;
+  }
+
+  return 0;
+}
+
+static int
+tryHostnameCopy (ClipboardCommandData *ccd, wchar_t *buf, int len, int target) {
+  if (!isEmailDomainChar(buf[target])) return 0;
+
+  /* scan backward and forward for hostname characters */
+  int start = target;
+  while (start > 0 && isEmailDomainChar(buf[start - 1])) start -= 1;
+
+  int end = target;
+  while (end < len - 1 && isEmailDomainChar(buf[end + 1])) end += 1;
+
+  /* strip leading/trailing dots and hyphens */
+  while (start <= end && (buf[start] == WC_C('.') || buf[start] == WC_C('-'))) start += 1;
+  while (end >= start && (buf[end] == WC_C('.') || buf[end] == WC_C('-'))) end -= 1;
+
+  int count = end - start + 1;
+  wchar_t *text = &buf[start];
+
+  if (count < 1) return 0;
+
+  /* must contain at least one dot */
+  {
+    int hasDot = 0;
+    for (int i = 0; i < count; i += 1) {
+      if (text[i] == WC_C('.')) { hasDot = 1; break; }
+    }
+    if (!hasDot) return 0;
+  }
+
+  /* labels between dots must be non-empty */
+  {
+    int prevDot = -1;
+    for (int i = 0; i <= count; i += 1) {
+      if (i == count || text[i] == WC_C('.')) {
+        if (i - prevDot <= 1) return 0;
+        prevDot = i;
+      }
+    }
+  }
+
+  /* require www. prefix or a known TLD */
+  {
+    int hasWWW = 0;
+
+    if (count >= 4) {
+      if (towlower(text[0]) == WC_C('w') &&
+          towlower(text[1]) == WC_C('w') &&
+          towlower(text[2]) == WC_C('w') &&
+          text[3] == WC_C('.')) {
+        hasWWW = 1;
+      }
+    }
+
+    if (!hasWWW && !hasKnownTLD(text, count)) return 0;
+  }
+
+  return cpbEndOperation(ccd, text, count, 0);
+}
+
+static int
+cpbSmartCopy (ClipboardCommandData *ccd) {
+  int linearLen;
+  int targetOffset;
+  int copied = 0;
+
+  wchar_t *buf = cpbLinearize(ccd, &linearLen, &targetOffset);
+  if (!buf) return 0;
+
+  if (tryURLCopy(ccd, buf, linearLen, targetOffset)) copied = 1;
+  else if (tryEmailCopy(ccd, buf, linearLen, targetOffset)) copied = 1;
+  else if (tryHostnameCopy(ccd, buf, linearLen, targetOffset)) copied = 1;
+
+  free(buf);
+  return copied;
+}
+
+static int
 handleClipboardCommands (int command, void *data) {
   ClipboardCommandData *ccd = data;
 
@@ -510,6 +850,10 @@ handleClipboardCommands (int command, void *data) {
 
     case BRL_CMD_CLIP_RESTORE:
       alert(cpbRestore(ccd)? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
+      break;
+
+    case BRL_CMD_COPY_SMART:
+      if (!cpbSmartCopy(ccd)) alert(ALERT_COMMAND_REJECTED);
       break;
 
     {
