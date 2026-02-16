@@ -107,3 +107,4 @@ SupplementaryGroups=root
 
 # for reading the BrlAPI authorization key file
 SupplementaryGroups=brlapi
+
