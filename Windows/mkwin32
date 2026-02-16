@@ -225,8 +225,13 @@ cd "${temporaryDirectory}"
 temporaryDirectory="$(pwd -W)"
 
 logTask "copying source tree"
+resolveDirectory "${sourceRoot}" rsyncSource
 newSourceRoot="${temporaryDirectory}/source"
-cp -a "${sourceRoot}" "${newSourceRoot}"
+mkdir "${newSourceRoot}"
+resolveDirectory "${newSourceRoot}" rsyncTarget
+rsyncOptions=(--recursive --perms --times)
+rsyncOptions+=(--exclude "/Android/Gradle/??l")
+rsync "${rsyncOptions[@]}" -- "${rsyncSource}/" "${rsyncTarget}/"
 cd "${newSourceRoot}"
 sourceRoot="${newSourceRoot}"
 
