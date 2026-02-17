@@ -246,8 +246,6 @@
   <string name="CONTRACTION_TABLE_LABEL_de_g0">الألمانية (غير مختصر)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">الألمانية (الاختصارات الأساسية)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">الألمانية (مختصر)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_1998">الألمانية (مختصر  - وفقا لمعايير 1998)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_2015">الألمانية (مختصر  - معيار 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">الإنجليزية</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">الإنجليزية (الولايات المتحدة)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">الإنجليزية (الموحد، مختصر)</string>

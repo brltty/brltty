@@ -248,8 +248,6 @@
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Almanca (kısaltmasız)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Almanca (temel kısaltmalar)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Almanca (kısaltmalı)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_1998">Almanca (kısaltmalı - 1998 standart)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_2015">Almanca (kısaltmalı - 2015 standart)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">İngilizce</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">İngilizce (Amerika Birleşik Devletleri)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">İngilizce (Birleşmiş, kısaltmasız)</string>

@@ -8,8 +8,6 @@
   <string name="CONTRACTION_TABLE_LABEL_af" translatable="true">Afrikaans (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_am" translatable="true">Amharic (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_de" translatable="true">German</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_1998" translatable="true">German (contracted - 1998 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_2015" translatable="true">German (contracted - 2015 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0" translatable="true">German (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1" translatable="true">German (basic contractions)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2" translatable="true">German (contracted)</string>
@@ -48,8 +46,6 @@
     <item>@string/CONTRACTION_TABLE_LABEL_af</item>
     <item>@string/CONTRACTION_TABLE_LABEL_am</item>
     <item>@string/CONTRACTION_TABLE_LABEL_de</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_de_1998</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_de_2015</item>
     <item>@string/CONTRACTION_TABLE_LABEL_de_g0</item>
     <item>@string/CONTRACTION_TABLE_LABEL_de_g1</item>
     <item>@string/CONTRACTION_TABLE_LABEL_de_g2</item>
@@ -89,8 +85,6 @@
     <item>af</item>
     <item>am</item>
     <item>de</item>
-    <item>de-1998</item>
-    <item>de-2015</item>
     <item>de-g0</item>
     <item>de-g1</item>
     <item>de-g2</item>

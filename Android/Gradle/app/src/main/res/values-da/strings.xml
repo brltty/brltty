@@ -248,8 +248,6 @@
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Tysk (uforkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Tysk (basis forkortelser)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Tysk (forkortet)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_1998">Tysk (forkortet - 1998 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_2015">Tysk (forkortet - 2015 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Engelsk</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">Engelsk (Forenede stater)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Engelsk (Samlet, uforkortet)</string>

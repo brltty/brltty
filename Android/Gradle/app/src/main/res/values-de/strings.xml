@@ -248,8 +248,6 @@
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Deutsch (Vollschrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Deutsch (Basisschrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Deutsch (Kurzschrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_1998">Deutsch (Kurzschrift - 1998 Standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_2015">Deutsch (Kurzschrift - 2015 Standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Englisch</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">Englisch (Vereinigte Staaten)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Englisch (UEB, Vollschrift)</string>

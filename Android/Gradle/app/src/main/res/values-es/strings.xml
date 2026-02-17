@@ -248,8 +248,6 @@
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Alemán (sin contracciones)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Alemán (contracciones básicas)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Alemán (contraccionado)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_1998">Alemán (contraccionado - estándar de 1998)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_2015">Alemán (contraccionado - estándar de 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Inglés</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">Inglés (Estados Unidos)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Inglés (Unificado, no contraccionado)</string>

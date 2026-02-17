@@ -248,8 +248,6 @@
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Nemška (brez krajšav)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Nemška (osnovne krajšave)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Nemška (s krajšavami)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_1998">Nemška (s krajšavami - 1998 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_2015">Nemška (s krajšavami - 2015 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Angleška</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">Angleška (Združene Države)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Angleška (Združena, brez kr</string>

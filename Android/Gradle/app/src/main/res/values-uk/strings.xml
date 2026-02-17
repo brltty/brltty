@@ -248,8 +248,6 @@
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Німецька (нескорочена)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">німецька (основні скорочення)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Німецька (скорочена)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_1998">Німецька (скорочена - стандарт 1998)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_2015">Німецька (скорочена - стандарт 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">англійська</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">англійська (Сполучені Штати)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Англійська (уніфікована, нескорочена)</string>

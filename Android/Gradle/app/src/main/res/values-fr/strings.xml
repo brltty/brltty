@@ -248,8 +248,6 @@
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Allemand (désabrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Allemand (abréviations de base)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Allemand (abrégé)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_1998">Allemand (abrégé - standard 1998)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_2015">Allemand (abrégé - standard 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Anglais</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">Anglais (États-Unis)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Anglais (Braille anglais unifié, 1er degré)</string>
