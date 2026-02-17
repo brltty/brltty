@@ -16,35 +16,14 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-context braille Braille Input Mode
-assign dot1 B4
-assign dot2 B3
-assign dot3 B2
-assign dot4 B5
-assign dot5 B6
-assign dot6 B7
-assign dot7 B1
-assign dot8 B8
-
-map \{dot1} DOT1
-map \{dot2} DOT2
-map \{dot3} DOT3
-map \{dot4} DOT4
-map \{dot5} DOT5
-map \{dot6} DOT6
-map \{dot7} DOT7
-map \{dot8} DOT8
-
-bind \{space} PASSDOTS
-bind \{enter} KEY_ENTER
-bind \{space}+\{dot7} KEY_BACKSPACE
-
-map \{space} CONTROL
-map \{enter} META
-
-bind \{brailleOff} CONTEXT+default
 context default
-bind \{brailleOn} CONTEXT+braille
-bind \{brailleOff} CONTEXT+default
 
-include android.kti
+ifPlatform android
+  include ../chords-global.kti
+
+  note For Android-specific navigation, use \{space} with the specified dot combination when in Navigation Mode.
+  note For web page structural navigation, use \{enter} with the specified dot combination when in Input Mode.
+
+  assign chord \{space}+
+  include ../chords-android.kti
+endif
