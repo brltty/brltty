@@ -18,6 +18,7 @@
 ###############################################################################
 
 . "$(dirname "${0}")/../prologue.sh"
+toolName="brltty-ctb"
 
 showProgramUsagePurpose() {
 cat <<END_OF_PROGRAM_USAGE_PURPOSE
@@ -32,6 +33,6 @@ setBuildRoot
 set -e
 
 cd "${buildRoot}/Programs"
-make --silent brltty-ctb
-./brltty-ctb -T../Tables -c "${tableName}" </dev/null
+make --silent "${toolName}"
+./"${toolName}" -T../Tables -c "${tableName}" </dev/null
 exit 0

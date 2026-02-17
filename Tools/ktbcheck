@@ -18,10 +18,21 @@
 ###############################################################################
 
 . "$(dirname "${0}")/../prologue.sh"
-setBuildRoot
+toolName="brltty-ktb"
 
+handleInitialHelpOption "${@}" <<END-OF-HELP
+Check a key table for errors.
+
+Syntax: ${programName} {-h | [-option ...] table}
+
+All of the options, as well as the table name, are passed through to ${toolName}.
+To see its usage summary, use its --help long option.
+END-OF-HELP
+
+setBuildRoot
 set -e
+
 cd "${buildRoot}/Programs"
-make --silent brltty-ktb
-./brltty-ktb -T../Tables -D../lib -a "${@}"
+make --silent "${toolName}"
+"./${toolName}" -T../Tables -D../lib -a "${@}"
 exit 0
