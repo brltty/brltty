@@ -46,7 +46,7 @@ bind \{prefix}+\{dot2}+\{dot3} GUI_ITEM_FRST
 bind \{prefix}+\{dot5}+\{dot6} GUI_ITEM_LAST
 
 bind \{prefix}+\{dot2}+\{dot5} CONTEXT+chrome
-context chrome Web Page Navigation
+context chrome Web Page Structural Navigation
 bind \{dot7}+\{dot8} CONTEXT+default
 
 superimpose meta
