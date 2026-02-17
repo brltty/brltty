@@ -41,19 +41,18 @@ bind B2+B3+SpaceRight SAY_LINE
 include dots.kti
 
 context braille Braille Input Mode
-map B4 DOT1
-map B3 DOT2
-map B2 DOT3
-map B5 DOT4
-map B6 DOT5
-map B7 DOT6
-map B1 DOT7
-map B8 DOT8
-bind SpaceLeft PASSDOTS
-bind SpaceRight KEY_ENTER
-bind SpaceLeft+B1 KEY_BACKSPACE
-map SpaceLeft CONTROL
-map SpaceRight META
+assign dot1 B4
+assign dot2 B3
+assign dot3 B2
+assign dot4 B5
+assign dot5 B6
+assign dot6 B7
+assign dot7 B1
+assign dot8 B8
+assign space SpaceLeft
+assign enter SpaceRight
+include map.kti
+
 bind B1+B8+SpaceLeft CONTEXT+default
 
 context default
@@ -61,3 +60,4 @@ bind B1+B8+SpaceLeft CONTEXT+braille
 
 include ../bm/display6.kti
 include ../bm/routing6.kti
+include android.kti
