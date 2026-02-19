@@ -593,7 +593,7 @@ cpbLinearize (
 }
 
 static int
-tryURLCopy (ClipboardCommandData *ccd, wchar_t *buf, int len, int target) {
+tryURLCopy (ClipboardCommandData *ccd, const wchar_t *buf, int len, int target) {
   /* scan backward and forward for URL characters */
   int start = target;
   while (start > 0 && isURLChar(buf[start - 1])) start -= 1;
@@ -602,7 +602,7 @@ tryURLCopy (ClipboardCommandData *ccd, wchar_t *buf, int len, int target) {
   while (end < len - 1 && isURLChar(buf[end + 1])) end += 1;
 
   int count = end - start + 1;
-  wchar_t *text = &buf[start];
+  const wchar_t *text = &buf[start];
 
   /* strip trailing punctuation that is typically not part of URLs */
   while (count > 0) {
@@ -650,7 +650,7 @@ tryURLCopy (ClipboardCommandData *ccd, wchar_t *buf, int len, int target) {
 }
 
 static int
-tryEmailCopy (ClipboardCommandData *ccd, wchar_t *buf, int len, int target) {
+tryEmailCopy (ClipboardCommandData *ccd, const wchar_t *buf, int len, int target) {
   /* find the '@' sign: scan outward from the target */
   int at = -1;
 
@@ -748,7 +748,7 @@ hasKnownTLD (const wchar_t *text, int len) {
 }
 
 static int
-tryHostnameCopy (ClipboardCommandData *ccd, wchar_t *buf, int len, int target) {
+tryHostnameCopy (ClipboardCommandData *ccd, const wchar_t *buf, int len, int target) {
   if (!isEmailDomainChar(buf[target])) return 0;
 
   /* scan backward and forward for hostname characters */
@@ -763,7 +763,7 @@ tryHostnameCopy (ClipboardCommandData *ccd, wchar_t *buf, int len, int target) {
   while (end >= start && (buf[end] == WC_C('.') || buf[end] == WC_C('-'))) end -= 1;
 
   int count = end - start + 1;
-  wchar_t *text = &buf[start];
+  const wchar_t *text = &buf[start];
 
   if (count < 1) return 0;
 
@@ -810,17 +810,28 @@ static int
 cpbSmartCopy (ClipboardCommandData *ccd) {
   int linearLen;
   int targetOffset;
-  int copied = 0;
 
   wchar_t *buf = cpbLinearize(ccd, &linearLen, &targetOffset);
   if (!buf) return 0;
 
-  if (tryURLCopy(ccd, buf, linearLen, targetOffset)) copied = 1;
-  else if (tryEmailCopy(ccd, buf, linearLen, targetOffset)) copied = 1;
-  else if (tryHostnameCopy(ccd, buf, linearLen, targetOffset)) copied = 1;
+  typedef int TryFunction (ClipboardCommandData *ccd, const wchar_t *characters, int count, int target);
+
+  static TryFunction *const tryFunctions[] = {
+    tryURLCopy,
+    tryEmailCopy,
+    tryHostnameCopy,
+  };
+
+  TryFunction *const *try = tryFunctions;
+  TryFunction *const *end = try + ARRAY_COUNT(tryFunctions);
+
+  while (try < end) {
+    if ((*try)(ccd, buf, linearLen, targetOffset)) break;
+    try += 1;
+  }
 
   free(buf);
-  return copied;
+  return try < end;
 }
 
 static int
