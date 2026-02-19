@@ -367,7 +367,7 @@ prepareUsbEndpoint (GioEndpoint *endpoint) {
   UsbChannel *channel = handle->channel;
 
   {
-    const void *data = channel->definition->data;
+    const void *data = handle->properties.applicationData;
     if (data) endpoint->options.applicationData = data;
   }
 
