@@ -20,6 +20,9 @@
 
 #include <stdio.h>
 #include <string.h>
+#if defined(HAVE_SYS_SOCKET_H)
+#include <sys/socket.h>
+#endif
 
 #include "log.h"
 #include "scr.h"
@@ -68,14 +71,26 @@ static int restart;
 static int brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 {
   currentPriority = BRLAPI_PARAM_CLIENT_PRIORITY_DEFAULT;
+  brlapi_fileDescriptor fd;
 
   brlapi_connectionSettings_t settings;
   settings.host = parameters[PARM_HOST];
   settings.auth = parameters[PARM_AUTH];
 
-  CHECK((brlapi_openConnection(&settings, &settings)!=BRLAPI_INVALID_FILE_DESCRIPTOR), out);
+  fd = brlapi_openConnection(&settings, &settings);
+  CHECK((fd!=BRLAPI_INVALID_FILE_DESCRIPTOR), out);
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
              "Connected to %s using %s", settings.host, settings.auth);
+
+#ifdef SO_PEERCRED
+  struct ucred cred;
+  socklen_t size = sizeof(cred);
+  int ret = getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &cred, &size);
+  if (ret == 0 && size == sizeof(cred) && cred.pid == getpid()) {
+    logMessage(LOG_ERR, "BrlAPI driver connected to ourself");
+    goto out0;
+  }
+#endif
 
   CHECK((brlapi_enterTtyModeWithPath(NULL, 0, NULL)>=0), out0);
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
