@@ -651,6 +651,11 @@ tryURLCopy (ClipboardCommandData *ccd, const wchar_t *buf, int len, int target) 
 
 static int
 tryEmailCopy (ClipboardCommandData *ccd, const wchar_t *buf, int len, int target) {
+  /* target must be part of an email address */
+  if (buf[target] != WC_C('@') &&
+      !isEmailLocalChar(buf[target]) &&
+      !isEmailDomainChar(buf[target])) return 0;
+
   /* find the '@' sign: scan outward from the target */
   int at = -1;
 
