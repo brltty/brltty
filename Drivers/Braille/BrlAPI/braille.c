@@ -20,9 +20,10 @@
 
 #include <stdio.h>
 #include <string.h>
-#if defined(HAVE_SYS_SOCKET_H)
+
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
+#endif /* HAVE_SYS_SOCKET_H */
 
 #include "log.h"
 #include "scr.h"
@@ -86,11 +87,12 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   struct ucred cred;
   socklen_t size = sizeof(cred);
   int ret = getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &cred, &size);
+
   if (ret == 0 && size == sizeof(cred) && cred.pid == getpid()) {
     logMessage(LOG_ERR, "BrlAPI driver connected to ourself");
     goto out0;
   }
-#endif
+#endif /* SO_PEERCRED */
 
   CHECK((brlapi_enterTtyModeWithPath(NULL, 0, NULL)>=0), out0);
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
