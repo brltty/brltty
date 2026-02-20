@@ -668,11 +668,11 @@ tryEmailCopy (ClipboardCommandData *ccd, const wchar_t *buf, int len, int target
       if (!isEmailLocalChar(buf[i])) break;
     }
 
-    /* if not found, scan right through domain characters */
+    /* if not found, scan right through local-part characters */
     if (at < 0) {
       for (int i = target + 1; i < len; i += 1) {
         if (buf[i] == WC_C('@')) { at = i; break; }
-        if (!isEmailDomainChar(buf[i])) break;
+        if (!isEmailLocalChar(buf[i])) break;
       }
     }
   }
@@ -685,6 +685,7 @@ tryEmailCopy (ClipboardCommandData *ccd, const wchar_t *buf, int len, int target
   if (!iswalnum(buf[start])) return 0;
 
   /* scan forward from '@' for the domain part */
+  if (!iswalnum(buf[at + 1])) return 0;
   int end = at + 1;
   while (end < len - 1 && isEmailDomainChar(buf[end + 1])) end += 1;
 
@@ -692,15 +693,17 @@ tryEmailCopy (ClipboardCommandData *ccd, const wchar_t *buf, int len, int target
   while (end > at + 1 && (buf[end] == WC_C('.') || buf[end] == WC_C('-'))) end -= 1;
   if (!iswalnum(buf[end])) return 0;
 
-  /* domain must contain at least one dot */
+  /* domain labels must be non-empty and start with alphanumeric */
   {
-    int hasDot = 0;
+    int prevDot = at;
 
-    for (int i = at + 1; i <= end; i += 1) {
-      if (buf[i] == WC_C('.')) { hasDot = 1; break; }
+    for (int i = at + 1; i <= end + 1; i += 1) {
+      if (i == end + 1 || buf[i] == WC_C('.')) {
+        if (i - prevDot <= 1) return 0;
+        if (!iswalnum(buf[prevDot + 1])) return 0;
+        prevDot = i;
+      }
     }
-
-    if (!hasDot) return 0;
   }
 
   int count = end - start + 1;
