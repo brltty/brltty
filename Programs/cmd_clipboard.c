@@ -662,24 +662,18 @@ tryEmailCopy (ClipboardCommandData *ccd, const wchar_t *buf, int len, int target
   if (buf[target] == WC_C('@')) {
     at = target;
   } else {
-    for (int dist = 1; ; dist += 1) {
-      int left = target - dist;
-      int right = target + dist;
-      int done = 1;
+    /* scan left through local-part characters */
+    for (int i = target - 1; i >= 0; i -= 1) {
+      if (buf[i] == WC_C('@')) { at = i; break; }
+      if (!isEmailLocalChar(buf[i])) break;
+    }
 
-      if (left >= 0) {
-        done = 0;
-        if (buf[left] == WC_C('@')) { at = left; break; }
-        if (!isEmailLocalChar(buf[left])) done = 1;
+    /* if not found, scan right through domain characters */
+    if (at < 0) {
+      for (int i = target + 1; i < len; i += 1) {
+        if (buf[i] == WC_C('@')) { at = i; break; }
+        if (!isEmailDomainChar(buf[i])) break;
       }
-
-      if (right < len) {
-        done = 0;
-        if (buf[right] == WC_C('@')) { at = right; break; }
-        if (!isEmailDomainChar(buf[right])) break;
-      }
-
-      if (done) break;
     }
   }
 
