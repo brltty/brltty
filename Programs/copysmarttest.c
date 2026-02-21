@@ -80,7 +80,7 @@ static int passCount  = 0;
 static int failCount  = 0;
 
 static void
-performTest (const char *desc, const wchar_t *input, int target,
+runTest (const char *desc, const wchar_t *input, int target,
       const wchar_t *expected) {
   testCount += 1;
 
@@ -109,6 +109,7 @@ performTest (const char *desc, const wchar_t *input, int target,
       if (matched) putf("    got:      \"%.*ls\"\n", matchLength, input + matchOffset);
     } else {
       putf("    expected: \"%ls\"\n", expected);
+
       if (matched) {
         putf("    got:      \"%.*ls\"\n", matchLength, input + matchOffset);
       } else {
@@ -119,6 +120,7 @@ performTest (const char *desc, const wchar_t *input, int target,
 
   if (opt_verbose) {
     putf("    buffer:   \"%ls\" (target=%d)\n", input, target);
+
     if (matched) {
       putf("    result:   \"%.*ls\"\n", matchLength, input + matchOffset);
     } else {
@@ -133,12 +135,14 @@ performTest (const char *desc, const wchar_t *input, int target,
  * Rows with input==NULL are section headers (desc is printed as-is).
  */
 
-static const struct {
+typedef struct {
   const char    *desc;
   const wchar_t *input;
   int            target;
   const wchar_t *expected;
-} tests[] = {
+} TestDescriptor;
+
+static const TestDescriptor tests[] = {
   /* URL detection */
   { "\nURL detection:" },
   { "cursor on scheme letter",                  L"https://example.com/path?q=1#frag",     2,  L"https://example.com/path?q=1#frag" },
@@ -222,10 +226,12 @@ runBuiltinTests (void) {
   putf("==========================\n");
 
   for (size_t i = 0; i < ARRAY_COUNT(tests); i += 1) {
-    if (!tests[i].input) {
-      putf("%s\n", tests[i].desc);
+    const TestDescriptor *test = &tests[i];
+
+    if (!test->input) {
+      putf("%s\n", test->desc);
     } else {
-      performTest(tests[i].desc, tests[i].input, tests[i].target, tests[i].expected);
+      runTest(test->desc, test->input, test->target, test->expected);
     }
   }
 
@@ -245,7 +251,10 @@ main (int argc, char *argv[]) {
     size_t textLen = strlen(opt_text) + 1;
     wchar_t *wtext = malloc(textLen * sizeof(wchar_t));
 
-    if (!wtext) return PROG_EXIT_FATAL;
+    if (!wtext) {
+      logMallocError();
+      return PROG_EXIT_FATAL;
+    }
 
     size_t wlen = mbstowcs(wtext, opt_text, textLen);
 
@@ -257,22 +266,25 @@ main (int argc, char *argv[]) {
 
     int target = atoi(opt_target);
     int matchOffset, matchLength;
+    int matched = cpbSmartMatch(wtext, (int)wlen, target, &matchOffset, &matchLength);
 
-    if (cpbSmartMatch(wtext, (int)wlen, target, &matchOffset, &matchLength)) {
+    if (matched) {
       putf("%.*ls\n", matchLength, wtext + matchOffset);
     } else {
       putf("no match\n");
     }
 
     free(wtext);
+    if (!matched) return PROG_EXIT_SEMANTIC;
   } else {
     runBuiltinTests();
+    int failed = !!failCount;
 
     putf("Results: %d/%d passed", passCount, testCount);
-    if (failCount) putf(", %d FAILED", failCount);
+    if (failed) putf(", %d FAILED", failCount);
     putf("\n");
 
-    if (failCount) return PROG_EXIT_SEMANTIC;
+    if (failed) return PROG_EXIT_SEMANTIC;
   }
 
   return PROG_EXIT_SUCCESS;
