@@ -19,11 +19,13 @@
 #include "prologue.h"
 
 #include <wchar.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
+#include "log.h"
 #include "cmdline.h"
+#include "cmdput.h"
 #include "copysmart.h"
 
 static char *opt_text    = NULL;
@@ -78,7 +80,7 @@ static int passCount  = 0;
 static int failCount  = 0;
 
 static void
-test (const char *desc, const wchar_t *input, int target,
+performTest (const char *desc, const wchar_t *input, int target,
       const wchar_t *expected) {
   testCount += 1;
 
@@ -97,30 +99,30 @@ test (const char *desc, const wchar_t *input, int target,
 
   if (pass) {
     passCount += 1;
-    printf("  PASS: %s\n", desc);
+    putf("  PASS: %s\n", desc);
   } else {
     failCount += 1;
-    printf("  FAIL: %s\n", desc);
+    putf("  FAIL: %s\n", desc);
 
     if (expected == NULL) {
-      printf("    expected: no match\n");
-      if (matched) printf("    got:      \"%.*ls\"\n", matchLength, input + matchOffset);
+      putf("    expected: no match\n");
+      if (matched) putf("    got:      \"%.*ls\"\n", matchLength, input + matchOffset);
     } else {
-      printf("    expected: \"%ls\"\n", expected);
+      putf("    expected: \"%ls\"\n", expected);
       if (matched) {
-        printf("    got:      \"%.*ls\"\n", matchLength, input + matchOffset);
+        putf("    got:      \"%.*ls\"\n", matchLength, input + matchOffset);
       } else {
-        printf("    got:      no match\n");
+        putf("    got:      no match\n");
       }
     }
   }
 
   if (opt_verbose) {
-    printf("    buffer:   \"%ls\" (target=%d)\n", input, target);
+    putf("    buffer:   \"%ls\" (target=%d)\n", input, target);
     if (matched) {
-      printf("    result:   \"%.*ls\"\n", matchLength, input + matchOffset);
+      putf("    result:   \"%.*ls\"\n", matchLength, input + matchOffset);
     } else {
-      printf("    result:   no match\n");
+      putf("    result:   no match\n");
     }
   }
 }
@@ -216,18 +218,18 @@ static const struct {
 
 static void
 runBuiltinTests (void) {
-  printf("COPY_SMART detection tests\n");
-  printf("==========================\n");
+  putf("COPY_SMART detection tests\n");
+  putf("==========================\n");
 
   for (size_t i = 0; i < ARRAY_COUNT(tests); i += 1) {
     if (!tests[i].input) {
-      printf("%s\n", tests[i].desc);
+      putf("%s\n", tests[i].desc);
     } else {
-      test(tests[i].desc, tests[i].input, tests[i].target, tests[i].expected);
+      performTest(tests[i].desc, tests[i].input, tests[i].target, tests[i].expected);
     }
   }
 
-  printf("\n==========================\n");
+  putf("\n==========================\n");
 }
 
 /* ============================================================
@@ -249,29 +251,29 @@ main (int argc, char *argv[]) {
 
     if (wlen == (size_t)-1) {
       free(wtext);
-      fprintf(stderr, "copysmarttest: invalid UTF-8 in --text\n");
-      return PROG_EXIT_FATAL;
+      logMessage(LOG_ERR, "invalid UTF-8 in --text");
+      return PROG_EXIT_SYNTAX;
     }
 
     int target = atoi(opt_target);
     int matchOffset, matchLength;
 
     if (cpbSmartMatch(wtext, (int)wlen, target, &matchOffset, &matchLength)) {
-      printf("%.*ls\n", matchLength, wtext + matchOffset);
+      putf("%.*ls\n", matchLength, wtext + matchOffset);
     } else {
-      printf("no match\n");
+      putf("no match\n");
     }
 
     free(wtext);
+  } else {
+    runBuiltinTests();
 
-    return PROG_EXIT_SUCCESS;
+    putf("Results: %d/%d passed", passCount, testCount);
+    if (failCount) putf(", %d FAILED", failCount);
+    putf("\n");
+
+    if (failCount) return PROG_EXIT_SEMANTIC;
   }
 
-  runBuiltinTests();
-
-  printf("Results: %d/%d passed", passCount, testCount);
-  if (failCount) printf(", %d FAILED", failCount);
-  printf("\n");
-
-  return failCount ? PROG_EXIT_FATAL : PROG_EXIT_SUCCESS;
+  return PROG_EXIT_SUCCESS;
 }
