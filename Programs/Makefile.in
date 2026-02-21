@@ -35,7 +35,7 @@ all-tools: all-brltty-cldr all-brltty-lsinc
 all-brltty-cldr: brltty-cldr$X
 all-brltty-lsinc: brltty-lsinc$X
 
-everything: all all-brltest all-spktest all-scrtest all-cmdtest all-colortest all-crctest all-msgtest
+everything: all all-brltest all-spktest all-scrtest all-cmdtest all-colortest all-crctest all-msgtest all-copysmarttest
 all-brltest: brltest$X | $(BRAILLE_DRIVERS)
 all-spktest: spktest$X | $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X | $(SCREEN_DRIVERS)
@@ -43,6 +43,7 @@ all-cmdtest: cmdtest$X
 all-colortest: colortest$X
 all-crctest: crctest$X
 all-msgtest: msgtest$X
+all-copysmarttest: copysmarttest$X
 
 all-api: $(ALL_XBRLAPI) all-brltty-clip all-apitest brlapi_brldefs.auto.h
 all-xbrlapi: xbrlapi$X
@@ -414,6 +415,16 @@ msgtest$X: $(MSGTEST_OBJECTS)
 
 msgtest.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/msgtest.c
+
+###############################################################################
+
+COPYSMARTTEST_OBJECTS = copysmarttest.$O $(PROGRAM_OBJECTS) copysmart.$O
+
+copysmarttest$X: $(COPYSMARTTEST_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(COPYSMARTTEST_OBJECTS) $(LDLIBS)
+
+copysmarttest.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/copysmarttest.c
 
 ###############################################################################
 
