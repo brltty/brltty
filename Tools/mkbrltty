@@ -30,7 +30,7 @@ makeTargets=(
    brltty-tune brltty-morse brltty-pty
    brltty-cmdref brltty-hid
    brltty-cldr brltty-lsinc
-   brltest spktest scrtest cmdtest colortest crctest msgtest
+   brltest spktest scrtest cmdtest colortest copysmarttest crctest msgtest
    all-api-bindings brltty-clip xbrlapi apitest
 )
 

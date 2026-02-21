@@ -28,6 +28,7 @@
 #include "cmd_utils.h"
 #include "cmd_clipboard.h"
 #include "clipboard.h"
+#include "copysmart.h"
 #include "brl_cmds.h"
 #include "scr.h"
 #include "routing.h"
@@ -36,7 +37,6 @@
 #include "utf8.h"
 #include "ascii.h"
 #include "core.h"
-#include "copysmart.h"
 
 typedef struct {
   ClipboardObject *clipboard;
