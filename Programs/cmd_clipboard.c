@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "log.h"
 #include "alert.h"
@@ -37,6 +36,7 @@
 #include "utf8.h"
 #include "ascii.h"
 #include "core.h"
+#include "copysmart.h"
 
 typedef struct {
   ClipboardObject *clipboard;
@@ -483,53 +483,6 @@ findCharacters (const wchar_t **address, size_t *length, const wchar_t *characte
   return 0;
 }
 
-static int
-isURLChar (wchar_t ch) {
-  if (iswalnum(ch)) return 1;
-
-  switch (ch) {
-    /* unreserved */
-    case WC_C('-'): case WC_C('_'): case WC_C('.'): case WC_C('~'):
-    /* reserved (gen-delims + sub-delims) */
-    case WC_C(':'): case WC_C('/'): case WC_C('?'): case WC_C('#'):
-    case WC_C('['): case WC_C(']'): case WC_C('@'):
-    case WC_C('!'): case WC_C('$'): case WC_C('&'): case WC_C('\''):
-    case WC_C('('): case WC_C(')'): case WC_C('*'): case WC_C('+'):
-    case WC_C(','): case WC_C(';'): case WC_C('='): case WC_C('%'):
-      return 1;
-
-    default:
-      return 0;
-  }
-}
-
-static int
-isEmailLocalChar (wchar_t ch) {
-  if (iswalnum(ch)) return 1;
-
-  switch (ch) {
-    case WC_C('.'): case WC_C('_'): case WC_C('%'):
-    case WC_C('+'): case WC_C('-'):
-      return 1;
-
-    default:
-      return 0;
-  }
-}
-
-static int
-isEmailDomainChar (wchar_t ch) {
-  if (iswalnum(ch)) return 1;
-
-  switch (ch) {
-    case WC_C('.'): case WC_C('-'):
-      return 1;
-
-    default:
-      return 0;
-  }
-}
-
 static wchar_t *
 cpbLinearize (
   ClipboardCommandData *ccd,
@@ -593,250 +546,6 @@ cpbLinearize (
 }
 
 static int
-tryURLCopy (ClipboardCommandData *ccd, const wchar_t *buf, int len, int target) {
-  /* scan backward and forward for URL characters */
-  int start = target;
-  while (start > 0 && isURLChar(buf[start - 1])) start -= 1;
-
-  int end = target;
-  while (end < len - 1 && isURLChar(buf[end + 1])) end += 1;
-
-  int count = end - start + 1;
-  const wchar_t *text = &buf[start];
-
-  /* strip trailing punctuation that is typically not part of URLs */
-  while (count > 0) {
-    wchar_t last = text[count - 1];
-
-    if (last == WC_C('.') || last == WC_C(',') || last == WC_C(';')) {
-      count -= 1;
-    } else if (last == WC_C(')') && !wmemchr(text, WC_C('('), count)) {
-      count -= 1;
-    } else {
-      break;
-    }
-  }
-
-  if (count < 1) return 0;
-
-  /* validate: must contain "://" with a valid scheme before it */
-  for (int i = 0; i < count - 2; i += 1) {
-    if (text[i] == WC_C(':') &&
-        text[i + 1] == WC_C('/') &&
-        text[i + 2] == WC_C('/')) {
-      if (i > 0 && iswalpha(text[0])) {
-        int valid = 1;
-
-        for (int j = 1; j < i; j += 1) {
-          wchar_t sc = text[j];
-
-          if (!iswalnum(sc) &&
-              sc != WC_C('+') &&
-              sc != WC_C('-') &&
-              sc != WC_C('.')) {
-            valid = 0;
-            break;
-          }
-        }
-
-        if (valid) return cpbEndOperation(ccd, text, count, 0);
-      }
-
-      break;
-    }
-  }
-
-  return 0;
-}
-
-static int
-tryEmailCopy (ClipboardCommandData *ccd, const wchar_t *buf, int len, int target) {
-  /* target must be part of an email address */
-  if (buf[target] != WC_C('@') &&
-      !isEmailLocalChar(buf[target]) &&
-      !isEmailDomainChar(buf[target])) return 0;
-
-  /* find the '@' sign: scan outward from the target */
-  int at = -1;
-
-  if (buf[target] == WC_C('@')) {
-    at = target;
-  } else {
-    /* scan left through local-part characters */
-    for (int i = target - 1; i >= 0; i -= 1) {
-      if (buf[i] == WC_C('@')) { at = i; break; }
-      if (!isEmailLocalChar(buf[i])) break;
-    }
-
-    /* if not found, scan right through local-part characters */
-    if (at < 0) {
-      for (int i = target + 1; i < len; i += 1) {
-        if (buf[i] == WC_C('@')) { at = i; break; }
-        if (!isEmailLocalChar(buf[i])) break;
-      }
-    }
-  }
-
-  if (at < 1 || at >= len - 1) return 0;
-
-  /* scan backward from '@' for the local part */
-  int start = at - 1;
-  while (start > 0 && isEmailLocalChar(buf[start - 1])) start -= 1;
-  if (!iswalnum(buf[start])) return 0;
-
-  /* scan forward from '@' for the domain part */
-  if (!iswalnum(buf[at + 1])) return 0;
-  int end = at + 1;
-  while (end < len - 1 && isEmailDomainChar(buf[end + 1])) end += 1;
-
-  /* strip trailing dots and hyphens from domain */
-  while (end > at + 1 && (buf[end] == WC_C('.') || buf[end] == WC_C('-'))) end -= 1;
-  if (!iswalnum(buf[end])) return 0;
-
-  /* domain labels must be non-empty and start with alphanumeric */
-  {
-    int prevDot = at;
-
-    for (int i = at + 1; i <= end + 1; i += 1) {
-      if (i == end + 1 || buf[i] == WC_C('.')) {
-        if (i - prevDot <= 1) return 0;
-        if (!iswalnum(buf[prevDot + 1])) return 0;
-        prevDot = i;
-      }
-    }
-  }
-
-  int count = end - start + 1;
-  return cpbEndOperation(ccd, &buf[start], count, 0);
-}
-
-static int
-hasKnownTLD (const wchar_t *text, int len) {
-  static const char *const knownTLDs[] = {
-    "com", "org", "net", "edu", "gov",
-    "mil", "int",
-    "io", "dev", "app", "info", "biz",
-    "name", "pro", "coop", "museum",
-    NULL
-  };
-
-  /* find the last dot */
-  int lastDot = -1;
-  for (int i = len - 1; i >= 0; i -= 1) {
-    if (text[i] == WC_C('.')) { lastDot = i; break; }
-  }
-
-  if (lastDot < 0 || lastDot >= len - 1) return 0;
-
-  const wchar_t *tld = &text[lastDot + 1];
-  int tldLen = len - lastDot - 1;
-
-  /* two-letter TLDs are country codes - accept them all */
-  if (tldLen == 2 && iswalpha(tld[0]) && iswalpha(tld[1])) return 1;
-
-  for (const char *const *t = knownTLDs; *t; t += 1) {
-    int knownLen = strlen(*t);
-    if (knownLen != tldLen) continue;
-
-    int match = 1;
-    for (int i = 0; i < knownLen; i += 1) {
-      if (towlower(tld[i]) != (*t)[i]) { match = 0; break; }
-    }
-
-    if (match) return 1;
-  }
-
-  return 0;
-}
-
-static int
-tryHostnameCopy (ClipboardCommandData *ccd, const wchar_t *buf, int len, int target) {
-  if (!isEmailDomainChar(buf[target])) return 0;
-
-  /* scan backward and forward for hostname characters */
-  int start = target;
-  while (start > 0 && isEmailDomainChar(buf[start - 1])) start -= 1;
-
-  int end = target;
-  while (end < len - 1 && isEmailDomainChar(buf[end + 1])) end += 1;
-
-  /* strip leading/trailing dots and hyphens */
-  while (start <= end && (buf[start] == WC_C('.') || buf[start] == WC_C('-'))) start += 1;
-  while (end >= start && (buf[end] == WC_C('.') || buf[end] == WC_C('-'))) end -= 1;
-
-  int count = end - start + 1;
-  const wchar_t *text = &buf[start];
-
-  if (count < 1) return 0;
-
-  /* must contain at least one dot */
-  {
-    int hasDot = 0;
-    for (int i = 0; i < count; i += 1) {
-      if (text[i] == WC_C('.')) { hasDot = 1; break; }
-    }
-    if (!hasDot) return 0;
-  }
-
-  /* labels between dots must be non-empty */
-  {
-    int prevDot = -1;
-    for (int i = 0; i <= count; i += 1) {
-      if (i == count || text[i] == WC_C('.')) {
-        if (i - prevDot <= 1) return 0;
-        prevDot = i;
-      }
-    }
-  }
-
-  /* require www. prefix or a known TLD */
-  {
-    int hasWWW = 0;
-
-    if (count >= 4) {
-      if (towlower(text[0]) == WC_C('w') &&
-          towlower(text[1]) == WC_C('w') &&
-          towlower(text[2]) == WC_C('w') &&
-          text[3] == WC_C('.')) {
-        hasWWW = 1;
-      }
-    }
-
-    if (!hasWWW && !hasKnownTLD(text, count)) return 0;
-  }
-
-  return cpbEndOperation(ccd, text, count, 0);
-}
-
-static int
-cpbSmartCopy (ClipboardCommandData *ccd) {
-  int linearLen;
-  int targetOffset;
-
-  wchar_t *buf = cpbLinearize(ccd, &linearLen, &targetOffset);
-  if (!buf) return 0;
-
-  typedef int TryFunction (ClipboardCommandData *ccd, const wchar_t *characters, int count, int target);
-
-  static TryFunction *const tryFunctions[] = {
-    tryURLCopy,
-    tryEmailCopy,
-    tryHostnameCopy,
-  };
-
-  TryFunction *const *try = tryFunctions;
-  TryFunction *const *end = try + ARRAY_COUNT(tryFunctions);
-
-  while (try < end) {
-    if ((*try)(ccd, buf, linearLen, targetOffset)) break;
-    try += 1;
-  }
-
-  free(buf);
-  return try < end;
-}
-
-static int
 handleClipboardCommands (int command, void *data) {
   ClipboardCommandData *ccd = data;
 
@@ -865,9 +574,26 @@ handleClipboardCommands (int command, void *data) {
       alert(cpbRestore(ccd)? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
       break;
 
-    case BRL_CMD_COPY_SMART:
-      if (!cpbSmartCopy(ccd)) alert(ALERT_COMMAND_REJECTED);
+    case BRL_CMD_COPY_SMART: {
+      int linearLen, targetOffset;
+      wchar_t *buf = cpbLinearize(ccd, &linearLen, &targetOffset);
+
+      if (buf) {
+        int matchOffset, matchLength;
+
+        if (cpbSmartMatch(buf, linearLen, targetOffset, &matchOffset, &matchLength)) {
+          cpbEndOperation(ccd, buf + matchOffset, matchLength, 0);
+        } else {
+          alert(ALERT_COMMAND_REJECTED);
+        }
+
+        free(buf);
+      } else {
+        alert(ALERT_COMMAND_REJECTED);
+      }
+
       break;
+    }
 
     {
       int increment;
