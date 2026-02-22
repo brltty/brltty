@@ -53,12 +53,12 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .letter = 't',
     .argument = "string",
     .setting.string = &opt_text,
-    .description = "UTF-8 text to test"
+    .description = "the text to test"
   },
 
   { .word = "offset",
     .letter = 'o',
-    .argument = "offset",
+    .argument = "integer",
     .setting.string = &opt_offset,
     .description = "zero-based character offset of the cursor"
   },
@@ -74,8 +74,8 @@ BEGIN_COMMAND_LINE_PARAMETERS(programParameters)
 END_COMMAND_LINE_PARAMETERS(programParameters)
 
 BEGIN_COMMAND_LINE_NOTES(programNotes)
-  "Without options, runs all built-in test cases.",
-  "With --text and --target, tests a single string and prints the result.",
+  "Without --text, run all of the built-in test cases.",
+  "With --text, test a single string and print the result.",
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
@@ -272,7 +272,7 @@ main (int argc, char *argv[]) {
   int targetOffset;
 
   if (haveOffset) {
-    static int minimum = 0;
+    static const int minimum = 0;
 
     if (!validateInteger(&targetOffset, opt_offset, &minimum, NULL)) {
       logMessage(LOG_ERR, "invalid offset: %s", opt_offset);
