@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "copysmart.h"
+#include "match.h"
 #include "utf8.h"
 
 #ifdef HAVE_REGEX_H
@@ -142,7 +142,7 @@ utf8WcharCount (const char *utf8, size_t bytes) {
 }
 
 int
-cpbSmartMatch (const wchar_t *buf, int len, int target,
+matchSmart (const wchar_t *buf, int len, int target,
                int *matchOffset, int *matchLength) {
   if (len <= 0 || target < 0 || target >= len) return 0;
 
@@ -199,7 +199,7 @@ cpbSmartMatch (const wchar_t *buf, int len, int target,
 #else /* !HAVE_REGEX_H */
 
 int
-cpbSmartMatch (const wchar_t *buf, int len, int target,
+matchSmart (const wchar_t *buf, int len, int target,
                int *matchOffset, int *matchLength) {
   return 0;
 }

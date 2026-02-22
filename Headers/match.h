@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_COPYSMART
-#define BRLTTY_INCLUDED_COPYSMART
+#ifndef BRLTTY_INCLUDED_MATCH
+#define BRLTTY_INCLUDED_MATCH
 
 #include <wchar.h>
 
@@ -28,11 +28,13 @@ extern "C" {
 /* Set *matchOffset and *matchLength to the wchar_t position and length of
  * the URL/email/hostname at position `target` within buffer `buf` of `len`
  * chars.  Returns 1 if found, 0 otherwise. */
-extern int cpbSmartMatch (const wchar_t *buf, int len, int target,
-                          int *matchOffset, int *matchLength);
+extern int matchSmart (
+  const wchar_t *buf, int len, int target,
+  int *matchOffset, int *matchLength
+);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_COPYSMART */
+#endif /* BRLTTY_INCLUDED_MATCH */

@@ -28,7 +28,7 @@
 #include "cmd_utils.h"
 #include "cmd_clipboard.h"
 #include "clipboard.h"
-#include "copysmart.h"
+#include "match.h"
 #include "brl_cmds.h"
 #include "scr.h"
 #include "routing.h"
@@ -703,7 +703,7 @@ handleClipboardCommands (int command, void *data) {
               if (buf) {
                 int matchOffset, matchLength;
 
-                if (cpbSmartMatch(buf, linearLen, targetOffset, &matchOffset, &matchLength)) {
+                if (matchSmart(buf, linearLen, targetOffset, &matchOffset, &matchLength)) {
                   cpbEndOperation(ccd, buf + matchOffset, matchLength, 0);
                   copied = 1;
                 }

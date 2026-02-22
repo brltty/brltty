@@ -35,14 +35,14 @@ all-tools: all-brltty-cldr all-brltty-lsinc
 all-brltty-cldr: brltty-cldr$X
 all-brltty-lsinc: brltty-lsinc$X
 
-everything: all all-brltest all-spktest all-scrtest all-cmdtest all-colortest all-copysmarttest all-crctest all-msgtest
+everything: all all-brltest all-spktest all-scrtest all-cmdtest all-colortest all-crctest all-matchtest all-msgtest
 all-brltest: brltest$X | $(BRAILLE_DRIVERS)
 all-spktest: spktest$X | $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X | $(SCREEN_DRIVERS)
 all-cmdtest: cmdtest$X
 all-colortest: colortest$X
-all-copysmarttest: copysmarttest$X
 all-crctest: crctest$X
+all-matchtest: matchtest$X
 all-msgtest: msgtest$X
 
 all-api: $(ALL_XBRLAPI) all-brltty-clip all-apitest brlapi_brldefs.auto.h
@@ -418,16 +418,13 @@ msgtest.$O:
 
 ###############################################################################
 
-COPYSMARTTEST_OBJECTS = copysmarttest.$O $(PROGRAM_OBJECTS) copysmart.$O
+MATCHTEST_OBJECTS = matchtest.$O $(PROGRAM_OBJECTS) match.$O
 
-copysmarttest$X: $(COPYSMARTTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(COPYSMARTTEST_OBJECTS) $(LDLIBS)
+matchtest$X: $(MATCHTEST_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(MATCHTEST_OBJECTS) $(LDLIBS)
 
-copysmarttest.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/copysmarttest.c
-
-copysmart.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/copysmart.c
+matchtest.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/matchtest.c
 
 ###############################################################################
 
@@ -854,7 +851,7 @@ driver.$O:
 
 ###############################################################################
 
-CMD_OBJECTS = cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_clipboard.$O cmd_custom.$O cmd_input.$O cmd_keycodes.$O cmd_learn.$O cmd_miscellaneous.$O cmd_navigation.$O cmd_override.$O cmd_preferences.$O cmd_speech.$O cmd_toggle.$O cmd_touch.$O clipboard.$O learn.$O copysmart.$O
+CMD_OBJECTS = cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_clipboard.$O cmd_custom.$O cmd_input.$O cmd_keycodes.$O cmd_learn.$O cmd_miscellaneous.$O cmd_navigation.$O cmd_override.$O cmd_preferences.$O cmd_speech.$O cmd_toggle.$O cmd_touch.$O clipboard.$O learn.$O match.$O
 
 cmd.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd.c
@@ -909,6 +906,9 @@ clipboard.$O:
 
 learn.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/learn.c
+
+match.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/match.c
 
 ###############################################################################
 

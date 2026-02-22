@@ -26,7 +26,7 @@
 #include "log.h"
 #include "cmdline.h"
 #include "cmdput.h"
-#include "copysmart.h"
+#include "match.h"
 #include "parse.h"
 
 static char *opt_text    = NULL;
@@ -87,7 +87,7 @@ runTest (const char *desc, const wchar_t *input, int target,
 
   int len = (int)wcslen(input);
   int matchOffset, matchLength;
-  int matched = cpbSmartMatch(input, len, target, &matchOffset, &matchLength);
+  int matched = matchSmart(input, len, target, &matchOffset, &matchLength);
 
   int pass;
   if (expected == NULL) {
@@ -288,7 +288,7 @@ main (int argc, char *argv[]) {
     }
 
     int matchOffset, matchLength;
-    int matched = cpbSmartMatch(wtext, (int)wlen, targetOffset, &matchOffset, &matchLength);
+    int matched = matchSmart(wtext, (int)wlen, targetOffset, &matchOffset, &matchLength);
 
     if (matched) {
       putf("%.*ls\n", matchLength, wtext + matchOffset);
