@@ -574,9 +574,6 @@ handleClipboardCommands (int command, void *data) {
       alert(cpbRestore(ccd)? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
       break;
 
-    case BRL_CMD_COPY_SMART:
-      goto doSmartCopy;
-
     {
       int increment;
 
@@ -683,44 +680,42 @@ handleClipboardCommands (int command, void *data) {
 
         {
           int append;
-          int column, row;
 
         case BRL_CMD_BLK(COPY_SMART_NEW):
           append = 0;
-          goto doSmartCopyBegin;
+          goto doSmartCopy;
 
         case BRL_CMD_BLK(COPY_SMART_ADD):
           append = 1;
-          goto doSmartCopyBegin;
+          goto doSmartCopy;
 
-        doSmartCopyBegin:
-          if (getCharacterCoordinates(arg1, &row, &column, NULL, 0)) {
-            cpbBeginOperation(ccd, column, row, append);
-          } else {
-            alert(ALERT_COMMAND_REJECTED);
-            break;
-          }
+        doSmartCopy:
+          {
+            int copied = 0;
+            int column, row;
 
-        doSmartCopy: {
-          int linearLen, targetOffset;
-          wchar_t *buf = cpbLinearize(ccd, &linearLen, &targetOffset);
+            if (getCharacterCoordinates(arg1, &row, &column, NULL, 0)) {
+              cpbBeginOperation(ccd, column, row, append);
 
-          if (buf) {
-            int matchOffset, matchLength;
+              int linearLen, targetOffset;
+              wchar_t *buf = cpbLinearize(ccd, &linearLen, &targetOffset);
 
-            if (cpbSmartMatch(buf, linearLen, targetOffset, &matchOffset, &matchLength)) {
-              cpbEndOperation(ccd, buf + matchOffset, matchLength, 0);
-            } else {
-              alert(ALERT_COMMAND_REJECTED);
+              if (buf) {
+                int matchOffset, matchLength;
+
+                if (cpbSmartMatch(buf, linearLen, targetOffset, &matchOffset, &matchLength)) {
+                  cpbEndOperation(ccd, buf + matchOffset, matchLength, 0);
+                  copied = 1;
+                }
+
+                free(buf);
+              }
             }
 
-            free(buf);
-          } else {
-            alert(ALERT_COMMAND_REJECTED);
+            if (!copied) alert(ALERT_COMMAND_REJECTED);
           }
 
           break;
-        }
         }
 
         case BRL_CMD_BLK(COPY_RECT): {
