@@ -29,11 +29,26 @@
 #include "match.h"
 #include "parse.h"
 
+typedef enum {
+   OPTQ_INFO,
+   OPTQ_PASS,
+   OPTQ_FAIL,
+   OPTQ_SUMMARY,
+} OptQuietness;
+
+static int   opt_quietness;
 static char *opt_text    = NULL;
 static char *opt_offset  = NULL;
 static int   opt_verbose = 0;
 
 BEGIN_COMMAND_LINE_OPTIONS(programOptions)
+  { .word = "quieter",
+    .letter = 'q',
+    .setting.flag = &opt_quietness,
+    .flags = OPT_Extend,
+    .description = "reduce verbosity - this option is cumulative",
+  },
+
   { .word = "text",
     .letter = 't',
     .argument = "string",
@@ -100,21 +115,23 @@ runTest (const char *desc, const wchar_t *input, int target,
 
   if (pass) {
     passCount += 1;
-    putf("  PASS: %s\n", desc);
+    if (opt_quietness <= OPTQ_PASS) putf("  PASS: %s\n", desc);
   } else {
     failCount += 1;
-    putf("  FAIL: %s\n", desc);
+    if (opt_quietness <= OPTQ_FAIL) {
+      putf("  FAIL: %s\n", desc);
 
-    if (expected == NULL) {
-      putf("    expected: no match\n");
-      if (matched) putf("    got:      \"%.*ls\"\n", matchLength, input + matchOffset);
-    } else {
-      putf("    expected: \"%ls\"\n", expected);
-
-      if (matched) {
-        putf("    got:      \"%.*ls\"\n", matchLength, input + matchOffset);
+      if (expected == NULL) {
+        putf("    expected: no match\n");
+        if (matched) putf("    got:      \"%.*ls\"\n", matchLength, input + matchOffset);
       } else {
-        putf("    got:      no match\n");
+        putf("    expected: \"%ls\"\n", expected);
+
+        if (matched) {
+          putf("    got:      \"%.*ls\"\n", matchLength, input + matchOffset);
+        } else {
+          putf("    got:      no match\n");
+        }
       }
     }
   }
@@ -145,7 +162,7 @@ typedef struct {
 
 static const TestDescriptor tests[] = {
   /* URL detection */
-  { "\nURL detection:" },
+  { "URL Detection" },
   { "cursor on scheme letter",                  L"https://example.com/path?q=1#frag",     2,  L"https://example.com/path?q=1#frag" },
   { "cursor on path character",                 L"https://example.com/path?q=1#frag",     22, L"https://example.com/path?q=1#frag" },
   { "URL embedded in text",                     L"visit https://foo.bar/baz for details",  10, L"https://foo.bar/baz"               },
@@ -163,7 +180,7 @@ static const TestDescriptor tests[] = {
   { "URL stops at > (angle-bracketed URL)",     L"<https://example.com>",                   5, L"https://example.com"               },
 
   /* Email detection */
-  { "\nEmail detection:" },
+  { "Email Address Detection" },
   { "cursor on @",                              L"user@example.com",                        4, L"user@example.com"                  },
   { "cursor on first char of local part",       L"user@example.com",                        0, L"user@example.com"                  },
   { "cursor in middle of local part",           L"user@example.com",                        2, L"user@example.com"                  },
@@ -181,7 +198,7 @@ static const TestDescriptor tests[] = {
   { "bare word not matched",                    L"hello",                                   0, NULL                                },
 
   /* Hostname detection */
-  { "\nHostname detection:" },
+  { "Host Name Detection" },
   { "www prefix accepted",                      L"www.example.com",                         0, L"www.example.com"                   },
   { "www prefix, cursor on TLD",                L"www.example.com",                        12, L"www.example.com"                   },
   { "known TLD (com) without www",              L"example.com",                             0, L"example.com"                       },
@@ -196,7 +213,7 @@ static const TestDescriptor tests[] = {
   { "URL takes priority over hostname",         L"https://example.com",                    10, L"https://example.com"               },
 
   /* Negative cases */
-  { "\nNegative cases:" },
+  { "Negative Cases" },
   { "space character",                          L"hello world",                             5, NULL                                },
   { "plain word",                               L"hello",                                   2, NULL                                },
   { "number alone",                             L"12345",                                   2, NULL                                },
@@ -204,7 +221,7 @@ static const TestDescriptor tests[] = {
 
   /* Multiple targets — cursor selects the right one;
    * surrounding non-target characters must not bleed into the result. */
-  { "\nMultiple targets / surrounding characters:" },
+  { "Multiple Targets / Surrounding Characters" },
   { "two URLs, cursor on first",                L"https://first.com and https://second.org",  8,  L"https://first.com"              },
   { "two URLs, cursor on second",               L"https://first.com and https://second.org",  30, L"https://second.org"             },
   { "two emails, cursor on first",              L"foo@a.com and bar@b.com",                   4,  L"foo@a.com"                      },
@@ -223,20 +240,24 @@ static const TestDescriptor tests[] = {
 
 static void
 runBuiltinTests (void) {
-  putf("COPY_SMART detection tests\n");
-  putf("==========================\n");
+  if (opt_quietness <= OPTQ_INFO) {
+    putf("COPY_SMART detection tests\n");
+    putf("==========================\n");
+    putf("\n");
+  }
 
-  for (size_t i = 0; i < ARRAY_COUNT(tests); i += 1) {
-    const TestDescriptor *test = &tests[i];
+  for (size_t t = 0; t < ARRAY_COUNT(tests); t += 1) {
+    const TestDescriptor *test = &tests[t];
 
     if (!test->input) {
-      putf("%s\n", test->desc);
+      if (opt_quietness <= OPTQ_FAIL) {
+        if (t > 0) putf("\n");
+        putf("%s:\n", test->desc);
+      }
     } else {
       runTest(test->desc, test->input, test->target, test->expected);
     }
   }
-
-  putf("\n==========================\n");
 }
 
 /* ============================================================
@@ -307,9 +328,15 @@ main (int argc, char *argv[]) {
     runBuiltinTests();
     int failed = !!failCount;
 
-    putf("Results: %d/%d passed", passCount, testCount);
-    if (failed) putf(", %d FAILED", failCount);
-    putf("\n");
+    if (opt_quietness <= OPTQ_FAIL) {
+      putf("\n==========================\n");
+    }
+
+    if (opt_quietness <= OPTQ_SUMMARY) {
+      putf("Results: %d/%d passed", passCount, testCount);
+      if (failed) putf(", %d FAILED", failCount);
+      putf("\n");
+    }
 
     if (failed) return PROG_EXIT_SEMANTIC;
   }
