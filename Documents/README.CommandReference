@@ -46,6 +46,8 @@ Alphabetical Command Index
 * `CONTROL`_
 * `COPY_LINE`_
 * `COPY_RECT`_
+* `COPY_SMART_ADD`_
+* `COPY_SMART_NEW`_
 * `CSRBLINK`_
 * `CSRHIDE`_
 * `CSRJMP_VERT`_
@@ -808,6 +810,8 @@ Clipboard Functions
 * `COPY_RECT`_
 * `CLIP_COPY`_
 * `CLIP_APPEND`_
+* `COPY_SMART_NEW`_
+* `COPY_SMART_ADD`_
 * `PASTE`_
 * `PASTE_ALTMODE`_
 * `PASTE_HISTORY`_
@@ -856,6 +860,22 @@ The following modifiers may be specified:
 .. _CLIP_APPEND:
 
 **CLIP_APPEND** - Append characters to clipboard.
+
+.. _COPY_SMART_NEW:
+
+**COPY_SMART_NEW** - Start new clipboard with smart copy (URL, email, etc) at character.
+
+The following modifiers may be specified:
+
+* a column number
+
+.. _COPY_SMART_ADD:
+
+**COPY_SMART_ADD** - Append to clipboard with smart copy (URL, email, etc) at character.
+
+The following modifiers may be specified:
+
+* a column number
 
 .. _PASTE:
 
