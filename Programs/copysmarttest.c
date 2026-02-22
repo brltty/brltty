@@ -27,9 +27,10 @@
 #include "cmdline.h"
 #include "cmdput.h"
 #include "copysmart.h"
+#include "parse.h"
 
 static char *opt_text    = NULL;
-static char *opt_target  = NULL;
+static char *opt_offset  = NULL;
 static int   opt_verbose = 0;
 
 BEGIN_COMMAND_LINE_OPTIONS(programOptions)
@@ -40,10 +41,10 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .description = "UTF-8 text to test"
   },
 
-  { .word = "target",
-    .letter = 'n',
+  { .word = "offset",
+    .letter = 'o',
     .argument = "offset",
-    .setting.string = &opt_target,
+    .setting.string = &opt_offset,
     .description = "zero-based character offset of the cursor"
   },
 
@@ -246,10 +247,32 @@ int
 main (int argc, char *argv[]) {
   PROCESS_COMMAND_LINE(programDescriptor, argc, argv);
 
-  if (opt_text && *opt_text && opt_target && *opt_target) {
-    /* interactive single-string mode */
-    size_t textLen = strlen(opt_text) + 1;
-    wchar_t *wtext = malloc(textLen * sizeof(wchar_t));
+  int haveOffset = opt_offset && *opt_offset;
+  int targetOffset;
+
+  if (haveOffset) {
+    static int minimum = 0;
+
+    if (!validateInteger(&targetOffset, opt_offset, &minimum, NULL)) {
+      logMessage(LOG_ERR, "invalid offset: %s", opt_offset);
+      return PROG_EXIT_SYNTAX;
+    }
+  }
+
+  if (opt_text && *opt_text) {
+    size_t textLen = strlen(opt_text);
+    if (!haveOffset) targetOffset = 0;
+
+    if (targetOffset > textLen) {
+      logMessage(LOG_ERR,
+        "offset greater than text length: %d > %" PRIsize,
+        targetOffset, textLen
+      );
+
+      return PROG_EXIT_SEMANTIC;
+    }
+
+    wchar_t *wtext = malloc((textLen + 1) * sizeof(wchar_t));
 
     if (!wtext) {
       logMallocError();
@@ -260,23 +283,27 @@ main (int argc, char *argv[]) {
 
     if (wlen == (size_t)-1) {
       free(wtext);
-      logMessage(LOG_ERR, "invalid UTF-8 in --text");
+      logMessage(LOG_ERR, "invalid UTF-8 byte in text");
       return PROG_EXIT_SYNTAX;
     }
 
-    int target = atoi(opt_target);
     int matchOffset, matchLength;
-    int matched = cpbSmartMatch(wtext, (int)wlen, target, &matchOffset, &matchLength);
+    int matched = cpbSmartMatch(wtext, (int)wlen, targetOffset, &matchOffset, &matchLength);
 
     if (matched) {
       putf("%.*ls\n", matchLength, wtext + matchOffset);
     } else {
-      putf("no match\n");
+      logMessage(LOG_WARNING, "no match");
     }
 
     free(wtext);
     if (!matched) return PROG_EXIT_SEMANTIC;
   } else {
+    if (haveOffset) {
+      logMessage(LOG_ERR, "offset without text");
+      return PROG_EXIT_SYNTAX;
+    }
+
     runBuiltinTests();
     int failed = !!failCount;
 
