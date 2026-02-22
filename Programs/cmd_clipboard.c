@@ -704,8 +704,9 @@ handleClipboardCommands (int command, void *data) {
                 int matchOffset, matchLength;
 
                 if (matchSmart(buf, linearLen, targetOffset, &matchOffset, &matchLength)) {
-                  cpbEndOperation(ccd, buf + matchOffset, matchLength, 0);
-                  copied = 1;
+                  if (cpbEndOperation(ccd, buf + matchOffset, matchLength, 0)) {
+                    copied = 1;
+                  }
                 }
 
                 free(buf);
