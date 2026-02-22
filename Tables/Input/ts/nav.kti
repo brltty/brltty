@@ -104,8 +104,8 @@ ifKey RoutingKey
   assign keyRoutingDown \{keyNavDown}
   include routing.kti
 
-  bind RoutingKey+\{keyNavLeft} CLIP_NEW
-  ifVar keyCursorLeft  bind RoutingKey+\{keyCursorLeft} CLIP_ADD
+  bind RoutingKey+\{keyNavLeft} CLIP_NEW:COPY_SMART_NEW
+  ifVar keyCursorLeft  bind RoutingKey+\{keyCursorLeft} CLIP_ADD:COPY_SMART_ADD
   bind RoutingKey+\{keyNavRight} COPY_RECT
   ifVar keyCursorRight  bind RoutingKey+\{keyCursorRight} COPY_LINE
 

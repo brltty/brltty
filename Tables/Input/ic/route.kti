@@ -35,10 +35,10 @@ bind PanLeft CONTEXT+upDifferentCharacter
 bind PanRight CONTEXT+downDifferentCharacter
 
 context clipNew
-bind RoutingKey CLIP_NEW
+bind RoutingKey CLIP_NEW:COPY_SMART_NEW
 
 context clipAdd
-bind RoutingKey CLIP_ADD
+bind RoutingKey CLIP_ADD:COPY_SMART_ADD
 
 context copyLinear
 bind RoutingKey COPY_LINE

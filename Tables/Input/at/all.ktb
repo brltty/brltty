@@ -82,8 +82,8 @@ bind !LeftWheelDown LNDN
 bind !RightWheelDown LNDN
 
 bind !RoutingKey1 ROUTE
-bind Attribute2+!RoutingKey1 CLIP_NEW
-bind Attribute1+!RoutingKey1 CLIP_ADD
+bind Attribute2+!RoutingKey1 CLIP_NEW:COPY_SMART_NEW
+bind Attribute1+!RoutingKey1 CLIP_ADD:COPY_SMART_ADD
 bind Attribute4+!RoutingKey1 COPY_LINE
 bind Attribute3+!RoutingKey1 COPY_RECT
 

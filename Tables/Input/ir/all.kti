@@ -28,8 +28,8 @@ bind \{Dot2}+\{Dot3}+\{Dot5} SIXDOTS+on
 bind \{Dot2}+\{Dot3}+\{Dot6} SIXDOTS+off
 
 bind !RoutingKey ROUTE
-bind L1+!RoutingKey CLIP_NEW
-bind L2+!RoutingKey CLIP_ADD
+bind L1+!RoutingKey CLIP_NEW:COPY_SMART_NEW
+bind L2+!RoutingKey CLIP_ADD:COPY_SMART_ADD
 bind L8+!RoutingKey COPY_LINE
 bind L7+!RoutingKey COPY_RECT
 bind L3+!RoutingKey SETLEFT

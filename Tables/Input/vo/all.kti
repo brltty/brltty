@@ -49,8 +49,8 @@ bind Right+Down AUTOSPEAK
 assign chord Thumb2+
 include ../chords.kti
 
-bind Thumb1+RoutingKey CLIP_NEW
-bind Thumb2+RoutingKey CLIP_ADD
+bind Thumb1+RoutingKey CLIP_NEW:COPY_SMART_NEW
+bind Thumb2+RoutingKey CLIP_ADD:COPY_SMART_ADD
 bind Thumb3+RoutingKey COPY_LINE
 bind Thumb4+RoutingKey COPY_RECT
 bind RoutingKey+!RoutingKey CLIP_COPY

@@ -37,7 +37,7 @@ bind Select+!RoutingKey.2 LEARN
 bind Select+!RoutingKey.3 PREFMENU
 bind Select+!RoutingKey.4 INFO
 
-bind Up+!RoutingKey CLIP_NEW
+bind Up+!RoutingKey CLIP_NEW:COPY_SMART_NEW
 bind Up+Select+!RoutingKey CLIP_APPEND
 bind Down+!RoutingKey COPY_LINE
 bind Down+Select+!RoutingKey COPY_RECT

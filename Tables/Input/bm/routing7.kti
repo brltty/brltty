@@ -22,8 +22,8 @@ include routing.kti
 
 bind Display5+!RoutingKey DESCCHAR
 
-bind Display3+!RoutingKey CLIP_NEW
-bind Display4+!RoutingKey CLIP_ADD
+bind Display3+!RoutingKey CLIP_NEW:COPY_SMART_NEW
+bind Display4+!RoutingKey CLIP_ADD:COPY_SMART_ADD
 bind Display6+!RoutingKey COPY_LINE
 bind Display7+!RoutingKey COPY_RECT
 

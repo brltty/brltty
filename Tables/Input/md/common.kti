@@ -42,7 +42,7 @@ bind Shift+Long+Up PRPROMPT
 bind Shift+Long+Down NXPROMPT
 
 bind RoutingKey ROUTE
-bind RoutingKey+Left CLIP_NEW
+bind RoutingKey+Left CLIP_NEW:COPY_SMART_NEW
 bind RoutingKey+Up CLIP_APPEND
 bind RoutingKey+Right COPY_LINE
 bind RoutingKey+Down COPY_RECT

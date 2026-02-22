@@ -77,8 +77,8 @@ bind RightJoystickPress+RoutingKey GOTOMARK
 bind LeftJoystickPress+RightJoystickPress PASTE:PASTE_ALTMODE
 bind RoutingKey+RoutingKey CLIP_COPY
 bind LeftJoystickUp+RoutingKey+RoutingKey CLIP_APPEND
-bind LeftJoystickLeft+RoutingKey CLIP_NEW
-bind LeftJoystickUp+RoutingKey CLIP_ADD
+bind LeftJoystickLeft+RoutingKey CLIP_NEW:COPY_SMART_NEW
+bind LeftJoystickUp+RoutingKey CLIP_ADD:COPY_SMART_ADD
 bind LeftJoystickRight+RoutingKey COPY_LINE
 bind LeftJoystickDown+RoutingKey COPY_RECT
 

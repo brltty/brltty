@@ -104,8 +104,8 @@ assign keyRoutingUp RightRockerUp
 assign keyRoutingDown RightRockerDown
 include routing.kti
 
-bind RoutingKey+Button1 CLIP_NEW
-bind RoutingKey+Button2 CLIP_ADD
+bind RoutingKey+Button1 CLIP_NEW:COPY_SMART_NEW
+bind RoutingKey+Button2 CLIP_ADD:COPY_SMART_ADD
 bind RoutingKey+Button3 COPY_RECT
 bind RoutingKey+Button4 COPY_LINE
 

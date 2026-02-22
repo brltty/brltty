@@ -61,8 +61,8 @@ bind RoutingKey1 ROUTE:COLOR
 
 bind ETouchLeftRear+ETouchLeftFront+RoutingKey1 DESCCHAR
 bind RoutingKey1+!RoutingKey1 CLIP_COPY
-bind ETouchLeftRear+RoutingKey1 CLIP_NEW
-bind ETouchLeftFront+RoutingKey1 CLIP_ADD
+bind ETouchLeftRear+RoutingKey1 CLIP_NEW:COPY_SMART_NEW
+bind ETouchLeftFront+RoutingKey1 CLIP_ADD:COPY_SMART_ADD
 bind ETouchRightRear+RoutingKey1 COPY_LINE
 bind ETouchRightFront+RoutingKey1 COPY_RECT
 bind ETouchRightRear+ETouchRightFront PASTE:PASTE_ALTMODE

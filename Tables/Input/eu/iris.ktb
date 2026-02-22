@@ -71,11 +71,11 @@ bind Right TUNES
 
 
 context CLIP_NEW
-bind \{routingKey1} CLIP_NEW
+bind \{routingKey1} CLIP_NEW:COPY_SMART_NEW
 
 
 context CLIP_ADD
-bind \{routingKey1} CLIP_ADD
+bind \{routingKey1} CLIP_ADD:COPY_SMART_ADD
 
 
 context COPY_RECT

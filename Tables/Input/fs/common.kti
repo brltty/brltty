@@ -62,7 +62,7 @@ bind Left\{navKeyType}Press+RoutingKey SETLEFT
 bind Right\{navKeyType}Press+RoutingKey DESCCHAR
 
 bind RoutingKey+!RoutingKey CLIP_COPY
-bind PanLeft+RoutingKey CLIP_NEW
+bind PanLeft+RoutingKey CLIP_NEW:COPY_SMART_NEW
 bind PanRight+RoutingKey COPY_RECT
-bind LeftSelector+RoutingKey CLIP_ADD
+bind LeftSelector+RoutingKey CLIP_ADD:COPY_SMART_ADD
 bind RightSelector+RoutingKey COPY_LINE

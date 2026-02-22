@@ -37,8 +37,8 @@ bind \{space}+RoutingKey KEY_FUNCTION
 bind \{space}+RoutingKey+!RoutingKey CLIP_APPEND
 
 bind RoutingKey+\{press} DESCCHAR
-bind RoutingKey+Left CLIP_NEW
-bind RoutingKey+Up CLIP_ADD
+bind RoutingKey+Left CLIP_NEW:COPY_SMART_NEW
+bind RoutingKey+Up CLIP_ADD:COPY_SMART_ADD
 bind RoutingKey+Right COPY_LINE
 bind RoutingKey+Down COPY_RECT
 endIf

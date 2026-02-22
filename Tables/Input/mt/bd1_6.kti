@@ -34,7 +34,7 @@ bind RightSelect+RightUp+RightDown HOME
 
 bind !RoutingKey ROUTE
 
-bind LeftUp+!RoutingKey CLIP_NEW
+bind LeftUp+!RoutingKey CLIP_NEW:COPY_SMART_NEW
 bind LeftSelect+!RoutingKey CLIP_APPEND
 bind RightUp+!RoutingKey COPY_LINE
 bind RightSelect+!RoutingKey COPY_RECT

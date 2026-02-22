@@ -58,8 +58,8 @@ bind Select+Read+ArrowDown NXPROMPT
 bind Control TIME
 bind Alt INFO
 
-bind Control+RoutingKey CLIP_NEW
-bind Alt+RoutingKey CLIP_ADD
+bind Control+RoutingKey CLIP_NEW:COPY_SMART_NEW
+bind Alt+RoutingKey CLIP_ADD:COPY_SMART_ADD
 bind Select+RoutingKey COPY_LINE
 bind Read+RoutingKey COPY_RECT
 bind Control+Alt PASTE

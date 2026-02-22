@@ -69,8 +69,8 @@ bind LeftKeypadDown+\{routingKey1} SWITCHVT
 bind LeftKeypadDown+LeftKeypadLeft+\{routingKey1} SETMARK
 bind LeftKeypadDown+LeftKeypadRight+\{routingKey1} GOTOMARK
 
-bind RightKeypadLeft+\{routingKey1} CLIP_NEW
-bind RightKeypadUp+\{routingKey1} CLIP_ADD
+bind RightKeypadLeft+\{routingKey1} CLIP_NEW:COPY_SMART_NEW
+bind RightKeypadUp+\{routingKey1} CLIP_ADD:COPY_SMART_ADD
 bind RightKeypadRight+\{routingKey1} COPY_LINE
 bind RightKeypadDown+\{routingKey1} COPY_RECT
 

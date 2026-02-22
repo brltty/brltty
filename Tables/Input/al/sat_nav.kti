@@ -28,8 +28,8 @@ bind NavPadF1+!Right CHRRT
 bind NavPadF2+!Left HWINLT
 bind NavPadF2+!Right HWINRT
 
-bind NavPadF1+!RoutingKey1 CLIP_NEW
-bind NavPadF1+!RoutingKey2 CLIP_ADD
+bind NavPadF1+!RoutingKey1 CLIP_NEW:COPY_SMART_NEW
+bind NavPadF1+!RoutingKey2 CLIP_ADD:COPY_SMART_ADD
 bind NavPadF2+!RoutingKey1 COPY_RECT
 bind NavPadF2+!RoutingKey2 COPY_LINE
 

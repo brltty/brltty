@@ -115,7 +115,7 @@ bind K8+K6 SAY_BELOW
 bind RoutingKey ROUTE:COLOR
 bind RoutingKey+RoutingKey CLIP_COPY
 
-bind F1+RoutingKey CLIP_NEW
+bind F1+RoutingKey CLIP_NEW:COPY_SMART_NEW
 bind F6+RoutingKey COPY_LINE
 
 bind F2+RoutingKey CLIP_APPEND

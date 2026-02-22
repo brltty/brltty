@@ -53,7 +53,7 @@ bind !RoutingKey1 ROUTE:COLOR
 bind Prog+Home+!RoutingKey1 DESCCHAR
 bind Home+Cursor+!RoutingKey1 SETLEFT
 
-bind Prog+!RoutingKey1 CLIP_NEW
+bind Prog+!RoutingKey1 CLIP_NEW:COPY_SMART_NEW
 bind Home+!RoutingKey1 COPY_RECT
 bind Prog+Home+Down PASTE:PASTE_ALTMODE
 

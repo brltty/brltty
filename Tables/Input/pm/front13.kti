@@ -96,8 +96,8 @@ bind Dot8+!End SAY_FASTER
 bind Dot8+!Up SAY_SOFTER
 bind Dot8+!Down SAY_LOUDER
 
-bind Dot7+!RoutingKey1 CLIP_NEW
-bind Dot3+!RoutingKey1 CLIP_ADD
+bind Dot7+!RoutingKey1 CLIP_NEW:COPY_SMART_NEW
+bind Dot3+!RoutingKey1 CLIP_ADD:COPY_SMART_ADD
 bind Dot6+!RoutingKey1 COPY_LINE
 bind Dot8+!RoutingKey1 COPY_RECT
 

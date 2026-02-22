@@ -107,10 +107,10 @@ bind K5 MENU_LAST_ITEM
 ############################
 
 context CLIP_NEW
-bind !RoutingKey CLIP_NEW
+bind !RoutingKey CLIP_NEW:COPY_SMART_NEW
 
 context CLIP_ADD
-bind !RoutingKey CLIP_ADD
+bind !RoutingKey CLIP_ADD:COPY_SMART_ADD
 
 context COPY_LINE
 bind !RoutingKey COPY_LINE

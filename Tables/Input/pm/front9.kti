@@ -47,7 +47,7 @@ bind Attribute+!Backward TOP
 bind Function+!Forward BOT_LEFT
 bind Attribute+!Forward BOT
 
-bind Function+!RoutingKey1 CLIP_NEW
+bind Function+!RoutingKey1 CLIP_NEW:COPY_SMART_NEW
 bind Attribute+!RoutingKey1 COPY_RECT
 bind Cursor+!RoutingKey1 PRINDENT
 bind Braille+!RoutingKey1 NXINDENT

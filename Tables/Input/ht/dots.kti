@@ -56,8 +56,8 @@ bind B2+B3+B5+B6 TIME
 
 bind B1+RoutingKey SETLEFT
 bind B2+RoutingKey DESCCHAR
-bind B3+RoutingKey CLIP_ADD
-bind B4+RoutingKey CLIP_NEW
+bind B3+RoutingKey CLIP_ADD:COPY_SMART_ADD
+bind B4+RoutingKey CLIP_NEW:COPY_SMART_NEW
 bind B5+RoutingKey COPY_RECT
 bind B6+RoutingKey COPY_LINE
 bind B7+RoutingKey SETMARK

@@ -187,10 +187,10 @@ context SETLEFT
 bind RoutingKey SETLEFT
 
 context CLIP_NEW
-bind RoutingKey CLIP_NEW
+bind RoutingKey CLIP_NEW:COPY_SMART_NEW
 
 context CLIP_ADD
-bind RoutingKey CLIP_ADD
+bind RoutingKey CLIP_ADD:COPY_SMART_ADD
 
 context COPY_RECT
 bind RoutingKey COPY_RECT

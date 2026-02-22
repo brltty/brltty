@@ -89,8 +89,8 @@ bind LeftJoystickUp+\{routingKey1} PRINDENT
 bind LeftJoystickDown+\{routingKey1} NXINDENT
 
 bind RightJoystickPress+\{routingKey1} DESCCHAR
-bind RightJoystickLeft+\{routingKey1} CLIP_NEW
-bind RightJoystickUp+\{routingKey1} CLIP_ADD
+bind RightJoystickLeft+\{routingKey1} CLIP_NEW:COPY_SMART_NEW
+bind RightJoystickUp+\{routingKey1} CLIP_ADD:COPY_SMART_ADD
 bind RightJoystickRight+\{routingKey1} COPY_LINE
 bind RightJoystickDown+\{routingKey1} COPY_RECT
 

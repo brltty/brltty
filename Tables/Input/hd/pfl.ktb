@@ -105,8 +105,8 @@ include ../toggle.kti
 
 bind RoutingKey ROUTE:COLOR
 
-bind B7+RoutingKey CLIP_NEW
-bind B3+RoutingKey CLIP_ADD
+bind B7+RoutingKey CLIP_NEW:COPY_SMART_NEW
+bind B3+RoutingKey CLIP_ADD:COPY_SMART_ADD
 bind B6+RoutingKey COPY_RECT
 bind B8+RoutingKey COPY_LINE
 

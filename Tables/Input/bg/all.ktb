@@ -91,8 +91,8 @@ bind RoutingKey ROUTE
 bind RoutingKey+RoutingKey CLIP_COPY
 bind RoutingKey+RoutingKey+Space CLIP_APPEND
 
-bind Dot7+RoutingKey CLIP_NEW
-bind Dot3+RoutingKey CLIP_ADD
+bind Dot7+RoutingKey CLIP_NEW:COPY_SMART_NEW
+bind Dot3+RoutingKey CLIP_ADD:COPY_SMART_ADD
 bind Dot6+RoutingKey COPY_LINE
 bind Dot8+RoutingKey COPY_RECT
 
