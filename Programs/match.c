@@ -18,8 +18,8 @@
 
 #include "prologue.h"
 
-#include <wchar.h>
 #include <stdlib.h>
+#include <wchar.h>
 #include <string.h>
 
 #include "match.h"
@@ -30,11 +30,13 @@
 
 /* POSIX ERE patterns tried in order.  The first match whose byte range
  * contains the cursor position wins. */
-static struct {
-  const char *source;
-  int         matchGroup;  /* capture group holding the match bounds */
+typedef struct {
+  const char *const source;
+  const int   matchGroup;  /* capture group holding the match bounds */
   regex_t     compiled;
-} patterns[] = {
+} PatternDescriptor;
+
+static PatternDescriptor patterns[] = {
   /* 0: URL with scheme (highest priority)
    *   scheme:  letter then letters/digits/+/./- (e.g. https, ftp, git+ssh)
    *   ://      separator
@@ -160,16 +162,19 @@ matchSmart (const wchar_t *buf, int len, int target,
   int found = 0;
 
   for (size_t p = 0; p < PATTERN_COUNT && !found; p += 1) {
+    const PatternDescriptor *pattern = &patterns[p];
     size_t offset = 0;
-    int g = patterns[p].matchGroup;
-    regmatch_t pmatch[5];
 
-    while (regexec(&patterns[p].compiled, utf8 + offset, 5, pmatch,
+    regmatch_t matches[5];
+    const regmatch_t *rmPattern = &matches[0];
+    const regmatch_t *rmResult = &matches[pattern->matchGroup];
+
+    while (regexec(&pattern->compiled, utf8 + offset, ARRAY_COUNT(matches), matches,
                    (offset > 0) ? REG_NOTBOL : 0) == 0) {
-      if (pmatch[0].rm_so < 0 || pmatch[0].rm_eo <= pmatch[0].rm_so) break;
+      if (rmPattern->rm_so < 0 || rmPattern->rm_eo <= rmPattern->rm_so) break;
 
-      size_t mStart = offset + (size_t)pmatch[g].rm_so;
-      size_t mEnd   = offset + (size_t)pmatch[g].rm_eo;
+      size_t mStart = offset + (size_t)rmResult->rm_so;
+      size_t mEnd   = offset + (size_t)rmResult->rm_eo;
 
       /* Past the cursor — no later match can contain it. */
       if (mStart > targetByte) break;
@@ -188,7 +193,7 @@ matchSmart (const wchar_t *buf, int len, int target,
         break;
       }
 
-      offset += (size_t)pmatch[0].rm_eo;
+      offset += (size_t)rmPattern->rm_eo;
     }
   }
 
