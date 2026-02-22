@@ -28,6 +28,8 @@
 #ifdef HAVE_REGEX_H
 #include <regex.h>
 
+#define COMMON_TLD_NAMES "(com|org|net|edu|gov|mil|int|io|dev|app|info|biz|name|pro|coop|museum)"
+
 /* POSIX ERE patterns tried in order.  The first match whose byte range
  * contains the cursor position wins. */
 typedef struct {
@@ -61,14 +63,14 @@ static PatternDescriptor patterns[] = {
    *   tld:     one of the recognised suffixes
    *   group 1 captures the hostname; ([^[:alnum:]]|$) is a word boundary
    *   that prevents matching e.g. "example.io" inside "example.iox" */
-  { "(([[:alnum:]][[:alnum:]-]*\\.)+(com|org|net|edu|gov|mil|int|io|dev|app|info|biz|name|pro|coop|museum))([^[:alnum:]]|$)", 1 },
+  { "(([[:alnum:]][[:alnum:]-]*\\.)+" COMMON_TLD_NAMES ")([^[:alnum:]]|$)", 1 },
 
   /* 4: hostname with a two-letter country-code TLD
    *   labels:  same structure as pattern 3
    *   tld:     exactly two letters
    *   group 1 captures the hostname; ([^[:alnum:]]|$) is a word boundary
    *   that prevents matching e.g. "example.xy" inside "example.xyz" */
-  { "(([[:alnum:]][[:alnum:]-]*\\.)+[[:alpha:]][[:alpha:]])([^[:alnum:]]|$)", 1 },
+  { "(([[:alnum:]][[:alnum:]-]*\\.)+[[:alpha:]]{2})([^[:alnum:]]|$)", 1 },
 };
 
 #define PATTERN_COUNT (sizeof(patterns) / sizeof(patterns[0]))
