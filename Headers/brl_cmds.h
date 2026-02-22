@@ -331,6 +331,8 @@ typedef enum {
   BRL_BLK_MACRO /* execute command macro */,
   BRL_BLK_HOSTCMD /* run host command */,
   BRL_BLK_COLOR /* describe color of character */,
+  BRL_BLK_COPY_SMART_NEW /* smart copy (URL, email, etc.) at character to new clipboard */,
+  BRL_BLK_COPY_SMART_ADD /* smart copy (URL, email, etc.) at character appended to clipboard */,
 
   BRL_blockCommandCount /* must be last */
 } BRL_BlockCommand;

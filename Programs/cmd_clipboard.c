@@ -574,26 +574,8 @@ handleClipboardCommands (int command, void *data) {
       alert(cpbRestore(ccd)? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
       break;
 
-    case BRL_CMD_COPY_SMART: {
-      int linearLen, targetOffset;
-      wchar_t *buf = cpbLinearize(ccd, &linearLen, &targetOffset);
-
-      if (buf) {
-        int matchOffset, matchLength;
-
-        if (cpbSmartMatch(buf, linearLen, targetOffset, &matchOffset, &matchLength)) {
-          cpbEndOperation(ccd, buf + matchOffset, matchLength, 0);
-        } else {
-          alert(ALERT_COMMAND_REJECTED);
-        }
-
-        free(buf);
-      } else {
-        alert(ALERT_COMMAND_REJECTED);
-      }
-
-      break;
-    }
+    case BRL_CMD_COPY_SMART:
+      goto doSmartCopy;
 
     {
       int increment;
@@ -697,6 +679,48 @@ handleClipboardCommands (int command, void *data) {
 
           alert(ALERT_COMMAND_REJECTED);
           break;
+        }
+
+        {
+          int append;
+          int column, row;
+
+        case BRL_CMD_BLK(COPY_SMART_NEW):
+          append = 0;
+          goto doSmartCopyBegin;
+
+        case BRL_CMD_BLK(COPY_SMART_ADD):
+          append = 1;
+          goto doSmartCopyBegin;
+
+        doSmartCopyBegin:
+          if (getCharacterCoordinates(arg1, &row, &column, NULL, 0)) {
+            cpbBeginOperation(ccd, column, row, append);
+          } else {
+            alert(ALERT_COMMAND_REJECTED);
+            break;
+          }
+
+        doSmartCopy: {
+          int linearLen, targetOffset;
+          wchar_t *buf = cpbLinearize(ccd, &linearLen, &targetOffset);
+
+          if (buf) {
+            int matchOffset, matchLength;
+
+            if (cpbSmartMatch(buf, linearLen, targetOffset, &matchOffset, &matchLength)) {
+              cpbEndOperation(ccd, buf + matchOffset, matchLength, 0);
+            } else {
+              alert(ALERT_COMMAND_REJECTED);
+            }
+
+            free(buf);
+          } else {
+            alert(ALERT_COMMAND_REJECTED);
+          }
+
+          break;
+        }
         }
 
         case BRL_CMD_BLK(COPY_RECT): {
