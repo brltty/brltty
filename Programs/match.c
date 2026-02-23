@@ -40,8 +40,10 @@
  * contains the cursor position wins. */
 typedef struct {
   const char *const source;
-  const int   matchGroup;  /* capture group holding the match bounds */
-  regex_t     compiled;
+  const int matchGroup;  /* capture group holding the match bounds */
+
+  unsigned char isCompiled:1;
+  regex_t compiled;
 } PatternDescriptor;
 
 static PatternDescriptor patterns[] = {
@@ -79,41 +81,42 @@ static PatternDescriptor patterns[] = {
   { "(" HOST_NAME_PREFIX "[[:alpha:]]{2}" ")" HOST_NAME_END, 1 },
 };
 
-#define PATTERN_COUNT (sizeof(patterns) / sizeof(patterns[0]))
-
+#define PATTERN_COUNT ARRAY_COUNT(patterns)
 static int patternsCompiled = 0;
 
-static int
+static void
 ensureCompiledPatterns (void) {
-  if (patternsCompiled) return 1;
+  if (!patternsCompiled) {
+    for (size_t p = 0; p < PATTERN_COUNT; p += 1) {
+      PatternDescriptor *pattern = &patterns[p];
 
-  for (size_t p = 0; p < PATTERN_COUNT; p += 1) {
-    PatternDescriptor *pattern = &patterns[p];
+      if (!pattern->isCompiled) {
+        logMessage(LOG_DEBUG,
+          "compiling extended regular expression: %s",
+          pattern->source
+        );
 
-    int rcResult = regcomp(
-      &pattern->compiled, pattern->source,
-      (REG_EXTENDED | REG_ICASE)
-    );
+        int rcResult = regcomp(
+          &pattern->compiled, pattern->source,
+          (REG_EXTENDED | REG_ICASE)
+        );
 
-    if (rcResult != 0) {
-      char problem[0X100];
-      regerror(rcResult, &pattern->compiled, problem, sizeof(problem));
+        if (rcResult == 0) {
+          pattern->isCompiled = 1;
+        } else {
+          char problem[0X100];
+          regerror(rcResult, &pattern->compiled, problem, sizeof(problem));
 
-      logMessage(LOG_ERR,
-        "extended regular expression compile error: %s: %s",
-        problem, pattern->source
-      );
-
-      for (size_t f = 0; f < p; f += 1) {
-        regfree(&patterns[f].compiled);
+          logMessage(LOG_ERR,
+            "extended regular expression compile error: %s: %s",
+            problem, pattern->source
+          );
+        }
       }
-
-      return 0;
     }
-  }
 
-  patternsCompiled = 1;
-  return 1;
+    patternsCompiled = 1;
+  }
 }
 
 /* Strip trailing .,; and unmatched ) from a byte (ASCII) string.
@@ -174,18 +177,14 @@ matchSmart (const wchar_t *buf, int len, int target,
   size_t utf8Len;
   char *utf8 = getUtf8FromWchars(buf, (unsigned int)len, &utf8Len);
   if (!utf8) return 0;
-
   size_t targetByte = utf8ByteOffset(utf8, target);
 
-  if (!ensureCompiledPatterns()) {
-    free(utf8);
-    return 0;
-  }
-
+  ensureCompiledPatterns();
   int found = 0;
 
   for (size_t p = 0; p < PATTERN_COUNT && !found; p += 1) {
     const PatternDescriptor *pattern = &patterns[p];
+    if (!pattern->isCompiled) break;
     size_t offset = 0;
 
     regmatch_t rmArray[1 + MAXIMUM_CAPTURE_COUNT];
