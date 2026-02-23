@@ -2,7 +2,6 @@
 #espeak-ng-dev
 #festival
 #liblouis-dev
-#linuxdoc-tools
 #speech-dispatcher
 #speech-dispatcher-dev
 alsa-lib-dev
@@ -46,6 +45,7 @@ pkgconf
 polkit-dev
 py3-docutils
 py3-setuptools
+py3-sphinx
 python3-dev
 tcl
 tcl-dev

@@ -40,7 +40,7 @@ of the prepared source tarballs) then you'll also need these packages:
 If you'd like to prepare the documentation (by doing ``make`` within the
 ``Documents/`` subdirectory) then you'll need these packages:
 
-*  linuxdoc-tools (not pre-packaged in Cygwin)
+*  python3-sphinx
 *  doxygen
 
 If you're using MSYS (the MinGW command shell) for running ``configure`` and

@@ -76,7 +76,7 @@ BuildRequires: systemd-devel
 BuildRequires: gettext
 BuildRequires: groff
 BuildRequires: doxygen
-BuildRequires: linuxdoc-tools
+BuildRequires: python3-sphinx
 BuildRequires: python3-docutils
 BuildRequires: pandoc-cli
 

@@ -31,7 +31,6 @@ liblouis-devel
 libX11-devel
 libXt-devel
 libXtst-devel
-linuxdoc-tools
 lua-devel
 make
 ncurses-devel
@@ -47,6 +46,7 @@ python3-Cython
 python3-devel
 python3-docutils
 python3-setuptools
+python3-sphinx
 speech-dispatcher-devel
 systemd
 systemd-devel

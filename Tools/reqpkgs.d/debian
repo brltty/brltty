@@ -34,7 +34,6 @@ libx11-dev
 libxaw7-dev
 libxt-dev
 libxtst-dev
-linuxdoc-tools
 lua5.4
 make
 ocaml
@@ -42,6 +41,7 @@ ocaml-findlib
 pkg-config
 python3-all-dev
 python3-docutils
+python3-sphinx
 python3-setuptools
 systemd
 tcl-dev

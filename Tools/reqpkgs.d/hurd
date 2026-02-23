@@ -26,13 +26,13 @@ libx11-dev
 libxaw7-dev
 libxt-dev
 libxtst-dev
-linuxdoc-tools
 make
 ocaml
 ocaml-findlib
 pkg-config
 python3-all-dev
 python3-docutils
+python3-sphinx
 tcl-dev
 unicode-cldr-core
 x11proto-kb-dev

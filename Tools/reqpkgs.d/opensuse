@@ -1,5 +1,4 @@
 #at-spi-devel
-#linuxdoc-tools
 #neXtaw-devel
 alsa-devel
 at-spi2-core-devel
@@ -49,6 +48,7 @@ python310-Cython
 python310-devel
 python310-docutils
 python310-setuptools
+python310-Sphinx
 speech-dispatcher
 systemd
 systemd-devel

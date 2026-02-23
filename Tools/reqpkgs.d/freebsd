@@ -23,7 +23,6 @@ libX11
 libXaw
 libXt
 libXtst
-linuxdoc-tools
 ocaml
 ocaml-findlib
 openjdk11
@@ -33,6 +32,7 @@ polkit
 python39
 py39-cython
 py39-docutils
+py39-sphinx
 speech-dispatcher
 tcl87
 xorgproto

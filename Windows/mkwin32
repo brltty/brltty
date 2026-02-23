@@ -209,7 +209,7 @@ getPythonLocation pythonRoot && {
 verifyWindowsPackages ahk nsis icu "${usbWindowsPackages[@]}" || :
 verifyWindowsCommands lib python cython || :
 verifyMingwPackages pthreads curses || :
-verifyMingwCommands zip unix2dos linuxdoc doxygen groff || :
+verifyMingwCommands zip unix2dos sphinx-build doxygen groff || :
 
 if [ -z "${temporaryDirectory}" ]
 then

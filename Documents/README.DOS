@@ -316,7 +316,7 @@ cross-compiler. If you don't already have a cross-compiler for DOS then see
 Before running this script, ensure that the following commands have been 
 installed on your system:
 
-*  linuxdoc
+*  sphinx-build
 *  unix2dos
 *  zip
 
