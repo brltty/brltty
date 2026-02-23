@@ -22,6 +22,7 @@
 #include <wchar.h>
 #include <string.h>
 
+#include "log.h"
 #include "match.h"
 #include "utf8.h"
 
@@ -86,10 +87,25 @@ static int
 ensureCompiledPatterns (void) {
   if (patternsCompiled) return 1;
 
-  for (size_t i = 0; i < PATTERN_COUNT; i += 1) {
-    if (regcomp(&patterns[i].compiled, patterns[i].source, REG_EXTENDED | REG_ICASE) != 0) {
-      for (size_t j = 0; j < i; j += 1) {
-        regfree(&patterns[j].compiled);
+  for (size_t p = 0; p < PATTERN_COUNT; p += 1) {
+    PatternDescriptor *pattern = &patterns[p];
+
+    int rcResult = regcomp(
+      &pattern->compiled, pattern->source,
+      (REG_EXTENDED | REG_ICASE)
+    );
+
+    if (rcResult != 0) {
+      char message[0X100];
+      regerror(rcResult, &pattern->compiled, message, sizeof(message));
+
+      logMessage(LOG_ERR,
+        "extended regular expression compile error: %s: %s",
+        message, pattern->source
+      );
+
+      for (size_t f = 0; f < p; f += 1) {
+        regfree(&patterns[f].compiled);
       }
 
       return 0;
@@ -184,7 +200,14 @@ matchSmart (const wchar_t *buf, int len, int target,
           (offset > 0)? REG_NOTBOL: 0
         );
 
-        if (rxResult != 0) break;
+        if (rxResult != 0) {
+          if (rxResult != REG_NOMATCH) {
+            logMessage(LOG_ERR, "unexpected regexec return value: %d", rxResult);
+          }
+
+          break;
+        }
+
         if ((rmPattern->rm_so < 0) || (rmPattern->rm_eo <= rmPattern->rm_so)) break;
       }
 
