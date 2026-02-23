@@ -5,4 +5,6 @@ Synthèses vocales supportées
 
 BRLTTY supporte les synthèses vocales suivantes:
 
-.. include:: ../common/speech-drivers.rst
+.. csv-table::
+   :header-rows: 1
+   :file: ../../speech-driver.csv

@@ -5,4 +5,6 @@ Afficheurs braille supportés
 
 BRLTTY supporte les afficheurs braille suivants:
 
-.. include:: ../common/braille-drivers.rst
+.. csv-table::
+   :header-rows: 1
+   :file: ../../braille-driver.csv

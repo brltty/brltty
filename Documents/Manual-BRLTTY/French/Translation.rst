@@ -20,7 +20,9 @@ Au départ, BRLTTY est configuré pour utiliser la table de texte
 En plus de celle-ci par défaut, les alternatives suivantes sont fournies:
 
 
-.. include:: ../common/text-tables.rst
+.. csv-table::
+   :header-rows: 1
+   :file: ../../text-table.csv
 
 
 Voir l'option :ref:`-t <options-text-table>` en ligne de commande,
@@ -428,7 +430,9 @@ compilation
 Les tables d'abrégé suivantes sont fournies:
 
 
-.. include:: ../common/contraction-tables.rst
+.. csv-table::
+   :header-rows: 1
+   :file: ../../contraction-table.csv
 
 Voir l'option :ref:`-c <options-contraction-table>` en ligne de commande
 et la ligne :ref:`contraction-table <configure-contraction-table>` du fichier de

@@ -3710,7 +3710,9 @@ BRLTTY is initially configured to use the
 In addition to this default,
 the following alternatives are provided:
 
-.. include:: ../common/text-tables.rst
+.. csv-table::
+   :header-rows: 1
+   :file: ../../text-table.csv
 
 See the :ref:`-t <options-text-table>` command line option,
 the :ref:`text-table <configure-text-table>` configuration file directive,
@@ -4034,7 +4036,9 @@ This feature isn't available if the
 
 The following contraction tables are provided:
 
-.. include:: ../common/contraction-tables.rst
+.. csv-table::
+   :header-rows: 1
+   :file: ../../contraction-table.csv
 
 See the :ref:`-c <options-contraction-table>` command line option,
 and the :ref:`contraction-table <configure-contraction-table>` configuration file directive
@@ -5101,7 +5105,9 @@ Supported Braille Displays
 
 BRLTTY supports the following braille displays:
 
-.. include:: ../common/braille-drivers.rst
+.. csv-table::
+   :header-rows: 1
+   :file: ../../braille-driver.csv
 
 
 .. _synthesizers:
@@ -5111,7 +5117,9 @@ Supported Speech Synthesizers
 
 BRLTTY supports the following speech synthesizers:
 
-.. include:: ../common/speech-drivers.rst
+.. csv-table::
+   :header-rows: 1
+   :file: ../../speech-driver.csv
 
 
 .. _drivers:
@@ -5120,7 +5128,9 @@ Driver Identification Codes
 ===========================
 
 
-.. include:: ../common/driver-codes.rst
+.. csv-table::
+   :header-rows: 1
+   :file: ../../driver-code.csv
 
 
 .. _screen:

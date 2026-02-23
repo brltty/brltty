@@ -4,4 +4,6 @@ Codes d'identification de pilote
 ================================
 
 
-.. include:: ../common/driver-codes.rst
+.. csv-table::
+   :header-rows: 1
+   :file: ../../driver-code.csv

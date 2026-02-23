@@ -90,6 +90,29 @@ proc updateTable {lists name} {
    return 0
 }
 
+proc updateDriverCodes {lists} {
+   set headers {code name}
+   set seen [dict create]
+   set dataRows [list]
+
+   foreach driverType {braille-driver speech-driver screen-driver} {
+      if {[dict exists $lists $driverType]} {
+         foreach columns [dict get $lists $driverType] {
+            set row [list [lindex $columns 0] [lindex $columns 1]]
+            set key [join $row \t]
+
+            if {![dict exists $seen $key]} {
+               dict set seen $key 1
+               lappend dataRows $row
+            }
+         }
+      }
+   }
+
+   set rows [linsert [lsort -index 0 $dataRows] 0 $headers]
+   return [updateFile "driver-code.csv" [csvMakeTable $rows] $::optionValues(test)]
+}
+
 proc updateTables {lists} {
    set updated 0
 
@@ -97,6 +120,10 @@ proc updateTables {lists} {
       if {[updateTable $lists $name]} {
          set updated 1
       }
+   }
+
+   if {[updateDriverCodes $lists]} {
+      set updated 1
    }
 
    return $updated
