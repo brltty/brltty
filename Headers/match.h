@@ -29,7 +29,7 @@ extern "C" {
  * the URL/email/hostname at position `target` within buffer `buf` of `len`
  * chars.  Returns 1 if found, 0 otherwise. */
 extern int matchSmart (
-  const wchar_t *buf, int len, int target,
+  const wchar_t *buf, int len, int targetOffset,
   int *matchOffset, int *matchLength
 );
 

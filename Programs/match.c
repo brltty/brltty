@@ -41,7 +41,7 @@
 typedef struct {
   const char *const name;
   const char *const source;
-  const int matchGroup;  /* capture group holding the match bounds */
+  const int matchIndex;  /* capture group holding the match bounds */
 
   unsigned char isCompiled:1;
   regex_t compiled;
@@ -55,7 +55,7 @@ static PatternDescriptor patterns[] = {
    *            sub-delims (!$&'()*+,;=), gen-delims (:/?#[]@) */
   { .name = "url",
     .source = "[[:alpha:]][[:alnum:]+.-]*" "://" "[][[:alnum:]_.~:/?#@!$&'()*+,;=%-]*",
-    .matchGroup = 0
+    .matchIndex = 0
   },
 
   /* 1: Email address
@@ -63,7 +63,7 @@ static PatternDescriptor patterns[] = {
    *   domain:  labels of letters/digits separated by dots or hyphens */
   { .name = "email",
     .source = "[[:alnum:]._%+-]+" "@" "(" HOST_NAME_COMPONENT "\\." ")*" HOST_NAME_COMPONENT,
-    .matchGroup = 0
+    .matchIndex = 0
   },
 
   /* 2: www. hostname (no scheme required)
@@ -72,7 +72,7 @@ static PatternDescriptor patterns[] = {
    *            trailing character is always non-alnum — no boundary needed) */
   { .name = "host-www",
     .source = "www" "(" "\\." HOST_NAME_COMPONENT ")+",
-    .matchGroup = 0
+    .matchIndex = 0
   },
 
   /* 3: hostname with a known multi-letter TLD
@@ -83,7 +83,7 @@ static PatternDescriptor patterns[] = {
    *   that prevents matching e.g. "example.io" inside "example.iox" */
   { .name = "host-tldcommon",
     .source = "(" HOST_NAME_PREFIX COMMON_TLD_NAMES ")" HOST_NAME_END,
-    .matchGroup = 1
+    .matchIndex = 1
   },
 
   /* 4: hostname with a two-letter country-code TLD
@@ -93,7 +93,7 @@ static PatternDescriptor patterns[] = {
    *   that prevents matching e.g. "example.xy" inside "example.xyz" */
   { .name = "host-tld2",
     .source = "(" HOST_NAME_PREFIX "[[:alpha:]]{2}" ")" HOST_NAME_END,
-    .matchGroup = 1
+    .matchIndex = 1
   },
 };
 
@@ -189,9 +189,11 @@ utf8WcharCount (const char *utf8, size_t bytes) {
 }
 
 int
-matchSmart (const wchar_t *buf, int len, int target,
-               int *matchOffset, int *matchLength) {
-  if (len <= 0 || target < 0 || target >= len) return 0;
+matchSmart (
+  const wchar_t *buf, int len, int targetOffset,
+  int *matchOffset, int *matchLength
+) {
+  if (len <= 0 || targetOffset < 0 || targetOffset >= len) return 0;
 
   if (patternFailed) {
     for (size_t p = 0; p < PATTERN_COUNT; p += 1) {
@@ -208,7 +210,7 @@ matchSmart (const wchar_t *buf, int len, int target,
   size_t utf8Len;
   char *utf8 = getUtf8FromWchars(buf, (unsigned int)len, &utf8Len);
   if (!utf8) return 0;
-  size_t targetByte = utf8ByteOffset(utf8, target);
+  size_t targetByte = utf8ByteOffset(utf8, targetOffset);
 
   ensureCompiledPatterns();
   int found = 0;
@@ -220,7 +222,7 @@ matchSmart (const wchar_t *buf, int len, int target,
 
     regmatch_t rmArray[1 + MAXIMUM_CAPTURE_COUNT];
     const regmatch_t *rmPattern = &rmArray[0];
-    const regmatch_t *rmResult = &rmArray[pattern->matchGroup];
+    const regmatch_t *rmResult = &rmArray[pattern->matchIndex];
 
     while (1) {
       {
@@ -272,8 +274,11 @@ matchSmart (const wchar_t *buf, int len, int target,
 #else /* !HAVE_REGEX_H */
 
 int
-matchSmart (const wchar_t *buf, int len, int target,
-               int *matchOffset, int *matchLength) {
+matchSmart (
+  const wchar_t *buf, int len, int targetOffset,
+  int *matchOffset, int *matchLength
+) {
+  logMessage(LOG_WARNING, "extended regular expressions aren't supported on this platform");
   return 0;
 }
 
