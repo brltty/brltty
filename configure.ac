@@ -427,7 +427,7 @@ fi
 AC_PATH_PROG([MSGMERGE], [msgmerge], [false])
 AC_PATH_PROG([MSGFMT], [msgfmt], [false])
 
-AC_PATH_PROG([LINUXDOC], [linuxdoc], [false])
+AC_PATH_PROG([SPHINX_BUILD], [sphinx-build], [false])
 AC_PATH_PROG([DOXYGEN], [doxygen], [false])
 
 case "${host_os}"
@@ -496,7 +496,7 @@ BRLTTY_ARG_ENABLE(
 AC_PROG_INSTALL
 BRLTTY_EXECUTABLE_PATH([INSTALL])
 
-test "${LINUXDOC}" = "false" && can_make_manual=no || can_make_manual=yes
+test "${SPHINX_BUILD}" = "false" && can_make_manual=no || can_make_manual=yes
 AC_SUBST([can_make_manual])
 
 test "${DOXYGEN}" = "false" && can_make_BrlAPIref=no || can_make_BrlAPIref=yes

@@ -17,5 +17,4 @@
 ###############################################################################
 
 DOCUMENT_NAME = BRLTTY
-DOCUMENT_LANGUAGE = french
 include $(SRC_TOP)document.mk

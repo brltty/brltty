@@ -17,5 +17,4 @@
 ###############################################################################
 
 DOCUMENT_NAME = BRLTTY
-DOCUMENT_LANGUAGE = english
 include $(SRC_TOP)document.mk

@@ -1,7 +1,0 @@
-<sect>Codes d'identification de pilote<label id="drivers"><p>
-<table loc="h">
-  <tabular ca="ll">
-    Code|Name@<hline>
-    &DriverCodes
-  </tabular>
-</table>

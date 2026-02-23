@@ -19,24 +19,25 @@
 LOCALE = C
 SETLOCALE = LC_ALL=$(LOCALE)
 
+SPHINX_CONFDIR = $(SRC_TOP)Documents
+
 all: all-yes
 all-yes: txt html
 all-no:
-	@echo linuxdoc is not installed - document will not be made
+	@echo sphinx-build is not installed - document will not be made
 
 txt: $(DOCUMENT_NAME).txt
 html: html.made
 
-LINUXDOC_OPTIONS = -l $(DOCUMENT_LANGUAGE) -c utf-8
+$(DOCUMENT_NAME).txt: $(SRC_DIR)/$(DOCUMENT_NAME).rst
+	$(SETLOCALE) sphinx-build -Q -b text -c $(SPHINX_CONFDIR) -D master_doc=$(DOCUMENT_NAME) $(SRC_DIR) _build/text
+	cp _build/text/$(DOCUMENT_NAME).txt $@
 
-$(DOCUMENT_NAME).txt: $(SRC_DIR)/$(DOCUMENT_NAME).sgml
-	$(SETLOCALE) linuxdoc -B txt -f $(LINUXDOC_OPTIONS) $<
-	sed -e 's/\x1B\[[0-9][0-9]*m//g' -i $@
-
-html.made: $(SRC_DIR)/$(DOCUMENT_NAME).sgml
-	$(SETLOCALE) linuxdoc -B html $(LINUXDOC_OPTIONS) $<
+html.made: $(SRC_DIR)/$(DOCUMENT_NAME).rst
+	$(SETLOCALE) sphinx-build -Q -b singlehtml -c $(SPHINX_CONFDIR) -D master_doc=$(DOCUMENT_NAME) $(SRC_DIR) _build/html
+	cp _build/html/$(DOCUMENT_NAME).html $(DOCUMENT_NAME).html
 	touch $@
 
 clean::
 	-rm -f -- *.txt *.html *.made
-
+	-rm -f -r _build

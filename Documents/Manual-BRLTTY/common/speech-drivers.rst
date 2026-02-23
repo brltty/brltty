@@ -1,0 +1,34 @@
+.. list-table::
+   :header-rows: 1
+   :widths: 20 30
+
+   * - Name
+     - Models
+   * - Alva
+     - Delphi (4nn)
+   * - Android
+     - text to speech engine
+   * - BrailleLite
+     -
+   * - CombiBraille
+     -
+   * - eSpeak
+     - text to speech engine
+   * - eSpeak-NG
+     - text to speech engine
+   * - ExternalSpeech
+     - runs /usr/local/bin/externalspeech
+   * - Festival
+     - text to speech engine
+   * - FestivalLite
+     - text to speech engine
+   * - GenericSay
+     - pipes to /usr/local/bin/say
+   * - Mikropuhe
+     - text to speech engine
+   * - Swift
+     - text to speech engine
+   * - Theta
+     - text to speech engine
+   * - ViaVoice
+     - text to speech engine
