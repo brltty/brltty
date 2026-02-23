@@ -39,6 +39,7 @@
 /* POSIX ERE patterns tried in order.  The first match whose byte range
  * contains the cursor position wins. */
 typedef struct {
+  const char *const name;
   const char *const source;
   const int matchGroup;  /* capture group holding the match bounds */
 
@@ -52,37 +53,53 @@ static PatternDescriptor patterns[] = {
    *   ://      separator
    *   rest:    RFC 3986 characters only — unreserved (-._~), pct-encoded (%),
    *            sub-delims (!$&'()*+,;=), gen-delims (:/?#[]@) */
-  { "[[:alpha:]][[:alnum:]+.-]*" "://" "[][[:alnum:]_.~:/?#@!$&'()*+,;=%-]*", 0 },
+  { .name = "url",
+    .source = "[[:alpha:]][[:alnum:]+.-]*" "://" "[][[:alnum:]_.~:/?#@!$&'()*+,;=%-]*",
+    .matchGroup = 0
+  },
 
   /* 1: Email address
    *   local:   letters/digits and ._%+- before the @
    *   domain:  labels of letters/digits separated by dots or hyphens */
-  { "[[:alnum:]._%+-]+" "@" "(" HOST_NAME_COMPONENT "\\." ")*" HOST_NAME_COMPONENT, 0 },
+  { .name = "email",
+    .source = "[[:alnum:]._%+-]+" "@" "(" HOST_NAME_COMPONENT "\\." ")*" HOST_NAME_COMPONENT,
+    .matchGroup = 0
+  },
 
   /* 2: www. hostname (no scheme required)
    *   www.:    literal prefix (case handled by REG_ICASE)
    *   rest:    labels of letters/digits/dots/hyphens (greedy, so the
    *            trailing character is always non-alnum — no boundary needed) */
-  { "www" "(" "\\." HOST_NAME_COMPONENT ")+", 0 },
+  { .name = "www",
+    .source = "www" "(" "\\." HOST_NAME_COMPONENT ")+",
+    .matchGroup = 0
+  },
 
   /* 3: hostname with a known multi-letter TLD
    *   labels:  explicitly structured as ([[:alnum:]][[:alnum:]-]*\\.)+ so
    *            that dots are only consumed by literal \\. — no backtracking
-   *   tld:     one of the recognised suffixes
+   *   tld:     one of the recognized suffixes
    *   group 1 captures the hostname; ([^[:alnum:]]|$) is a word boundary
    *   that prevents matching e.g. "example.io" inside "example.iox" */
-  { "(" HOST_NAME_PREFIX COMMON_TLD_NAMES ")" HOST_NAME_END, 1 },
+  { .name = "commontlds",
+    .source = "(" HOST_NAME_PREFIX COMMON_TLD_NAMES ")" HOST_NAME_END,
+    .matchGroup = 1
+  },
 
   /* 4: hostname with a two-letter country-code TLD
    *   labels:  same structure as pattern 3
    *   tld:     exactly two letters
    *   group 1 captures the hostname; ([^[:alnum:]]|$) is a word boundary
    *   that prevents matching e.g. "example.xy" inside "example.xyz" */
-  { "(" HOST_NAME_PREFIX "[[:alpha:]]{2}" ")" HOST_NAME_END, 1 },
+  { .name = "2lettertld",
+    .source = "(" HOST_NAME_PREFIX "[[:alpha:]]{2}" ")" HOST_NAME_END,
+    .matchGroup = 1
+  },
 };
 
 #define PATTERN_COUNT ARRAY_COUNT(patterns)
-static int patternsCompiled = 0;
+static unsigned char patternsCompiled = 0;
+static unsigned char patternFailed = 0;
 
 static void
 ensureCompiledPatterns (void) {
@@ -92,8 +109,8 @@ ensureCompiledPatterns (void) {
 
       if (!pattern->isCompiled) {
         logMessage(LOG_DEBUG,
-          "compiling extended regular expression: %s",
-          pattern->source
+          "compiling extended regular expression: %s: %s",
+          pattern->name, pattern->source
         );
 
         int rcResult = regcomp(
@@ -104,12 +121,14 @@ ensureCompiledPatterns (void) {
         if (rcResult == 0) {
           pattern->isCompiled = 1;
         } else {
+          patternFailed = 1;
+
           char problem[0X100];
           regerror(rcResult, &pattern->compiled, problem, sizeof(problem));
 
           logMessage(LOG_ERR,
-            "extended regular expression compile error: %s: %s",
-            problem, pattern->source
+            "extended regular expression compile error: %s: %s: %s",
+            problem, pattern->name, pattern->source
           );
         }
       }
@@ -172,6 +191,7 @@ utf8WcharCount (const char *utf8, size_t bytes) {
 int
 matchSmart (const wchar_t *buf, int len, int target,
                int *matchOffset, int *matchLength) {
+  if (patternFailed) return 0;
   if (len <= 0 || target < 0 || target >= len) return 0;
 
   size_t utf8Len;
