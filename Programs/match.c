@@ -30,9 +30,10 @@
 
 #define MAXIMUM_CAPTURE_COUNT 5
 #define COMMON_TLD_NAMES "(com|org|net|edu|gov|mil|int|io|dev|app|info|biz|name|pro|coop|museum)"
+
 #define HOST_NAME_COMPONENT "[[:alnum:]][[:alnum:]-]*"
 #define HOST_NAME_PREFIX "(" HOST_NAME_COMPONENT "\\.)+"
-#define END_HOST_NAME "([^[:alnum:]]|$)"
+#define HOST_NAME_END "([^[:alnum:]]|$)"
 
 /* POSIX ERE patterns tried in order.  The first match whose byte range
  * contains the cursor position wins. */
@@ -59,7 +60,7 @@ static PatternDescriptor patterns[] = {
    *   www.:    literal prefix (case handled by REG_ICASE)
    *   rest:    labels of letters/digits/dots/hyphens (greedy, so the
    *            trailing character is always non-alnum — no boundary needed) */
-  { "www\\.[[:alnum:]][[:alnum:].-]*", 0 },
+  { "www" "(" "\\." HOST_NAME_COMPONENT ")+", 0 },
 
   /* 3: hostname with a known multi-letter TLD
    *   labels:  explicitly structured as ([[:alnum:]][[:alnum:]-]*\\.)+ so
@@ -67,14 +68,14 @@ static PatternDescriptor patterns[] = {
    *   tld:     one of the recognised suffixes
    *   group 1 captures the hostname; ([^[:alnum:]]|$) is a word boundary
    *   that prevents matching e.g. "example.io" inside "example.iox" */
-  { "(" HOST_NAME_PREFIX COMMON_TLD_NAMES ")" END_HOST_NAME, 1 },
+  { "(" HOST_NAME_PREFIX COMMON_TLD_NAMES ")" HOST_NAME_END, 1 },
 
   /* 4: hostname with a two-letter country-code TLD
    *   labels:  same structure as pattern 3
    *   tld:     exactly two letters
    *   group 1 captures the hostname; ([^[:alnum:]]|$) is a word boundary
    *   that prevents matching e.g. "example.xy" inside "example.xyz" */
-  { "(" HOST_NAME_PREFIX "[[:alpha:]]{2})" END_HOST_NAME, 1 },
+  { "(" HOST_NAME_PREFIX "[[:alpha:]]{2}" ")" HOST_NAME_END, 1 },
 };
 
 #define PATTERN_COUNT (sizeof(patterns) / sizeof(patterns[0]))
