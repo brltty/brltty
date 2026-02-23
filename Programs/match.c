@@ -70,7 +70,7 @@ static PatternDescriptor patterns[] = {
    *   www.:    literal prefix (case handled by REG_ICASE)
    *   rest:    labels of letters/digits/dots/hyphens (greedy, so the
    *            trailing character is always non-alnum — no boundary needed) */
-  { .name = "www",
+  { .name = "host-www",
     .source = "www" "(" "\\." HOST_NAME_COMPONENT ")+",
     .matchGroup = 0
   },
@@ -81,7 +81,7 @@ static PatternDescriptor patterns[] = {
    *   tld:     one of the recognized suffixes
    *   group 1 captures the hostname; ([^[:alnum:]]|$) is a word boundary
    *   that prevents matching e.g. "example.io" inside "example.iox" */
-  { .name = "commontlds",
+  { .name = "host-tldcommon",
     .source = "(" HOST_NAME_PREFIX COMMON_TLD_NAMES ")" HOST_NAME_END,
     .matchGroup = 1
   },
@@ -91,7 +91,7 @@ static PatternDescriptor patterns[] = {
    *   tld:     exactly two letters
    *   group 1 captures the hostname; ([^[:alnum:]]|$) is a word boundary
    *   that prevents matching e.g. "example.xy" inside "example.xyz" */
-  { .name = "2lettertld",
+  { .name = "host-tld2",
     .source = "(" HOST_NAME_PREFIX "[[:alpha:]]{2}" ")" HOST_NAME_END,
     .matchGroup = 1
   },
@@ -191,8 +191,19 @@ utf8WcharCount (const char *utf8, size_t bytes) {
 int
 matchSmart (const wchar_t *buf, int len, int target,
                int *matchOffset, int *matchLength) {
-  if (patternFailed) return 0;
   if (len <= 0 || target < 0 || target >= len) return 0;
+
+  if (patternFailed) {
+    for (size_t p = 0; p < PATTERN_COUNT; p += 1) {
+      const PatternDescriptor *pattern = &patterns[p];
+
+      if (!pattern->isCompiled) {
+        logMessage(LOG_WARNING, "pattern failed to compile: %s", pattern->name);
+      }
+    }
+
+    return 0;
+  }
 
   size_t utf8Len;
   char *utf8 = getUtf8FromWchars(buf, (unsigned int)len, &utf8Len);
