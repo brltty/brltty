@@ -50,12 +50,12 @@ static PatternDescriptor patterns[] = {
    *   ://      separator
    *   rest:    RFC 3986 characters only — unreserved (-._~), pct-encoded (%),
    *            sub-delims (!$&'()*+,;=), gen-delims (:/?#[]@) */
-  { "[[:alpha:]][[:alnum:]+.-]*://[][[:alnum:]_.~:/?#@!$&'()*+,;=%-]*", 0 },
+  { "[[:alpha:]][[:alnum:]+.-]*" "://" "[][[:alnum:]_.~:/?#@!$&'()*+,;=%-]*", 0 },
 
   /* 1: Email address
    *   local:   letters/digits and ._%+- before the @
    *   domain:  labels of letters/digits separated by dots or hyphens */
-  { "[[:alnum:]._%+-]+@[[:alnum:]][[:alnum:].-]*", 0 },
+  { "[[:alnum:]._%+-]+" "@" "(" HOST_NAME_COMPONENT "\\." ")*" HOST_NAME_COMPONENT, 0 },
 
   /* 2: www. hostname (no scheme required)
    *   www.:    literal prefix (case handled by REG_ICASE)
@@ -96,12 +96,12 @@ ensureCompiledPatterns (void) {
     );
 
     if (rcResult != 0) {
-      char message[0X100];
-      regerror(rcResult, &pattern->compiled, message, sizeof(message));
+      char problem[0X100];
+      regerror(rcResult, &pattern->compiled, problem, sizeof(problem));
 
       logMessage(LOG_ERR,
         "extended regular expression compile error: %s: %s",
-        message, pattern->source
+        problem, pattern->source
       );
 
       for (size_t f = 0; f < p; f += 1) {
