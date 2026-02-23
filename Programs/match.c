@@ -28,6 +28,7 @@
 #ifdef HAVE_REGEX_H
 #include <regex.h>
 
+#define MAXIMUM_CAPTURE_COUNT 5
 #define COMMON_TLD_NAMES "(com|org|net|edu|gov|mil|int|io|dev|app|info|biz|name|pro|coop|museum)"
 
 /* POSIX ERE patterns tried in order.  The first match whose byte range
@@ -78,7 +79,7 @@ static PatternDescriptor patterns[] = {
 static int patternsCompiled = 0;
 
 static int
-ensurePatterns (void) {
+ensureCompiledPatterns (void) {
   if (patternsCompiled) return 1;
 
   for (size_t i = 0; i < PATTERN_COUNT; i += 1) {
@@ -98,7 +99,7 @@ ensurePatterns (void) {
 /* Strip trailing .,; and unmatched ) from a byte (ASCII) string.
  * Returns the new byte count. */
 static int
-stripTrailingPunct (const char *text, int count) {
+stripTrailingPunctuation (const char *text, int count) {
   while (count > 0) {
     char last = text[count - 1];
 
@@ -156,7 +157,7 @@ matchSmart (const wchar_t *buf, int len, int target,
 
   size_t targetByte = utf8ByteOffset(utf8, target);
 
-  if (!ensurePatterns()) {
+  if (!ensureCompiledPatterns()) {
     free(utf8);
     return 0;
   }
@@ -167,13 +168,21 @@ matchSmart (const wchar_t *buf, int len, int target,
     const PatternDescriptor *pattern = &patterns[p];
     size_t offset = 0;
 
-    regmatch_t matches[5];
-    const regmatch_t *rmPattern = &matches[0];
-    const regmatch_t *rmResult = &matches[pattern->matchGroup];
+    regmatch_t rmArray[1 + MAXIMUM_CAPTURE_COUNT];
+    const regmatch_t *rmPattern = &rmArray[0];
+    const regmatch_t *rmResult = &rmArray[pattern->matchGroup];
 
-    while (regexec(&pattern->compiled, utf8 + offset, ARRAY_COUNT(matches), matches,
-                   (offset > 0) ? REG_NOTBOL : 0) == 0) {
-      if (rmPattern->rm_so < 0 || rmPattern->rm_eo <= rmPattern->rm_so) break;
+    while (1) {
+      {
+        int rxResult = regexec(
+          &pattern->compiled, (utf8 + offset),
+          ARRAY_COUNT(rmArray), rmArray,
+          (offset > 0)? REG_NOTBOL: 0
+        );
+
+        if (rxResult != 0) break;
+        if ((rmPattern->rm_so < 0) || (rmPattern->rm_eo <= rmPattern->rm_so)) break;
+      }
 
       size_t mStart = offset + (size_t)rmResult->rm_so;
       size_t mEnd   = offset + (size_t)rmResult->rm_eo;
@@ -183,8 +192,8 @@ matchSmart (const wchar_t *buf, int len, int target,
 
       if (targetByte < mEnd) {
         /* This match contains the cursor — strip trailing punctuation. */
-        int byteCount = stripTrailingPunct(utf8 + mStart,
-                                           (int)(mEnd - mStart));
+        int byteCount = stripTrailingPunctuation((utf8 + mStart),
+                                                 (int)(mEnd - mStart));
 
         if (byteCount > 0) {
           *matchOffset = utf8WcharCount(utf8, mStart);
