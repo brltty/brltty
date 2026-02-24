@@ -19,8 +19,6 @@
 #ifndef BRLTTY_INCLUDED_MATCH
 #define BRLTTY_INCLUDED_MATCH
 
-#include <wchar.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
