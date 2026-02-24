@@ -355,7 +355,7 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define wcsrchr(source,character) strrchr((const char *)(source), (char)(character))
 #define wcsspn(source,accept) strspn((const char *)(source), (const char *)(accept))
 #define wcsstr(source,substring) strstr((const char *)(source), (const char *)(substring))
-#define wcstok(target,delimiters,end) ((wchar_t *)strtok(((char *)(target)), ((const char *)(delimiters))))
+#define wcstok(target,delimiters) ((wchar_t *)strtok(((char *)(target)), ((const char *)(delimiters))))
 #define wcswcs(source,substring) strstr((const char *)(source), (const char *)(substring))
 #define wcsxfrm(target,source,count) strxfrm((char *)(target), (const char *)(source), (count))
 #define wcstoul(nptr, endptr, base) strtoul(((const char *)(nptr)), ((char **)(endptr)), (base))
