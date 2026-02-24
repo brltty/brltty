@@ -79,8 +79,8 @@ BEGIN_COMMAND_LINE_NOTES(programNotes)
 END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
-  .name = "copysmarttest",
-  .purpose = strtext("Test COPY_SMART URL/email/hostname detection."),
+  .name = "matchtest",
+  .purpose = strtext("Test smart matching (URL, email, hostname) detection."),
 
   .options = &programOptions,
   .parameters = &programParameters,
@@ -241,7 +241,7 @@ static const TestDescriptor tests[] = {
 static void
 runBuiltinTests (void) {
   if (opt_quietness <= OPTQ_INFO) {
-    putf("COPY_SMART detection tests\n");
+    putf("Smart match detection tests\n");
     putf("==========================\n");
     putf("\n");
   }
