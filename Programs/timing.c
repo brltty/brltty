@@ -86,10 +86,16 @@ getCurrentTime (TimeValue *now) {
 #elif defined(HAVE_GETTIMEOFDAY)
   struct timeval tv;
 
+  #ifdef SUPPORTS_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  #endif /* SUPPORTS_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP */
+
   int result = gettimeofday(&tv, NULL);
+
+  #ifdef SUPPORTS_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP
   #pragma GCC diagnostic pop
+  #endif /* SUPPORTS_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP */
 
   if (result != -1) {
     now->seconds = tv.tv_sec;

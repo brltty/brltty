@@ -23,6 +23,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#undef SUPPORTS_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP
+#if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
+#define SUPPORTS_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP
+#endif /* #pragma GCC diagnostic push/pop */
+
 #undef HAVE_BUILTIN_POPCOUNT
 #undef HAVE_SYNC_SYNCHRONIZE
 
