@@ -139,14 +139,6 @@ static inline void __sync_synchronize (void) {}
 #endif /* WINVER */
 #endif /* WINDOWS */
 
-#if defined(__MSDOS__)
-#undef WCHAR_MAX
-
-#elif defined(HAVE_WCHAR_H)
-#include <wchar.h>
-#include <wctype.h>
-#endif /* HAVE_WCHAR_H */
-
 #ifdef WINDOWS
 #ifdef __MINGW32__
 #ifndef __MINGW64__
@@ -230,6 +222,14 @@ ffs (int i) {
 #define float NO_FLOAT
 #define double NO_DOUBLE
 #endif /* GRUB_RUNHTIME */
+
+#if defined(__MSDOS__)
+#undef WCHAR_MAX
+
+#elif defined(HAVE_WCHAR_H)
+#include <wchar.h>
+#include <wctype.h>
+#endif /* HAVE_WCHAR_H */
 
 #ifdef __MSDOS__
 #include <stdarg.h>
