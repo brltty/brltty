@@ -638,7 +638,7 @@ addNewLogMessages (const LogEntry *entry) {
     STR_BEGIN(buffer, sizeof(buffer));
 
     STR_FORMAT(formatSeconds, "%Y-%m-%d@%H:%M:%S", time->seconds);
-    STR_PRINTF(".%03u", (time->nanoseconds / NSECS_PER_MSEC));
+    STR_PRINTF(".%03"PRIi32, (time->nanoseconds / NSECS_PER_MSEC));
 
     STR_END;
     name.label = strdup(buffer);
