@@ -2,11 +2,11 @@ mkdosarc: configuring build
 configure: WARNING: using cross tools not prefixed with host triplet
 configure: WARNING: function not available: systemd:sd_session_get_vt()
 mkdosarc: building programs
+.../brltty/Programs/io_misc.c:452:2: warning: #warning sockets not supported on this platform
 .../brltty/Programs/lock.c:213:2: warning: #warning thread lock support not available on this platform
 In file included from .../brltty/Drivers/Braille/TTY/braille.c:40:
 .../brltty/Headers/get_curses.h:54:2: warning: #warning curses package either unspecified or unsupported
-.../brltty/Programs/io_misc.c:452:2: warning: #warning sockets not supported on this platform
-In file included from .../brltty/Programs/brltty-ttb.c:1294:
+In file included from .../brltty/Programs/brltty-ttb.c:1319:
 .../brltty/Headers/get_curses.h:54:2: warning: #warning curses package either unspecified or unsupported
 mkdosarc: building documentation
 Processing file .../brltty/Documents/Manual-BRLTTY/English/BRLTTY.sgml
@@ -19,5 +19,6 @@ mkdosarc: installing files
 mkdosarc: updating files
 mkdosarc: converting text files
 mkdosarc: checking for name collisions
+mkdosarc: name collision: /etc/brltty/Contraction: en-ueb-g1.ctb & en-ueb-g2.ctb
 mkdosarc: creating archive
 mkdosarc: done
