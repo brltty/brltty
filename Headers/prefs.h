@@ -154,6 +154,7 @@ typedef struct {
   unsigned char alertMessages;
   unsigned char skipBlankBrailleWindowsMode;
   unsigned char alertDots;
+  unsigned char alertDotsDurationMultiplier;
   unsigned char skipBlankBrailleWindows;
   unsigned char midiInstrument;
   unsigned char expandCurrentWord;

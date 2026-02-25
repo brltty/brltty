@@ -264,7 +264,7 @@ alert (AlertIdentifier identifier) {
 
       tunePlayTones(*tune, 0);
     } else if (prefs.alertDots && alert->tactile.duration) {
-      showDotPattern(alert->tactile.pattern, alert->tactile.duration);
+      showDotPattern(alert->tactile.pattern, alert->tactile.duration * prefs.alertDotsDurationMultiplier);
     } else if (prefs.alertMessages && alert->message) {
       message("alert", gettext(alert->message), 0);
     }

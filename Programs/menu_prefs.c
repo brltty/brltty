@@ -249,6 +249,11 @@ testAlertTunes (void) {
 }
 
 static int
+testAlertDots (void) {
+  return prefs.alertDots;
+}
+
+static int
 changedAlertTunes (const MenuItem *item UNUSED, unsigned char setting) {
   api.updateParameter(BRLAPI_PARAM_AUDIBLE_ALERTS, 0);
   return 1;
@@ -1123,6 +1128,12 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Alert Dots"));
       ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertDots, &itemName));
+    }
+
+    {
+      NAME(strtext("Alert Dot Duration"));
+      ITEM(newNumericMenuItem(alertsSubmenu, &prefs.alertDotsDurationMultiplier, &itemName, 1, 10, 1, NULL, NULL));
+      TEST(AlertDots);
     }
 
     {
