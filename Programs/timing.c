@@ -213,7 +213,7 @@ expandTimeValue (const TimeValue *value, TimeComponents *components) {
 }
 
 size_t
-formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds) {
+formatSeconds (char *buffer, size_t size, const char *format, int64_t seconds) {
   time_t time = seconds;
   struct tm description;
 
@@ -283,7 +283,7 @@ millisecondsTillNextSecond (const TimeValue *reference) {
 long int
 millisecondsTillNextMinute (const TimeValue *reference) {
   TimeValue time = *reference;
-  int32_t *seconds = &time.seconds;
+  int64_t *seconds = &time.seconds;
 
   time.nanoseconds = 0;
   *seconds /= SECS_PER_MIN;
