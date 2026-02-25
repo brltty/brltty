@@ -69,10 +69,12 @@ static const AlertEntry alertTable[] = {
   },
 
   [ALERT_CLIPBOARD_BEGIN] = {
+    .tactile = ALERT_TACTILE(20, BRL_DOT_1 | BRL_DOT_8),
     .tune = "m74@40 m86@20"
   },
 
   [ALERT_CLIPBOARD_END] = {
+    .tactile = ALERT_TACTILE(20, BRL_DOT_4 | BRL_DOT_7),
     .tune = "m86@50 m74@30"
   },
 
