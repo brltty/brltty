@@ -30,7 +30,7 @@ extern void setCurrentTime (const TimeValue *time);
 
 extern void makeTimeValue (TimeValue *value, const TimeComponents *components);
 extern void expandTimeValue (const TimeValue *value, TimeComponents *components);
-extern size_t formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds);
+extern size_t formatSeconds (char *buffer, size_t size, const char *format, int64_t seconds);
 
 extern void normalizeTimeValue (TimeValue *time);
 extern void adjustTimeValue (TimeValue *time, int milliseconds);

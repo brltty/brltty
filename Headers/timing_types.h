@@ -44,7 +44,7 @@ extern "C" {
 #define HRS_PER_WK   (HRS_PER_DAY * DAYS_PER_WK)
 
 typedef struct {
-  int32_t seconds;
+  int64_t seconds;
   int32_t nanoseconds;
 } TimeValue;
 
