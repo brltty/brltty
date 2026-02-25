@@ -244,13 +244,13 @@ changedKeyboardLedAlerts (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
-testAlertTunes (void) {
-  return prefs.alertTunes;
+testAlertDots (void) {
+  return prefs.alertDots;
 }
 
 static int
-testAlertDots (void) {
-  return prefs.alertDots;
+testAlertTunes (void) {
+  return prefs.alertTunes;
 }
 
 static int
@@ -1131,7 +1131,7 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Alert Dot Duration"));
+      NAME(strtext("Alert Dots Duration"));
       ITEM(newNumericMenuItem(alertsSubmenu, &prefs.alertDotsDurationMultiplier, &itemName, 1, 10, 1, NULL, NULL));
       TEST(AlertDots);
     }
