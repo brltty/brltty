@@ -87,11 +87,16 @@ cpbReadScreen (ClipboardCommandData *ccd, size_t *length, int fromColumn, int fr
 }
 
 static void
+cpbStartOperation (ClipboardCommandData *ccd, int append) {
+  ccd->begin.offset = append? getClipboardContentLength(ccd->clipboard): 0;
+  alert(ALERT_CLIPBOARD_BEGIN);
+}
+
+static void
 cpbBeginOperation (ClipboardCommandData *ccd, int column, int row, int append) {
   ccd->begin.column = column;
   ccd->begin.row = row;
-  ccd->begin.offset = append? getClipboardContentLength(ccd->clipboard): 0;
-  alert(ALERT_CLIPBOARD_BEGIN);
+  cpbStartOperation(ccd, append);
 }
 
 static int
@@ -485,17 +490,15 @@ findCharacters (const wchar_t **address, size_t *length, const wchar_t *characte
 
 static wchar_t *
 cpbLinearize (
-  ClipboardCommandData *ccd,
+  int beginColumn, int beginRow,
   int *linearLen, int *targetOffset
 ) {
-  int column = ccd->begin.column;
-  int row = ccd->begin.row;
-
   int scanRadius = 5;
-  int startRow = row - scanRadius;
+
+  int startRow = beginRow - scanRadius;
   if (startRow < 0) startRow = 0;
 
-  int endRow = row + scanRadius;
+  int endRow = beginRow + scanRadius;
   if (endRow >= scr.rows) endRow = scr.rows - 1;
 
   int numRows = endRow - startRow + 1;
@@ -512,7 +515,7 @@ cpbLinearize (
 
   /* collapse multiple spaces into one in place,
    * tracking the target offset */
-  int rawTarget = ((row - startRow) * cols) + column;
+  int rawTarget = ((beginRow - startRow) * cols) + beginColumn;
   int inSpace = 0;
 
   *linearLen = 0;
@@ -695,15 +698,15 @@ handleClipboardCommands (int command, void *data) {
             int column, row;
 
             if (getCharacterCoordinates(arg1, &row, &column, NULL, 0)) {
-              cpbBeginOperation(ccd, column, row, append);
-
               int linearLen, targetOffset;
-              wchar_t *buf = cpbLinearize(ccd, &linearLen, &targetOffset);
+              wchar_t *buf = cpbLinearize(column, row, &linearLen, &targetOffset);
 
               if (buf) {
                 int matchOffset, matchLength;
 
                 if (matchSmart(buf, linearLen, targetOffset, &matchOffset, &matchLength)) {
+                  cpbStartOperation(ccd, append);
+
                   if (cpbEndOperation(ccd, buf + matchOffset, matchLength, 0)) {
                     copied = 1;
                   }
