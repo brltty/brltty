@@ -103,7 +103,7 @@ extern "C" {
 
 #define DEFAULT_ALERT_TUNES 1		/* 1 for on, 0 for off */
 #define DEFAULT_ALERT_DOTS 0		/* 1 for on, 0 for off */
-#define DEFAULT_ALERT_DOTS_DURATION_MULTIPLIER 1
+#define DEFAULT_ALERT_DOTS_DURATION 20	/* hundredths of a second */
 #define DEFAULT_ALERT_MESSAGES 0		/* 1 for on, 0 for off */
 
 #if defined(HAVE_BEEP_SUPPORT)

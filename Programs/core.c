@@ -1426,7 +1426,7 @@ brlttyWait (int duration) {
 }
 
 int
-showDotPattern (unsigned char dots, unsigned char duration) {
+showDotPattern (unsigned char dots, int duration) {
   if (braille->writeStatus && (brl.statusColumns > 0)) {
     unsigned int length = brl.statusColumns * brl.statusRows;
     unsigned char cells[length];        /* status cell buffer */

@@ -211,9 +211,9 @@ typedef struct {
   unsigned char dateFormat;
   unsigned char dateSeparator;
 
-  unsigned char alertDotsDurationMultiplier;
   unsigned char consoleBellAlert;
   unsigned char keyboardLedAlerts;
+  unsigned char alertDotsDuration;
 
   unsigned char speakKeyContext;
   unsigned char speakModifierKey;

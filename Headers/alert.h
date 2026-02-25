@@ -76,7 +76,7 @@ typedef enum {
 
 extern void alert (AlertIdentifier identifier);
 
-extern int showDotPattern (unsigned char dots, unsigned char duration);
+extern int showDotPattern (unsigned char dots, int duration);
 
 extern void speakAlertMessage (const char *message);
 extern void speakAlertText (const wchar_t *text);

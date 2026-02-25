@@ -543,9 +543,9 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.alertDots
   },
 
-  { .name = "alert-dots-duration-multiplier",
-    .defaultValue = DEFAULT_ALERT_DOTS_DURATION_MULTIPLIER,
-    .setting = &prefs.alertDotsDurationMultiplier
+  { .name = "alert-dots-duration",
+    .defaultValue = DEFAULT_ALERT_DOTS_DURATION,
+    .setting = &prefs.alertDotsDuration
   },
 
   { .name = "alert-messages",

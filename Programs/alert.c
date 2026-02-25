@@ -33,7 +33,6 @@
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 typedef struct {
-  unsigned char duration;
   BrlDots pattern;
 } TactileAlert;
 
@@ -43,7 +42,7 @@ typedef struct {
   TactileAlert tactile;
 } AlertEntry;
 
-#define ALERT_TACTILE(d,p) {.duration=(d), .pattern=(p)}
+#define ALERT_TACTILE(p) {.pattern=(p)}
 
 static const AlertEntry alertTable[] = {
   [ALERT_BRAILLE_ON] = {
@@ -60,7 +59,7 @@ static const AlertEntry alertTable[] = {
   },
 
   [ALERT_COMMAND_REJECTED] = {
-    .tactile = ALERT_TACTILE(50, BRL_DOT_1 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_6),
+    .tactile = ALERT_TACTILE(BRL_DOT_1 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_6),
     .tune = "m78@100"
   },
 
@@ -69,27 +68,27 @@ static const AlertEntry alertTable[] = {
   },
 
   [ALERT_CLIPBOARD_BEGIN] = {
-    .tactile = ALERT_TACTILE(20, BRL_DOT_1 | BRL_DOT_8),
+    .tactile = ALERT_TACTILE(BRL_DOT_1 | BRL_DOT_8),
     .tune = "m74@40 m86@20"
   },
 
   [ALERT_CLIPBOARD_END] = {
-    .tactile = ALERT_TACTILE(20, BRL_DOT_4 | BRL_DOT_7),
+    .tactile = ALERT_TACTILE(BRL_DOT_4 | BRL_DOT_7),
     .tune = "m86@50 m74@30"
   },
 
   [ALERT_NO_CHANGE] = {
-    .tactile = ALERT_TACTILE(30, BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_5 | BRL_DOT_6),
+    .tactile = ALERT_TACTILE(BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_5 | BRL_DOT_6),
     .tune = "m79@30 r@30 m79@30 r@30 m79@30"
   },
 
   [ALERT_TOGGLE_ON] = {
-    .tactile = ALERT_TACTILE(30, BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5),
+    .tactile = ALERT_TACTILE(BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5),
     .tune = "m74@30 r@30 m79@30 r@30 m86@30"
   },
 
   [ALERT_TOGGLE_OFF] = {
-    .tactile = ALERT_TACTILE(30, BRL_DOT_3 | BRL_DOT_7 | BRL_DOT_6 | BRL_DOT_8),
+    .tactile = ALERT_TACTILE(BRL_DOT_3 | BRL_DOT_7 | BRL_DOT_6 | BRL_DOT_8),
     .tune = "m86@30 r@30 m79@30 r@30 m74@30"
   },
 
@@ -116,17 +115,17 @@ static const AlertEntry alertTable[] = {
   },
 
   [ALERT_WRAP_DOWN] = {
-    .tactile = ALERT_TACTILE(20, BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_8),
+    .tactile = ALERT_TACTILE(BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_8),
     .tune = "m86@6 m74@6 m62@6 m50@10"
   },
 
   [ALERT_WRAP_UP] = {
-    .tactile = ALERT_TACTILE(20, BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_7),
+    .tactile = ALERT_TACTILE(BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_7),
     .tune = "m50@6 m62@6 m74@6 m86@10"
   },
 
   [ALERT_SKIP_FIRST] = {
-    .tactile = ALERT_TACTILE(30, BRL_DOT_1 | BRL_DOT_4 | BRL_DOT_7 | BRL_DOT_8),
+    .tactile = ALERT_TACTILE(BRL_DOT_1 | BRL_DOT_4 | BRL_DOT_7 | BRL_DOT_8),
     .tune = "r@40 m62@4 m67@6 m74@8 r@25"
   },
 
@@ -139,7 +138,7 @@ static const AlertEntry alertTable[] = {
   },
 
   [ALERT_BOUNCE] = {
-    .tactile = ALERT_TACTILE(50, BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8),
+    .tactile = ALERT_TACTILE(BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8),
     .tune = "m98@6 m86@6 m74@6 m62@6 m50@10"
   },
 
@@ -263,8 +262,8 @@ alert (AlertIdentifier identifier) {
       }
 
       tunePlayTones(*tune, 0);
-    } else if (prefs.alertDots && alert->tactile.duration) {
-      showDotPattern(alert->tactile.pattern, alert->tactile.duration * prefs.alertDotsDurationMultiplier);
+    } else if (prefs.alertDots) {
+      showDotPattern(alert->tactile.pattern, PREFS2MSECS(prefs.alertDotsDuration));
     } else if (prefs.alertMessages && alert->message) {
       message("alert", gettext(alert->message), 0);
     }

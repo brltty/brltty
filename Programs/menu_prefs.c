@@ -1132,7 +1132,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Alert Dots Duration"));
-      ITEM(newNumericMenuItem(alertsSubmenu, &prefs.alertDotsDurationMultiplier, &itemName, 1, 10, 1, NULL, NULL));
+      ITEM(newTimeMenuItem(alertsSubmenu, &prefs.alertDotsDuration, &itemName));
       TEST(AlertDots);
     }
 
