@@ -23,9 +23,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#undef SUPPORTS_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP
+#undef CAN_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP
 #if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
-#define SUPPORTS_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP
+#define CAN_PRAGMA_GCC_DIAGNOSTIC_PUSH_POP
 #endif /* #pragma GCC diagnostic push/pop */
 
 #undef HAVE_BUILTIN_POPCOUNT
@@ -319,6 +319,11 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define PRIkey PRIX32
 #endif /* format for key_t */
 
+#undef WCSTOK_HAS_END_ARGUMENT
+#if !(defined(__MINGW32__) && defined(__i386__))
+#define WCSTOK_HAS_END_ARGUMENT
+#endif /* WCSTOK_HAS_END_ARGUMENT */
+
 #ifdef WCHAR_MAX
 #define WC_C(wc) L##wc
 #define WS_C(ws) L##ws
@@ -326,8 +331,8 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define PRIws "ls"
 #define iswLatin1(wc) ((wc) < 0X100)
 #else /* HAVE_WCHAR_H */
-#include <ctype.h>
 #include <string.h>
+#include <ctype.h>
 
 #define wchar_t unsigned char
 #define wint_t int
@@ -360,13 +365,15 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define wcsrchr(source,character) strrchr((const char *)(source), (char)(character))
 #define wcsspn(source,accept) strspn((const char *)(source), (const char *)(accept))
 #define wcsstr(source,substring) strstr((const char *)(source), (const char *)(substring))
-#define wcstok(target,delimiters) ((wchar_t *)strtok(((char *)(target)), ((const char *)(delimiters))))
 #define wcswcs(source,substring) strstr((const char *)(source), (const char *)(substring))
 #define wcsxfrm(target,source,count) strxfrm((char *)(target), (const char *)(source), (count))
 #define wcstoul(nptr, endptr, base) strtoul(((const char *)(nptr)), ((char **)(endptr)), (base))
 
 #define wcstol(source,end,base) strtol((const char *)(source), (char **)(end), (base))
 #define wcstoll(source,end,base) strtoll((const char *)(source), (char **)(end), (base))
+
+#define wcstok(target,delimiters) ((wchar_t *)strtok(((char *)(target)), ((const char *)(delimiters))))
+#undef WCSTOK_HAS_END_ARGUMENT
 
 #define iswalnum(character) isalnum((int)(character))
 #define iswalpha(character) isalpha((int)(character))
@@ -415,11 +422,6 @@ mbsinit (const mbstate_t *ps) {
 #define PRIws "s"
 #define iswLatin1(wc) (1)
 #endif /* HAVE_WCHAR_H */
-
-#undef WCSTOK_HAS_END_ARGUMENT
-#if !( (defined(__MINGW32__) && defined(__i386__)) || defined(__MSDOS__) )
-#define WCSTOK_HAS_END_ARGUMENT
-#endif /* WCSTOK_HAS_END_ARGUMENT */
 
 #ifdef WORDS_BIGENDIAN
 #define CHARSET_ENDIAN_SUFFIX "BE"
