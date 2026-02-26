@@ -44,8 +44,11 @@ typedef struct {
   struct {
     int column;
     int row;
-    size_t offset;
   } begin;
+
+  struct {
+    size_t offset;
+  } copy;
 } ClipboardCommandData;
 
 static wchar_t *
@@ -148,7 +151,7 @@ cpbReadLinearized (
 
 static void
 cpbStartOperation (ClipboardCommandData *ccd, int append) {
-  ccd->begin.offset = append? getClipboardContentLength(ccd->clipboard): 0;
+  ccd->copy.offset = append? getClipboardContentLength(ccd->clipboard): 0;
   alert(ALERT_CLIPBOARD_BEGIN);
 }
 
@@ -162,7 +165,7 @@ cpbBeginOperation (ClipboardCommandData *ccd, int column, int row, int append) {
 static int
 cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t length, int insertCR) {
   lockMainClipboard();
-  int copied = copyClipboardContent(ccd->clipboard, characters, length, ccd->begin.offset, insertCR);
+  int copied = copyClipboardContent(ccd->clipboard, characters, length, ccd->copy.offset, insertCR);
   unlockMainClipboard();
 
   if (!copied) return 0;
@@ -172,13 +175,17 @@ cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t le
 }
 
 static int
-cpbCopyRectangular (ClipboardCommandData *ccd, int column, int row) {
-  if (row < ccd->begin.row) return 0;
-  if (column < ccd->begin.column) return 0;
+cpbCopyRectangular (
+  ClipboardCommandData *ccd,
+  int beginColumn, int beginRow,
+  int endColumn, int endRow
+) {
+  if (endRow < beginRow) return 0;
+  if (endColumn < beginColumn) return 0;
 
   int copied = 0;
   size_t length;
-  wchar_t *buffer = cpbReadScreen(ccd, &length, ccd->begin.column, ccd->begin.row, column, row);
+  wchar_t *buffer = cpbReadScreen(ccd, &length, beginColumn, beginRow, endColumn, endRow);
 
   if (buffer) {
     {
@@ -222,9 +229,13 @@ cpbCopyRectangular (ClipboardCommandData *ccd, int column, int row) {
 }
 
 static int
-cpbCopyLinear (ClipboardCommandData *ccd, int column, int row) {
-  if (row < ccd->begin.row) return 0;
-  if ((row == ccd->begin.row) && (column < ccd->begin.column)) return 0;
+cpbCopyLinear (
+  ClipboardCommandData *ccd,
+  int beginColumn, int beginRow,
+  int endColumn, int endRow
+) {
+  if (endRow < beginRow) return 0;
+  if ((endRow == beginRow) && (endColumn < beginColumn)) return 0;
 
   int copied = 0;
   ScreenDescription screen;
@@ -233,10 +244,10 @@ cpbCopyLinear (ClipboardCommandData *ccd, int column, int row) {
   {
     int rightColumn = screen.cols - 1;
     size_t length;
-    wchar_t *buffer = cpbReadScreen(ccd, &length, 0, ccd->begin.row, rightColumn, row);
+    wchar_t *buffer = cpbReadScreen(ccd, &length, 0, beginRow, rightColumn, endRow);
 
     if (buffer) {
-      if (column < rightColumn) {
+      if (endColumn < rightColumn) {
         wchar_t *start = buffer + length;
 
         while (start != buffer) {
@@ -247,15 +258,15 @@ cpbCopyLinear (ClipboardCommandData *ccd, int column, int row) {
         }
 
         {
-          int adjustment = (column + 1) - (buffer + length - start);
+          int adjustment = (endColumn + 1) - (buffer + length - start);
           if (adjustment < 0) length += adjustment;
         }
       }
 
-      if (ccd->begin.column) {
+      if (beginColumn) {
         wchar_t *start = wmemchr(buffer, WC_C('\r'), length);
         if (!start) start = buffer + length;
-        if ((start - buffer) > ccd->begin.column) start = buffer + ccd->begin.column;
+        if ((start - buffer) > beginColumn) start = buffer + beginColumn;
         if (start != buffer) wmemmove(buffer, start, (length -= start - buffer));
       }
 
@@ -726,7 +737,7 @@ handleClipboardCommands (int command, void *data) {
           int column, row;
 
           if (getCharacterCoordinates(arg1, &row, NULL, &column, 1)) {
-            if (cpbCopyRectangular(ccd, column, row)) {
+            if (cpbCopyRectangular(ccd, ccd->begin.column, ccd->begin.row, column, row)) {
               break;
             }
           }
@@ -739,7 +750,7 @@ handleClipboardCommands (int command, void *data) {
           int column, row;
 
           if (getCharacterCoordinates(arg1, &row, NULL, &column, 1)) {
-            if (cpbCopyLinear(ccd, column, row)) {
+            if (cpbCopyLinear(ccd, ccd->begin.column, ccd->begin.row, column, row)) {
               break;
             }
           }
@@ -767,8 +778,8 @@ handleClipboardCommands (int command, void *data) {
               int column2, row2;
 
               if (getCharacterCoordinates(arg2, &row2, NULL, &column2, 1)) {
-                cpbBeginOperation(ccd, column1, row1, append);
-                if (cpbCopyLinear(ccd, column2, row2)) break;
+                cpbStartOperation(ccd, append);
+                if (cpbCopyLinear(ccd, column1, row1, column2, row2)) break;
               }
             }
           }
@@ -820,7 +831,7 @@ addClipboardCommands (void) {
 
     ccd->begin.column = 0;
     ccd->begin.row = 0;
-    ccd->begin.offset = 0;
+    ccd->copy.offset = 0;
 
     if (pushCommandHandler("clipboard", KTB_CTX_DEFAULT,
                            handleClipboardCommands, destroyClipboardCommandData, ccd)) {
