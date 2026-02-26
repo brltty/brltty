@@ -44,7 +44,9 @@ extern int readScreen (short left, short top, short width, short height, ScreenC
 extern int readScreenText (short left, short top, short width, short height, wchar_t *buffer);
 
 extern int insertScreenKey (ScreenKey key);
+extern int pasteCharacters (const wchar_t *characters, size_t count);
 extern ScreenPasteMode getScreenPasteMode (void);
+
 extern int routeScreenCursor (int column, int row, int screen);
 extern int highlightScreenRegion (int left, int right, int top, int bottom);
 extern int unhighlightScreenRegion (void);

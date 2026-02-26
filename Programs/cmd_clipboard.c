@@ -151,7 +151,7 @@ cpbReadLinearized (
 }
 
 static void
-cpbStartOperation (ClipboardCommandData *ccd, int append) {
+cpbStartCopy (ClipboardCommandData *ccd, int append) {
   ccd->copy.offset = append? getClipboardContentLength(ccd->clipboard): 0;
   alert(ALERT_CLIPBOARD_BEGIN);
 }
@@ -160,7 +160,7 @@ static void
 cpbBeginOperation (ClipboardCommandData *ccd, int column, int row, int append) {
   ccd->begin.column = column;
   ccd->begin.row = row;
-  cpbStartOperation(ccd, append);
+  cpbStartCopy(ccd, append);
 }
 
 static int
@@ -317,18 +317,6 @@ cpbCopyLinear (
   }
 
   return copied;
-}
-
-static int
-pasteCharacters (const wchar_t *characters, size_t count) {
-  const wchar_t *character = characters;
-  const wchar_t *end = character + count;
-
-  while (character < end) {
-    if (!insertScreenKey(*character++)) return 0;
-  }
-
-  return 1;
 }
 
 static int
@@ -539,28 +527,6 @@ cpbRestore (ClipboardCommandData *ccd) {
 }
 
 static int
-findCharacters (const wchar_t **address, size_t *length, const wchar_t *characters, size_t count) {
-  const wchar_t *ptr = *address;
-  size_t len = *length;
-
-  while (count <= len) {
-    const wchar_t *next = wmemchr(ptr, *characters, len);
-    if (!next) break;
-
-    len -= next - ptr;
-    if (wmemcmp((ptr = next), characters, count) == 0) {
-      *address = ptr;
-      *length = len;
-      return 1;
-    }
-
-    ++ptr, --len;
-  }
-
-  return 0;
-}
-
-static int
 handleClipboardCommands (int command, void *data) {
   ClipboardCommandData *ccd = data;
 
@@ -750,7 +716,7 @@ handleClipboardCommands (int command, void *data) {
                 int matchOffset, matchLength;
 
                 if (matchSmart(buf, linearLen, targetOffset, &matchOffset, &matchLength)) {
-                  cpbStartOperation(ccd, append);
+                  cpbStartCopy(ccd, append);
 
                   if (cpbEndOperation(ccd, buf + matchOffset, matchLength, 0)) {
                     copied = 1;
@@ -812,7 +778,7 @@ handleClipboardCommands (int command, void *data) {
               int column2, row2;
 
               if (getCharacterCoordinates(arg2, &row2, NULL, &column2, 1)) {
-                cpbStartOperation(ccd, append);
+                cpbStartCopy(ccd, append);
                 if (cpbCopyLinear(ccd, column1, row1, column2, row2)) break;
               }
             }

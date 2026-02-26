@@ -116,3 +116,25 @@ getCharacterCoordinates (int arg, int *row, int *first, int *last, int relaxed) 
 
   return 1;
 }
+
+int
+findCharacters (const wchar_t **address, size_t *length, const wchar_t *characters, size_t count) {
+  const wchar_t *ptr = *address;
+  size_t len = *length;
+
+  while (count <= len) {
+    const wchar_t *next = wmemchr(ptr, *characters, len);
+    if (!next) break;
+
+    len -= next - ptr;
+    if (wmemcmp((ptr = next), characters, count) == 0) {
+      *address = ptr;
+      *length = len;
+      return 1;
+    }
+
+    ++ptr, --len;
+  }
+
+  return 0;
+}

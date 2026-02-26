@@ -327,6 +327,18 @@ insertScreenKey (ScreenKey key) {
   return currentScreen->insertKey(key);
 }
 
+int
+pasteCharacters (const wchar_t *characters, size_t count) {
+  const wchar_t *character = characters;
+  const wchar_t *end = character + count;
+
+  while (character < end) {
+    if (!insertScreenKey(*character++)) return 0;
+  }
+
+  return 1;
+}
+
 ScreenPasteMode
 getScreenPasteMode (void) {
   return currentScreen->getPasteMode();
