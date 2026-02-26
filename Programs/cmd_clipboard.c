@@ -556,12 +556,12 @@ handleClipboardCommands (int command, void *data) {
         char buffer[0X80];
         STR_BEGIN(buffer, sizeof(buffer));
 
-        STR_PRINTF("clipboard: ");
+        STR_PRINTF("%s: ", gettext("clipboard"));
         const char *cr = strchr(content, '\r');
 
         if (cr) {
           STR_PRINTF(
-            "%.*s[...]%s",
+            "%.*s [...] %s",
             (int)(cr - content), content,
             (strrchr(content, '\r') + 1)
           );
