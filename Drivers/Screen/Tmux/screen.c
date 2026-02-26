@@ -51,9 +51,6 @@
 #include "async_io.h"
 #include "embed.h"
 
-/* From scr_main.h */
-extern void mainScreenUpdated(void);
-
 typedef enum {
   PARM_SESSION,
   PARM_SOCKET,
