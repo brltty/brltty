@@ -117,6 +117,7 @@ static const CommandListEntry commandList_clipboard[] = {
   { .code = BRL_CMD_PASTE_ALTMODE },
   { .code = BRL_CMD_BLK(PASTE_HISTORY) },
   { .code = BRL_CMD_BLK(PASTE_HISTORY_ALTMODE) },
+  { .code = BRL_CMD_CLIP_SHOW },
   { .code = BRL_CMD_PRSEARCH },
   { .code = BRL_CMD_NXSEARCH },
   { .code = BRL_CMD_CLIP_SAVE },

@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "alert.h"
+#include "strfmt.h"
 #include "message.h"
 #include "cmd_queue.h"
 #include "cmd_utils.h"
@@ -577,6 +578,39 @@ handleClipboardCommands (int command, void *data) {
 
     doPaste:
       if (!cpbPaste(ccd, 0, useAlternateMode)) alert(ALERT_COMMAND_REJECTED);
+      break;
+    }
+
+    case BRL_CMD_CLIP_SHOW: {
+      lockMainClipboard();
+      char *content = getClipboardContentUTF8(ccd->clipboard);
+      unlockMainClipboard();
+
+      if (content) {
+        char buffer[0X80];
+        STR_BEGIN(buffer, sizeof(buffer));
+
+        STR_PRINTF("clipboard: ");
+        const char *cr = strchr(content, '\r');
+
+        if (cr) {
+          STR_PRINTF(
+            "%.*s[...]%s",
+            (int)(cr - content), content,
+            (strrchr(content, '\r') + 1)
+          );
+        } else {
+          STR_PRINTF("%s", content);
+        }
+
+        STR_END;
+        message("clip", buffer, MSG_SYNC);
+
+        free(content);
+      } else {
+        alert(ALERT_COMMAND_REJECTED);
+      }
+
       break;
     }
 
