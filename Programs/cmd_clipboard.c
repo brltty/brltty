@@ -73,7 +73,7 @@ cpbReadScreen (ClipboardCommandData *ccd, size_t *length, int fromColumn, int fr
           *toAddress++ = character;
         }
 
-        if (row != toRow) *toAddress++ = WC_C('\r');
+        if (row != toRow) *toAddress++ = CLIPBOARD_LINE_DELIMITER;
       }
 
       /* make a new permanent buffer of just the right size */
@@ -164,9 +164,9 @@ cpbBeginOperation (ClipboardCommandData *ccd, int column, int row, int append) {
 }
 
 static int
-cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t length, int insertCR) {
+cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t length, int insertLineDelimiter) {
   lockMainClipboard();
-  int copied = copyClipboardContent(ccd->clipboard, characters, length, ccd->copy.offset, insertCR);
+  int copied = copyClipboardContent(ccd->clipboard, characters, length, ccd->copy.offset, insertLineDelimiter);
   unlockMainClipboard();
 
   if (!copied) return 0;
@@ -203,7 +203,7 @@ cpbCopyRectangular (
             spaces += 1;
             continue;
 
-          case WC_C('\r'):
+          case CLIPBOARD_LINE_DELIMITER:
             spaces = 0;
             break;
 
@@ -252,7 +252,7 @@ cpbCopyLinear (
         wchar_t *start = buffer + length;
 
         while (start != buffer) {
-          if (*--start == WC_C('\r')) {
+          if (*--start == CLIPBOARD_LINE_DELIMITER) {
             start += 1;
             break;
           }
@@ -265,7 +265,7 @@ cpbCopyLinear (
       }
 
       if (beginColumn) {
-        wchar_t *start = wmemchr(buffer, WC_C('\r'), length);
+        wchar_t *start = wmemchr(buffer, CLIPBOARD_LINE_DELIMITER, length);
         if (!start) start = buffer + length;
         if ((start - buffer) > beginColumn) start = buffer + beginColumn;
         if (start != buffer) wmemmove(buffer, start, (length -= start - buffer));
@@ -286,7 +286,7 @@ cpbCopyLinear (
               spaces += 1;
               continue;
 
-            case WC_C('\r'):
+            case CLIPBOARD_LINE_DELIMITER:
               newlines += 1;
               continue;
 
@@ -557,13 +557,13 @@ handleClipboardCommands (int command, void *data) {
         STR_BEGIN(buffer, sizeof(buffer));
 
         STR_PRINTF("%s: ", gettext("clipboard"));
-        const char *cr = strchr(content, '\r');
+        const char *delimiter = strchr(content, CLIPBOARD_LINE_DELIMITER);
 
-        if (cr) {
+        if (delimiter) {
           STR_PRINTF(
             "%.*s [...] %s",
-            (int)(cr - content), content,
-            (strrchr(content, '\r') + 1)
+            (int)(delimiter - content), content,
+            (strrchr(content, CLIPBOARD_LINE_DELIMITER) + 1)
           );
         } else {
           STR_PRINTF("%s", content);

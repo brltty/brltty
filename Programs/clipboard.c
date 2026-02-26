@@ -179,12 +179,12 @@ setClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t len
 int
 copyClipboardContent (
   ClipboardObject *cpb, const wchar_t *characters, size_t length,
-  size_t offset, int insertCR
+  size_t offset, int insertLineDelimiter
 ) {
   if (offset > 0) {
     if (!truncateClipboardContent(cpb, offset)) return 0;
 
-    if (insertCR) {
+    if (insertLineDelimiter) {
       size_t length;
       const wchar_t *content = getClipboardContent(cpb, &length);
 
@@ -195,7 +195,7 @@ copyClipboardContent (
           size_t last = length - 1;
           wchar_t character = content[last];
 
-          if (character == WC_C('\r')) insertCR = 0;
+          if (character == CLIPBOARD_LINE_DELIMITER) insertLineDelimiter = 0;
           if (character != WC_C(' ')) break;
 
           truncate = 1;
@@ -208,9 +208,9 @@ copyClipboardContent (
           }
         }
 
-        if (insertCR && (length > 0)) {
-          static const wchar_t cr = WC_C('\r');
-          if (!appendClipboardContent(cpb, &cr, 1)) return 0;
+        if (insertLineDelimiter && (length > 0)) {
+          static const wchar_t lineDelimiter = CLIPBOARD_LINE_DELIMITER;
+          if (!appendClipboardContent(cpb, &lineDelimiter, 1)) return 0;
         }
       }
     }
