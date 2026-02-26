@@ -115,12 +115,12 @@ static const AlertEntry alertTable[] = {
   },
 
   [ALERT_WRAP_DOWN] = {
-    .tactile = ALERT_TACTILE(BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_8),
+    .tactile = ALERT_TACTILE(BRL_DOT_1 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7),
     .tune = "m86@6 m74@6 m62@6 m50@10"
   },
 
   [ALERT_WRAP_UP] = {
-    .tactile = ALERT_TACTILE(BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_7),
+    .tactile = ALERT_TACTILE(BRL_DOT_4 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_8),
     .tune = "m50@6 m62@6 m74@6 m86@10"
   },
 
@@ -262,7 +262,7 @@ alert (AlertIdentifier identifier) {
       }
 
       tunePlayTones(*tune, 0);
-    } else if (prefs.alertDots) {
+    } else if (prefs.alertDots && alert->tactile.pattern) {
       showDotPattern(alert->tactile.pattern, PREFS2MSECS(prefs.alertDotsDuration));
     } else if (prefs.alertMessages && alert->message) {
       message("alert", gettext(alert->message), 0);
