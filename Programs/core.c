@@ -1425,22 +1425,6 @@ brlttyWait (int duration) {
   return 1;
 }
 
-int
-showDotPattern (unsigned char dots, int duration) {
-  if (braille->writeStatus && (brl.statusColumns > 0)) {
-    unsigned int length = brl.statusColumns * brl.statusRows;
-    unsigned char cells[length];        /* status cell buffer */
-    memset(cells, dots, length);
-    if (!braille->writeStatus(&brl, cells)) return 0;
-  }
-
-  memset(brl.buffer, dots, brl.textColumns*brl.textRows);
-  if (!writeBrailleWindow(&brl, NULL, SCQ_GOOD)) return 0;
-
-  drainBrailleOutput(&brl, duration);
-  return 1;
-}
-
 static void
 exitSessions (void *data) {
   cancelDelayedCursorTrackingAlarm();

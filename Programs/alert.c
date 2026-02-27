@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "alert.h"
 #include "program.h"
 #include "prefs.h"
@@ -26,11 +28,29 @@
 #include "message.h"
 #include "brl_dots.h"
 #include "utf8.h"
+#include "update.h"
+#include "brl_utils.h"
 #include "core.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
 #include "spk.h"
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+static int
+showDotPattern (unsigned char dots) {
+  if (braille->writeStatus && (brl.statusColumns > 0)) {
+    unsigned int length = brl.statusColumns * brl.statusRows;
+    unsigned char cells[length];        /* status cell buffer */
+    memset(cells, dots, length);
+    if (!braille->writeStatus(&brl, cells)) return 0;
+  }
+
+  memset(brl.buffer, dots, brl.textColumns*brl.textRows);
+  if (!writeBrailleWindow(&brl, NULL, SCQ_GOOD)) return 0;
+
+  drainBrailleOutput(&brl, PREFS2MSECS(prefs.alertDotsDuration));
+  return 1;
+}
 
 typedef struct {
   BrlDots pattern;
@@ -270,7 +290,7 @@ alert (AlertIdentifier identifier) {
     } else if (prefs.alertMessages && alert->message) {
       message("alert", gettext(alert->message), 0);
     } else if (prefs.alertDots && alert->tactile.pattern) {
-      showDotPattern(alert->tactile.pattern, PREFS2MSECS(prefs.alertDotsDuration));
+      showDotPattern(alert->tactile.pattern);
     }
   }
 }
