@@ -1126,6 +1126,11 @@ makePreferencesMenu (void) {
   #endif /* HAVE_FM_SUPPORT */
 
     {
+      NAME(strtext("Alert Messages"));
+      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertMessages, &itemName));
+    }
+
+    {
       NAME(strtext("Alert Dots"));
       ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertDots, &itemName));
     }
@@ -1134,11 +1139,6 @@ makePreferencesMenu (void) {
       NAME(strtext("Alert Dots Duration"));
       ITEM(newTimeMenuItem(alertsSubmenu, &prefs.alertDotsDuration, &itemName));
       TEST(AlertDots);
-    }
-
-    {
-      NAME(strtext("Alert Messages"));
-      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertMessages, &itemName));
     }
 
 #ifdef ENABLE_SPEECH_SUPPORT

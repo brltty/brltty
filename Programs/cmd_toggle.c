@@ -280,7 +280,7 @@ handleToggleCommands (int command, void *data) {
         break;
       }
 
-      switch (toggleSetting(&setting, command, ALERT_SCREEN_UNFROZEN, ALERT_SCREEN_FROZEN)) {
+      switch (toggleSetting(&setting, command, ALERT_SCREEN_LIVE, ALERT_SCREEN_FREEZE)) {
         case TOGGLE_OFF:
           deactivateSpecialScreen(SCR_FROZEN);
           break;

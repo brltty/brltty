@@ -537,6 +537,12 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.fmVolume
   },
 
+  { .name = "alert-messages",
+    .defaultValue = DEFAULT_ALERT_MESSAGES,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.alertMessages
+  },
+
   { .name = "alert-dots",
     .defaultValue = DEFAULT_ALERT_DOTS,
     .settingNames = &preferenceStringTable_boolean,
@@ -546,12 +552,6 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
   { .name = "alert-dots-duration",
     .defaultValue = DEFAULT_ALERT_DOTS_DURATION,
     .setting = &prefs.alertDotsDuration
-  },
-
-  { .name = "alert-messages",
-    .defaultValue = DEFAULT_ALERT_MESSAGES,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.alertMessages
   },
 
   { .name = "speech-volume",

@@ -39,7 +39,7 @@ ASYNC_ALARM_CALLBACK(handleFreezeReminderAlarm) {
   asyncDiscardHandle(freezeReminderAlarm);
   freezeReminderAlarm = NULL;
 
-  alert(ALERT_FREEZE_REMINDER);
+  alert(ALERT_SCREEN_FROZEN);
   startFreezeReminderAlarm();
 }
 
