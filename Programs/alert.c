@@ -203,7 +203,7 @@ static const AlertEntry alertTable[] = {
 };
 
 static int
-showDotPattern (unsigned char dots) {
+showDots (unsigned char dots) {
   if (braille->writeStatus && (brl.statusColumns > 0)) {
     unsigned int length = brl.statusColumns * brl.statusRows;
     unsigned char cells[length];        /* status cell buffer */
@@ -211,12 +211,19 @@ showDotPattern (unsigned char dots) {
     if (!braille->writeStatus(&brl, cells)) return 0;
   }
 
-  memset(brl.buffer, dots, brl.textColumns*brl.textRows);
-  if (!writeBrailleWindow(&brl, NULL, SCQ_GOOD)) return 0;
+  {
+    unsigned int length = brl.textColumns * brl.textRows;
+    unsigned char newCells[length];        /* status cell buffer */
+    memset(newCells, dots, length);
+
+    unsigned char *oldCells = brl.buffer;
+    brl.buffer = newCells;
+    if (!writeBrailleWindow(&brl, NULL, SCQ_GOOD)) return 0;
+    brl.buffer = oldCells;
+  }
 
   drainBrailleOutput(&brl, PREFS2MSECS(prefs.alertDotsDuration));
-  scheduleUpdate("alert dots");
-  return 1;
+  return writeBrailleWindow(&brl, NULL, SCQ_GOOD);
 }
 
 static ToneElement *tuneTable[ARRAY_COUNT(alertTable)] = {NULL};
@@ -291,7 +298,7 @@ alert (AlertIdentifier identifier) {
     } else if (prefs.alertMessages && alert->message) {
       message("alert", gettext(alert->message), 0);
     } else if (prefs.alertDots && alert->tactile.pattern) {
-      showDotPattern(alert->tactile.pattern);
+      showDots(alert->tactile.pattern);
     }
   }
 }
