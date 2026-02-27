@@ -219,9 +219,10 @@ showDots (unsigned char dots) {
     unsigned char oldQuality = brl.quality;
     unsigned char *oldCells = brl.buffer;
     brl.buffer = newCells;
-    if (!writeBrailleWindow(&brl, NULL, SCQ_GOOD)) return 0;
+    int written = writeBrailleWindow(&brl, NULL, SCQ_GOOD);
     brl.buffer = oldCells;
     brl.quality = oldQuality;
+    if (!written) return 0;
   }
 
   drainBrailleOutput(&brl, PREFS2MSECS(prefs.alertDotsDuration));
