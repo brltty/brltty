@@ -36,22 +36,6 @@
 #include "spk.h"
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-static int
-showDotPattern (unsigned char dots) {
-  if (braille->writeStatus && (brl.statusColumns > 0)) {
-    unsigned int length = brl.statusColumns * brl.statusRows;
-    unsigned char cells[length];        /* status cell buffer */
-    memset(cells, dots, length);
-    if (!braille->writeStatus(&brl, cells)) return 0;
-  }
-
-  memset(brl.buffer, dots, brl.textColumns*brl.textRows);
-  if (!writeBrailleWindow(&brl, NULL, SCQ_GOOD)) return 0;
-
-  drainBrailleOutput(&brl, PREFS2MSECS(prefs.alertDotsDuration));
-  return 1;
-}
-
 typedef struct {
   BrlDots pattern;
 } TactileAlert;
@@ -217,6 +201,23 @@ static const AlertEntry alertTable[] = {
     .tune = "m66@60 m69@60 m73@90",
   },
 };
+
+static int
+showDotPattern (unsigned char dots) {
+  if (braille->writeStatus && (brl.statusColumns > 0)) {
+    unsigned int length = brl.statusColumns * brl.statusRows;
+    unsigned char cells[length];        /* status cell buffer */
+    memset(cells, dots, length);
+    if (!braille->writeStatus(&brl, cells)) return 0;
+  }
+
+  memset(brl.buffer, dots, brl.textColumns*brl.textRows);
+  if (!writeBrailleWindow(&brl, NULL, SCQ_GOOD)) return 0;
+
+  drainBrailleOutput(&brl, PREFS2MSECS(prefs.alertDotsDuration));
+  scheduleUpdate("alert dots");
+  return 1;
+}
 
 static ToneElement *tuneTable[ARRAY_COUNT(alertTable)] = {NULL};
 static TuneBuilder *tuneBuilder = NULL;
