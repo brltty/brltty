@@ -216,10 +216,12 @@ showDots (unsigned char dots) {
     unsigned char newCells[length];        /* status cell buffer */
     memset(newCells, dots, length);
 
+    unsigned char oldQuality = brl.quality;
     unsigned char *oldCells = brl.buffer;
     brl.buffer = newCells;
     if (!writeBrailleWindow(&brl, NULL, SCQ_GOOD)) return 0;
     brl.buffer = oldCells;
+    brl.quality = oldQuality;
   }
 
   drainBrailleOutput(&brl, PREFS2MSECS(prefs.alertDotsDuration));
