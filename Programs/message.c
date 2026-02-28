@@ -135,7 +135,7 @@ static void
 beginClipboardCopy (const wchar_t *start, int append, MessageData *mgd) {
   mgd->clipboard.start = start;
   mgd->clipboard.offset = append? getClipboardContentLength(mgd->clipboard.main): 0;
-  alert(ALERT_CLIPBOARD_BEGIN);
+  alert(ALERT_COPY_BEGIN);
 }
 
 static int
@@ -145,7 +145,7 @@ endClipboardCopy (ClipboardObject *clipboard, const wchar_t *characters, size_t 
   unlockMainClipboard();
 
   if (!copied) return 0;
-  alert(ALERT_CLIPBOARD_END);
+  alert(ALERT_COPY_END);
   onMainClipboardUpdated();
   return 1;
 }

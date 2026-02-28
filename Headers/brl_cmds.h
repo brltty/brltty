@@ -112,7 +112,7 @@ typedef enum {
   BRL_CMD_RETURN /* go to screen cursor or go back after cursor tracking */,
   
   /* feature activation and deactivation */
-  BRL_CMD_FREEZE /* set screen image frozen/unfrozen */,
+  BRL_CMD_FREEZE /* set screen image frozen/live */,
   BRL_CMD_DISPMD /* set display mode attributes/text */,
   BRL_CMD_SIXDOTS /* set text style 6-dot/8-dot */,
   BRL_CMD_SLIDEWIN /* set sliding braille window on/off */,
@@ -279,7 +279,7 @@ typedef enum {
   BRL_CMD_SPELL_CURR_PWRD /* spell current partial (identifier or symbols) word */,
   BRL_CMD_SPELL_CURR_LINE /* spell current line */,
 
-  BRL_CMD_CLIP_SHOW /* show clipboard */,
+  BRL_CMD_CLIP_SHOW /* show current clipboard content */,
 
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;

@@ -153,7 +153,7 @@ cpbReadLinearized (
 static void
 cpbStartCopy (ClipboardCommandData *ccd, int append) {
   ccd->copy.offset = append? getClipboardContentLength(ccd->clipboard): 0;
-  alert(ALERT_CLIPBOARD_BEGIN);
+  alert(ALERT_COPY_BEGIN);
 }
 
 static void
@@ -170,7 +170,7 @@ cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t le
   unlockMainClipboard();
 
   if (!copied) return 0;
-  alert(ALERT_CLIPBOARD_END);
+  alert(ALERT_COPY_END);
   onMainClipboardUpdated();
   return 1;
 }

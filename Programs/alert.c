@@ -71,12 +71,12 @@ static const AlertEntry alertTable[] = {
     .tune = "m83@20 m81@15 m79@15 m84@25",
   },
 
-  [ALERT_CLIPBOARD_BEGIN] = {
+  [ALERT_COPY_BEGIN] = {
     .tune = "m74@40 m86@20",
     .tactile = ALERT_TACTILE(BRL_DOT_1 | BRL_DOT_8),
   },
 
-  [ALERT_CLIPBOARD_END] = {
+  [ALERT_COPY_END] = {
     .tune = "m86@50 m74@30",
     .tactile = ALERT_TACTILE(BRL_DOT_4 | BRL_DOT_7),
   },
