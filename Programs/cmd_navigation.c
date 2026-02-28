@@ -324,7 +324,72 @@ toNextNonblankWindow (void) {
 }
 
 static int
+toPreferredCommand (int command) {
+  int preferred = command;
+
+  int cmd = command & BRL_MSK_CMD;
+  int blk = command & BRL_MSK_BLK;
+
+  if (blk) {
+  } else {
+    if (prefs.skipIdenticalLines) {
+      switch (cmd) {
+        case BRL_CMD_LNUP:
+          preferred = BRL_CMD_PRDIFLN;
+          break;
+
+        case BRL_CMD_LNDN:
+          preferred = BRL_CMD_NXDIFLN;
+          break;
+
+        case BRL_CMD_PRDIFLN:
+          preferred = BRL_CMD_LNUP;
+          break;
+
+        case BRL_CMD_NXDIFLN:
+          preferred = BRL_CMD_LNDN;
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    if (prefs.skipBlankBrailleWindows) {
+      switch (cmd) {
+        case BRL_CMD_FWINLT:
+          preferred = BRL_CMD_FWINLTSKIP;
+          break;
+
+        case BRL_CMD_FWINRT:
+          preferred = BRL_CMD_FWINRTSKIP;
+          break;
+
+        case BRL_CMD_FWINLTSKIP:
+          preferred = BRL_CMD_FWINLT;
+          break;
+
+        case BRL_CMD_FWINRTSKIP:
+          preferred = BRL_CMD_FWINRT;
+          break;
+
+        default:
+          break;
+      }
+    }
+  }
+
+  if (preferred != command) {
+    preferred |= (command & ~BRL_MSK_CMD);
+    command = preferred;
+  }
+
+  return command;
+}
+
+static int
 handleNavigationCommands (int command, void *data) {
+  command = toPreferredCommand(command);
   int oldwiny = ses->winy;
 
   switch (command & BRL_MSK_CMD) {
