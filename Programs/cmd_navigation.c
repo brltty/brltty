@@ -330,8 +330,7 @@ toPreferredCommand (int command) {
   int cmd = command & BRL_MSK_CMD;
   int blk = command & BRL_MSK_BLK;
 
-  if (blk) {
-  } else {
+  if (!blk) {
     if (prefs.skipIdenticalLines) {
       switch (cmd) {
         case BRL_CMD_LNUP:
@@ -348,9 +347,6 @@ toPreferredCommand (int command) {
 
         case BRL_CMD_NXDIFLN:
           preferred = BRL_CMD_LNDN;
-          break;
-
-        default:
           break;
       }
     }
@@ -372,15 +368,13 @@ toPreferredCommand (int command) {
         case BRL_CMD_FWINRTSKIP:
           preferred = BRL_CMD_FWINRT;
           break;
-
-        default:
-          break;
       }
     }
   }
 
   if (preferred != command) {
     preferred |= (command & ~BRL_MSK_CMD);
+    logTransformedCommand(command, preferred);
     command = preferred;
   }
 

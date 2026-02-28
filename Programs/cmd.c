@@ -360,7 +360,7 @@ static
 STR_BEGIN_FORMATTER(formatLogTransformedCommandData, const void *data)
   const LogTransformedCommandData *cmd = data;
 
-  STR_PRINTF("command: ");
+  STR_PRINTF("transformed command: ");
   STR_FORMAT(formatCommand, cmd->oldCommand);
 
   STR_PRINTF(" -> ");
