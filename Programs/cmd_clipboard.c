@@ -107,11 +107,11 @@ cpbReadLinearized (
   int cols = scr.cols;
   int totalCells = numRows * cols;
 
-  wchar_t *buf = allocateCharacters(totalCells);
-  if (!buf) return NULL;
+  wchar_t *buffer = allocateCharacters(totalCells);
+  if (!buffer) return NULL;
 
-  if (!readScreenText(0, startRow, cols, numRows, buf)) {
-    free(buf);
+  if (!readScreenText(0, startRow, cols, numRows, buffer)) {
+    free(buffer);
     return NULL;
   }
 
@@ -124,7 +124,7 @@ cpbReadLinearized (
   *targetOffset = -1;
 
   for (int i = 0; i < totalCells; i += 1) {
-    wchar_t ch = buf[i];
+    wchar_t ch = buffer[i];
 
     if (ch == WC_C(' ')) {
       if (inSpace) {
@@ -138,16 +138,16 @@ cpbReadLinearized (
     }
 
     if (i == rawTarget) *targetOffset = *linearLen;
-    buf[*linearLen] = ch;
+    buffer[*linearLen] = ch;
     *linearLen += 1;
   }
 
   if (*targetOffset < 0) {
-    free(buf);
+    free(buffer);
     return NULL;
   }
 
-  return buf;
+  return buffer;
 }
 
 static void
@@ -710,20 +710,20 @@ handleClipboardCommands (int command, void *data) {
 
             if (getCharacterCoordinates(arg1, &row, &column, NULL, 0)) {
               int linearLen, targetOffset;
-              wchar_t *buf = cpbReadLinearized(column, row, &linearLen, &targetOffset);
+              wchar_t *buffer = cpbReadLinearized(column, row, &linearLen, &targetOffset);
 
-              if (buf) {
+              if (buffer) {
                 int matchOffset, matchLength;
 
-                if (matchSmart(buf, linearLen, targetOffset, &matchOffset, &matchLength)) {
+                if (matchSmart(buffer, linearLen, targetOffset, &matchOffset, &matchLength)) {
                   cpbStartCopy(ccd, append);
 
-                  if (cpbEndOperation(ccd, buf + matchOffset, matchLength, 0)) {
+                  if (cpbEndOperation(ccd, buffer + matchOffset, matchLength, 0)) {
                     copied = 1;
                   }
                 }
 
-                free(buf);
+                free(buffer);
               }
             }
 

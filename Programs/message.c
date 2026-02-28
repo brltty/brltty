@@ -33,6 +33,7 @@
 #include "brl_utils.h"
 #include "brl_cmds.h"
 #include "clipboard.h"
+#include "match.h"
 #include "spk.h"
 #include "ktb_types.h"
 #include "ctb.h"
@@ -132,16 +133,21 @@ toMessageCharacter (int arg, int end, MessageData *mgd) {
 }
 
 static void
-beginClipboardCopy (const wchar_t *start, int append, MessageData *mgd) {
-  mgd->clipboard.start = start;
+startClipboardCopy (int append, MessageData *mgd) {
   mgd->clipboard.offset = append? getClipboardContentLength(mgd->clipboard.main): 0;
   alert(ALERT_COPY_BEGIN);
 }
 
+static void
+beginClipboardCopy (const wchar_t *start, int append, MessageData *mgd) {
+  mgd->clipboard.start = start;
+  startClipboardCopy(append, mgd);
+}
+
 static int
-endClipboardCopy (ClipboardObject *clipboard, const wchar_t *characters, size_t length, int insertCR, MessageData *mgd) {
+endClipboardCopy (const wchar_t *characters, size_t length, int insertLineDelimiter, MessageData *mgd) {
   lockMainClipboard();
-  int copied = copyClipboardContent(clipboard, characters, length, mgd->clipboard.offset, insertCR);
+  int copied = copyClipboardContent(mgd->clipboard.main, characters, length, mgd->clipboard.offset, insertLineDelimiter);
   unlockMainClipboard();
 
   if (!copied) return 0;
@@ -196,40 +202,6 @@ handleMessageCommands (int command, void *data) {
         {
           int append;
 
-        case BRL_CMD_BLK(CLIP_COPY):
-          append = 0;
-          goto doClipCopy;
-
-        case BRL_CMD_BLK(CLIP_APPEND):
-          append = 1;
-          goto doClipCopy;
-
-        doClipCopy:
-          {
-            const wchar_t *first = toMessageCharacter(arg1, 0, mgd);
-
-            if (first) {
-              const wchar_t *last = toMessageCharacter(arg2, 1, mgd);
-
-              if (last) {
-                beginClipboardCopy(first, append, mgd);
-                size_t count = last - first + 1;
-
-                if (endClipboardCopy(mgd->clipboard.main, first, count, 0, mgd)) {
-                  mgd->hold = 1;
-                  return 1;
-                }
-              }
-            }
-          }
-
-          alert(ALERT_COMMAND_REJECTED);
-          return 1;
-        }
-
-        {
-          int append;
-
         case BRL_CMD_BLK(CLIP_NEW):
           append = 0;
           goto doClipBegin;
@@ -254,14 +226,14 @@ handleMessageCommands (int command, void *data) {
         }
 
         {
-          int insertCR;
+          int insertLineDelimiter;
 
         case BRL_CMD_BLK(COPY_RECT):
-          insertCR = 1;
+          insertLineDelimiter = 1;
           goto doClipEnd;
 
         case BRL_CMD_BLK(COPY_LINE):
-          insertCR = 0;
+          insertLineDelimiter = 0;
           goto doClipEnd;
 
         doClipEnd:
@@ -275,7 +247,7 @@ handleMessageCommands (int command, void *data) {
                 if (last > first) {
                   size_t count = last - first + 1;
 
-                  if (endClipboardCopy(mgd->clipboard.main, first, count, insertCR, mgd)) {
+                  if (endClipboardCopy(first, count, insertLineDelimiter, mgd)) {
                     mgd->hold = 1;
                     return 1;
                   }
@@ -286,6 +258,76 @@ handleMessageCommands (int command, void *data) {
 
           alert(ALERT_COMMAND_REJECTED);
           return 1;
+        }
+
+        {
+          int append;
+
+        case BRL_CMD_BLK(CLIP_COPY):
+          append = 0;
+          goto doClipCopy;
+
+        case BRL_CMD_BLK(CLIP_APPEND):
+          append = 1;
+          goto doClipCopy;
+
+        doClipCopy:
+          {
+            const wchar_t *first = toMessageCharacter(arg1, 0, mgd);
+
+            if (first) {
+              const wchar_t *last = toMessageCharacter(arg2, 1, mgd);
+
+              if (last) {
+                startClipboardCopy(append, mgd);
+                size_t count = last - first + 1;
+
+                if (endClipboardCopy(first, count, 0, mgd)) {
+                  mgd->hold = 1;
+                  return 1;
+                }
+              }
+            }
+          }
+
+          alert(ALERT_COMMAND_REJECTED);
+          return 1;
+        }
+
+        {
+          int append;
+
+        case BRL_CMD_BLK(COPY_SMART_NEW):
+          append = 0;
+          goto doSmartCopy;
+
+        case BRL_CMD_BLK(COPY_SMART_ADD):
+          append = 1;
+          goto doSmartCopy;
+
+        doSmartCopy:
+          {
+            const wchar_t *target = toMessageCharacter(arg1, 0, mgd);
+
+            if (target) {
+              const wchar_t *messageStart = mgd->segments.first->start;
+              size_t messageLength = mgd->segments.last->start + mgd->segments.last->length - messageStart;
+              size_t targetOffset = target - messageStart;
+              int matchOffset, matchLength;
+
+              if (matchSmart(messageStart, messageLength, targetOffset, &matchOffset, &matchLength)) {
+                startClipboardCopy(append, mgd);
+
+                if (endClipboardCopy(messageStart + matchOffset, matchLength, 0, mgd)) {
+                  mgd->hold = 1;
+                  return 1;
+                }
+              }
+            }
+          }
+
+          alert(ALERT_COMMAND_REJECTED);
+          break;
         }
 
         default:
