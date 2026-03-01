@@ -147,7 +147,7 @@ beginClipboardCopy (const wchar_t *start, int append, MessageData *mgd) {
 static int
 endClipboardCopy (const wchar_t *characters, size_t length, int insertLineDelimiter, MessageData *mgd) {
   lockMainClipboard();
-  int copied = copyClipboardContent(mgd->clipboard.main, characters, length, mgd->clipboard.offset, insertLineDelimiter);
+  int copied = copyToClipboard(mgd->clipboard.main, characters, length, mgd->clipboard.offset, insertLineDelimiter);
   unlockMainClipboard();
 
   if (!copied) return 0;

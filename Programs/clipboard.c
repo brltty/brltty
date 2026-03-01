@@ -177,8 +177,9 @@ setClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t len
 }
 
 int
-copyClipboardContent (
-  ClipboardObject *cpb, const wchar_t *characters, size_t length,
+copyToClipboard (
+  ClipboardObject *cpb,
+  const wchar_t *characters, size_t length,
   size_t offset, int insertLineDelimiter
 ) {
   if (offset > 0) {

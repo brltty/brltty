@@ -157,16 +157,16 @@ cpbStartCopy (ClipboardCommandData *ccd, int append) {
 }
 
 static void
-cpbBeginOperation (ClipboardCommandData *ccd, int column, int row, int append) {
+cpbBeginCopy (ClipboardCommandData *ccd, int column, int row, int append) {
   ccd->begin.column = column;
   ccd->begin.row = row;
   cpbStartCopy(ccd, append);
 }
 
 static int
-cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t length, int insertLineDelimiter) {
+cpbEndCopy (ClipboardCommandData *ccd, const wchar_t *characters, size_t length, int insertLineDelimiter) {
   lockMainClipboard();
-  int copied = copyClipboardContent(ccd->clipboard, characters, length, ccd->copy.offset, insertLineDelimiter);
+  int copied = copyToClipboard(ccd->clipboard, characters, length, ccd->copy.offset, insertLineDelimiter);
   unlockMainClipboard();
 
   if (!copied) return 0;
@@ -222,7 +222,7 @@ cpbCopyRectangular (
       length = to - buffer;
     }
 
-    if (cpbEndOperation(ccd, buffer, length, 1)) copied = 1;
+    if (cpbEndCopy(ccd, buffer, length, 1)) copied = 1;
     free(buffer);
   }
 
@@ -311,7 +311,7 @@ cpbCopyLinear (
         length = to - buffer;
       }
 
-      if (cpbEndOperation(ccd, buffer, length, 0)) copied = 1;
+      if (cpbEndCopy(ccd, buffer, length, 0)) copied = 1;
       free(buffer);
     }
   }
@@ -684,7 +684,7 @@ handleClipboardCommands (int command, void *data) {
 
         doClipBegin:
           if (getCharacterCoordinates(arg1, &row, &column, NULL, 0)) {
-            cpbBeginOperation(ccd, column, row, append);
+            cpbBeginCopy(ccd, column, row, append);
             break;
           }
 
@@ -718,7 +718,7 @@ handleClipboardCommands (int command, void *data) {
                 if (matchSmart(buffer, linearLen, targetOffset, &matchOffset, &matchLength)) {
                   cpbStartCopy(ccd, append);
 
-                  if (cpbEndOperation(ccd, buffer + matchOffset, matchLength, 0)) {
+                  if (cpbEndCopy(ccd, buffer + matchOffset, matchLength, 0)) {
                     copied = 1;
                   }
                 }

@@ -36,9 +36,10 @@ extern int truncateClipboardContent (ClipboardObject *cpb, size_t length);
 extern int setClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length);
 extern int appendClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length);
 
-extern int copyClipboardContent (
-  ClipboardObject *cpb, const wchar_t *characters, size_t length,
-  size_t offset, int insertCR
+extern int copyToClipboard (
+  ClipboardObject *cpb,
+  const wchar_t *characters, size_t length,
+  size_t offset, int insertLineDelimiter
 );
 
 extern int setClipboardContentUTF8 (ClipboardObject *cpb, const char *text);
