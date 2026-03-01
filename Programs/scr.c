@@ -328,13 +328,13 @@ insertScreenKey (ScreenKey key) {
 }
 
 int
-pasteCharacters (const wchar_t *characters, size_t count) {
+pasteScreenCharacters (const wchar_t *characters, size_t count) {
   const wchar_t *character = characters;
   const wchar_t *end = character + count;
 
   while (character < end) {
     ScreenKey key = *character++;
-    if (key == '\n') key = '\r';
+    mapScreenKey(&key);
     if (!insertScreenKey(key)) return 0;
   }
 

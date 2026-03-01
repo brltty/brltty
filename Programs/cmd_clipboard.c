@@ -373,12 +373,12 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index, int useAlternateMode) {
           ASCII_ESC, WC_C('['), WC_C('2'), WC_C('0'), WC_C('0'), WC_C('~')
         };
 
-        if (!pasteCharacters(sequence, ARRAY_COUNT(sequence))) {
+        if (!pasteScreenCharacters(sequence, ARRAY_COUNT(sequence))) {
           goto PASTE_FAILED;
         }
       }
 
-      if (!pasteCharacters(characters, length)) {
+      if (!pasteScreenCharacters(characters, length)) {
         goto PASTE_FAILED;
       }
 
@@ -387,7 +387,7 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index, int useAlternateMode) {
           ASCII_ESC, WC_C('['), WC_C('2'), WC_C('0'), WC_C('1'), WC_C('~')
         };
 
-        if (!pasteCharacters(sequence, ARRAY_COUNT(sequence))) {
+        if (!pasteScreenCharacters(sequence, ARRAY_COUNT(sequence))) {
           goto PASTE_FAILED;
         }
       }
