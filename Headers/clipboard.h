@@ -23,7 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define CLIPBOARD_LINE_DELIMITER '\r'
+#define CLIPBOARD_LINE_DELIMITER '\n'
 
 typedef struct ClipboardObjectStruct ClipboardObject;
 

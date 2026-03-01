@@ -333,7 +333,9 @@ pasteCharacters (const wchar_t *characters, size_t count) {
   const wchar_t *end = character + count;
 
   while (character < end) {
-    if (!insertScreenKey(*character++)) return 0;
+    ScreenKey key = *character++;
+    if (key == '\n') key = '\r';
+    if (!insertScreenKey(key)) return 0;
   }
 
   return 1;
