@@ -692,47 +692,6 @@ handleClipboardCommands (int command, void *data) {
           break;
         }
 
-        {
-          int append;
-
-        case BRL_CMD_BLK(COPY_SMART_NEW):
-          append = 0;
-          goto doSmartCopy;
-
-        case BRL_CMD_BLK(COPY_SMART_ADD):
-          append = 1;
-          goto doSmartCopy;
-
-        doSmartCopy:
-          {
-            int copied = 0;
-            int column, row;
-
-            if (getCharacterCoordinates(arg1, &row, &column, NULL, 0)) {
-              int linearLen, targetOffset;
-              wchar_t *buffer = cpbReadLinearized(column, row, &linearLen, &targetOffset);
-
-              if (buffer) {
-                int matchOffset, matchLength;
-
-                if (matchSmart(buffer, linearLen, targetOffset, &matchOffset, &matchLength)) {
-                  cpbStartCopy(ccd, append);
-
-                  if (cpbEndCopy(ccd, buffer + matchOffset, matchLength, 0)) {
-                    copied = 1;
-                  }
-                }
-
-                free(buffer);
-              }
-            }
-
-            if (!copied) alert(ALERT_COMMAND_REJECTED);
-          }
-
-          break;
-        }
-
         case BRL_CMD_BLK(COPY_RECT): {
           int column, row;
 
@@ -785,6 +744,47 @@ handleClipboardCommands (int command, void *data) {
           }
 
           alert(ALERT_COMMAND_REJECTED);
+          break;
+        }
+
+        {
+          int append;
+
+        case BRL_CMD_BLK(COPY_SMART_NEW):
+          append = 0;
+          goto doSmartCopy;
+
+        case BRL_CMD_BLK(COPY_SMART_ADD):
+          append = 1;
+          goto doSmartCopy;
+
+        doSmartCopy:
+          {
+            int copied = 0;
+            int column, row;
+
+            if (getCharacterCoordinates(arg1, &row, &column, NULL, 0)) {
+              int linearLen, targetOffset;
+              wchar_t *buffer = cpbReadLinearized(column, row, &linearLen, &targetOffset);
+
+              if (buffer) {
+                int matchOffset, matchLength;
+
+                if (matchSmart(buffer, linearLen, targetOffset, &matchOffset, &matchLength)) {
+                  cpbStartCopy(ccd, append);
+
+                  if (cpbEndCopy(ccd, buffer + matchOffset, matchLength, 0)) {
+                    copied = 1;
+                  }
+                }
+
+                free(buffer);
+              }
+            }
+
+            if (!copied) alert(ALERT_COMMAND_REJECTED);
+          }
+
           break;
         }
 
