@@ -26,27 +26,27 @@ function showLibraryDirectory ()
 
     if name ~= "?.so"
     then
-      goto nextDirectory
+      goto nextComponent
     end
 
     if not directory
     then
-      goto nextDirectory
+      goto nextComponent
     end
 
     if #directory == 0
     then
-      goto nextDirectory
+      goto nextComponent
     end
 
     if directory:sub(1,1) ~= "/"
     then
-      goto nextDirectory
+      goto nextComponent
     end
 
     if stringContains(directory, "?")
     then
-      goto nextDirectory
+      goto nextComponent
     end
 
     if not stringContains(directory, "/local/")
@@ -60,7 +60,7 @@ function showLibraryDirectory ()
       localDirectory = directory
     end
 
-  ::nextDirectory::
+  ::nextComponent::
   end
 
   if localDirectory
