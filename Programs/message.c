@@ -108,7 +108,7 @@ getMessageLength (const MessageData *mgd) {
 }
 
 static const wchar_t *
-toMessageCharacter (int arg, int end, MessageData *mgd) {
+toMessageCharacter (int arg, int end, const MessageData *mgd) {
   if (arg < 0) return NULL;
   int column = arg % brl.textColumns;
   int row = arg / brl.textColumns;
@@ -161,7 +161,7 @@ beginClipboardCopy (const wchar_t *start, int append, MessageData *mgd) {
 }
 
 static int
-endClipboardCopy (const wchar_t *characters, size_t length, int insertLineDelimiter, MessageData *mgd) {
+endClipboardCopy (const wchar_t *characters, size_t length, int insertLineDelimiter, const MessageData *mgd) {
   lockMainClipboard();
   int copied = copyToClipboard(mgd->clipboard.main, characters, length, mgd->clipboard.offset, insertLineDelimiter);
   unlockMainClipboard();
@@ -378,6 +378,7 @@ sayMessage (const char *text) {
 
 static const MessageSegment *
 makeSegments (MessageSegment *segment, const wchar_t *characters, size_t characterCount, int wordWrap) {
+  const MessageSegment *lastSegment = NULL;
   const size_t windowLength = textCount * brl.textRows;
 
   const wchar_t *character = characters;
@@ -412,10 +413,10 @@ makeSegments (MessageSegment *segment, const wchar_t *characters, size_t charact
     }
 
     character += segment->length;
-    segment += 1;
+    lastSegment = segment++;
   }
 
-  return segment - 1;
+  return lastSegment;
 }
 
 static wchar_t *
@@ -525,10 +526,11 @@ ASYNC_TASK_CALLBACK(presentMessage) {
     MessageSegment messageSegments[characterCount];
     {
       MessageSegment *firstSegment = messageSegments;
+
       mgd.segments.current = mgd.segments.first = firstSegment;
       mgd.segments.last = makeSegments(firstSegment, characters, characterCount, wordWrap);
 
-      if (mgd.segments.last < mgd.segments.first) {
+      if (!mgd.segments.last) {
         firstSegment->start = characters;
         firstSegment->length = 0;
         mgd.segments.last = firstSegment;
