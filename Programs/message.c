@@ -507,14 +507,14 @@ ASYNC_TASK_CALLBACK(presentMessage) {
     }
 
     MessageSegment messageSegments[characterCount];
-    mgd.segments.current = mgd.segments.first = messageSegments;
-    mgd.segments.last = makeSegments(messageSegments, characters, characterCount, wordWrap);
+    MessageSegment *firstSegment = messageSegments;
+    mgd.segments.current = mgd.segments.first = firstSegment;
+    mgd.segments.last = makeSegments(firstSegment, characters, characterCount, wordWrap);
 
     if (mgd.segments.last < mgd.segments.first) {
-      MessageSegment *segment = messageSegments;
-      segment->start = characters;
-      segment->length = 0;
-      mgd.segments.last = segment;
+      firstSegment->start = characters;
+      firstSegment->length = 0;
+      mgd.segments.last = firstSegment;
     }
 
     mgd.clipboard.start = mgd.segments.first->start;
