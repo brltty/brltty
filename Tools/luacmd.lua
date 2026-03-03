@@ -20,36 +20,59 @@ require("brltty-prologue")
 function showLibraryDirectory ()
   local localDirectory = nil
 
-  for number, component in ipairs(splitString(package.cpath, ";")) do
+  for number, component in ipairs(splitString(package.cpath, ";"))
+  do
     local directory, name = component:match("^(.*)/(.-)$")
-    if name ~= "?.so" then goto next end
 
-    if not directory then goto next end
-    if #directory == 0 then goto next end
-
-    if directory:sub(1,1) ~= "/" then goto next end
-    if stringContains(directory, "?") then goto next end
-
-    if not stringContains(directory, "/local/") then
-      print(directory)
-      break
+    if name ~= "?.so"
+    then
+      goto nextDirectory
     end
 
-    if not localDirectory then
+    if not directory
+    then
+      goto nextDirectory
+    end
+
+    if #directory == 0
+    then
+      goto nextDirectory
+    end
+
+    if directory:sub(1,1) ~= "/"
+    then
+      goto nextDirectory
+    end
+
+    if stringContains(directory, "?")
+    then
+      goto nextDirectory
+    end
+
+    if not stringContains(directory, "/local/")
+    then
+      print(directory)
+      return
+    end
+
+    if not localDirectory
+    then
       localDirectory = directory
     end
 
-  ::next::
+  ::nextDirectory::
   end
 
-  if localDirectory then
+  if localDirectory
+  then
     print(localDirectory)
   end
 end
 
 action = nextProgramArgument("action")
 
-if action == "libdir" then
+if action == "libdir"
+then
   showLibraryDirectory()
 else
   syntaxError(string.format("unknown action: %s", action))
