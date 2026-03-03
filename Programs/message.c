@@ -76,7 +76,6 @@ typedef struct {
   struct {
     ClipboardObject *main;
     const wchar_t *start;
-    size_t length;
     size_t offset;
   } clipboard;
 
@@ -90,6 +89,22 @@ typedef struct {
 ASYNC_CONDITION_TESTER(testEndMessageWait) {
   const MessageData *mgd = data;
   return mgd->endWait;
+}
+
+static inline const wchar_t *
+getMessageStart (const MessageData *mgd) {
+  return mgd->segments.first->start;
+}
+
+static inline const wchar_t *
+getMessageEnd (const MessageData *mgd) {
+  const MessageSegment *last = mgd->segments.last;
+  return last->start + last->length;
+}
+
+static inline size_t
+getMessageLength (const MessageData *mgd) {
+  return getMessageEnd(mgd) - getMessageStart(mgd);
 }
 
 static const wchar_t *
@@ -311,18 +326,19 @@ handleMessageCommands (int command, void *data) {
             const wchar_t *target = toMessageCharacter(arg1, 0, mgd);
 
             if (target) {
+              const wchar_t *messageStart = getMessageStart(mgd);
               int matchOffset, matchLength;
 
               int matched = matchSmart(
-                mgd->clipboard.start, mgd->clipboard.length,
-                (target - mgd->clipboard.start),
+                messageStart, getMessageLength(mgd),
+                (target - messageStart),
                 &matchOffset, &matchLength
               );
 
               if (matched) {
                 startClipboardCopy(append, mgd);
 
-                if (endClipboardCopy(mgd->clipboard.start + matchOffset, matchLength, 0, mgd)) {
+                if (endClipboardCopy(messageStart + matchOffset, matchLength, 0, mgd)) {
                   mgd->hold = 1;
                   return 1;
                 }
@@ -507,18 +523,19 @@ ASYNC_TASK_CALLBACK(presentMessage) {
     }
 
     MessageSegment messageSegments[characterCount];
-    MessageSegment *firstSegment = messageSegments;
-    mgd.segments.current = mgd.segments.first = firstSegment;
-    mgd.segments.last = makeSegments(firstSegment, characters, characterCount, wordWrap);
+    {
+      MessageSegment *firstSegment = messageSegments;
+      mgd.segments.current = mgd.segments.first = firstSegment;
+      mgd.segments.last = makeSegments(firstSegment, characters, characterCount, wordWrap);
 
-    if (mgd.segments.last < mgd.segments.first) {
-      firstSegment->start = characters;
-      firstSegment->length = 0;
-      mgd.segments.last = firstSegment;
+      if (mgd.segments.last < mgd.segments.first) {
+        firstSegment->start = characters;
+        firstSegment->length = 0;
+        mgd.segments.last = firstSegment;
+      }
+
+      mgd.clipboard.start = getMessageStart(&mgd);
     }
-
-    mgd.clipboard.start = mgd.segments.first->start;
-    mgd.clipboard.length = mgd.segments.last->start + mgd.segments.last->length - mgd.clipboard.start;
 
     int apiWasLinked = api.isServerLinked();
     if (apiWasLinked) api.unlinkServer();
