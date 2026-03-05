@@ -105,6 +105,8 @@ static const CommandListEntry commandList_window[] = {
 };
 
 static const CommandListEntry commandList_clipboard[] = {
+  { .code = BRL_CMD_CLIP_SHOW },
+  { .code = BRL_CMD_CLIP_CLEAR },
   { .code = BRL_CMD_BLK(CLIP_NEW) },
   { .code = BRL_CMD_BLK(CLIP_ADD) },
   { .code = BRL_CMD_BLK(COPY_LINE) },
@@ -117,7 +119,6 @@ static const CommandListEntry commandList_clipboard[] = {
   { .code = BRL_CMD_PASTE_ALTMODE },
   { .code = BRL_CMD_BLK(PASTE_HISTORY) },
   { .code = BRL_CMD_BLK(PASTE_HISTORY_ALTMODE) },
-  { .code = BRL_CMD_CLIP_SHOW },
   { .code = BRL_CMD_PRSEARCH },
   { .code = BRL_CMD_NXSEARCH },
   { .code = BRL_CMD_CLIP_SAVE },

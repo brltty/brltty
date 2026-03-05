@@ -279,6 +279,7 @@ typedef enum {
   BRL_CMD_SPELL_CURR_PWRD /* spell current partial (identifier or symbols) word */,
   BRL_CMD_SPELL_CURR_LINE /* spell current line */,
 
+  BRL_CMD_CLIP_CLEAR /* clear the clipboard */,
   BRL_CMD_CLIP_SHOW /* show current clipboard content */,
 
   BRL_basicCommandCount /* must be last */

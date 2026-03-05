@@ -547,6 +547,20 @@ handleClipboardCommands (int command, void *data) {
       break;
     }
 
+    case BRL_CMD_CLIP_CLEAR: {
+      lockMainClipboard();
+      int cleared = clearClipboardContent(ccd->clipboard);
+      unlockMainClipboard();
+
+      if (cleared) {
+        alert(ALERT_COPY_END);
+      } else {
+        alert(ALERT_COMMAND_REJECTED);
+      }
+
+      break;
+    }
+
     case BRL_CMD_CLIP_SHOW: {
       lockMainClipboard();
       char *content = getClipboardContentUTF8(ccd->clipboard);
