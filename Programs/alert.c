@@ -57,9 +57,14 @@ static const AlertEntry alertTable[] = {
     .tune = "m64@60 m57@60",
   },
 
-  [ALERT_COMMAND_DONE] = {
-    .tune = "m74@40 r@30 m74@40 r@40 m74@140 r@20 m79@50",
-    .message = strtext("Done"),
+  [ALERT_CONSOLE_BELL] = {
+    .tune = "m78@100",
+    .message = strtext("Console Bell"),
+  },
+
+  [ALERT_KEYS_AUTORELEASED] = {
+    .tune = "c6@50 b- g e- p50 c@100 c c",
+    .message = strtext("Keys Autoreleased"),
   },
 
   [ALERT_COMMAND_REJECTED] = {
@@ -67,8 +72,23 @@ static const AlertEntry alertTable[] = {
     .tactile = ALERT_TACTILE(BRL_DOT_1 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_6),
   },
 
+  [ALERT_RANGE_LIMIT] = {
+    .tune = "m79@30 r@30 m79@30 r@30 m79@30",
+    .tactile = ALERT_TACTILE(BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_5 | BRL_DOT_6),
+  },
+
   [ALERT_MARK_SET] = {
     .tune = "m83@20 m81@15 m79@15 m84@25",
+  },
+
+  [ALERT_DATA_SAVED] = {
+    .tune = "m74@40 r@30 m74@40 r@40 m74@140 r@20 m79@50",
+    .message = strtext("Saved"),
+  },
+
+  [ALERT_DATA_RESTORED] = {
+    .tune = "m79@40 r@30 m79@40 r@40 m76@100 r@20 m73@100",
+    .message = strtext("Restored"),
   },
 
   [ALERT_COPY_BEGIN] = {
@@ -79,11 +99,6 @@ static const AlertEntry alertTable[] = {
   [ALERT_COPY_END] = {
     .tune = "m86@50 m74@30",
     .tactile = ALERT_TACTILE(BRL_DOT_4 | BRL_DOT_7),
-  },
-
-  [ALERT_NO_CHANGE] = {
-    .tune = "m79@30 r@30 m79@30 r@30 m79@30",
-    .tactile = ALERT_TACTILE(BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_5 | BRL_DOT_6),
   },
 
   [ALERT_TOGGLE_ON] = {
@@ -175,20 +190,6 @@ static const AlertEntry alertTable[] = {
     .tune = "m82@60 m77@60 m74@60 m70@90",
   },
 
-  [ALERT_CONSOLE_BELL] = {
-    .tune = "m78@100",
-    .message = strtext("Console Bell"),
-  },
-
-  [ALERT_KEYS_AUTORELEASED] = {
-    .tune = "c6@50 b- g e- p50 c@100 c c",
-    .message = strtext("Keys Autoreleased"),
-  },
-
-  [ALERT_SCROLL_UP] = {
-    .tune = "b6@10 d7",
-  },
-
   [ALERT_CONTEXT_DEFAULT] = {
     .tune = "m76@60 m73@60 m69@60 m66@90",
   },
@@ -199,6 +200,10 @@ static const AlertEntry alertTable[] = {
 
   [ALERT_CONTEXT_TEMPORARY] = {
     .tune = "m66@60 m69@60 m73@90",
+  },
+
+  [ALERT_SCROLL_UP] = {
+    .tune = "b6@10 d7",
   },
 };
 

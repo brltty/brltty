@@ -355,7 +355,7 @@ handleSpeechCommands (int command, void *data) {
       } else if (prefs.speechVolume > 0) {
         setSpeechVolume(&spk, --prefs.speechVolume, 1);
       } else {
-        alert(ALERT_NO_CHANGE);
+        alert(ALERT_RANGE_LIMIT);
       }
       break;
 
@@ -365,7 +365,7 @@ handleSpeechCommands (int command, void *data) {
       } else if (prefs.speechVolume < SPK_VOLUME_MAXIMUM) {
         setSpeechVolume(&spk, ++prefs.speechVolume, 1);
       } else {
-        alert(ALERT_NO_CHANGE);
+        alert(ALERT_RANGE_LIMIT);
       }
       break;
 
@@ -375,7 +375,7 @@ handleSpeechCommands (int command, void *data) {
       } else if (prefs.speechRate > 0) {
         setSpeechRate(&spk, --prefs.speechRate, 1);
       } else {
-        alert(ALERT_NO_CHANGE);
+        alert(ALERT_RANGE_LIMIT);
       }
       break;
 
@@ -385,7 +385,7 @@ handleSpeechCommands (int command, void *data) {
       } else if (prefs.speechRate < SPK_RATE_MAXIMUM) {
         setSpeechRate(&spk, ++prefs.speechRate, 1);
       } else {
-        alert(ALERT_NO_CHANGE);
+        alert(ALERT_RANGE_LIMIT);
       }
       break;
 
@@ -395,7 +395,7 @@ handleSpeechCommands (int command, void *data) {
       } else if (prefs.speechPitch > 0) {
         setSpeechPitch(&spk, --prefs.speechPitch, 1);
       } else {
-        alert(ALERT_NO_CHANGE);
+        alert(ALERT_RANGE_LIMIT);
       }
       break;
 
@@ -405,7 +405,7 @@ handleSpeechCommands (int command, void *data) {
       } else if (prefs.speechPitch < SPK_PITCH_MAXIMUM) {
         setSpeechPitch(&spk, ++prefs.speechPitch, 1);
       } else {
-        alert(ALERT_NO_CHANGE);
+        alert(ALERT_RANGE_LIMIT);
       }
       break;
 

@@ -42,7 +42,7 @@ save (void) {
   int saved = savePreferences();
 
   if (saved) {
-    alert(ALERT_COMMAND_DONE);
+    alert(ALERT_DATA_SAVED);
   } else {
     message("warn", gettext("not saved"), 0);
   }
@@ -78,36 +78,42 @@ handlePreferencesCommands (int command, void *data) {
       break;
     }
 
-    case BRL_CMD_PREFSAVE:
+    case BRL_CMD_PREFSAVE: {
       if (isSpecialScreen(SCR_MENU)) {
         save();
         deactivateSpecialScreen(SCR_MENU);
       } else if (!save()) {
         alert(ALERT_COMMAND_REJECTED);
       }
-      break;
 
-    case BRL_CMD_PREFLOAD:
+      break;
+    }
+
+    case BRL_CMD_PREFLOAD: {
       if (isSpecialScreen(SCR_MENU)) {
         setPreferences(&pcd->savedPreferences);
         menuScreenUpdated();
         message("warn", gettext("changes discarded"), 0);
       } else if (loadPreferences(0)) {
         menuScreenUpdated();
-        alert(ALERT_COMMAND_DONE);
+        alert(ALERT_DATA_RESTORED);
       } else {
         alert(ALERT_COMMAND_REJECTED);
       }
-      break;
 
-    case BRL_CMD_PREFRESET:
+      break;
+    }
+
+    case BRL_CMD_PREFRESET: {
       if (loadPreferences(1)) {
         menuScreenUpdated();
-        alert(ALERT_COMMAND_DONE);
+        alert(ALERT_DATA_RESTORED);
       } else {
         alert(ALERT_COMMAND_REJECTED);
       }
+
       break;
+    }
 
     default: {
       int arg = command & BRL_MSK_ARG;

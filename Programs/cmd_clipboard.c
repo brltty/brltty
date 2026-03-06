@@ -595,11 +595,11 @@ handleClipboardCommands (int command, void *data) {
     }
 
     case BRL_CMD_CLIP_SAVE:
-      alert(cpbSave(ccd)? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
+      alert(cpbSave(ccd)? ALERT_DATA_SAVED: ALERT_COMMAND_REJECTED);
       break;
 
     case BRL_CMD_CLIP_RESTORE:
-      alert(cpbRestore(ccd)? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
+      alert(cpbRestore(ccd)? ALERT_DATA_RESTORED: ALERT_COMMAND_REJECTED);
       break;
 
     {
