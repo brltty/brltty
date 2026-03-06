@@ -1,0 +1,4625 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: brltty\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-06 17:00+0100\n"
+"PO-Revision-Date: 2026-03-06 17:45+0100\n"
+"Last-Translator: Daniel Nylander <daniel@danielnylander.se>\n"
+"Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: Drivers/Braille/Baum/braille.c:1147
+msgid "driver request"
+msgstr "förarförfrågan"
+
+#: Drivers/Braille/Baum/braille.c:1148
+msgid "power switch"
+msgstr "strömbrytare"
+
+#: Drivers/Braille/Baum/braille.c:1149
+msgid "idle timeout"
+msgstr "Timeout för tomgång"
+
+#: Drivers/Braille/Baum/braille.c:1150 Drivers/Braille/TSI/braille.c:869
+msgid "battery low"
+msgstr "låg batterinivå"
+
+#: Drivers/Braille/Baum/braille.c:1159
+msgid "Powerdown"
+msgstr "Nedstängning"
+
+#: Drivers/Braille/BrailleLite/braille.c:589
+msgid "keyboard emu on"
+msgstr "tangentbord emu på"
+
+#: Drivers/Braille/BrailleLite/braille.c:590
+#: Drivers/Braille/BrailleLite/braille.c:668
+msgid "keyboard emu off"
+msgstr "tangentbord emu av"
+
+#: Drivers/Braille/BrailleLite/braille.c:601
+#: Drivers/Braille/BrailleLite/braille.c:780
+#: Drivers/Braille/BrailleLite/braille.c:782
+#: Drivers/Braille/BrailleLite/braille.c:791
+msgid "repeat count"
+msgstr "upprepa räkning"
+
+#. configuration menu
+#: Drivers/Braille/BrailleLite/braille.c:607
+msgid "config"
+msgstr "konfiguration"
+
+#: Drivers/Braille/Iris/braille.c:1497
+msgid "eurobraille"
+msgstr "eurobraille"
+
+#: Drivers/Braille/Iris/braille.c:1513
+msgid "native"
+msgstr "infödd"
+
+#: Drivers/Braille/Iris/braille.c:1548
+msgid "PC mode"
+msgstr "PC-läge"
+
+#: Drivers/Screen/Android/screen.c:181
+msgid "Java exception occurred"
+msgstr "Java-undantag inträffade"
+
+#: Drivers/Screen/Android/screen.c:184
+msgid "screen locked"
+msgstr "skärmen låst"
+
+#: Drivers/Screen/Android/screen.c:189
+msgid "braille released"
+msgstr "punktskrift frisläppt"
+
+#: Drivers/Screen/Android/screen.c:194
+msgid "Java method not found"
+msgstr "Java-metoden hittades inte"
+
+#: Drivers/Screen/Android/screen.c:197
+msgid "Java class not found"
+msgstr "Java-klassen hittades inte"
+
+#: Drivers/Screen/FileViewer/screen.c:177
+msgid "file not specified"
+msgstr "filen är inte specificerad"
+
+#: Drivers/Screen/Linux/screen.c:1925
+msgid "console not in use"
+msgstr "konsolen används inte"
+
+#: Drivers/Screen/Linux/screen.c:1928
+msgid "can't open console"
+msgstr "kan inte öppna konsolen"
+
+#: Drivers/Screen/Linux/screen.c:1938
+msgid "screen not in text mode"
+msgstr "skärmen inte i textläge"
+
+#: Drivers/Screen/Linux/screen.c:1996
+msgid "no foreground console"
+msgstr "ingen förgrundskonsol"
+
+#: Drivers/Screen/Linux/screen.c:2001
+msgid "can't read screen content"
+msgstr "kan inte läsa skärmens innehåll"
+
+#: Drivers/Screen/Linux/screen.c:2047
+msgid "can't get screen properties"
+msgstr "kan inte få skärmegenskaper"
+
+#: Drivers/Screen/TerminalEmulator/screen.c:137
+msgid "no screen cache"
+msgstr "ingen skärmcache"
+
+#: Drivers/Screen/TerminalEmulator/screen.c:141
+msgid "screen not accessible"
+msgstr "skärmen inte tillgänglig"
+
+#: Drivers/Screen/TerminalEmulator/screen.c:384
+msgid "screen not available"
+msgstr "skärmen är inte tillgänglig"
+
+#: Drivers/Screen/TerminalEmulator/screen.c:395
+msgid "screen not attached"
+msgstr "skärmen inte fäst"
+
+#: Drivers/Screen/TerminalEmulator/screen.c:398
+msgid "no screen emulator"
+msgstr "ingen skärmemulator"
+
+#: Headers/cmdline_types.h:72
+msgid "Show this usage summary, and then exit."
+msgstr "Visa denna användningsöversikt och avsluta sedan."
+
+#: Programs/alert.c:58
+msgid "Done"
+msgstr "Klar"
+
+#: Programs/alert.c:103
+msgid "Frozen"
+msgstr "Fryst"
+
+#: Programs/alert.c:108
+msgid "Unfrozen"
+msgstr "Ofrusen"
+
+#: Programs/alert.c:169
+msgid "Console Bell"
+msgstr "Konsol Bell"
+
+#: Programs/alert.c:174
+msgid "Autorelease"
+msgstr "Automatisk frigöring"
+
+#: Programs/apitest.c:137
+msgid "Test BrlAPI functions."
+msgstr "Testa BrlAPI-funktioner."
+
+#: Programs/atb_translate.c:70
+msgid "cannot compile attributes table"
+msgstr "kan inte sammanställa attributtabell"
+
+#: Programs/atb_translate.c:90
+msgid "cannot load attributes table"
+msgstr "kan inte ladda attributtabell"
+
+#: Programs/brltest.c:60 Programs/brltest.c:78 Programs/brltty-atb.c:31
+#: Programs/brltty-ctb.c:92 Programs/brltty-ktb.c:76 Programs/brltty-ktb.c:85
+#: Programs/brltty-trtxt.c:75 Programs/config.c:725 Programs/config.c:735
+#: Programs/config.c:745 Programs/config.c:755 Programs/config.c:765
+#: Programs/config.c:774
+msgid "directory"
+msgstr "katalog"
+
+#: Programs/brltest.c:64 Programs/brltty-atb.c:35 Programs/brltty-ctb.c:96
+#: Programs/brltty-ktb.c:80 Programs/config.c:729
+msgid "Path to directory containing tables."
+msgstr "Sökväg till katalog som innehåller tabeller."
+
+#: Programs/brltest.c:82 Programs/config.c:769
+msgid "Path to directory which can be written to."
+msgstr "Sökväg till katalog som det går att skriva till."
+
+#: Programs/brltest.c:100
+msgid "Test a braille driver."
+msgstr "Testa en punktskriftsdrivrutin."
+
+#: Programs/brltty-atb.c:53
+msgid "Check an attributes table."
+msgstr "Kontrollera en attributtabell."
+
+#: Programs/brltty.c:209
+#, c-format
+msgid "\"%s\" started as \"%s\"\n"
+msgstr "\"%s\" började som \"%s\"\n"
+
+#. failed
+#: Programs/brltty.c:214
+#, c-format
+msgid "fork of \"%s\" failed: %s\n"
+msgstr "förgreningen av \"%s\" misslyckades: %s\n"
+
+#. parent
+#: Programs/brltty.c:219
+#, c-format
+msgid "executing \"%s\" (from \"%s\")\n"
+msgstr "Exekvering av \"%s\" (från \"%s\")\n"
+
+#. execv() shouldn't return
+#: Programs/brltty.c:226
+#, c-format
+msgid "execution of \"%s\" failed: %s\n"
+msgstr "Utförandet av \"%s\" misslyckades: %s\n"
+
+#: Programs/brltty-cldr.c:37 Programs/brltty-hid.c:94
+#: Programs/brltty-hid.c:101 Programs/brltty-hid.c:108
+#: Programs/brltty-hid.c:122
+msgid "string"
+msgstr "sträng"
+
+#: Programs/brltty-cldr.c:40
+msgid "The format of each output line."
+msgstr "Formatet för varje utdatarad."
+
+#: Programs/brltty-cldr.c:80
+msgid ""
+"List the characters defined within a CLDR (Common Locale Data Repository "
+"Project) annotations file."
+msgstr ""
+"Lista de tecken som definieras i en CLDR-annoteringsfil (Common Locale Data "
+"Repository Project)."
+
+#: Programs/brltty-clip.c:80
+msgid "Manage brltty's clipboard from the command line."
+msgstr "Hantera brlttys urklipp från kommandoraden."
+
+#: Programs/brltty-cmdref.c:40
+msgid "Write a brltty command reference in reStructuredText."
+msgstr "Skriv en briljant kommandoreferens i reStructuredText."
+
+#: Programs/brltty-ctb.c:53
+msgid "Maximum length of an output line."
+msgstr "Maximal längd på en utdatarad."
+
+#: Programs/brltty-ctb.c:59
+msgid "Reformat input."
+msgstr "Formatera om inmatningen."
+
+#: Programs/brltty-ctb.c:65
+msgid "Force immediate output."
+msgstr "Tvinga fram omedelbar utmatning."
+
+#: Programs/brltty-ctb.c:73
+msgid "Contraction table."
+msgstr "Sammandragningsbord."
+
+#: Programs/brltty-ctb.c:80
+msgid "Text table."
+msgstr "Text tabell."
+
+#: Programs/brltty-ctb.c:87
+msgid "Contraction verification table."
+msgstr "Tabell för kontroll av sammandragning."
+
+#: Programs/brltty-ctb.c:124
+msgid ""
+"Check/validate a contraction (literary braille) table, or translate text "
+"into contracted braille."
+msgstr ""
+"Kontrollera/validera en tabell för sammandragning (litterär punktskrift) "
+"eller översätt text till sammandragen punktskrift."
+
+#: Programs/brltty-hid.c:69
+msgid "Filter for a USB device (the default if not ambiguous)."
+msgstr "Filter för en USB-enhet (standard om det inte är tvetydigt)."
+
+#: Programs/brltty-hid.c:75
+msgid "Filter for a Bluetooth device."
+msgstr "Filter för en Bluetooth-enhet."
+
+#: Programs/brltty-hid.c:80 Programs/brltty-hid.c:87 Programs/brltty-hid.c:171
+#: Programs/brltty-hid.c:178
+msgid "identifier"
+msgstr "identifierare"
+
+#: Programs/brltty-hid.c:82
+msgid "Match the vendor identifier (four hexadecimal digits)."
+msgstr "Matcha leverantörens identifierare (fyra hexadecimala siffror)."
+
+#: Programs/brltty-hid.c:89
+msgid "Match the product identifier (four hexadecimal digits)."
+msgstr "Matcha med produktidentifieraren (fyra hexadecimala siffror)."
+
+#: Programs/brltty-hid.c:96
+msgid "Match the start of the manufacturer name (USB only)."
+msgstr "Matcha med början av tillverkarens namn (endast USB)."
+
+#: Programs/brltty-hid.c:103
+msgid "Match the start of the product description (USB only)."
+msgstr "Matcha med början av produktbeskrivningen (endast USB)."
+
+#: Programs/brltty-hid.c:110
+msgid "Match the start of the serial number (USB only)."
+msgstr "Matcha med början av serienumret (endast USB)."
+
+#: Programs/brltty-hid.c:115
+msgid "octets"
+msgstr "oktetter"
+
+#: Programs/brltty-hid.c:117
+msgid ""
+"Match the full device address (Bluetooth only - all six two-digit, "
+"hexadecimal octets separated by a colon [:])."
+msgstr ""
+"Matcha den fullständiga enhetsadressen (endast Bluetooth - alla sex "
+"tvåsiffriga hexadecimala oktetter åtskilda av kolon [:])."
+
+#: Programs/brltty-hid.c:124
+msgid "Match the start of the device name (Bluetooth only)."
+msgstr "Matcha början av enhetsnamnet (endast Bluetooth)."
+
+#: Programs/brltty-hid.c:130
+msgid "Show the vendor and product identifiers."
+msgstr "Visa försäljar- och produktidentifierare."
+
+#: Programs/brltty-hid.c:136
+msgid ""
+"Show the device address (USB serial number, Bluetooth device address, etc)."
+msgstr ""
+"Visa enhetens adress (USB-serienummer, Bluetooth-enhetens adress etc.)."
+
+#: Programs/brltty-hid.c:142
+msgid ""
+"Show the device name (USB manufacturer and/or product strings, Bluetooth "
+"device name, etc)."
+msgstr ""
+"Visa enhetsnamnet (USB-tillverkare och/eller produktsträngar, Bluetooth-"
+"enhetsnamn, etc)."
+
+#: Programs/brltty-hid.c:148
+msgid ""
+"Show the host path (USB topology, Bluetooth host controller address, etc)."
+msgstr "Visa värdvägen (USB-topologi, Bluetooth host controller-adress, etc)."
+
+#: Programs/brltty-hid.c:154
+msgid "Show the host device (usually its absolute path)."
+msgstr "Visa värdenheten (vanligtvis dess absoluta sökväg)."
+
+#: Programs/brltty-hid.c:160
+msgid "List the HID report descriptor's items."
+msgstr "Lista HID-rapportbeskrivarens objekt."
+
+#: Programs/brltty-hid.c:166
+msgid "List each report's identifier and sizes."
+msgstr "Ange varje rapports identifierare och storlek."
+
+#: Programs/brltty-hid.c:173
+msgid "Read (get) an input report (two hexadecimal digits)."
+msgstr "Läs (hämta) en inmatningsrapport (två hexadecimala siffror)."
+
+#: Programs/brltty-hid.c:180
+msgid "Read (get) a feature report (two hexadecimal digits)."
+msgstr "Läs (hämta) en funktionsrapport (två hexadecimala siffror)."
+
+#: Programs/brltty-hid.c:185 Programs/brltty-hid.c:192
+msgid "bytes"
+msgstr "byte"
+
+#: Programs/brltty-hid.c:187
+msgid "Write (set) an output report (see below)."
+msgstr "Skriv (ställ in) en utdatarapport (se nedan)."
+
+#: Programs/brltty-hid.c:194
+msgid "Write (set) a feature report (see below)."
+msgstr "Skriva (ställa in) en funktionsrapport (se nedan)."
+
+#: Programs/brltty-hid.c:200
+msgid "Echo (in hexadecimal) input received from the device."
+msgstr "Echo (i hexadecimal) indata som mottagits från enheten."
+
+#: Programs/brltty-hid.c:205
+msgid "integer"
+msgstr "heltal"
+
+#: Programs/brltty-hid.c:207
+msgid "The input timeout (in seconds)."
+msgstr "Tidsgräns för inmatning (i sekunder)."
+
+#: Programs/brltty-hid.c:223
+msgid ""
+"Find HID devices, list report descriptors, read/write reports/features, or "
+"monitor input from a HID device."
+msgstr ""
+"Hitta HID-enheter, lista rapportdeskriptorer, läsa/skriva "
+"rapporter/funktioner eller övervaka indata från en HID-enhet."
+
+#: Programs/brltty-ktb.c:45
+msgid "driver"
+msgstr "Drivrutin"
+
+#: Programs/brltty-ktb.c:47
+msgid "Braille driver code."
+msgstr "Drivrutinskod för punktskrift."
+
+#: Programs/brltty-ktb.c:53
+msgid "Report problems with the key table."
+msgstr "Rapportera problem med nyckelbordet."
+
+#: Programs/brltty-ktb.c:59
+msgid "List key names."
+msgstr "Lista nyckelnamn."
+
+#: Programs/brltty-ktb.c:65
+msgid "List key table in help screen format."
+msgstr "Lista nyckeltabell i hjälpskärmsformat."
+
+#: Programs/brltty-ktb.c:71
+msgid "List key table in reStructuredText format."
+msgstr "Lista nyckeltabell i reStructuredText-format."
+
+#: Programs/brltty-ktb.c:89
+msgid "Path to directory for loading drivers."
+msgstr "Sökväg till katalog för laddning av drivrutiner."
+
+#: Programs/brltty-ktb.c:107
+msgid ""
+"check a key table, list the key naems it can use, or write the key bindings "
+"it defines in useful formats."
+msgstr ""
+"kontrollera en nyckeltabell, lista de nyckelnamn som den kan använda eller "
+"skriva de nyckelbindningar som den definierar i användbara format."
+
+#: Programs/brltty-lsinc.c:47
+msgid "List the paths to a data file and those which it recursively includes."
+msgstr "Lista sökvägarna till en datafil och de som den rekursivt inkluderar."
+
+#: Programs/brltty-morse.c:126
+msgid "Translate text into Morse Code tones."
+msgstr "Översätt text till morsekodstoner."
+
+#: Programs/brltty-pty.c:61
+msgid "write driver directives to standard error"
+msgstr "skriva drivrutinsdirektiv till standardfel"
+
+#: Programs/brltty-pty.c:67
+msgid "show the absolute path to the pty slave"
+msgstr "visa den absoluta sökvägen till pty-slaven"
+
+#: Programs/brltty-pty.c:74
+msgid "the name or number of the user to run as"
+msgstr "namnet eller numret på den användare som ska köras som"
+
+#: Programs/brltty-pty.c:81
+msgid "the name or number of the group to run as"
+msgstr "namnet eller numret på den grupp som du ska köra som"
+
+#: Programs/brltty-pty.c:88
+msgid "the directory to change to"
+msgstr "katalogen som du vill byta till"
+
+#: Programs/brltty-pty.c:95
+msgid "the home directory to use"
+msgstr "den hemkatalog som ska användas"
+
+#: Programs/brltty-pty.c:101
+msgid "log input written to the pty slave"
+msgstr "logga inmatning som skrivs till pty-slav"
+
+#: Programs/brltty-pty.c:107
+msgid ""
+"log output received from the pty slave that isn't an escape sequence or a "
+"special character"
+msgstr ""
+"logga utdata från pty-slav som inte är en escape-sekvens eller ett "
+"specialtecken"
+
+#: Programs/brltty-pty.c:113
+msgid ""
+"log escape sequences and special characters received from the pty slave"
+msgstr "logga escape-sekvenser och specialtecken som tas emot från pty-slav"
+
+#: Programs/brltty-pty.c:119
+msgid "log unexpected input/output"
+msgstr "logga oväntad inmatning/utmatning"
+
+#: Programs/brltty-pty.c:131
+msgid ""
+"Run a shell or terminal manager within a pty (virtual terminal) and export "
+"its screen via a shared memory segment so that brltty can read it via its "
+"Terminal Emulator screen driver."
+msgstr ""
+"Kör ett skal eller en terminalhanterare i en pty (virtuell terminal) och "
+"exportera dess skärm via ett delat minnessegment så att brltty kan läsa den "
+"via sin Terminal Emulator-skärmdrivrutin."
+
+#: Programs/brltty-pty.c:280
+msgid "command not found"
+msgstr "Kommandot hittades inte"
+
+#: Programs/brltty-pty.c:440
+msgid "standard input isn't a terminal"
+msgstr "standardinmatning är inte en terminal"
+
+#: Programs/brltty-pty.c:445
+msgid "standard output isn't a terminal"
+msgstr "standardutdata är inte en terminal"
+
+#: Programs/brltty-trtxt.c:47 Programs/brltty-trtxt.c:55 Programs/config.c:412
+#: Programs/config.c:466 Programs/config.c:476 Programs/config.c:485
+#: Programs/config.c:520 Programs/config.c:556 Programs/config.c:580
+#: Programs/config.c:589 Programs/config.c:640 Programs/config.c:784
+#: Programs/xbrlapi.c:135 Programs/xbrlapi.c:142
+msgid "file"
+msgstr "fil"
+
+#: Programs/brltty-trtxt.c:50
+msgid "The name of (or path to) the input text table."
+msgstr "Namnet på (eller sökvägen till) tabellen med inmatad text."
+
+#: Programs/brltty-trtxt.c:58
+msgid "The name of (or path to) the output text table."
+msgstr "Namnet på (eller sökvägen till) den utgående texttabellen."
+
+#: Programs/brltty-trtxt.c:64
+msgid "Remove dots seven and eight."
+msgstr "Ta bort punkt sju och åtta."
+
+#: Programs/brltty-trtxt.c:70
+msgid "Don't fall back to the Unicode base character."
+msgstr "Gå inte tillbaka till Unicodes bastecken."
+
+#: Programs/brltty-trtxt.c:79
+msgid "Path to directory for text tables."
+msgstr "Sökväg till katalog för texttabeller."
+
+#: Programs/brltty-trtxt.c:98
+msgid "Translate one binary braille representation to another."
+msgstr "Översätt en binär punktskriftsrepresentation till en annan."
+
+#: Programs/brltty-ttb.c:148
+msgid "Edit table."
+msgstr "Redigera tabellen."
+
+#: Programs/brltty-ttb.c:155
+msgid "Format of input file."
+msgstr "Format för inmatningsfilen."
+
+#: Programs/brltty-ttb.c:162
+msgid "Format of output file."
+msgstr "Format för utdatafilen."
+
+#: Programs/brltty-ttb.c:169
+msgid "8-bit character set to use."
+msgstr "8-bitars teckenuppsättning som ska användas."
+
+#: Programs/brltty-ttb.c:176
+msgid ""
+"Report the characters within the current screen font that aren't defined "
+"within the text table."
+msgstr ""
+"Rapportera de tecken inom det aktuella skärmteckensnittet som inte "
+"definieras inom texttabellen."
+
+#: Programs/brltty-ttb.c:186
+msgid "Path to directory containing text tables."
+msgstr "Sökväg till katalog som innehåller texttabeller."
+
+#: Programs/brltty-ttb.c:211
+msgid ""
+"Check/edit a text (computer braille) table, or convert it from one format to"
+" another."
+msgstr ""
+"Kontrollera/redigera en tabell med text (datorbraille) eller konvertera den "
+"från ett format till ett annat."
+
+#: Programs/brltty-tune.c:104
+msgid ""
+"Compose a tune with the tune builder and play it with the tone generator."
+msgstr "Komponera en melodi med tune builder och spela den med tongeneratorn."
+
+#: Programs/cmdbase.c:47
+#, c-format
+msgid "cannot determine program directory"
+msgstr "kan inte bestämma programkatalog"
+
+#: Programs/cmd.c:199
+msgid "unknown command"
+msgstr "okänt kommando"
+
+#: Programs/cmd.c:278 Programs/core.c:1075
+msgid "space"
+msgstr "utrymme"
+
+#: Programs/cmd.c:291
+msgid "at cursor"
+msgstr "vid markören"
+
+#: Programs/cmdline.c:120
+msgid "Syntax"
+msgstr "Syntax"
+
+#: Programs/cmdline.c:129
+msgid "option"
+msgstr "alternativ"
+
+#: Programs/cmdline.c:216
+msgid "Parameters"
+msgstr "Parametrar"
+
+#: Programs/cmdline.c:283
+msgid "Options"
+msgstr "Alternativ"
+
+#: Programs/cmdline.c:463
+msgid "invalid counter setting"
+msgstr "ogiltig räknarinställning"
+
+#: Programs/cmdline.c:472
+msgid "invalid flag setting"
+msgstr "Inställning av ogiltig flagga"
+
+#: Programs/cmdline.c:754
+msgid "unknown option"
+msgstr "okänt alternativ"
+
+#: Programs/cmdline.c:759
+msgid "missing operand"
+msgstr "operand saknas"
+
+#: Programs/cmdline.c:764
+msgid "invalid operand"
+msgstr "ogiltig operand"
+
+#: Programs/cmdline.c:844
+msgid "missing parameter"
+msgstr "saknad parameter"
+
+#: Programs/cmdline.c:868
+msgid "too many parameters"
+msgstr "för många parametrar"
+
+#: Programs/cmdline.c:1065
+msgid "configuration directive specified more than once"
+msgstr "konfigurationsdirektiv specificerat mer än en gång"
+
+#: Programs/cmdline.c:1081
+msgid "unknown configuration directive"
+msgstr "okänt konfigurationsdirektiv"
+
+#: Programs/cmdline.c:1251
+#, c-format
+msgid "file '%s' processing error."
+msgstr "fel vid bearbetning av filen \"%s\"."
+
+#. xgettext: This is how to say when the time is exactly on (i.e. zero minutes
+#. after) an hour.
+#. xgettext: (%u represents the number of hours)
+#: Programs/cmd_miscellaneous.c:94
+#, c-format
+msgid "%u o'clock"
+msgstr "%u klockan"
+
+#. xgettext: This is the term used when the time is exactly on (i.e. zero
+#. seconds after) a minute.
+#: Programs/cmd_miscellaneous.c:107
+msgid "exactly"
+msgstr "exakt"
+
+#: Programs/cmd_miscellaneous.c:109
+msgid "and"
+msgstr "och"
+
+#. xgettext: This is a number (%u) of seconds (time units).
+#: Programs/cmd_miscellaneous.c:112
+#, c-format
+msgid "%u second"
+msgstr "%u sekund"
+
+#: Programs/cmd_miscellaneous.c:230
+msgid "braille driver stopped"
+msgstr "punktskriftsdrivrutin stoppad"
+
+#: Programs/cmd_miscellaneous.c:238
+msgid "screen driver stopped"
+msgstr "skärmdrivrutin stoppad"
+
+#: Programs/cmd_miscellaneous.c:280
+msgid "help not available"
+msgstr "hjälp inte tillgänglig"
+
+#: Programs/cmd_preferences.c:47
+msgid "not saved"
+msgstr "inte räddad"
+
+#: Programs/cmd_preferences.c:94
+msgid "changes discarded"
+msgstr "förändringar kasserade"
+
+#: Programs/cmd_queue.c:158
+msgid "unhandled command"
+msgstr "obehandlat kommando"
+
+#. xgettext: This is the description of the NOOP command.
+#: Programs/cmds.auto.h:5
+msgid "do nothing"
+msgstr "gör ingenting"
+
+#. xgettext: This is the description of the LNUP command.
+#: Programs/cmds.auto.h:14
+msgid "go up one line"
+msgstr "gå upp en rad"
+
+#. xgettext: This is the description of the LNDN command.
+#: Programs/cmds.auto.h:23
+msgid "go down one line"
+msgstr "gå ner en linje"
+
+#. xgettext: This is the description of the WINUP command.
+#: Programs/cmds.auto.h:32
+msgid "go up several lines"
+msgstr "gå upp flera rader"
+
+#. xgettext: This is the description of the WINDN command.
+#: Programs/cmds.auto.h:41
+msgid "go down several lines"
+msgstr "gå ner flera rader"
+
+#. xgettext: This is the description of the PRDIFLN command.
+#: Programs/cmds.auto.h:50
+msgid "go up to nearest line with different content"
+msgstr "gå upp till närmaste rad med annat innehåll"
+
+#. xgettext: This is the description of the NXDIFLN command.
+#: Programs/cmds.auto.h:59
+msgid "go down to nearest line with different content"
+msgstr "gå ner till närmaste rad med annat innehåll"
+
+#. xgettext: This is the description of the ATTRUP command.
+#: Programs/cmds.auto.h:68
+msgid "go up to nearest line with different highlighting"
+msgstr "gå upp till närmaste linje med olika markeringar"
+
+#. xgettext: This is the description of the ATTRDN command.
+#: Programs/cmds.auto.h:77
+msgid "go down to nearest line with different highlighting"
+msgstr "gå ner till närmaste rad med olika markeringar"
+
+#. xgettext: This is the description of the TOP command.
+#: Programs/cmds.auto.h:86
+msgid "go to top line"
+msgstr "gå till översta raden"
+
+#. xgettext: This is the description of the BOT command.
+#: Programs/cmds.auto.h:95
+msgid "go to bottom line"
+msgstr "gå till sista raden"
+
+#. xgettext: This is the description of the TOP_LEFT command.
+#: Programs/cmds.auto.h:105
+msgid "go to beginning of top line"
+msgstr "gå till början av den översta raden"
+
+#. xgettext: This is the description of the BOT_LEFT command.
+#: Programs/cmds.auto.h:115
+msgid "go to beginning of bottom line"
+msgstr "gå till början av bottenlinjen"
+
+#. xgettext: This is the description of the PRPGRPH command.
+#: Programs/cmds.auto.h:124
+msgid "go up to first line of paragraph"
+msgstr "gå upp till första raden i stycket"
+
+#. xgettext: This is the description of the NXPGRPH command.
+#: Programs/cmds.auto.h:133
+msgid "go down to first line of next paragraph"
+msgstr "gå ner till första raden i nästa stycke"
+
+#. xgettext: This is the description of the PRPROMPT command.
+#: Programs/cmds.auto.h:142
+msgid "go up to previous command prompt"
+msgstr "gå upp till föregående kommandotolk"
+
+#. xgettext: This is the description of the NXPROMPT command.
+#: Programs/cmds.auto.h:151
+msgid "go down to next command prompt"
+msgstr "gå ner till nästa kommandotolk"
+
+#. xgettext: This is the description of the PRSEARCH command.
+#: Programs/cmds.auto.h:158
+msgid "search backward for clipboard text"
+msgstr "Sök bakåt efter urklippstext"
+
+#. xgettext: This is the description of the NXSEARCH command.
+#: Programs/cmds.auto.h:165
+msgid "search forward for clipboard text"
+msgstr "Sök framåt efter urklippstext"
+
+#. xgettext: This is the description of the CHRLT command.
+#: Programs/cmds.auto.h:174
+msgid "go left one character"
+msgstr "gå vänster ett tecken"
+
+#. xgettext: This is the description of the CHRRT command.
+#: Programs/cmds.auto.h:183
+msgid "go right one character"
+msgstr "gå höger en karaktär"
+
+#. xgettext: This is the description of the HWINLT command.
+#: Programs/cmds.auto.h:192
+msgid "go left half a braille window"
+msgstr "gå vänster halv ett punktskriftsfönster"
+
+#. xgettext: This is the description of the HWINRT command.
+#: Programs/cmds.auto.h:201
+msgid "go right half a braille window"
+msgstr "gå höger halv ett punktskriftsfönster"
+
+#. xgettext: This is the description of the FWINLT command.
+#: Programs/cmds.auto.h:210
+msgid "go backward one braille window"
+msgstr "gå bakåt ett punktskriftsfönster"
+
+#. xgettext: This is the description of the FWINRT command.
+#: Programs/cmds.auto.h:219
+msgid "go forward one braille window"
+msgstr "gå framåt ett punktskriftsfönster"
+
+#. xgettext: This is the description of the FWINLTSKIP command.
+#: Programs/cmds.auto.h:228
+msgid "go backward skipping blank braille windows"
+msgstr "gå bakåt hoppa över tomma punktskriftsfönster"
+
+#. xgettext: This is the description of the FWINRTSKIP command.
+#: Programs/cmds.auto.h:237
+msgid "go forward skipping blank braille windows"
+msgstr "gå framåt hoppa över tomma punktskriftsfönster"
+
+#. xgettext: This is the description of the LNBEG command.
+#: Programs/cmds.auto.h:246
+msgid "go to beginning of line"
+msgstr "gå till början av raden"
+
+#. xgettext: This is the description of the LNEND command.
+#: Programs/cmds.auto.h:255
+msgid "go to end of line"
+msgstr "gå till slutet av raden"
+
+#. xgettext: This is the description of the HOME command.
+#: Programs/cmds.auto.h:263
+msgid "go to screen cursor"
+msgstr "gå till skärmens markör"
+
+#. xgettext: This is the description of the BACK command.
+#: Programs/cmds.auto.h:271
+msgid "go back after cursor tracking"
+msgstr "gå tillbaka efter markörspårning"
+
+#. xgettext: This is the description of the RETURN command.
+#: Programs/cmds.auto.h:279
+msgid "go to screen cursor or go back after cursor tracking"
+msgstr "gå till skärmmarkören eller gå tillbaka efter markörspårning"
+
+#. xgettext: This is the description of the FREEZE command.
+#: Programs/cmds.auto.h:287
+msgid "set screen image frozen/unfrozen"
+msgstr "ställa in skärmbild fryst/ej fryst"
+
+#. xgettext: This is the description of the DISPMD command.
+#: Programs/cmds.auto.h:295
+msgid "set display mode attributes/text"
+msgstr "ställa in attribut/text för visningsläge"
+
+#. xgettext: This is the description of the SIXDOTS command.
+#: Programs/cmds.auto.h:303
+msgid "set text style 6-dot/8-dot"
+msgstr "ange textformat 6-punkter/8-punkter"
+
+#. xgettext: This is the description of the SLIDEWIN command.
+#: Programs/cmds.auto.h:311
+msgid "set sliding braille window on/off"
+msgstr "sätt på/av skjutbart punktskriftsfönster"
+
+#. xgettext: This is the description of the SKPIDLNS command.
+#: Programs/cmds.auto.h:319
+msgid "set skipping of lines with identical content on/off"
+msgstr "sätt på/av att hoppa över rader med identiskt innehåll"
+
+#. xgettext: This is the description of the SKPBLNKWINS command.
+#: Programs/cmds.auto.h:327
+msgid "set skipping of blank braille windows on/off"
+msgstr "sätt på/av att hoppa över tomma punktskriftsfönster"
+
+#. xgettext: This is the description of the CSRVIS command.
+#: Programs/cmds.auto.h:335
+msgid "set screen cursor visibility on/off"
+msgstr "Ställ in skärmmarkörens synlighet på/av"
+
+#. xgettext: This is the description of the CSRHIDE command.
+#: Programs/cmds.auto.h:343
+msgid "set hidden screen cursor on/off"
+msgstr "Ställ in markören för dold skärm på/av"
+
+#. xgettext: This is the description of the CSRTRK command.
+#: Programs/cmds.auto.h:351
+msgid "set track screen cursor on/off"
+msgstr "Ställ in markör för spårskärm på/av"
+
+#. xgettext: This is the description of the CSRSIZE command.
+#: Programs/cmds.auto.h:359
+msgid "set screen cursor style block/underline"
+msgstr "ställa in skärmens markörstil block/understreck"
+
+#. xgettext: This is the description of the CSRBLINK command.
+#: Programs/cmds.auto.h:367
+msgid "set screen cursor blinking on/off"
+msgstr "inställd skärmmarkör blinkar på/av"
+
+#. xgettext: This is the description of the ATTRVIS command.
+#: Programs/cmds.auto.h:375
+msgid "set attribute underlining on/off"
+msgstr "sätt attribut understrykning på/av"
+
+#. xgettext: This is the description of the ATTRBLINK command.
+#: Programs/cmds.auto.h:383
+msgid "set attribute blinking on/off"
+msgstr "ställ in attribut blinkande på/av"
+
+#. xgettext: This is the description of the CAPBLINK command.
+#: Programs/cmds.auto.h:391
+msgid "set capital letter blinking on/off"
+msgstr "ställ in versal bokstav blinkar på/av"
+
+#. xgettext: This is the description of the TUNES command.
+#: Programs/cmds.auto.h:399
+msgid "set alert tunes on/off"
+msgstr "sätt på/av varningsmelodier"
+
+#. xgettext: This is the description of the AUTOREPEAT command.
+#: Programs/cmds.auto.h:407
+msgid "set autorepeat on/off"
+msgstr "sätt autorepeat på/av"
+
+#. xgettext: This is the description of the AUTOSPEAK command.
+#: Programs/cmds.auto.h:415
+msgid "set autospeak on/off"
+msgstr "sätt autospeak på/av"
+
+#. xgettext: This is the description of the HELP command.
+#: Programs/cmds.auto.h:422
+msgid "enter/leave help display"
+msgstr "Enter/Lämna hjälpdisplay"
+
+#. xgettext: This is the description of the INFO command.
+#: Programs/cmds.auto.h:429
+msgid "enter/leave status display"
+msgstr "statusvisning för in/utgång"
+
+#. xgettext: This is the description of the LEARN command.
+#: Programs/cmds.auto.h:436
+msgid "enter/leave command learn mode"
+msgstr "gå in i/gå ur inlärningsläge för kommando"
+
+#. xgettext: This is the description of the PREFMENU command.
+#: Programs/cmds.auto.h:443
+msgid "enter/leave preferences menu"
+msgstr "gå till/från inställningsmeny"
+
+#. xgettext: This is the description of the PREFSAVE command.
+#: Programs/cmds.auto.h:450
+msgid "save preferences to disk"
+msgstr "spara inställningar på disk"
+
+#. xgettext: This is the description of the PREFLOAD command.
+#: Programs/cmds.auto.h:457
+msgid "restore preferences from disk"
+msgstr "återställa preferenser från disk"
+
+#. xgettext: This is the description of the MENU_FIRST_ITEM command.
+#: Programs/cmds.auto.h:466
+msgid "go up to first item"
+msgstr "gå upp till första objektet"
+
+#. xgettext: This is the description of the MENU_LAST_ITEM command.
+#: Programs/cmds.auto.h:475
+msgid "go down to last item"
+msgstr "gå ner till sista artikeln"
+
+#. xgettext: This is the description of the MENU_PREV_ITEM command.
+#: Programs/cmds.auto.h:484
+msgid "go up to previous item"
+msgstr "gå upp till föregående punkt"
+
+#. xgettext: This is the description of the MENU_NEXT_ITEM command.
+#: Programs/cmds.auto.h:493
+msgid "go down to next item"
+msgstr "gå ner till nästa punkt"
+
+#. xgettext: This is the description of the MENU_PREV_SETTING command.
+#: Programs/cmds.auto.h:500
+msgid "select previous choice"
+msgstr "välj tidigare val"
+
+#. xgettext: This is the description of the MENU_NEXT_SETTING command.
+#: Programs/cmds.auto.h:507
+msgid "select next choice"
+msgstr "välj nästa val"
+
+#. xgettext: This is the description of the MUTE command.
+#: Programs/cmds.auto.h:514
+msgid "stop speaking"
+msgstr "sluta tala"
+
+#. xgettext: This is the description of the SPKHOME command.
+#: Programs/cmds.auto.h:522
+msgid "go to current speaking position"
+msgstr "gå till aktuell talarposition"
+
+#. xgettext: This is the description of the SAY_LINE command.
+#. xgettext: This is the description of the SPEAK_CURR_LINE command.
+#: Programs/cmds.auto.h:529 Programs/cmds.auto.h:765
+msgid "speak current line"
+msgstr "tala aktuell rad"
+
+#. xgettext: This is the description of the SAY_ABOVE command.
+#: Programs/cmds.auto.h:536
+msgid "speak from top of screen through current line"
+msgstr "tala från toppen av skärmen till och med aktuell rad"
+
+#. xgettext: This is the description of the SAY_BELOW command.
+#: Programs/cmds.auto.h:543
+msgid "speak from current line through bottom of screen"
+msgstr "tala från aktuell rad genom skärmens nedre del"
+
+#. xgettext: This is the description of the SAY_SLOWER command.
+#: Programs/cmds.auto.h:550
+msgid "decrease speaking rate"
+msgstr "minska talfrekvensen"
+
+#. xgettext: This is the description of the SAY_FASTER command.
+#: Programs/cmds.auto.h:557
+msgid "increase speaking rate"
+msgstr "öka talfrekvensen"
+
+#. xgettext: This is the description of the SAY_SOFTER command.
+#: Programs/cmds.auto.h:564
+msgid "decrease speaking volume"
+msgstr "minska talvolymen"
+
+#. xgettext: This is the description of the SAY_LOUDER command.
+#: Programs/cmds.auto.h:571
+msgid "increase speaking volume"
+msgstr "öka talvolymen"
+
+#. xgettext: This is the description of the SWITCHVT_PREV command.
+#: Programs/cmds.auto.h:578
+msgid "switch to the previous virtual terminal"
+msgstr "växla till föregående virtuella terminal"
+
+#. xgettext: This is the description of the SWITCHVT_NEXT command.
+#: Programs/cmds.auto.h:585
+msgid "switch to the next virtual terminal"
+msgstr "växla till nästa virtuella terminal"
+
+#. xgettext: This is the description of the CSRJMP_VERT command.
+#: Programs/cmds.auto.h:593
+msgid "bring screen cursor to current line"
+msgstr "flytta skärmens markör till aktuell rad"
+
+#. xgettext: This is the description of the PASTE command.
+#: Programs/cmds.auto.h:600
+msgid "insert the clipboard content before the screen cursor"
+msgstr "infoga urklippets innehåll före skärmens markör"
+
+#. xgettext: This is the description of the RESTARTBRL command.
+#: Programs/cmds.auto.h:607
+msgid "restart braille driver"
+msgstr "starta om drivrutinen för punktskrift"
+
+#. xgettext: This is the description of the RESTARTSPEECH command.
+#: Programs/cmds.auto.h:614
+msgid "restart speech driver"
+msgstr "starta om drivrutinen för tal"
+
+#. xgettext: This is the description of the OFFLINE command.
+#: Programs/cmds.auto.h:621
+msgid "braille display temporarily unavailable"
+msgstr "punktskriftsdisplayen tillfälligt otillgänglig"
+
+#. xgettext: This is the description of the SHIFT command.
+#: Programs/cmds.auto.h:628
+msgid "cycle the Shift sticky input modifier (next, on, off)"
+msgstr "cykla Shift sticky input modifier (nästa, på, av)"
+
+#. xgettext: This is the description of the UPPER command.
+#: Programs/cmds.auto.h:635
+msgid "cycle the Upper sticky input modifier (next, on, off)"
+msgstr "Cykla den övre klistriga inmatningsmodifieraren (nästa, på, av)"
+
+#. xgettext: This is the description of the CONTROL command.
+#: Programs/cmds.auto.h:642
+msgid "cycle the Control sticky input modifier (next, on, off)"
+msgstr "cykla inmatningsmodifieraren Control sticky (nästa, på, av)"
+
+#. xgettext: This is the description of the META command.
+#: Programs/cmds.auto.h:649
+msgid "cycle the Meta (Left Alt) sticky input modifier (next, on, off)"
+msgstr ""
+"cykla Meta (vänster Alt) klistrig inmatningsmodifierare (nästa, på, av)"
+
+#. xgettext: This is the description of the TIME command.
+#: Programs/cmds.auto.h:656
+msgid "show current date and time"
+msgstr "visa aktuellt datum och tid"
+
+#. xgettext: This is the description of the MENU_PREV_LEVEL command.
+#: Programs/cmds.auto.h:664
+msgid "go to previous menu level"
+msgstr "gå till föregående menynivå"
+
+#. xgettext: This is the description of the ASPK_SEL_LINE command.
+#: Programs/cmds.auto.h:672
+msgid "set autospeak selected line on/off"
+msgstr "sätt autospeak vald rad på/av"
+
+#. xgettext: This is the description of the ASPK_SEL_CHAR command.
+#: Programs/cmds.auto.h:680
+msgid "set autospeak selected character on/off"
+msgstr "sätt autospeak vald karaktär på/av"
+
+#. xgettext: This is the description of the ASPK_INS_CHARS command.
+#: Programs/cmds.auto.h:688
+msgid "set autospeak inserted characters on/off"
+msgstr "sätt autospeak för infogade tecken på/av"
+
+#. xgettext: This is the description of the ASPK_DEL_CHARS command.
+#: Programs/cmds.auto.h:696
+msgid "set autospeak deleted characters on/off"
+msgstr "sätt autospeak raderade tecken på/av"
+
+#. xgettext: This is the description of the ASPK_REP_CHARS command.
+#: Programs/cmds.auto.h:704
+msgid "set autospeak replaced characters on/off"
+msgstr "sätt autospeak ersatta tecken på/av"
+
+#. xgettext: This is the description of the ASPK_CMP_WORDS command.
+#: Programs/cmds.auto.h:712
+msgid "set autospeak completed words on/off"
+msgstr "sätt på/av autospeak för färdiga ord"
+
+#. xgettext: This is the description of the SPEAK_CURR_CHAR command.
+#: Programs/cmds.auto.h:719
+msgid "speak current character"
+msgstr "tala aktuell karaktär"
+
+#. xgettext: This is the description of the SPEAK_PREV_CHAR command.
+#: Programs/cmds.auto.h:727
+msgid "go to and speak previous character"
+msgstr "gå till och tala tidigare karaktär"
+
+#. xgettext: This is the description of the SPEAK_NEXT_CHAR command.
+#: Programs/cmds.auto.h:735
+msgid "go to and speak next character"
+msgstr "gå till och tala med nästa karaktär"
+
+#. xgettext: This is the description of the SPEAK_CURR_WORD command.
+#: Programs/cmds.auto.h:742
+msgid "speak current word"
+msgstr "tala aktuellt ord"
+
+#. xgettext: This is the description of the SPEAK_PREV_WORD command.
+#: Programs/cmds.auto.h:750
+msgid "go to and speak previous word"
+msgstr "gå till och tala föregående ord"
+
+#. xgettext: This is the description of the SPEAK_NEXT_WORD command.
+#: Programs/cmds.auto.h:758
+msgid "go to and speak next word"
+msgstr "gå till och tala nästa ord"
+
+#. xgettext: This is the description of the SPEAK_PREV_LINE command.
+#: Programs/cmds.auto.h:773
+msgid "go to and speak previous line"
+msgstr "gå till och tala föregående linje"
+
+#. xgettext: This is the description of the SPEAK_NEXT_LINE command.
+#: Programs/cmds.auto.h:781
+msgid "go to and speak next line"
+msgstr "gå till och tala nästa rad"
+
+#. xgettext: This is the description of the SPEAK_FRST_CHAR command.
+#: Programs/cmds.auto.h:789
+msgid "go to and speak first non-blank character on line"
+msgstr "gå till och tala med första icke blanka tecknet på raden"
+
+#. xgettext: This is the description of the SPEAK_LAST_CHAR command.
+#: Programs/cmds.auto.h:797
+msgid "go to and speak last non-blank character on line"
+msgstr "gå till och tala med sista icke blanka tecknet på raden"
+
+#. xgettext: This is the description of the SPEAK_FRST_LINE command.
+#: Programs/cmds.auto.h:805
+msgid "go to and speak first non-blank line on screen"
+msgstr "gå till och tala första icke blanka raden på skärmen"
+
+#. xgettext: This is the description of the SPEAK_LAST_LINE command.
+#: Programs/cmds.auto.h:813
+msgid "go to and speak last non-blank line on screen"
+msgstr "gå till och tala in den sista icke-tomma raden på skärmen"
+
+#. xgettext: This is the description of the DESC_CURR_CHAR command.
+#: Programs/cmds.auto.h:820
+msgid "describe current character"
+msgstr "beskriva nuvarande karaktär"
+
+#. xgettext: This is the description of the SPELL_CURR_WORD command.
+#: Programs/cmds.auto.h:827
+msgid "spell current word"
+msgstr "stava aktuellt ord"
+
+#. xgettext: This is the description of the ROUTE_CURR_LOCN command.
+#: Programs/cmds.auto.h:835
+msgid "bring screen cursor to speech cursor"
+msgstr "flytta skärmmarkören till talmarkören"
+
+#. xgettext: This is the description of the SPEAK_CURR_LOCN command.
+#: Programs/cmds.auto.h:842
+msgid "speak speech cursor location"
+msgstr "läs upp talmarkörens position"
+
+#. xgettext: This is the description of the SHOW_CURR_LOCN command.
+#: Programs/cmds.auto.h:850
+msgid "set speech cursor visibility on/off"
+msgstr "ställa in talmarkörens synlighet på/av"
+
+#. xgettext: This is the description of the CLIP_SAVE command.
+#: Programs/cmds.auto.h:857
+msgid "save clipboard to disk"
+msgstr "spara urklipp till disk"
+
+#. xgettext: This is the description of the CLIP_RESTORE command.
+#: Programs/cmds.auto.h:864
+msgid "restore clipboard from disk"
+msgstr "återställa urklipp från disk"
+
+#. xgettext: This is the description of the BRLUCDOTS command.
+#: Programs/cmds.auto.h:872
+msgid "set braille typing mode dots/text"
+msgstr "ställa in punktskriftsläge prickar/text"
+
+#. xgettext: This is the description of the BRLKBD command.
+#: Programs/cmds.auto.h:880
+msgid "set braille keyboard enabled/disabled"
+msgstr "aktivera/inaktivera tangentbord för punktskrift"
+
+#. xgettext: This is the description of the UNSTICK command.
+#: Programs/cmds.auto.h:887
+msgid "clear all sticky input modifiers"
+msgstr "rensa alla klistriga inmatningsändringar"
+
+#. xgettext: This is the description of the ALTGR command.
+#: Programs/cmds.auto.h:894
+msgid "cycle the AltGr (Right Alt) sticky input modifier (next, on, off)"
+msgstr ""
+"cykla AltGr (Höger Alt) modifierare för klistrig inmatning (nästa, på, av)"
+
+#. xgettext: This is the description of the GUI command.
+#: Programs/cmds.auto.h:901
+msgid "cycle the GUI (Windows) sticky input modifier (next, on, off)"
+msgstr "cykla GUI (Windows) sticky input modifier (nästa, på, av)"
+
+#. xgettext: This is the description of the BRL_STOP command.
+#: Programs/cmds.auto.h:908
+msgid "stop the braille driver"
+msgstr "stoppa punktskriftsdrivrutinen"
+
+#. xgettext: This is the description of the BRL_START command.
+#: Programs/cmds.auto.h:915
+msgid "start the braille driver"
+msgstr "starta punktskriftsdrivrutinen"
+
+#. xgettext: This is the description of the SPK_STOP command.
+#: Programs/cmds.auto.h:922
+msgid "stop the speech driver"
+msgstr "stoppa taldrivrutinen"
+
+#. xgettext: This is the description of the SPK_START command.
+#: Programs/cmds.auto.h:929
+msgid "start the speech driver"
+msgstr "starta taldrivrutinen"
+
+#. xgettext: This is the description of the SCR_STOP command.
+#: Programs/cmds.auto.h:936
+msgid "stop the screen driver"
+msgstr "stoppa skärmdrivrutinen"
+
+#. xgettext: This is the description of the SCR_START command.
+#: Programs/cmds.auto.h:943
+msgid "start the screen driver"
+msgstr "starta skärmdrivrutinen"
+
+#. xgettext: This is the description of the SELECTVT_PREV command.
+#: Programs/cmds.auto.h:950
+msgid "bind to the previous virtual terminal"
+msgstr "binda till den tidigare virtuella terminalen"
+
+#. xgettext: This is the description of the SELECTVT_NEXT command.
+#: Programs/cmds.auto.h:957
+msgid "bind to the next virtual terminal"
+msgstr "binda till nästa virtuella terminal"
+
+#. xgettext: This is the description of the PRNBWIN command.
+#: Programs/cmds.auto.h:966
+msgid "go backward to nearest non-blank braille window"
+msgstr "gå bakåt till närmaste punktskriftsfönster utan blanksteg"
+
+#. xgettext: This is the description of the NXNBWIN command.
+#: Programs/cmds.auto.h:975
+msgid "go forward to nearest non-blank braille window"
+msgstr "gå vidare till närmaste punktskriftsfönster utan blanksteg"
+
+#. xgettext: This is the description of the TOUCH_NAV command.
+#: Programs/cmds.auto.h:983
+msgid "set touch navigation on/off"
+msgstr "sätt på/av touch-navigering"
+
+#. xgettext: This is the description of the SPEAK_INDENT command.
+#: Programs/cmds.auto.h:990
+msgid "speak indent of current line"
+msgstr "tala om indrag på aktuell rad"
+
+#. xgettext: This is the description of the ASPK_INDENT command.
+#: Programs/cmds.auto.h:998
+msgid "set autospeak indent of current line on/off"
+msgstr "set autospeak indrag av aktuell rad on/off"
+
+#. xgettext: This is the description of the REFRESH command.
+#: Programs/cmds.auto.h:1005
+msgid "refresh braille display"
+msgstr "uppdatera punktskriftsdisplayen"
+
+#. xgettext: This is the description of the INDICATORS command.
+#: Programs/cmds.auto.h:1012
+msgid "show various device status indicators"
+msgstr "visa olika statusindikatorer för enheten"
+
+#. xgettext: This is the description of the TXTSEL_CLEAR command.
+#: Programs/cmds.auto.h:1019
+msgid "clear the text selection"
+msgstr "rensa textmarkeringen"
+
+#. xgettext: This is the description of the TXTSEL_ALL command.
+#: Programs/cmds.auto.h:1026
+msgid "select all of the text"
+msgstr "markera all text"
+
+#. xgettext: This is the description of the HOST_COPY command.
+#: Programs/cmds.auto.h:1033
+msgid "copy selected text to host clipboard"
+msgstr "kopiera markerad text till värdklippbordet"
+
+#. xgettext: This is the description of the HOST_CUT command.
+#: Programs/cmds.auto.h:1040
+msgid "cut selected text to host clipboard"
+msgstr "klippa ut markerad text till värdklippbordet"
+
+#. xgettext: This is the description of the HOST_PASTE command.
+#: Programs/cmds.auto.h:1047
+msgid "insert the host clipboard text before the screen cursor"
+msgstr "infoga texten i värddatorns urklipp före skärmens markör"
+
+#. xgettext: This is the description of the GUI_TITLE command.
+#: Programs/cmds.auto.h:1054
+msgid "show the window title"
+msgstr "visa fönstrets titel"
+
+#. xgettext: This is the description of the GUI_BRL_ACTIONS command.
+#: Programs/cmds.auto.h:1061
+msgid "open the braille actions window"
+msgstr "öppna fönstret för punktskriftsåtgärder"
+
+#. xgettext: This is the description of the GUI_HOME command.
+#: Programs/cmds.auto.h:1069
+msgid "go to the home screen"
+msgstr "gå till startskärmen"
+
+#. xgettext: This is the description of the GUI_BACK command.
+#: Programs/cmds.auto.h:1077
+msgid "go back to the previous screen"
+msgstr "gå tillbaka till föregående skärm"
+
+#. xgettext: This is the description of the GUI_DEV_SETTINGS command.
+#: Programs/cmds.auto.h:1084
+msgid "open the device settings window"
+msgstr "öppna fönstret för enhetsinställningar"
+
+#. xgettext: This is the description of the GUI_DEV_OPTIONS command.
+#: Programs/cmds.auto.h:1091
+msgid "open the device options window"
+msgstr "öppna fönstret för enhetsalternativ"
+
+#. xgettext: This is the description of the GUI_APP_LIST command.
+#: Programs/cmds.auto.h:1098
+msgid "open the application list window"
+msgstr "öppna fönstret för programlistan"
+
+#. xgettext: This is the description of the GUI_APP_MENU command.
+#: Programs/cmds.auto.h:1105
+msgid "open the application-specific menu"
+msgstr "öppna den applikationsspecifika menyn"
+
+#. xgettext: This is the description of the GUI_APP_ALERTS command.
+#: Programs/cmds.auto.h:1112
+msgid "open the application alerts window"
+msgstr "öppna fönstret för applikationsvarningar"
+
+#. xgettext: This is the description of the GUI_AREA_ACTV command.
+#: Programs/cmds.auto.h:1119
+msgid "return to the active screen area"
+msgstr "återgå till det aktiva skärmområdet"
+
+#. xgettext: This is the description of the GUI_AREA_PREV command.
+#: Programs/cmds.auto.h:1126
+msgid "switch to the previous screen area"
+msgstr "växla till föregående skärmområde"
+
+#. xgettext: This is the description of the GUI_AREA_NEXT command.
+#: Programs/cmds.auto.h:1133
+msgid "switch to the next screen area"
+msgstr "växla till nästa skärmområde"
+
+#. xgettext: This is the description of the GUI_ITEM_FRST command.
+#: Programs/cmds.auto.h:1140
+msgid "move to the first item in the screen area"
+msgstr "flytta till det första objektet i skärmområdet"
+
+#. xgettext: This is the description of the GUI_ITEM_PREV command.
+#: Programs/cmds.auto.h:1147
+msgid "move to the previous item in the screen area"
+msgstr "flytta till föregående objekt i skärmområdet"
+
+#. xgettext: This is the description of the GUI_ITEM_NEXT command.
+#: Programs/cmds.auto.h:1154
+msgid "move to the next item in the screen area"
+msgstr "gå till nästa objekt i skärmområdet"
+
+#. xgettext: This is the description of the GUI_ITEM_LAST command.
+#: Programs/cmds.auto.h:1161
+msgid "move to the last item in the screen area"
+msgstr "flytta till det sista objektet i skärmområdet"
+
+#. xgettext: This is the description of the SAY_LOWER command.
+#: Programs/cmds.auto.h:1168
+msgid "decrease speaking pitch"
+msgstr "sänka taltempot"
+
+#. xgettext: This is the description of the SAY_HIGHER command.
+#: Programs/cmds.auto.h:1175
+msgid "increase speaking pitch"
+msgstr "öka taltempot"
+
+#. xgettext: This is the description of the SAY_ALL command.
+#: Programs/cmds.auto.h:1182
+msgid "speak from top of screen through bottom of screen"
+msgstr "tala från skärmens ovansida till skärmens undersida"
+
+#. xgettext: This is the description of the CONTRACTED command.
+#: Programs/cmds.auto.h:1190
+msgid "set contracted/computer braille"
+msgstr "Kontrakterad punktskrift/datorpunktskrift"
+
+#. xgettext: This is the description of the COMPBRL6 command.
+#: Programs/cmds.auto.h:1198
+msgid "set six/eight dot computer braille"
+msgstr "uppsättning sex/åtta punkt datorpunktskrift"
+
+#. xgettext: This is the description of the PREFRESET command.
+#: Programs/cmds.auto.h:1205
+msgid "reset preferences to defaults"
+msgstr "återställa inställningar till standardvärden"
+
+#. xgettext: This is the description of the ASPK_EMP_LINE command.
+#: Programs/cmds.auto.h:1213
+msgid "set autospeak empty line on/off"
+msgstr "sätt autospeak tom linje på/av"
+
+#. xgettext: This is the description of the SPK_PUNCT_LEVEL command.
+#: Programs/cmds.auto.h:1220
+msgid "cycle speech punctuation level"
+msgstr "växla nivå för talad interpunktion"
+
+#. xgettext: This is the description of the PASTE_ALTMODE command.
+#: Programs/cmds.auto.h:1227
+msgid ""
+"insert the clipboard content before the screen cursor using the alternate "
+"paste mode"
+msgstr ""
+"infoga urklippets innehåll före skärmens markör med hjälp av det alternativa"
+" klistra in-läget"
+
+#. xgettext: This is the description of the ROUTE command.
+#: Programs/cmds.auto.h:1236
+msgid "bring screen cursor to character"
+msgstr "flytta markören till tecknet på skärmen"
+
+#. xgettext: This is the description of the CLIP_NEW command.
+#: Programs/cmds.auto.h:1244
+msgid "start new clipboard at character"
+msgstr "starta nytt klippbord vid tecken"
+
+#. xgettext: This is the description of the CLIP_ADD command.
+#: Programs/cmds.auto.h:1252
+msgid "append to clipboard from character"
+msgstr "lägg till i urklipp från tecken"
+
+#. xgettext: This is the description of the COPY_RECT command.
+#: Programs/cmds.auto.h:1260
+msgid "rectangular copy to character"
+msgstr "rektangulär kopia till tecken"
+
+#. xgettext: This is the description of the COPY_LINE command.
+#: Programs/cmds.auto.h:1268
+msgid "linear copy to character"
+msgstr "linjär kopia till tecken"
+
+#. xgettext: This is the description of the SWITCHVT command.
+#: Programs/cmds.auto.h:1276
+msgid "switch to specific virtual terminal"
+msgstr "växla till en specifik virtuell terminal"
+
+#. xgettext: This is the description of the PRINDENT command.
+#: Programs/cmds.auto.h:1286
+msgid "go up to nearest line with less indent than character"
+msgstr "gå upp till närmaste rad med mindre indrag än tecknet"
+
+#. xgettext: This is the description of the NXINDENT command.
+#: Programs/cmds.auto.h:1296
+msgid "go down to nearest line with less indent than character"
+msgstr "gå ner till närmaste rad med mindre indrag än tecknet"
+
+#. xgettext: This is the description of the DESCCHAR command.
+#: Programs/cmds.auto.h:1304
+msgid "describe character"
+msgstr "beskriva karaktär"
+
+#. xgettext: This is the description of the SETLEFT command.
+#: Programs/cmds.auto.h:1312
+msgid "place left end of braille window at character"
+msgstr "placera vänster ände av punktskriftsfönstret vid tecken"
+
+#. xgettext: This is the description of the SETMARK command.
+#: Programs/cmds.auto.h:1320
+msgid "remember current braille window position"
+msgstr "minns aktuell position för punktskriftsfönstret"
+
+#. xgettext: This is the description of the GOTOMARK command.
+#: Programs/cmds.auto.h:1329
+msgid "go to remembered braille window position"
+msgstr "gå till ihågkommen position för punktskriftsfönster"
+
+#. xgettext: This is the description of the GOTOLINE command.
+#: Programs/cmds.auto.h:1339
+msgid "go to selected line"
+msgstr "gå till vald linje"
+
+#. xgettext: This is the description of the PRDIFCHAR command.
+#: Programs/cmds.auto.h:1349
+msgid "go up to nearest line with different character"
+msgstr "gå upp till närmaste rad med annan karaktär"
+
+#. xgettext: This is the description of the NXDIFCHAR command.
+#: Programs/cmds.auto.h:1359
+msgid "go down to nearest line with different character"
+msgstr "gå ner till närmaste rad med annan karaktär"
+
+#. xgettext: This is the description of the CLIP_COPY command.
+#: Programs/cmds.auto.h:1367
+msgid "copy characters to clipboard"
+msgstr "kopiera tecken till urklipp"
+
+#. xgettext: This is the description of the CLIP_APPEND command.
+#: Programs/cmds.auto.h:1375
+msgid "append characters to clipboard"
+msgstr "Lägga till tecken i urklipp"
+
+#. xgettext: This is the description of the PASTE_HISTORY command.
+#: Programs/cmds.auto.h:1383
+msgid "insert a clipboard history entry before the screen cursor"
+msgstr "infoga en historikpost för klippbordet före skärmens markör"
+
+#. xgettext: This is the description of the SET_TEXT_TABLE command.
+#: Programs/cmds.auto.h:1391
+msgid "set text table"
+msgstr "ställa in texttabell"
+
+#. xgettext: This is the description of the SET_ATTRIBUTES_TABLE command.
+#: Programs/cmds.auto.h:1399
+msgid "set attributes table"
+msgstr "tabell med inställda attribut"
+
+#. xgettext: This is the description of the SET_CONTRACTION_TABLE command.
+#: Programs/cmds.auto.h:1407
+msgid "set contraction table"
+msgstr "set sammandragning bord"
+
+#. xgettext: This is the description of the SET_KEYBOARD_TABLE command.
+#: Programs/cmds.auto.h:1415
+msgid "set keyboard table"
+msgstr "uppsättning tangentbord"
+
+#. xgettext: This is the description of the SET_LANGUAGE_PROFILE command.
+#: Programs/cmds.auto.h:1423
+msgid "set language profile"
+msgstr "ställa in språkprofil"
+
+#. xgettext: This is the description of the ROUTE_LINE command.
+#: Programs/cmds.auto.h:1433
+msgid "bring screen cursor to line"
+msgstr "flytta skärmens markör till raden"
+
+#. xgettext: This is the description of the REFRESH_LINE command.
+#: Programs/cmds.auto.h:1442
+msgid "refresh braille line"
+msgstr "uppdatera punktskriftslinjen"
+
+#. xgettext: This is the description of the TXTSEL_START command.
+#: Programs/cmds.auto.h:1450
+msgid "start text selection"
+msgstr "starta texturval"
+
+#. xgettext: This is the description of the TXTSEL_SET command.
+#: Programs/cmds.auto.h:1458
+msgid "set text selection"
+msgstr "ställa in texturval"
+
+#. xgettext: This is the description of the ROUTE_SPEECH command.
+#: Programs/cmds.auto.h:1467
+msgid "bring speech cursor to character"
+msgstr "flytta talmarkören till tecknet"
+
+#. xgettext: This is the description of the PASTE_HISTORY_ALTMODE command.
+#: Programs/cmds.auto.h:1475
+msgid ""
+"insert a clipboard history entry before the screen cursor using the "
+"alternate paste mode"
+msgstr ""
+"infoga en post i urklippshistoriken före skärmens markör med hjälp av det "
+"alternativa klistra in-läget"
+
+#. xgettext: This is the description of the SELECTVT command.
+#: Programs/cmds.auto.h:1483
+msgid "bind to specific virtual terminal"
+msgstr "binda till en viss virtuell terminal"
+
+#. xgettext: This is the description of the ALERT command.
+#: Programs/cmds.auto.h:1491
+msgid "render an alert"
+msgstr "återge en varning"
+
+#. xgettext: This is the description of the PASSCHAR command.
+#: Programs/cmds.auto.h:1500
+msgid "type unicode character"
+msgstr "typ unicode tecken"
+
+#. xgettext: This is the description of the PASSDOTS command.
+#: Programs/cmds.auto.h:1509
+msgid "type braille dots"
+msgstr "Skriv punktskriftspunkter"
+
+#. xgettext: This is the description of the PASSAT command.
+#: Programs/cmds.auto.h:1517
+msgid "AT (set 2) keyboard scan code"
+msgstr "AT (set 2) skanningskod för tangentbord"
+
+#. xgettext: This is the description of the PASSXT command.
+#: Programs/cmds.auto.h:1525
+msgid "XT (set 1) keyboard scan code"
+msgstr "XT (set 1) skanningskod för tangentbord"
+
+#. xgettext: This is the description of the PASSPS2 command.
+#: Programs/cmds.auto.h:1533
+msgid "PS/2 (set 3) keyboard scan code"
+msgstr "PS/2 (set 3) tangentbord skanningskod"
+
+#. xgettext: This is the description of the CONTEXT command.
+#: Programs/cmds.auto.h:1541
+msgid "switch to command context"
+msgstr "växla till kommandokontext"
+
+#. xgettext: This is the description of the TOUCH_AT command.
+#: Programs/cmds.auto.h:1549
+msgid "current reading location"
+msgstr "aktuell läsplats"
+
+#. xgettext: This is the description of the MACRO command.
+#: Programs/cmds.auto.h:1557
+msgid "execute command macro"
+msgstr "Exekvera kommandomakro"
+
+#. xgettext: This is the description of the HOSTCMD command.
+#: Programs/cmds.auto.h:1565
+msgid "run host command"
+msgstr "köra värdkommando"
+
+#. xgettext: This is the description of the COLOR command.
+#: Programs/cmds.auto.h:1573
+msgid "describe color of character"
+msgstr "beskriva karaktärens färg"
+
+#. xgettext: This is the description of the KEY_ENTER command.
+#: Programs/cmds.auto.h:1581
+msgid "enter key"
+msgstr "Enter-tangent"
+
+#. xgettext: This is the description of the KEY_TAB command.
+#: Programs/cmds.auto.h:1589
+msgid "tab key"
+msgstr "flik-tangent"
+
+#. xgettext: This is the description of the KEY_BACKSPACE command.
+#: Programs/cmds.auto.h:1597
+msgid "backspace key"
+msgstr "Backstegstangent"
+
+#. xgettext: This is the description of the KEY_ESCAPE command.
+#: Programs/cmds.auto.h:1605
+msgid "escape key"
+msgstr "Escapetangent"
+
+#. xgettext: This is the description of the KEY_CURSOR_LEFT command.
+#: Programs/cmds.auto.h:1613
+msgid "cursor-left key"
+msgstr "markörens vänstra tangent"
+
+#. xgettext: This is the description of the KEY_CURSOR_RIGHT command.
+#: Programs/cmds.auto.h:1621
+msgid "cursor-right key"
+msgstr "markör-högertangent"
+
+#. xgettext: This is the description of the KEY_CURSOR_UP command.
+#: Programs/cmds.auto.h:1629
+msgid "cursor-up key"
+msgstr "cursor-up-tangent"
+
+#. xgettext: This is the description of the KEY_CURSOR_DOWN command.
+#: Programs/cmds.auto.h:1637
+msgid "cursor-down key"
+msgstr "markör-ned-tangent"
+
+#. xgettext: This is the description of the KEY_PAGE_UP command.
+#: Programs/cmds.auto.h:1645
+msgid "page-up key"
+msgstr "knapp för uppslagning"
+
+#. xgettext: This is the description of the KEY_PAGE_DOWN command.
+#: Programs/cmds.auto.h:1653
+msgid "page-down key"
+msgstr "sid-ned-tangent"
+
+#. xgettext: This is the description of the KEY_HOME command.
+#: Programs/cmds.auto.h:1661
+msgid "home key"
+msgstr "hemknapp"
+
+#. xgettext: This is the description of the KEY_END command.
+#: Programs/cmds.auto.h:1669
+msgid "end key"
+msgstr "slutnyckel"
+
+#. xgettext: This is the description of the KEY_INSERT command.
+#: Programs/cmds.auto.h:1677
+msgid "insert key"
+msgstr "infoga nyckel"
+
+#. xgettext: This is the description of the KEY_DELETE command.
+#: Programs/cmds.auto.h:1685
+msgid "delete key"
+msgstr "Radera tangent"
+
+#. xgettext: This is the description of the KEY_FUNCTION command.
+#: Programs/cmds.auto.h:1694
+msgid "function key"
+msgstr "funktionsknapp"
+
+#: Programs/cmd_speech.c:314
+msgid "speech driver stopped"
+msgstr "taldrivrutin stoppad"
+
+#: Programs/cmd_speech.c:753
+msgid "line"
+msgstr "linje"
+
+#: Programs/cmd_speech.c:754
+msgid "column"
+msgstr "kolumn"
+
+#: Programs/config.c:348
+msgid "unknown screen content quality"
+msgstr "okänd skärm innehållskvalitet"
+
+#: Programs/config.c:400
+msgid ""
+"Log the versions of the core, API, and built-in drivers, and then exit."
+msgstr ""
+"Logga versionerna av kärn-, API- och inbyggda drivrutiner och avsluta sedan."
+
+#: Programs/config.c:406
+msgid "Recognize environment variables."
+msgstr "Känna igen miljövariabler."
+
+#: Programs/config.c:416
+msgid "Path to default settings file."
+msgstr "Sökväg till filen med standardinställningar."
+
+#: Programs/config.c:423 Programs/config.c:494 Programs/config.c:537
+msgid "driver,..."
+msgstr "drivrutin,..."
+
+#: Programs/config.c:426
+#, c-format
+msgid "Braille driver code (%s, %s, or one of {%s})."
+msgstr "Drivrutinskod för punktskrift (%s, %s eller en av {%s})."
+
+#: Programs/config.c:434 Programs/config.c:504 Programs/config.c:547
+#: Programs/config.c:565 Programs/config.c:598 Programs/config.c:614
+#: Programs/config.c:667
+msgid "name=value,..."
+msgstr "name=värde,..."
+
+#: Programs/config.c:437
+msgid "Parameters for the braille driver."
+msgstr "Parametrar för drivrutinen för punktskrift."
+
+#: Programs/config.c:444
+msgid "identifier,..."
+msgstr "...identifierare,..."
+
+#: Programs/config.c:447
+msgid "Device for accessing braille display."
+msgstr "Enhet för åtkomst till punktskriftsdisplay."
+
+#: Programs/config.c:459
+msgid "Release braille device when screen or window is unreadable."
+msgstr "Släpp punktskriftsapparaten när skärmen eller fönstret är oläsligt."
+
+#: Programs/config.c:469
+#, c-format
+msgid "Name of or path to text table (or %s)."
+msgstr "Namn på eller sökväg till texttabell (eller %s)."
+
+#: Programs/config.c:479
+msgid "Name of or path to contraction table."
+msgstr "Namn på eller väg till sammandragningstabell."
+
+#: Programs/config.c:487
+msgid "Name of or path to attributes table."
+msgstr "Namn på eller sökväg till attributtabell."
+
+#: Programs/config.c:497
+#, c-format
+msgid "Speech driver code (%s, %s, or one of {%s})."
+msgstr "Kod för taldrivrutin (%s, %s eller en av {%s})."
+
+#: Programs/config.c:507
+msgid "Parameters for the speech driver."
+msgstr "Parametrar för taldrivrutinen."
+
+#: Programs/config.c:514
+msgid "Do not autospeak when braille is not being used."
+msgstr "Använd inte autospeak när punktskrift inte används."
+
+#: Programs/config.c:522
+msgid "Name of or path to speech input object."
+msgstr "Namn på eller sökväg till talinmatningsobjekt."
+
+#: Programs/config.c:527
+msgid "quality"
+msgstr "kvalitet"
+
+#: Programs/config.c:529
+#, c-format
+msgid "Minimum screen content quality to autospeak (one of {%s})."
+msgstr "Minsta kvalitet på skärminnehållet för autospeak (en av {%s})."
+
+#: Programs/config.c:540
+#, c-format
+msgid "Screen driver code (%s, %s, or one of {%s})."
+msgstr "Kod för skärmdrivrutin (%s, %s, eller en av {%s})."
+
+#: Programs/config.c:550
+msgid "Parameters for the screen driver."
+msgstr "Parametrar för skärmdrivrutinen."
+
+#: Programs/config.c:559
+msgid "Name of or path to keyboard table."
+msgstr "Namn på eller sökväg till tangentbordstabell."
+
+#: Programs/config.c:567
+msgid "Properties of eligible keyboards."
+msgstr "Egenskaper för valbara tangentbord."
+
+#: Programs/config.c:574
+msgid "Handle keyboard key events when using a Linux tty in graphics mode."
+msgstr ""
+"Hantera tangentbordshändelser när du använder en Linux-tty i grafikläge."
+
+#: Programs/config.c:583
+msgid "Name of or path to GUI keyboard table."
+msgstr "Namn på eller sökväg till GUI-tangentbordstabell."
+
+#: Programs/config.c:592
+msgid "Name of or path to default preferences file."
+msgstr "Namn på eller sökväg till filen med standardinställningar."
+
+#: Programs/config.c:600
+msgid "Explicit preference settings."
+msgstr "Explicita inställningar för preferenser."
+
+#: Programs/config.c:608
+msgid "Disable the application programming interface."
+msgstr "Inaktivera gränssnittet för applikationsprogrammering."
+
+#: Programs/config.c:617
+msgid "Parameters for the application programming interface."
+msgstr "Parametrar för gränssnittet för applikationsprogrammering."
+
+#: Programs/config.c:625
+msgid "Suppress start-up messages."
+msgstr "Undertrycka startmeddelanden."
+
+#: Programs/config.c:631
+msgid "lvl|cat,..."
+msgstr "lvl|cat,..."
+
+#: Programs/config.c:633
+#, c-format
+msgid ""
+"Logging level (%s or one of {%s}) and/or log categories to enable (any "
+"combination of {%s}, each optionally prefixed by %s to disable)."
+msgstr ""
+"Loggningsnivå (%s eller en av {%s}) och/eller loggkategorier som ska "
+"aktiveras (valfri kombination av {%s}, var och en eventuellt föregången av "
+"%s för att inaktivera)."
+
+#: Programs/config.c:642
+msgid "Path to log file."
+msgstr "Sökväg till loggfilen."
+
+#: Programs/config.c:648
+msgid "Log to standard error rather than to the system log."
+msgstr "Logga till standardfelet i stället för till systemloggen."
+
+#: Programs/config.c:654
+msgid "Remain a foreground process."
+msgstr "Förbli en förgrundsprocess."
+
+#: Programs/config.c:661
+msgid ""
+"Don't switch to an unprivileged user or relinquish any privileges (group "
+"memberships, capabilities, etc)."
+msgstr ""
+"Byt inte till en användare utan privilegier och avstå inte från några "
+"privilegier (gruppmedlemskap, funktioner etc.)."
+
+#: Programs/config.c:670
+msgid "Parameters for the privilege establishment stage."
+msgstr "Parametrar för upprättande av privilegier."
+
+#: Programs/config.c:676
+msgid "csecs"
+msgstr "csecs"
+
+#: Programs/config.c:678
+msgid "Message hold timeout (in 10ms units)."
+msgstr "Timeout för att hålla kvar meddelandet (i 10 ms-enheter)."
+
+#: Programs/config.c:683 Programs/config.c:690
+msgid "text"
+msgstr "text"
+
+#: Programs/config.c:685
+msgid ""
+"The text to be shown when the braille driver starts and to be spoken when "
+"the speech driver starts."
+msgstr ""
+"Den text som ska visas när punktskriftsdrivrutinen startar och som ska läsas"
+" upp när taldrivrutinen startar."
+
+#: Programs/config.c:692
+msgid "The text to be shown when the braille driver stops."
+msgstr "Den text som ska visas när punktskriftsdrivrutinen stannar."
+
+#: Programs/config.c:697
+msgid "regexp,..."
+msgstr "regexp,..."
+
+#: Programs/config.c:699
+msgid "Patterns that match command prompts."
+msgstr "Mönster som matchar kommandotolkar."
+
+#: Programs/config.c:706 Programs/config.c:716
+msgid "device"
+msgstr "enhet"
+
+#: Programs/config.c:708
+msgid "PCM (soundcard digital audio) device specifier."
+msgstr "PCM (ljudkort digitalt ljud) enhetsspecifikator."
+
+#: Programs/config.c:718
+msgid "MIDI (Musical Instrument Digital Interface) device specifier."
+msgstr "MIDI (Musical Instrument Digital Interface) enhetsspecifikator."
+
+#: Programs/config.c:739
+msgid "Path to directory containing drivers."
+msgstr "Sökväg till katalog som innehåller drivrutiner."
+
+#: Programs/config.c:749
+msgid "Path to directory containing helper commands."
+msgstr "Sökväg till katalog som innehåller hjälpkommandon."
+
+#: Programs/config.c:759
+msgid "Path to directory which contains files that can be updated."
+msgstr "Sökväg till katalog som innehåller filer som kan uppdateras."
+
+#: Programs/config.c:778
+msgid "Path to directory which contains message localizations."
+msgstr "Sökväg till katalog som innehåller lokaliseringar av meddelanden."
+
+#: Programs/config.c:787
+msgid "Path to process identifier file."
+msgstr "Sökväg till processidentifieringsfilen."
+
+#: Programs/config.c:793
+#, c-format
+msgid "Stop an existing instance of %s, and then exit."
+msgstr "Stoppa en befintlig instans av %s och avsluta sedan."
+
+#: Programs/config.c:800
+#, c-format
+msgid "Install the %s service, and then exit."
+msgstr "Installera tjänsten %s och avsluta sedan."
+
+#: Programs/config.c:807
+#, c-format
+msgid "Remove the %s service, and then exit."
+msgstr "Ta bort tjänsten %s och avsluta sedan."
+
+#: Programs/config.c:814
+msgid "Write the start-up logs, and then exit."
+msgstr "Skriv startloggarna och avsluta sedan."
+
+#: Programs/config.c:826
+msgid "Screen reader for those who use a braille device."
+msgstr "Skärmläsare för dem som använder en punktskriftsanordning."
+
+#: Programs/config.c:851
+msgid "unknown log level or category"
+msgstr "okänd loggnivå eller kategori"
+
+#: Programs/config.c:1302
+msgid "Key Help"
+msgstr "Nyckelhjälp"
+
+#: Programs/config.c:1304
+msgid "cannot open key help"
+msgstr "kan inte öppna nyckel hjälp"
+
+#: Programs/config.c:1313
+msgid "no key bindings"
+msgstr "inga tangentbindningar"
+
+#: Programs/config.c:1863
+msgid "Key Bindings"
+msgstr "Nyckelbindningar"
+
+#: Programs/config.c:1868 Programs/ktb_list.c:737
+msgid "Key Table"
+msgstr "Nyckelbord"
+
+#: Programs/config.c:1874
+msgid "cannot compile key table"
+msgstr "kan inte sammanställa nyckeltabell"
+
+#: Programs/config.c:1937 Programs/menu_prefs.c:1690
+msgid "Braille Device"
+msgstr "Braille-enhet"
+
+#: Programs/config.c:1956
+msgid "Old Preferences File"
+msgstr "Gammal inställningsfil"
+
+#: Programs/config.c:1972
+msgid "braille driver not loadable"
+msgstr "Braille-drivrutin inte laddningsbar"
+
+#: Programs/config.c:2168
+msgid "BRLTTY stopped"
+msgstr "BRLTTY stoppad"
+
+#: Programs/config.c:2233
+msgid "braille driver restarting"
+msgstr "omstart av drivrutin för punktskrift"
+
+#: Programs/config.c:2237
+#, c-format
+msgid "reinitializing braille driver"
+msgstr "återinitialisering av drivrutin för punktskrift"
+
+#: Programs/config.c:2400
+msgid "speech driver not loadable"
+msgstr "Taldrivrutinen kan inte laddas"
+
+#: Programs/config.c:2549
+msgid "speech driver restarting"
+msgstr "omstart av drivrutin för tal"
+
+#: Programs/config.c:2552
+#, c-format
+msgid "reinitializing speech driver"
+msgstr "återinitialisering av taldrivrutin"
+
+#: Programs/config.c:2631
+msgid "screen driver not loadable"
+msgstr "skärmdrivrutin inte laddningsbar"
+
+#: Programs/config.c:2752
+msgid "screen driver restarting"
+msgstr "skärmdrivrutin startar om"
+
+#: Programs/config.c:2755
+#, c-format
+msgid "reinitializing screen driver"
+msgstr "återinitialisering av skärmdrivrutin"
+
+#: Programs/config.c:2983
+msgid "pid file not specified"
+msgstr "pid-fil inte specificerad"
+
+#: Programs/config.c:3010
+msgid "invalid message hold timeout"
+msgstr "tidsgräns för ogiltigt meddelande"
+
+#: Programs/config.c:3092 Programs/menu.c:601
+msgid "cannot determine working directory"
+msgstr "kan inte bestämma arbetskatalog"
+
+#: Programs/config.c:3135
+#, c-format
+msgid "braille device not specified"
+msgstr "punktskriftsanordning ej specificerad"
+
+#: Programs/config.c:3254
+msgid "Language"
+msgstr "Språk"
+
+#. "cap" here, used during speech output, is short for "capital".
+#. It is spoken just before an uppercase letter, e.g. "cap A".
+#: Programs/core.c:1095
+msgid "cap"
+msgstr "lock"
+
+#: Programs/core.c:1167
+msgid "blank line"
+msgstr "tom linje"
+
+#: Programs/core.c:1170
+msgid "indent"
+msgstr "indrag"
+
+#: Programs/crctest.c:115
+msgid "Test supported CRC (Cyclic Redundancy Check) checksum algorithms."
+msgstr "Testa CRC (Cyclic Redundancy Check)-checksummaalgoritmer som stöds."
+
+#: Programs/ctb_translate.c:432
+msgid "cannot compile contraction table"
+msgstr "kan inte sammanställa sammandragningstabell"
+
+#: Programs/ctb_translate.c:438
+msgid "cannot access internal contraction table"
+msgstr "kan inte komma åt intern sammandragningstabell"
+
+#: Programs/ctb_translate.c:452
+msgid "cannot load contraction table"
+msgstr "kan inte belasta sammandragningsbordet"
+
+#: Programs/datafile.c:318
+msgid "invalid escape sequence"
+msgstr "ogiltig escape-sekvens"
+
+#: Programs/file.c:440
+msgid "cannot make world writable"
+msgstr "kan inte göra världen skrivbar"
+
+#: Programs/file.c:451
+msgid "cannot create directory"
+msgstr "kan inte skapa katalog"
+
+#: Programs/file.c:601
+msgid "cannot get working directory"
+msgstr "kan inte hämta arbetskatalog"
+
+#: Programs/file.c:615 Programs/menu.c:588
+msgid "cannot set working directory"
+msgstr "kan inte ange arbetskatalog"
+
+#: Programs/learn.c:164
+msgid "Learn Mode"
+msgstr "Lära läge"
+
+#: Programs/learn.c:184
+msgid "done"
+msgstr "klar"
+
+#: Programs/log.c:65
+msgid "Input Packets"
+msgstr "Inmatade paket"
+
+#: Programs/log.c:71
+msgid "Output Packets"
+msgstr "Utgående paket"
+
+#: Programs/log.c:77
+msgid "Braille Key Events"
+msgstr "Händelser med punktskriftsnyckel"
+
+#: Programs/log.c:83
+msgid "Keyboard Key Events"
+msgstr "Händelser på tangentbord"
+
+#: Programs/log.c:89
+msgid "Cursor Tracking"
+msgstr "Spårning av markör"
+
+#: Programs/log.c:95
+msgid "Cursor Routing"
+msgstr "Routning av markör"
+
+#: Programs/log.c:101
+msgid "Update Events"
+msgstr "Uppdatera händelser"
+
+#: Programs/log.c:107
+msgid "Speech Events"
+msgstr "Talhändelser"
+
+#: Programs/log.c:113
+msgid "Async Events"
+msgstr "Asynkrona händelser"
+
+#: Programs/log.c:119
+msgid "Server Events"
+msgstr "Serverhändelser"
+
+#: Programs/log.c:125
+msgid "generic I/O"
+msgstr "generisk I/O"
+
+#: Programs/log.c:131
+msgid "Serial I/O"
+msgstr "Seriell I/O"
+
+#: Programs/log.c:137
+msgid "USB I/O"
+msgstr "USB I/O"
+
+#: Programs/log.c:143
+msgid "Bluetooth I/O"
+msgstr "Bluetooth I/O"
+
+#: Programs/log.c:149
+msgid "Human Interface I/O"
+msgstr "Mänskligt gränssnitt I/O"
+
+#: Programs/log.c:155
+msgid "Braille Driver Events"
+msgstr "Händelser för punktskriftsdrivrutin"
+
+#: Programs/log.c:161
+msgid "Speech Driver Events"
+msgstr "Händelser för taldrivrutin"
+
+#: Programs/log.c:167
+msgid "Screen Driver Events"
+msgstr "Skärm förarhändelser"
+
+#: Programs/menu.c:452
+msgid "seconds"
+msgstr "sekunder"
+
+#: Programs/menu.c:504
+msgid "No"
+msgstr "Nej"
+
+#: Programs/menu.c:505
+msgid "Yes"
+msgstr "Ja"
+
+#: Programs/menu.c:599
+msgid "cannot open working directory"
+msgstr "kan inte öppna arbetskatalogen"
+
+#: Programs/menu.c:816
+msgid "not set"
+msgstr "inte inställd"
+
+#: Programs/menu.c:943
+msgid "Close"
+msgstr "Nära"
+
+#: Programs/menu_prefs.c:544
+msgid "End"
+msgstr "Slut"
+
+#: Programs/menu_prefs.c:545 Programs/menu_prefs.c:561
+msgid "Window Coordinates"
+msgstr "Fönsterkoordinater"
+
+#: Programs/menu_prefs.c:545 Programs/menu_prefs.c:548
+#: Programs/menu_prefs.c:551 Programs/menu_prefs.c:552
+#: Programs/menu_prefs.c:556
+msgid "2 cells"
+msgstr "2 celler"
+
+#: Programs/menu_prefs.c:546
+msgid "Window Column"
+msgstr "Fönsterkolonn"
+
+#: Programs/menu_prefs.c:546 Programs/menu_prefs.c:547
+#: Programs/menu_prefs.c:549 Programs/menu_prefs.c:550
+#: Programs/menu_prefs.c:553 Programs/menu_prefs.c:554
+#: Programs/menu_prefs.c:555 Programs/menu_prefs.c:557
+#: Programs/menu_prefs.c:558 Programs/menu_prefs.c:564
+msgid "1 cell"
+msgstr "1 cell"
+
+#: Programs/menu_prefs.c:547
+msgid "Window Row"
+msgstr "Fönsterrad"
+
+#: Programs/menu_prefs.c:548 Programs/menu_prefs.c:560
+msgid "Cursor Coordinates"
+msgstr "Koordinater för markören"
+
+#: Programs/menu_prefs.c:549
+msgid "Cursor Column"
+msgstr "Cursor-kolumn"
+
+#: Programs/menu_prefs.c:550
+msgid "Cursor Row"
+msgstr "Cursor-rad"
+
+#: Programs/menu_prefs.c:551 Programs/menu_prefs.c:562
+msgid "Cursor and Window Column"
+msgstr "Markör och fönsterkolumn"
+
+#: Programs/menu_prefs.c:552 Programs/menu_prefs.c:563
+msgid "Cursor and Window Row"
+msgstr "Markör och fönsterrad"
+
+#: Programs/menu_prefs.c:553
+msgid "Screen Number"
+msgstr "Skärmnummer"
+
+#: Programs/menu_prefs.c:554
+msgid "State Dots"
+msgstr "Statliga prickar"
+
+#: Programs/menu_prefs.c:555
+msgid "State Letter"
+msgstr "Statlig skrivelse"
+
+#: Programs/menu_prefs.c:556
+msgid "Time"
+msgstr "Tid"
+
+#: Programs/menu_prefs.c:557
+msgid "Alphabetic Window Coordinates"
+msgstr "Alfabetiska fönsterkoordinater"
+
+#: Programs/menu_prefs.c:558
+msgid "Alphabetic Cursor Coordinates"
+msgstr "Koordinater för alfabetisk markör"
+
+#: Programs/menu_prefs.c:559
+msgid "Generic"
+msgstr "Generisk"
+
+#: Programs/menu_prefs.c:560 Programs/menu_prefs.c:561
+#: Programs/menu_prefs.c:562 Programs/menu_prefs.c:563
+msgid "3 cells"
+msgstr "3 celler"
+
+#: Programs/menu_prefs.c:564 Programs/menu_prefs.c:1417
+msgid "Space"
+msgstr "Utrymme"
+
+#: Programs/menu_prefs.c:568
+msgid "Status Field"
+msgstr "Statusfält"
+
+#: Programs/menu_prefs.c:672
+msgid "Underline"
+msgstr "Understrykning"
+
+#: Programs/menu_prefs.c:672
+msgid "dots 7 and 8"
+msgstr "prickar 7 och 8"
+
+#: Programs/menu_prefs.c:673 Programs/menu_prefs.c:1418
+msgid "Block"
+msgstr "Block"
+
+#: Programs/menu_prefs.c:673
+msgid "all dots"
+msgstr "alla prickar"
+
+#: Programs/menu_prefs.c:674
+msgid "Lower Left Dot"
+msgstr "Nedre vänstra punkten"
+
+#: Programs/menu_prefs.c:674
+msgid "dot 7"
+msgstr "punkt 7"
+
+#: Programs/menu_prefs.c:675
+msgid "Lower Right Dot"
+msgstr "Nedre högra punkten"
+
+#: Programs/menu_prefs.c:675
+msgid "dot 8"
+msgstr "punkt 8"
+
+#: Programs/menu_prefs.c:676
+msgid "Hide"
+msgstr "Göm dig"
+
+#: Programs/menu_prefs.c:676
+msgid "no dots"
+msgstr "inga prickar"
+
+#: Programs/menu_prefs.c:683
+msgid "Save on Exit"
+msgstr "Spara vid avslut"
+
+#: Programs/menu_prefs.c:688
+msgid "Menu Options"
+msgstr "Menyalternativ"
+
+#: Programs/menu_prefs.c:691
+msgid "Show Submenu Sizes"
+msgstr "Visa storlekar på undermenyer"
+
+#: Programs/menu_prefs.c:696
+msgid "Show Advanced Submenus"
+msgstr "Visa avancerade undermenyer"
+
+#: Programs/menu_prefs.c:701
+msgid "Show All Items"
+msgstr "Visa alla artiklar"
+
+#: Programs/menu_prefs.c:707
+msgid "Braille Presentation"
+msgstr "Presentation av punktskrift"
+
+#: Programs/menu_prefs.c:711
+msgid "Computer Braille"
+msgstr "Punktskrift på dator"
+
+#: Programs/menu_prefs.c:712
+msgid "Contracted Braille"
+msgstr "Kontrakterad punktskrift"
+
+#: Programs/menu_prefs.c:715
+msgid "Braille Variant"
+msgstr "Braille-variant"
+
+#: Programs/menu_prefs.c:722
+msgid "Expand Current Word"
+msgstr "Expandera aktuellt ord"
+
+#: Programs/menu_prefs.c:729
+msgid "No Capitalization"
+msgstr "Ingen kapitalisering"
+
+#: Programs/menu_prefs.c:730
+msgid "Use Capital Sign"
+msgstr "Använd stort tecken"
+
+#: Programs/menu_prefs.c:731
+msgid "Superimpose Dot 7"
+msgstr "Överlagra punkt 7"
+
+#: Programs/menu_prefs.c:734
+msgid "Capitalization Mode"
+msgstr "Kapitaliseringsläge"
+
+#: Programs/menu_prefs.c:741
+msgid "8-dot"
+msgstr "8-punkter"
+
+#: Programs/menu_prefs.c:742
+msgid "6-dot"
+msgstr "6-punkter"
+
+#: Programs/menu_prefs.c:745
+msgid "Computer Braille Cell Type"
+msgstr "Dator Punktskrift Celltyp"
+
+#: Programs/menu_prefs.c:754 Programs/menu_prefs.c:1030
+msgid "Minimum"
+msgstr "Minimum"
+
+#: Programs/menu_prefs.c:755 Programs/menu_prefs.c:1031
+msgid "Low"
+msgstr "Låg"
+
+#: Programs/menu_prefs.c:756 Programs/menu_prefs.c:1032
+msgid "Medium"
+msgstr "Medium"
+
+#: Programs/menu_prefs.c:757 Programs/menu_prefs.c:1033
+msgid "High"
+msgstr "Hög"
+
+#: Programs/menu_prefs.c:758 Programs/menu_prefs.c:1034
+msgid "Maximum"
+msgstr "Maximalt"
+
+#: Programs/menu_prefs.c:761
+msgid "Braille Firmness"
+msgstr "Punktskrift Fasthet"
+
+#: Programs/menu_prefs.c:769
+msgid "Text Indicators"
+msgstr "Textindikatorer"
+
+#: Programs/menu_prefs.c:772
+msgid "Show Screen Cursor"
+msgstr "Visa skärmens markör"
+
+#: Programs/menu_prefs.c:777
+msgid "Screen Cursor Style"
+msgstr "Skärmens markörstil"
+
+#: Programs/menu_prefs.c:783
+msgid "Blinking Screen Cursor"
+msgstr "Blinkande markör på skärmen"
+
+#: Programs/menu_prefs.c:789
+msgid "Screen Cursor Blink Period"
+msgstr "Period för blinkning av skärmens markör"
+
+#: Programs/menu_prefs.c:797
+msgid "Screen Cursor Percent Visible"
+msgstr "Skärmens markör Procent synlig"
+
+#: Programs/menu_prefs.c:805
+msgid "Show Attributes"
+msgstr "Visa attribut"
+
+#: Programs/menu_prefs.c:810
+msgid "Blinking Attributes"
+msgstr "Blinkande attribut"
+
+#: Programs/menu_prefs.c:816
+msgid "Attributes Blink Period"
+msgstr "Attribut Blinkperiod"
+
+#: Programs/menu_prefs.c:824
+msgid "Attributes Percent Visible"
+msgstr "Attribut Procent synlig"
+
+#: Programs/menu_prefs.c:832
+msgid "Blinking Capitals"
+msgstr "Blinkande huvudstäder"
+
+#: Programs/menu_prefs.c:837
+msgid "Capitals Blink Period"
+msgstr "Capitals blundar för period"
+
+#: Programs/menu_prefs.c:845
+msgid "Capitals Percent Visible"
+msgstr "Bokstäver Procent synliga"
+
+#: Programs/menu_prefs.c:854
+msgid "Navigation Options"
+msgstr "Alternativ för navigering"
+
+#: Programs/menu_prefs.c:857
+msgid "Word Wrap"
+msgstr "Ordomslag"
+
+#: Programs/menu_prefs.c:862
+msgid "Skip Identical Lines"
+msgstr "Hoppa över identiska rader"
+
+#: Programs/menu_prefs.c:868
+msgid "Skip Blank Braille Windows"
+msgstr "Hoppa över blank Braille-fönster"
+
+#: Programs/menu_prefs.c:874 Programs/spk.c:281
+msgid "All"
+msgstr "Alla"
+
+#: Programs/menu_prefs.c:875
+msgid "End of Line"
+msgstr "Slut på linjen"
+
+#: Programs/menu_prefs.c:876
+msgid "Rest of Line"
+msgstr "Resten av linjen"
+
+#: Programs/menu_prefs.c:879
+msgid "Skip Which Blank Braille Windows"
+msgstr "Hoppa över vilka blinda punktskriftsfönster"
+
+#: Programs/menu_prefs.c:884
+msgid "Sliding Braille Window"
+msgstr "Skjutbart Braille-fönster"
+
+#: Programs/menu_prefs.c:889
+msgid "Eager Sliding Braille Window"
+msgstr "Eager skjutbart punktskriftsfönster"
+
+#: Programs/menu_prefs.c:895
+msgid "Braille Window Overlap"
+msgstr "Överlappning av punktskriftsfönster"
+
+#: Programs/menu_prefs.c:896 Programs/menu_prefs.c:1409
+msgid "cells"
+msgstr "celler"
+
+#: Programs/menu_prefs.c:901
+msgid "Scroll-aware Cursor Navigation"
+msgstr "Skrollmedveten navigering med markör"
+
+#: Programs/menu_prefs.c:907 Programs/menu_prefs.c:1243
+#: Programs/menu_prefs.c:1256 Programs/menu_prefs.c:1357
+#: Programs/menu_prefs.c:1396 Programs/menu_prefs.c:1416 Programs/spk.c:278
+msgid "None"
+msgstr "Ingen"
+
+#: Programs/menu_prefs.c:908
+msgid "250 milliseconds"
+msgstr "250 millisekunder"
+
+#: Programs/menu_prefs.c:909
+msgid "500 milliseconds"
+msgstr "500 millisekunder"
+
+#: Programs/menu_prefs.c:910
+msgid "1 second"
+msgstr "1 sekund"
+
+#: Programs/menu_prefs.c:911
+msgid "2 seconds"
+msgstr "2 sekunder"
+
+#: Programs/menu_prefs.c:914
+msgid "Cursor Tracking Delay"
+msgstr "Fördröjning av markörspårning"
+
+#: Programs/menu_prefs.c:919
+msgid "Track Screen Scroll"
+msgstr "Spåra skärm Scroll"
+
+#: Programs/menu_prefs.c:924
+msgid "Soft Cursor Detection"
+msgstr "Detektering av mjuk markör"
+
+#: Programs/menu_prefs.c:930
+msgid "Track Screen Pointer"
+msgstr "Track Screen Pointer"
+
+#: Programs/menu_prefs.c:936
+msgid "Highlight Braille Window Location"
+msgstr "Markera Braille-fönstrets plats"
+
+#: Programs/menu_prefs.c:941
+msgid "Start Selection with Routing Key"
+msgstr "Starta urvalet med Routing Key"
+
+#: Programs/menu_prefs.c:947
+msgid "Braille Typing"
+msgstr "Skrivning av punktskrift"
+
+#: Programs/menu_prefs.c:950
+msgid "Keyboard Enabled"
+msgstr "Tangentbord aktiverat"
+
+#: Programs/menu_prefs.c:956
+msgid "Translated via Text Table"
+msgstr "Översatt via texttabell"
+
+#: Programs/menu_prefs.c:957
+msgid "Dots via Unicode Braille"
+msgstr "Prickar via Unicode Braille"
+
+#: Programs/menu_prefs.c:960
+msgid "Typing Mode"
+msgstr "Maskinskrivningsläge"
+
+#: Programs/menu_prefs.c:965
+msgid "Quick Space"
+msgstr "Snabbt utrymme"
+
+#: Programs/menu_prefs.c:971
+msgid "Input Options"
+msgstr "Alternativ för inmatning"
+
+#: Programs/menu_prefs.c:975
+msgid "Off"
+msgstr "Av"
+
+#: Programs/menu_prefs.c:976
+msgid "5 seconds"
+msgstr "5 sekunder"
+
+#: Programs/menu_prefs.c:977
+msgid "10 seconds"
+msgstr "10 sekunder"
+
+#: Programs/menu_prefs.c:978
+msgid "20 seconds"
+msgstr "20 sekunder"
+
+#: Programs/menu_prefs.c:979
+msgid "40 seconds"
+msgstr "40 sekunder"
+
+#: Programs/menu_prefs.c:982
+msgid "Autorelease Time"
+msgstr "Tid för automatisk frigöring"
+
+#: Programs/menu_prefs.c:988
+msgid "On First Release"
+msgstr "Vid första utgivningen"
+
+#: Programs/menu_prefs.c:993
+msgid "Long Press Time"
+msgstr "Lång presstid"
+
+#: Programs/menu_prefs.c:999
+msgid "Autorepeat Enabled"
+msgstr "Autorepeat aktiverad"
+
+#: Programs/menu_prefs.c:1005
+msgid "Autorepeat Interval"
+msgstr "Autorepeat-intervall"
+
+#: Programs/menu_prefs.c:1012
+msgid "Autorepeat Panning"
+msgstr "Panorering med autorepeat"
+
+#: Programs/menu_prefs.c:1018
+msgid "Alternate Paste Mode Enabled"
+msgstr "Alternativt klistra in-läge aktiverat"
+
+#: Programs/menu_prefs.c:1023
+msgid "Touch Navigation"
+msgstr "Touch-navigering"
+
+#: Programs/menu_prefs.c:1037
+msgid "Touch Sensitivity"
+msgstr "Känslighet för beröring"
+
+#: Programs/menu_prefs.c:1044 Programs/menu_prefs.c:1660
+msgid "Keyboard Table"
+msgstr "Tangentbord"
+
+#: Programs/menu_prefs.c:1052
+msgid "Event Alerts"
+msgstr "Händelseaviseringar"
+
+#: Programs/menu_prefs.c:1055
+msgid "Console Bell Alert"
+msgstr "Alarm för konsolklocka"
+
+#: Programs/menu_prefs.c:1062
+msgid "Keyboard LED Alerts"
+msgstr "LED-varningar för tangentbord"
+
+#: Programs/menu_prefs.c:1069
+msgid "Alert Tunes"
+msgstr "Varningssignaler"
+
+#: Programs/menu_prefs.c:1076
+msgid "Beeper"
+msgstr "Signalsignal"
+
+#: Programs/menu_prefs.c:1076
+msgid "console tone generator"
+msgstr "tongenerator för konsol"
+
+#: Programs/menu_prefs.c:1077
+msgid "PCM"
+msgstr "PCM"
+
+#: Programs/menu_prefs.c:1077
+msgid "soundcard digital audio"
+msgstr "ljudkort digitalt ljud"
+
+#: Programs/menu_prefs.c:1078
+msgid "MIDI"
+msgstr "MIDI"
+
+#: Programs/menu_prefs.c:1078
+msgid "Musical Instrument Digital Interface"
+msgstr "Digitalt gränssnitt för musikinstrument"
+
+#: Programs/menu_prefs.c:1079
+msgid "FM"
+msgstr "FM"
+
+#: Programs/menu_prefs.c:1079
+msgid "soundcard synthesizer"
+msgstr "ljudkort synthesizer"
+
+#: Programs/menu_prefs.c:1082
+msgid "Tune Device"
+msgstr "Tune-enhet"
+
+#: Programs/menu_prefs.c:1090
+msgid "PCM Volume"
+msgstr "PCM-volym"
+
+#: Programs/menu_prefs.c:1098
+msgid "MIDI Volume"
+msgstr "MIDI volym"
+
+#: Programs/menu_prefs.c:1108
+msgid "MIDI Instrument"
+msgstr "MIDI-instrument"
+
+#: Programs/menu_prefs.c:1117
+msgid "FM Volume"
+msgstr "FM-volym"
+
+#: Programs/menu_prefs.c:1124
+msgid "Alert Dots"
+msgstr "Varningspunkter"
+
+#: Programs/menu_prefs.c:1129
+msgid "Alert Messages"
+msgstr "Varningsmeddelanden"
+
+#: Programs/menu_prefs.c:1135
+msgid "Speak Key Context"
+msgstr "Tala Nyckel Sammanhang"
+
+#: Programs/menu_prefs.c:1140
+msgid "Speak Modifier Key"
+msgstr "Modifieringsknapp för tal"
+
+#: Programs/menu_prefs.c:1148
+msgid "Autospeak Options"
+msgstr "Alternativ för autospeak"
+
+#: Programs/menu_prefs.c:1151
+msgid "Autospeak"
+msgstr "Autospeak"
+
+#: Programs/menu_prefs.c:1156
+msgid "Speak Selected Line"
+msgstr "Tala in vald rad"
+
+#: Programs/menu_prefs.c:1162
+msgid "Speak Empty Line"
+msgstr "Speak Empty Line"
+
+#: Programs/menu_prefs.c:1168
+msgid "Speak Selected Character"
+msgstr "Tala till vald karaktär"
+
+#: Programs/menu_prefs.c:1174
+msgid "Speak Inserted Characters"
+msgstr "Tala in infogade tecken"
+
+#: Programs/menu_prefs.c:1180
+msgid "Speak Deleted Characters"
+msgstr "Tala borttagna tecken"
+
+#: Programs/menu_prefs.c:1186
+msgid "Speak Replaced Characters"
+msgstr "Tala Ersatta tecken"
+
+#: Programs/menu_prefs.c:1192
+msgid "Speak Completed Words"
+msgstr "Tala färdigformulerade ord"
+
+#: Programs/menu_prefs.c:1198
+msgid "Speak Line Indent"
+msgstr "Talrad Indrag"
+
+#: Programs/menu_prefs.c:1205
+msgid "Speech Options"
+msgstr "Alternativ för tal"
+
+#: Programs/menu_prefs.c:1208 Programs/spk.c:210
+msgid "Volume"
+msgstr "Volym"
+
+#: Programs/menu_prefs.c:1215 Programs/spk.c:236
+msgid "Rate"
+msgstr "Pris"
+
+#: Programs/menu_prefs.c:1222 Programs/spk.c:262
+msgid "Pitch"
+msgstr "Pitch"
+
+#: Programs/menu_prefs.c:1235
+msgid "Punctuation Level"
+msgstr "Skiljetecken Nivå"
+
+#. "cap" here, used during speech output, is short for "capital".
+#. It is spoken just before an uppercase letter, e.g. "cap A".
+#: Programs/menu_prefs.c:1246
+msgid "Say Cap"
+msgstr "Say Cap"
+
+#: Programs/menu_prefs.c:1247
+msgid "Raise Pitch"
+msgstr "Höja pitchen"
+
+#: Programs/menu_prefs.c:1250
+msgid "Uppercase Indicator"
+msgstr "Versal Indikator"
+
+#: Programs/menu_prefs.c:1257
+msgid "Say Space"
+msgstr "Säg rymd"
+
+#: Programs/menu_prefs.c:1260
+msgid "Whitespace Indicator"
+msgstr "Indikator för blanksteg"
+
+#: Programs/menu_prefs.c:1265
+msgid "Character Autorepeat Interval"
+msgstr "Tecken Autorepeat-intervall"
+
+#: Programs/menu_prefs.c:1271
+msgid "Word Autorepeat Interval"
+msgstr "Ord Autorepeat-intervall"
+
+#: Programs/menu_prefs.c:1277
+msgid "Line Autorepeat Interval"
+msgstr "Linje Autorepeat-intervall"
+
+#: Programs/menu_prefs.c:1284
+msgid "Immediate"
+msgstr "Omedelbar"
+
+#: Programs/menu_prefs.c:1285
+msgid "Enqueue"
+msgstr "Enqueue"
+
+#: Programs/menu_prefs.c:1288
+msgid "Say Line Mode"
+msgstr "Say Line Mode"
+
+#: Programs/menu_prefs.c:1293
+msgid "Show Speech Cursor"
+msgstr "Visa talmarkör"
+
+#: Programs/menu_prefs.c:1298
+msgid "Speech Cursor Style"
+msgstr "Talmarkörens stil"
+
+#: Programs/menu_prefs.c:1304
+msgid "Blinking Speech Cursor"
+msgstr "Blinkande talmarkör"
+
+#: Programs/menu_prefs.c:1310
+msgid "Speech Cursor Blink Period"
+msgstr "Talmarkör Blink Period"
+
+#: Programs/menu_prefs.c:1318
+msgid "Speech Cursor Percent Visible"
+msgstr "Talmarkörens procentuella synlighet"
+
+#: Programs/menu_prefs.c:1328
+msgid "Time Presentation"
+msgstr "Presentation av tid"
+
+#: Programs/menu_prefs.c:1332
+msgid "24 Hour"
+msgstr "24 timmar"
+
+#: Programs/menu_prefs.c:1333
+msgid "12 Hour"
+msgstr "12 timmar"
+
+#: Programs/menu_prefs.c:1336
+msgid "Time Format"
+msgstr "Tidsformat"
+
+#: Programs/menu_prefs.c:1342
+msgid "Colon"
+msgstr "Kolon"
+
+#: Programs/menu_prefs.c:1343 Programs/menu_prefs.c:1382
+msgid "Dot"
+msgstr "Punkt"
+
+#: Programs/menu_prefs.c:1346
+msgid "Time Separator"
+msgstr "Tidsseparator"
+
+#: Programs/menu_prefs.c:1351
+msgid "Show Seconds"
+msgstr "Visa sekunder"
+
+#: Programs/menu_prefs.c:1358
+msgid "Before Time"
+msgstr "Före tiden"
+
+#: Programs/menu_prefs.c:1359
+msgid "After Time"
+msgstr "Efter tiden"
+
+#: Programs/menu_prefs.c:1362
+msgid "Date Position"
+msgstr "Datum Position"
+
+#: Programs/menu_prefs.c:1368
+msgid "Year Month Day"
+msgstr "År Månad Dag"
+
+#: Programs/menu_prefs.c:1369
+msgid "Month Day Year"
+msgstr "Månad Dag År"
+
+#: Programs/menu_prefs.c:1370
+msgid "Day Month Year"
+msgstr "Dag Månad År"
+
+#: Programs/menu_prefs.c:1373
+msgid "Date Format"
+msgstr "Datumformat"
+
+#: Programs/menu_prefs.c:1380
+msgid "Dash"
+msgstr "Dash"
+
+#: Programs/menu_prefs.c:1381
+msgid "Slash"
+msgstr "Slash"
+
+#: Programs/menu_prefs.c:1385
+msgid "Date Separator"
+msgstr "Datumseparator"
+
+#: Programs/menu_prefs.c:1392
+msgid "Status Cells"
+msgstr "Status celler"
+
+#: Programs/menu_prefs.c:1397
+msgid "Left"
+msgstr "Vänster"
+
+#: Programs/menu_prefs.c:1398
+msgid "Right"
+msgstr "Rätt"
+
+#: Programs/menu_prefs.c:1401
+msgid "Status Position"
+msgstr "Status Position"
+
+#: Programs/menu_prefs.c:1408
+msgid "Status Count"
+msgstr "Statusräkning"
+
+#: Programs/menu_prefs.c:1419
+msgid "Status Side"
+msgstr "Status Sida"
+
+#: Programs/menu_prefs.c:1420
+msgid "Text Side"
+msgstr "Text Sida"
+
+#: Programs/menu_prefs.c:1423
+msgid "Status Separator"
+msgstr "Statusseparator"
+
+#: Programs/menu_prefs.c:1445
+msgid "Braille Tables"
+msgstr "Tabeller med punktskrift"
+
+#: Programs/menu_prefs.c:1448 Programs/menu_prefs.c:1645
+msgid "Text Table"
+msgstr "Text Tabell"
+
+#: Programs/menu_prefs.c:1455 Programs/menu_prefs.c:1650
+msgid "Contraction Table"
+msgstr "Sammandragning Tabell"
+
+#: Programs/menu_prefs.c:1462 Programs/menu_prefs.c:1655
+msgid "Attributes Table"
+msgstr "Attribut Tabell"
+
+#: Programs/menu_prefs.c:1470
+msgid "Profiles"
+msgstr "Profiler"
+
+#: Programs/menu_prefs.c:1480
+msgid "Tools"
+msgstr "Verktyg"
+
+#: Programs/menu_prefs.c:1484
+msgid "Restart Braille Driver"
+msgstr "Starta om Braille Driver"
+
+#: Programs/menu_prefs.c:1490
+msgid "Restart Speech Driver"
+msgstr "Starta om Speech Driver"
+
+#: Programs/menu_prefs.c:1496
+msgid "Restart Screen Driver"
+msgstr "Starta om skärmdrivrutin"
+
+#: Programs/menu_prefs.c:1502
+msgid "Build Information"
+msgstr "Bygg information"
+
+#: Programs/menu_prefs.c:1506
+msgid "Package Version"
+msgstr "Paketversion"
+
+#: Programs/menu_prefs.c:1511
+msgid "Package Revision"
+msgstr "Revision av paket"
+
+#: Programs/menu_prefs.c:1516
+msgid "Web Site"
+msgstr "Webbplats"
+
+#: Programs/menu_prefs.c:1521
+msgid "Mailing List"
+msgstr "Mailinglista"
+
+#: Programs/menu_prefs.c:1526 Programs/menu_prefs.c:1576
+msgid "Configuration File"
+msgstr "Konfigurationsfil"
+
+#: Programs/menu_prefs.c:1531 Programs/menu_prefs.c:1591
+msgid "Preferences File"
+msgstr "Inställningsfil"
+
+#: Programs/menu_prefs.c:1536
+msgid "Configuration Directory"
+msgstr "Konfigurationskatalog"
+
+#: Programs/menu_prefs.c:1541 Programs/menu_prefs.c:1601
+msgid "Tables Directory"
+msgstr "Katalog över tabeller"
+
+#: Programs/menu_prefs.c:1546 Programs/menu_prefs.c:1606
+msgid "Drivers Directory"
+msgstr "Drivrutinskatalog"
+
+#: Programs/menu_prefs.c:1551 Programs/menu_prefs.c:1611
+msgid "Helpers Directory"
+msgstr "Katalog över hjälpare"
+
+#: Programs/menu_prefs.c:1556 Programs/menu_prefs.c:1616
+msgid "Updatable Directory"
+msgstr "Uppdateringsbar katalog"
+
+#: Programs/menu_prefs.c:1561 Programs/menu_prefs.c:1621
+msgid "Writable Directory"
+msgstr "Skrivbar katalog"
+
+#: Programs/menu_prefs.c:1566 Programs/menu_prefs.c:1626
+msgid "Locale Directory"
+msgstr "Lokal katalog"
+
+#: Programs/menu_prefs.c:1572
+msgid "Command Options"
+msgstr "Kommandoalternativ"
+
+#: Programs/menu_prefs.c:1581
+msgid "Environment Variables"
+msgstr "Miljövariabler"
+
+#: Programs/menu_prefs.c:1586
+msgid "Boot Parameters"
+msgstr "Parametrar för start"
+
+#: Programs/menu_prefs.c:1596
+msgid "Override Preferences"
+msgstr "Åsidosätta inställningar"
+
+#: Programs/menu_prefs.c:1635
+msgid "Override Directory"
+msgstr "Åsidosätt katalog"
+
+#: Programs/menu_prefs.c:1665
+msgid "Keyboard Properties"
+msgstr "Egenskaper för tangentbord"
+
+#: Programs/menu_prefs.c:1670
+msgid "GUI Keyboard Enabled"
+msgstr "GUI-tangentbord aktiverat"
+
+#: Programs/menu_prefs.c:1675
+msgid "GUI Keyboard Table"
+msgstr "GUI-tangentbordstabell"
+
+#: Programs/menu_prefs.c:1680
+msgid "Braille Driver"
+msgstr "Braille Driver"
+
+#: Programs/menu_prefs.c:1685
+msgid "Braille Parameters"
+msgstr "Parametrar för punktskrift"
+
+#: Programs/menu_prefs.c:1695
+msgid "Release Device"
+msgstr "Enhet för frigöring"
+
+#: Programs/menu_prefs.c:1701
+msgid "Speech Driver"
+msgstr "Taldrivrutin"
+
+#: Programs/menu_prefs.c:1706
+msgid "Speech Parameters"
+msgstr "Parametrar för tal"
+
+#: Programs/menu_prefs.c:1711
+msgid "Quiet If No Braille"
+msgstr "Tyst om ingen punktskrift"
+
+#: Programs/menu_prefs.c:1716
+msgid "Speech Input"
+msgstr "Inmatning av tal"
+
+#: Programs/menu_prefs.c:1722
+msgid "Screen Driver"
+msgstr "Skärmdrivrutin"
+
+#: Programs/menu_prefs.c:1727
+msgid "Screen Parameters"
+msgstr "Parametrar för skärm"
+
+#: Programs/menu_prefs.c:1733
+msgid "PCM Device"
+msgstr "PCM-enhet"
+
+#: Programs/menu_prefs.c:1740
+msgid "MIDI Device"
+msgstr "MIDI-enhet"
+
+#: Programs/menu_prefs.c:1746
+msgid "Log File"
+msgstr "Loggfil"
+
+#: Programs/menu_prefs.c:1751
+msgid "Log to Standard Error"
+msgstr "Logga till standardfel"
+
+#: Programs/menu_prefs.c:1756
+msgid "PID File"
+msgstr "PID-fil"
+
+#: Programs/menu_prefs.c:1761
+msgid "No Daemon"
+msgstr "Ingen Daemon"
+
+#: Programs/menu_prefs.c:1766
+msgid "Privilege Parameters"
+msgstr "Parametrar för behörighet"
+
+#: Programs/menu_prefs.c:1771
+msgid "Stay Privileged"
+msgstr "Förbli privilegierad"
+
+#: Programs/menu_prefs.c:1776
+msgid "Start Message"
+msgstr "Startmeddelande"
+
+#: Programs/menu_prefs.c:1781
+msgid "Stop Message"
+msgstr "Stoppa meddelandet"
+
+#: Programs/menu_prefs.c:1786
+msgid "Prompt Patterns"
+msgstr "Frågemönster"
+
+#: Programs/menu_prefs.c:1792
+msgid "No API"
+msgstr "Inget API"
+
+#: Programs/menu_prefs.c:1797
+msgid "API Parameters"
+msgstr "API-parametrar"
+
+#: Programs/menu_prefs.c:1804
+msgid "Log Settings"
+msgstr "Logginställningar"
+
+#: Programs/menu_prefs.c:1808
+msgid "Emergency"
+msgstr "Nödläge"
+
+#: Programs/menu_prefs.c:1809
+msgid "Alert"
+msgstr "Varning"
+
+#: Programs/menu_prefs.c:1810
+msgid "Critical"
+msgstr "Kritisk"
+
+#: Programs/menu_prefs.c:1811
+msgid "Error"
+msgstr "Fel"
+
+#: Programs/menu_prefs.c:1812
+msgid "Warning"
+msgstr "Varning"
+
+#: Programs/menu_prefs.c:1813
+msgid "Notice"
+msgstr "Meddelande"
+
+#: Programs/menu_prefs.c:1814
+msgid "Information"
+msgstr "Information om"
+
+#: Programs/menu_prefs.c:1815
+msgid "Debug"
+msgstr "Felsökning"
+
+#: Programs/menu_prefs.c:1819
+msgid "System Log Level"
+msgstr "Systemloggnivå"
+
+#: Programs/menu_prefs.c:1824
+msgid "Standard Error Log Level"
+msgstr "Loggnivå för standardfel"
+
+#: Programs/menu_prefs.c:1829
+msgid "Category Log Level"
+msgstr "Kategori Loggnivå"
+
+#: Programs/menu_prefs.c:1834
+msgid "Log Categories"
+msgstr "Loggkategorier"
+
+#: Programs/menu_prefs.c:1873
+msgid "Log Messages"
+msgstr "Loggmeddelanden"
+
+#. xgettext: This is the name of MIDI musical instrument group #1.
+#: Programs/midi.c:25
+msgid "Piano"
+msgstr "Piano"
+
+#. xgettext: This is the name of MIDI musical instrument group #2.
+#: Programs/midi.c:28
+msgid "Chromatic Percussion"
+msgstr "Kromatisk slagverk"
+
+#. xgettext: This is the name of MIDI musical instrument group #3.
+#: Programs/midi.c:31
+msgid "Organ"
+msgstr "Organ"
+
+#. xgettext: This is the name of MIDI musical instrument group #4.
+#: Programs/midi.c:34
+msgid "Guitar"
+msgstr "Gitarr"
+
+#. xgettext: This is the name of MIDI musical instrument group #5.
+#: Programs/midi.c:37
+msgid "Bass"
+msgstr "Bas"
+
+#. xgettext: This is the name of MIDI musical instrument group #6.
+#: Programs/midi.c:40
+msgid "Strings"
+msgstr "Strängar"
+
+#. xgettext: This is the name of MIDI musical instrument group #7.
+#: Programs/midi.c:43
+msgid "Ensemble"
+msgstr "Ensemble"
+
+#. xgettext: This is the name of MIDI musical instrument group #8.
+#: Programs/midi.c:46
+msgid "Brass"
+msgstr "Mässing"
+
+#. xgettext: This is the name of MIDI musical instrument group #9.
+#: Programs/midi.c:49
+msgid "Reed"
+msgstr "Reed"
+
+#. xgettext: This is the name of MIDI musical instrument group #10.
+#: Programs/midi.c:52
+msgid "Pipe"
+msgstr "Rör"
+
+#. xgettext: This is the name of MIDI musical instrument group #11.
+#. xgettext: (synth is a common short form for synthesizer)
+#: Programs/midi.c:56
+msgid "Synth Lead"
+msgstr "Synth Lead"
+
+#. xgettext: This is the name of MIDI musical instrument group #12.
+#. xgettext: (synth is a common short form for synthesizer)
+#: Programs/midi.c:60
+msgid "Synth Pad"
+msgstr "Synth Pad"
+
+#. xgettext: This is the name of MIDI musical instrument group #13.
+#. xgettext: (synth is a common short form for synthesizer)
+#. xgettext: (FM is the acronym for Frequency Modulation)
+#: Programs/midi.c:65
+msgid "Synth FM"
+msgstr "Synth FM"
+
+#. xgettext: This is the name of MIDI musical instrument group #14.
+#: Programs/midi.c:68
+msgid "Ethnic Instruments"
+msgstr "Etniska instrument"
+
+#. xgettext: This is the name of MIDI musical instrument group #15.
+#: Programs/midi.c:71
+msgid "Percussive Instruments"
+msgstr "Perkussiva instrument"
+
+#. xgettext: This is the name of MIDI musical instrument group #16.
+#: Programs/midi.c:74
+msgid "Sound Effects"
+msgstr "Ljudeffekter"
+
+#. Piano
+#. xgettext: This is the name of MIDI musical instrument #1 (in the Piano
+#. group).
+#: Programs/midi.c:80
+msgid "Acoustic Grand Piano"
+msgstr "Akustisk flygel"
+
+#. xgettext: This is the name of MIDI musical instrument #2 (in the Piano
+#. group).
+#: Programs/midi.c:83
+msgid "Bright Acoustic Piano"
+msgstr "Ljust akustiskt piano"
+
+#. xgettext: This is the name of MIDI musical instrument #3 (in the Piano
+#. group).
+#: Programs/midi.c:86
+msgid "Electric Grand Piano"
+msgstr "Elektrisk flygel"
+
+#. xgettext: This is the name of MIDI musical instrument #4 (in the Piano
+#. group).
+#: Programs/midi.c:89
+msgid "Honkytonk Piano"
+msgstr "Honkytonk Piano"
+
+#. xgettext: This is the name of MIDI musical instrument #5 (in the Piano
+#. group).
+#: Programs/midi.c:92
+msgid "Electric Piano 1"
+msgstr "Elektriskt piano 1"
+
+#. xgettext: This is the name of MIDI musical instrument #6 (in the Piano
+#. group).
+#: Programs/midi.c:95
+msgid "Electric Piano 2"
+msgstr "Elektriskt piano 2"
+
+#. xgettext: This is the name of MIDI musical instrument #7 (in the Piano
+#. group).
+#: Programs/midi.c:98
+msgid "Harpsichord"
+msgstr "Cembalo"
+
+#. xgettext: This is the name of MIDI musical instrument #8 (in the Piano
+#. group).
+#: Programs/midi.c:101
+msgid "Clavinet"
+msgstr "Clavinet"
+
+#. Chromatic Percussion
+#. xgettext: This is the name of MIDI musical instrument #9 (in the Chromatic
+#. Percussion group).
+#: Programs/midi.c:105
+msgid "Celesta"
+msgstr "Celesta"
+
+#. xgettext: This is the name of MIDI musical instrument #10 (in the Chromatic
+#. Percussion group).
+#: Programs/midi.c:108
+msgid "Glockenspiel"
+msgstr "Glockenspiel"
+
+#. xgettext: This is the name of MIDI musical instrument #11 (in the Chromatic
+#. Percussion group).
+#: Programs/midi.c:111
+msgid "Music Box"
+msgstr "Speldosa"
+
+#. xgettext: This is the name of MIDI musical instrument #12 (in the Chromatic
+#. Percussion group).
+#: Programs/midi.c:114
+msgid "Vibraphone"
+msgstr "Vibrafon"
+
+#. xgettext: This is the name of MIDI musical instrument #13 (in the Chromatic
+#. Percussion group).
+#: Programs/midi.c:117
+msgid "Marimba"
+msgstr "Marimba"
+
+#. xgettext: This is the name of MIDI musical instrument #14 (in the Chromatic
+#. Percussion group).
+#: Programs/midi.c:120
+msgid "Xylophone"
+msgstr "Xylofon"
+
+#. xgettext: This is the name of MIDI musical instrument #15 (in the Chromatic
+#. Percussion group).
+#: Programs/midi.c:123
+msgid "Tubular Bells"
+msgstr "Tubulära klockor"
+
+#. xgettext: This is the name of MIDI musical instrument #16 (in the Chromatic
+#. Percussion group).
+#: Programs/midi.c:126
+msgid "Dulcimer"
+msgstr "Dulcimer"
+
+#. Organ
+#. xgettext: This is the name of MIDI musical instrument #17 (in the Organ
+#. group).
+#: Programs/midi.c:130
+msgid "Drawbar Organ"
+msgstr "Dragstångsorgel"
+
+#. xgettext: This is the name of MIDI musical instrument #18 (in the Organ
+#. group).
+#: Programs/midi.c:133
+msgid "Percussive Organ"
+msgstr "Perkussiv orgel"
+
+#. xgettext: This is the name of MIDI musical instrument #19 (in the Organ
+#. group).
+#: Programs/midi.c:136
+msgid "Rock Organ"
+msgstr "Rockorgel"
+
+#. xgettext: This is the name of MIDI musical instrument #20 (in the Organ
+#. group).
+#: Programs/midi.c:139
+msgid "Church Organ"
+msgstr "Kyrkorgel"
+
+#. xgettext: This is the name of MIDI musical instrument #21 (in the Organ
+#. group).
+#: Programs/midi.c:142
+msgid "Reed Organ"
+msgstr "Reedorgel"
+
+#. xgettext: This is the name of MIDI musical instrument #22 (in the Organ
+#. group).
+#: Programs/midi.c:145
+msgid "Accordion"
+msgstr "Dragspel"
+
+#. xgettext: This is the name of MIDI musical instrument #23 (in the Organ
+#. group).
+#: Programs/midi.c:148
+msgid "Harmonica"
+msgstr "Munspel"
+
+#. xgettext: This is the name of MIDI musical instrument #24 (in the Organ
+#. group).
+#: Programs/midi.c:151
+msgid "Tango Accordion"
+msgstr "Tango dragspel"
+
+#. Guitar
+#. xgettext: This is the name of MIDI musical instrument #25 (in the Guitar
+#. group).
+#: Programs/midi.c:155
+msgid "Acoustic Guitar (nylon)"
+msgstr "Akustisk gitarr (nylon)"
+
+#. xgettext: This is the name of MIDI musical instrument #26 (in the Guitar
+#. group).
+#: Programs/midi.c:158
+msgid "Acoustic Guitar (steel)"
+msgstr "Akustisk gitarr (stål)"
+
+#. xgettext: This is the name of MIDI musical instrument #27 (in the Guitar
+#. group).
+#: Programs/midi.c:161
+msgid "Electric Guitar (jazz)"
+msgstr "Elgitarr (jazz)"
+
+#. xgettext: This is the name of MIDI musical instrument #28 (in the Guitar
+#. group).
+#: Programs/midi.c:164
+msgid "Electric Guitar (clean)"
+msgstr "Elgitarr (ren)"
+
+#. xgettext: This is the name of MIDI musical instrument #29 (in the Guitar
+#. group).
+#: Programs/midi.c:167
+msgid "Electric Guitar (muted)"
+msgstr "Elgitarr (dämpad)"
+
+#. xgettext: This is the name of MIDI musical instrument #30 (in the Guitar
+#. group).
+#: Programs/midi.c:170
+msgid "Overdriven Guitar"
+msgstr "Överdriven gitarr"
+
+#. xgettext: This is the name of MIDI musical instrument #31 (in the Guitar
+#. group).
+#: Programs/midi.c:173
+msgid "Distortion Guitar"
+msgstr "Distortion gitarr"
+
+#. xgettext: This is the name of MIDI musical instrument #32 (in the Guitar
+#. group).
+#: Programs/midi.c:176
+msgid "Guitar Harmonics"
+msgstr "Gitarrharmonik"
+
+#. Bass
+#. xgettext: This is the name of MIDI musical instrument #33 (in the Bass
+#. group).
+#: Programs/midi.c:180
+msgid "Acoustic Bass"
+msgstr "Akustisk bas"
+
+#. xgettext: This is the name of MIDI musical instrument #34 (in the Bass
+#. group).
+#: Programs/midi.c:183
+msgid "Electric Bass (finger)"
+msgstr "Elektrisk bas (finger)"
+
+#. xgettext: This is the name of MIDI musical instrument #35 (in the Bass
+#. group).
+#: Programs/midi.c:186
+msgid "Electric Bass (pick)"
+msgstr "Elektrisk bas (plektrum)"
+
+#. xgettext: This is the name of MIDI musical instrument #36 (in the Bass
+#. group).
+#: Programs/midi.c:189
+msgid "Fretless Bass"
+msgstr "Fretless bas"
+
+#. xgettext: This is the name of MIDI musical instrument #37 (in the Bass
+#. group).
+#: Programs/midi.c:192
+msgid "Slap Bass 1"
+msgstr "Slap Bass 1"
+
+#. xgettext: This is the name of MIDI musical instrument #38 (in the Bass
+#. group).
+#: Programs/midi.c:195
+msgid "Slap Bass 2"
+msgstr "Slap Bass 2"
+
+#. xgettext: This is the name of MIDI musical instrument #39 (in the Bass
+#. group).
+#: Programs/midi.c:198
+msgid "Synth Bass 1"
+msgstr "Synth Bass 1"
+
+#. xgettext: This is the name of MIDI musical instrument #40 (in the Bass
+#. group).
+#: Programs/midi.c:201
+msgid "Synth Bass 2"
+msgstr "Synth Bass 2"
+
+#. Strings
+#. xgettext: This is the name of MIDI musical instrument #41 (in the Strings
+#. group).
+#: Programs/midi.c:205
+msgid "Violin"
+msgstr "Violin"
+
+#. xgettext: This is the name of MIDI musical instrument #42 (in the Strings
+#. group).
+#: Programs/midi.c:208
+msgid "Viola"
+msgstr "Viola"
+
+#. xgettext: This is the name of MIDI musical instrument #43 (in the Strings
+#. group).
+#: Programs/midi.c:211
+msgid "Cello"
+msgstr "Cello"
+
+#. xgettext: This is the name of MIDI musical instrument #44 (in the Strings
+#. group).
+#: Programs/midi.c:214
+msgid "Contrabass"
+msgstr "Kontrabas"
+
+#. xgettext: This is the name of MIDI musical instrument #45 (in the Strings
+#. group).
+#: Programs/midi.c:217
+msgid "Tremolo Strings"
+msgstr "Tremolo Strängar"
+
+#. xgettext: This is the name of MIDI musical instrument #46 (in the Strings
+#. group).
+#: Programs/midi.c:220
+msgid "Pizzicato Strings"
+msgstr "Pizzicato Strängar"
+
+#. xgettext: This is the name of MIDI musical instrument #47 (in the Strings
+#. group).
+#: Programs/midi.c:223
+msgid "Orchestral Harp"
+msgstr "Orkesterharpa"
+
+#. xgettext: This is the name of MIDI musical instrument #48 (in the Strings
+#. group).
+#: Programs/midi.c:226
+msgid "Timpani"
+msgstr "Timpani"
+
+#. Ensemble
+#. xgettext: This is the name of MIDI musical instrument #49 (in the Ensemble
+#. group).
+#: Programs/midi.c:230
+msgid "String Ensemble 1"
+msgstr "Stråkensemble 1"
+
+#. xgettext: This is the name of MIDI musical instrument #50 (in the Ensemble
+#. group).
+#: Programs/midi.c:233
+msgid "String Ensemble 2"
+msgstr "Stråkensemble 2"
+
+#. xgettext: This is the name of MIDI musical instrument #51 (in the Ensemble
+#. group).
+#: Programs/midi.c:236
+msgid "SynthStrings 1"
+msgstr "SynthStrings 1"
+
+#. xgettext: This is the name of MIDI musical instrument #52 (in the Ensemble
+#. group).
+#: Programs/midi.c:239
+msgid "SynthStrings 2"
+msgstr "SynthStrings 2"
+
+#. xgettext: This is the name of MIDI musical instrument #53 (in the Ensemble
+#. group).
+#: Programs/midi.c:242
+msgid "Choir Aahs"
+msgstr "Kören Aahs"
+
+#. xgettext: This is the name of MIDI musical instrument #54 (in the Ensemble
+#. group).
+#: Programs/midi.c:245
+msgid "Voice Oohs"
+msgstr "Röst Oohs"
+
+#. xgettext: This is the name of MIDI musical instrument #55 (in the Ensemble
+#. group).
+#: Programs/midi.c:248
+msgid "Synth Voice"
+msgstr "Synth-röst"
+
+#. xgettext: This is the name of MIDI musical instrument #56 (in the Ensemble
+#. group).
+#: Programs/midi.c:251
+msgid "Orchestra Hit"
+msgstr "Orchestra Hit"
+
+#. Brass
+#. xgettext: This is the name of MIDI musical instrument #57 (in the Brass
+#. group).
+#: Programs/midi.c:255
+msgid "Trumpet"
+msgstr "Trumpet"
+
+#. xgettext: This is the name of MIDI musical instrument #58 (in the Brass
+#. group).
+#: Programs/midi.c:258
+msgid "Trombone"
+msgstr "Trombon"
+
+#. xgettext: This is the name of MIDI musical instrument #59 (in the Brass
+#. group).
+#: Programs/midi.c:261
+msgid "Tuba"
+msgstr "Tuba"
+
+#. xgettext: This is the name of MIDI musical instrument #60 (in the Brass
+#. group).
+#: Programs/midi.c:264
+msgid "Muted Trumpet"
+msgstr "Dämpad trumpet"
+
+#. xgettext: This is the name of MIDI musical instrument #61 (in the Brass
+#. group).
+#: Programs/midi.c:267
+msgid "French Horn"
+msgstr "Valthorn"
+
+#. xgettext: This is the name of MIDI musical instrument #62 (in the Brass
+#. group).
+#: Programs/midi.c:270
+msgid "Brass Section"
+msgstr "Mässingssektion"
+
+#. xgettext: This is the name of MIDI musical instrument #63 (in the Brass
+#. group).
+#: Programs/midi.c:273
+msgid "SynthBrass 1"
+msgstr "SynthBrass 1"
+
+#. xgettext: This is the name of MIDI musical instrument #64 (in the Brass
+#. group).
+#: Programs/midi.c:276
+msgid "SynthBrass 2"
+msgstr "SynthBrass 2"
+
+#. Reed
+#. xgettext: This is the name of MIDI musical instrument #65 (in the Reed
+#. group).
+#: Programs/midi.c:280
+msgid "Soprano Saxophone"
+msgstr "Sopransaxofon"
+
+#. xgettext: This is the name of MIDI musical instrument #66 (in the Reed
+#. group).
+#: Programs/midi.c:283
+msgid "Alto Saxophone"
+msgstr "Altsaxofon"
+
+#. xgettext: This is the name of MIDI musical instrument #67 (in the Reed
+#. group).
+#: Programs/midi.c:286
+msgid "Tenor Saxophone"
+msgstr "Tenorsaxofon"
+
+#. xgettext: This is the name of MIDI musical instrument #68 (in the Reed
+#. group).
+#: Programs/midi.c:289
+msgid "Baritone Saxophone"
+msgstr "Barytonsaxofon"
+
+#. xgettext: This is the name of MIDI musical instrument #69 (in the Reed
+#. group).
+#: Programs/midi.c:292
+msgid "Oboe"
+msgstr "Oboe"
+
+#. xgettext: This is the name of MIDI musical instrument #70 (in the Reed
+#. group).
+#: Programs/midi.c:295
+msgid "English Horn"
+msgstr "Engelskt horn"
+
+#. xgettext: This is the name of MIDI musical instrument #71 (in the Reed
+#. group).
+#: Programs/midi.c:298
+msgid "Bassoon"
+msgstr "Fagott"
+
+#. xgettext: This is the name of MIDI musical instrument #72 (in the Reed
+#. group).
+#: Programs/midi.c:301
+msgid "Clarinet"
+msgstr "Klarinett"
+
+#. Pipe
+#. xgettext: This is the name of MIDI musical instrument #73 (in the Pipe
+#. group).
+#: Programs/midi.c:305
+msgid "Piccolo"
+msgstr "Piccolo"
+
+#. xgettext: This is the name of MIDI musical instrument #74 (in the Pipe
+#. group).
+#: Programs/midi.c:308
+msgid "Flute"
+msgstr "Flöjt"
+
+#. xgettext: This is the name of MIDI musical instrument #75 (in the Pipe
+#. group).
+#: Programs/midi.c:311
+msgid "Recorder"
+msgstr "Inspelare"
+
+#. xgettext: This is the name of MIDI musical instrument #76 (in the Pipe
+#. group).
+#: Programs/midi.c:314
+msgid "Pan Flute"
+msgstr "Panflöjt"
+
+#. xgettext: This is the name of MIDI musical instrument #77 (in the Pipe
+#. group).
+#: Programs/midi.c:317
+msgid "Blown Bottle"
+msgstr "Blåst flaska"
+
+#. xgettext: This is the name of MIDI musical instrument #78 (in the Pipe
+#. group).
+#: Programs/midi.c:320
+msgid "Shakuhachi"
+msgstr "Shakuhachi"
+
+#. xgettext: This is the name of MIDI musical instrument #79 (in the Pipe
+#. group).
+#: Programs/midi.c:323
+msgid "Whistle"
+msgstr "Visselpipa"
+
+#. xgettext: This is the name of MIDI musical instrument #80 (in the Pipe
+#. group).
+#: Programs/midi.c:326
+msgid "Ocarina"
+msgstr "Ocarina"
+
+#. Synth Lead
+#. xgettext: This is the name of MIDI musical instrument #81 (in the Synth
+#. Lead group).
+#: Programs/midi.c:330
+msgid "Lead 1 (square)"
+msgstr "Ledning 1 (fyrkant)"
+
+#. xgettext: This is the name of MIDI musical instrument #82 (in the Synth
+#. Lead group).
+#: Programs/midi.c:333
+msgid "Lead 2 (sawtooth)"
+msgstr "Ledning 2 (sågtand)"
+
+#. xgettext: This is the name of MIDI musical instrument #83 (in the Synth
+#. Lead group).
+#: Programs/midi.c:336
+msgid "Lead 3 (calliope)"
+msgstr "Lead 3 (calliope)"
+
+#. xgettext: This is the name of MIDI musical instrument #84 (in the Synth
+#. Lead group).
+#: Programs/midi.c:339
+msgid "Lead 4 (chiff)"
+msgstr "Lead 4 (chiff)"
+
+#. xgettext: This is the name of MIDI musical instrument #85 (in the Synth
+#. Lead group).
+#: Programs/midi.c:342
+msgid "Lead 5 (charang)"
+msgstr "Ledning 5 (Charang)"
+
+#. xgettext: This is the name of MIDI musical instrument #86 (in the Synth
+#. Lead group).
+#: Programs/midi.c:345
+msgid "Lead 6 (voice)"
+msgstr "Lead 6 (röst)"
+
+#. xgettext: This is the name of MIDI musical instrument #87 (in the Synth
+#. Lead group).
+#: Programs/midi.c:348
+msgid "Lead 7 (fifths)"
+msgstr "Ledning 7 (kvinter)"
+
+#. xgettext: This is the name of MIDI musical instrument #88 (in the Synth
+#. Lead group).
+#: Programs/midi.c:351
+msgid "Lead 8 (bass + lead)"
+msgstr "Lead 8 (bas + lead)"
+
+#. Synth Pad
+#. xgettext: This is the name of MIDI musical instrument #89 (in the Synth Pad
+#. group).
+#: Programs/midi.c:355
+msgid "Pad 1 (new age)"
+msgstr "Pad 1 (ny tidsålder)"
+
+#. xgettext: This is the name of MIDI musical instrument #90 (in the Synth Pad
+#. group).
+#: Programs/midi.c:358
+msgid "Pad 2 (warm)"
+msgstr "Pad 2 (varm)"
+
+#. xgettext: This is the name of MIDI musical instrument #91 (in the Synth Pad
+#. group).
+#: Programs/midi.c:361
+msgid "Pad 3 (polysynth)"
+msgstr "Pad 3 (polysynth)"
+
+#. xgettext: This is the name of MIDI musical instrument #92 (in the Synth Pad
+#. group).
+#: Programs/midi.c:364
+msgid "Pad 4 (choir)"
+msgstr "Pad 4 (kör)"
+
+#. xgettext: This is the name of MIDI musical instrument #93 (in the Synth Pad
+#. group).
+#: Programs/midi.c:367
+msgid "Pad 5 (bowed)"
+msgstr "Pad 5 (böjd)"
+
+#. xgettext: This is the name of MIDI musical instrument #94 (in the Synth Pad
+#. group).
+#: Programs/midi.c:370
+msgid "Pad 6 (metallic)"
+msgstr "Pad 6 (metallisk)"
+
+#. xgettext: This is the name of MIDI musical instrument #95 (in the Synth Pad
+#. group).
+#: Programs/midi.c:373
+msgid "Pad 7 (halo)"
+msgstr "Pad 7 (halo)"
+
+#. xgettext: This is the name of MIDI musical instrument #96 (in the Synth Pad
+#. group).
+#: Programs/midi.c:376
+msgid "Pad 8 (sweep)"
+msgstr "Pad 8 (svep)"
+
+#. Synth FM
+#. xgettext: This is the name of MIDI musical instrument #97 (in the Synth FM
+#. group).
+#: Programs/midi.c:380
+msgid "FX 1 (rain)"
+msgstr "FX 1 (regn)"
+
+#. xgettext: This is the name of MIDI musical instrument #98 (in the Synth FM
+#. group).
+#: Programs/midi.c:383
+msgid "FX 2 (soundtrack)"
+msgstr "FX 2 (soundtrack)"
+
+#. xgettext: This is the name of MIDI musical instrument #99 (in the Synth FM
+#. group).
+#: Programs/midi.c:386
+msgid "FX 3 (crystal)"
+msgstr "FX 3 (kristall)"
+
+#. xgettext: This is the name of MIDI musical instrument #100 (in the Synth FM
+#. group).
+#: Programs/midi.c:389
+msgid "FX 4 (atmosphere)"
+msgstr "FX 4 (atmosfär)"
+
+#. xgettext: This is the name of MIDI musical instrument #101 (in the Synth FM
+#. group).
+#: Programs/midi.c:392
+msgid "FX 5 (brightness)"
+msgstr "FX 5 (ljusstyrka)"
+
+#. xgettext: This is the name of MIDI musical instrument #102 (in the Synth FM
+#. group).
+#: Programs/midi.c:395
+msgid "FX 6 (goblins)"
+msgstr "FX 6 (troll)"
+
+#. xgettext: This is the name of MIDI musical instrument #103 (in the Synth FM
+#. group).
+#: Programs/midi.c:398
+msgid "FX 7 (echoes)"
+msgstr "FX 7 (ekon)"
+
+#. xgettext: This is the name of MIDI musical instrument #104 (in the Synth FM
+#. group).
+#. xgettext: (sci-fi is a common short form for science fiction)
+#: Programs/midi.c:402
+msgid "FX 8 (sci-fi)"
+msgstr "FX 8 (sci-fi)"
+
+#. Ethnic Instruments
+#. xgettext: This is the name of MIDI musical instrument #105 (in the Ethnic
+#. group).
+#: Programs/midi.c:406
+msgid "Sitar"
+msgstr "Sitar"
+
+#. xgettext: This is the name of MIDI musical instrument #106 (in the Ethnic
+#. group).
+#: Programs/midi.c:409
+msgid "Banjo"
+msgstr "Banjo"
+
+#. xgettext: This is the name of MIDI musical instrument #107 (in the Ethnic
+#. group).
+#: Programs/midi.c:412
+msgid "Shamisen"
+msgstr "Shamisen"
+
+#. xgettext: This is the name of MIDI musical instrument #108 (in the Ethnic
+#. group).
+#: Programs/midi.c:415
+msgid "Koto"
+msgstr "Koto"
+
+#. xgettext: This is the name of MIDI musical instrument #109 (in the Ethnic
+#. group).
+#: Programs/midi.c:418
+msgid "Kalimba"
+msgstr "Kalimba"
+
+#. xgettext: This is the name of MIDI musical instrument #110 (in the Ethnic
+#. group).
+#: Programs/midi.c:421
+msgid "Bag Pipe"
+msgstr "Rör för påsar"
+
+#. xgettext: This is the name of MIDI musical instrument #111 (in the Ethnic
+#. group).
+#: Programs/midi.c:424
+msgid "Fiddle"
+msgstr "Fiol"
+
+#. xgettext: This is the name of MIDI musical instrument #112 (in the Ethnic
+#. group).
+#: Programs/midi.c:427
+msgid "Shanai"
+msgstr "Shanai"
+
+#. Percussive Instruments
+#. xgettext: This is the name of MIDI musical instrument #113 (in the
+#. Percussive group).
+#: Programs/midi.c:431
+msgid "Tinkle Bell"
+msgstr "Tinkle Bell"
+
+#. xgettext: This is the name of MIDI musical instrument #114 (in the
+#. Percussive group).
+#: Programs/midi.c:434
+msgid "Agogo"
+msgstr "Agogo"
+
+#. xgettext: This is the name of MIDI musical instrument #115 (in the
+#. Percussive group).
+#: Programs/midi.c:437
+msgid "Steel Drums"
+msgstr "Ståltrummor"
+
+#. xgettext: This is the name of MIDI musical instrument #116 (in the
+#. Percussive group).
+#: Programs/midi.c:440
+msgid "Woodblock"
+msgstr "Träblock"
+
+#. xgettext: This is the name of MIDI musical instrument #117 (in the
+#. Percussive group).
+#: Programs/midi.c:443
+msgid "Taiko Drum"
+msgstr "Taiko-trumma"
+
+#. xgettext: This is the name of MIDI musical instrument #118 (in the
+#. Percussive group).
+#: Programs/midi.c:446
+msgid "Melodic Tom"
+msgstr "Melodisk Tom"
+
+#. xgettext: This is the name of MIDI musical instrument #119 (in the
+#. Percussive group).
+#: Programs/midi.c:449
+msgid "Synth Drum"
+msgstr "Synth-trumma"
+
+#. xgettext: This is the name of MIDI musical instrument #120 (in the
+#. Percussive group).
+#: Programs/midi.c:452
+msgid "Reverse Cymbal"
+msgstr "Omvänd cymbal"
+
+#. Sound Effects
+#. xgettext: This is the name of MIDI musical instrument #121 (in the Sound
+#. Effects group).
+#: Programs/midi.c:456
+msgid "Guitar Fret Noise"
+msgstr "Ljud från gitarrfret"
+
+#. xgettext: This is the name of MIDI musical instrument #122 (in the Sound
+#. Effects group).
+#: Programs/midi.c:459
+msgid "Breath Noise"
+msgstr "Andningsljud"
+
+#. xgettext: This is the name of MIDI musical instrument #123 (in the Sound
+#. Effects group).
+#: Programs/midi.c:462
+msgid "Seashore"
+msgstr "Kust"
+
+#. xgettext: This is the name of MIDI musical instrument #124 (in the Sound
+#. Effects group).
+#: Programs/midi.c:465
+msgid "Bird Tweet"
+msgstr "Fågel Tweet"
+
+#. xgettext: This is the name of MIDI musical instrument #125 (in the Sound
+#. Effects group).
+#: Programs/midi.c:468
+msgid "Telephone Ring"
+msgstr "Telefonringning"
+
+#. xgettext: This is the name of MIDI musical instrument #126 (in the Sound
+#. Effects group).
+#: Programs/midi.c:471
+msgid "Helicopter"
+msgstr "Helikopter"
+
+#. xgettext: This is the name of MIDI musical instrument #127 (in the Sound
+#. Effects group).
+#: Programs/midi.c:474
+msgid "Applause"
+msgstr "Applåder"
+
+#. xgettext: This is the name of MIDI musical instrument #128 (in the Sound
+#. Effects group).
+#: Programs/midi.c:477
+msgid "Gunshot"
+msgstr "Skottlossning"
+
+#: Programs/msgtest.c:39
+msgid "path"
+msgstr "väg"
+
+#: Programs/msgtest.c:42
+msgid "the locale directory containing the translations"
+msgstr "locale-katalogen som innehåller översättningarna"
+
+#: Programs/msgtest.c:47
+msgid "specifier"
+msgstr "specifikation"
+
+#: Programs/msgtest.c:49
+msgid "the locale in which to look up a translation"
+msgstr "den lokala språkdräkt där en översättning ska sökas"
+
+#: Programs/msgtest.c:54
+msgid "name"
+msgstr "namn"
+
+#: Programs/msgtest.c:56
+msgid "the name of the domain containing the translations"
+msgstr "namnet på den domän som innehåller översättningarna"
+
+#: Programs/msgtest.c:62
+msgid "write the translations using UTF-8"
+msgstr "skriva översättningarna med UTF-8"
+
+#: Programs/msgtest.c:87
+msgid "Test message localization using the message catalog reader."
+msgstr ""
+"Testa lokalisering av meddelanden med hjälp av läsaren för "
+"meddelandekatalogen."
+
+#: Programs/parse.c:495
+msgid "missing parameter value"
+msgstr "parametervärde saknas"
+
+#: Programs/parse.c:519
+msgid "missing parameter qualifier"
+msgstr "parameterkvalificering saknas"
+
+#: Programs/parse.c:533
+msgid "missing parameter name"
+msgstr "parameternamn saknas"
+
+#: Programs/parse.c:562
+msgid "unsupported parameter"
+msgstr "parameter som inte stöds"
+
+#: Programs/pgmprivs_linux.c:1909
+msgid "working directory changed"
+msgstr "arbetskatalog ändrad"
+
+#: Programs/pgmprivs_linux.c:1981
+msgid "XDG runtime directory exists"
+msgstr "XDG runtime-katalogen finns"
+
+#: Programs/pgmprivs_linux.c:1986
+msgid "XDG runtime directory created"
+msgstr "XDG runtime-katalog skapad"
+
+#: Programs/pgmprivs_linux.c:2004
+msgid "XDG runtime directory access problem"
+msgstr "Problem med åtkomst till XDG-katalog under körtid"
+
+#: Programs/pgmprivs_linux.c:2049
+msgid "switched to unprivileged user"
+msgstr "bytte till icke-privilegierad användare"
+
+#: Programs/pgmprivs_linux.c:2073
+msgid "not switching to an unprivileged user"
+msgstr "inte byta till en icke-privilegierad användare"
+
+#: Programs/pgmprivs_linux.c:2100
+msgid "executing as the invoking user"
+msgstr "Exekverar som den anropande användaren"
+
+#: Programs/pgmprivs_linux.c:2207
+msgid "ownership claimed"
+msgstr "äganderätten hävdad"
+
+#: Programs/pgmprivs_linux.c:2222
+msgid "group permissions added"
+msgstr "gruppbehörigheter tillagda"
+
+#: Programs/prefs.c:363
+msgid "cannot read preferences file"
+msgstr "kan inte läsa preferensfilen"
+
+#: Programs/prefs.c:578
+msgid "cannot write to preferences file"
+msgstr "kan inte skriva till inställningsfilen"
+
+#: Programs/program.c:219
+msgid "cannot open process identifier file"
+msgstr "kan inte öppna processidentifieringsfilen"
+
+#: Programs/program.c:265
+msgid "pid file open error"
+msgstr "fel på pid-filen öppen"
+
+#: Programs/scr_driver.c:39
+msgid "no screen"
+msgstr "ingen skärm"
+
+#: Programs/scr_help.c:215
+msgid "Help Screen"
+msgstr "Hjälpskärm"
+
+#: Programs/scr_help.c:229
+msgid "help screen not readable"
+msgstr "Hjälpskärm inte läsbar"
+
+#: Programs/scr_menu.c:104
+msgid "<off>"
+msgstr "<Av>"
+
+#: Programs/scr_menu.c:271
+msgid "Preferences Menu"
+msgstr "Inställningsmeny"
+
+#: Programs/scrtest.c:94
+msgid "Test a screen driver."
+msgstr "Testa en skärmdrivrutin."
+
+#: Programs/spk.c:279
+msgid "Some"
+msgstr "Några"
+
+#: Programs/spk.c:280
+msgid "Most"
+msgstr "De flesta"
+
+#: Programs/spk.c:298
+msgid "Punctuation"
+msgstr "Skiljetecken"
+
+#: Programs/spktest.c:96
+msgid "Test a speech driver."
+msgstr "Testa en taldrivrutin."
+
+#: Programs/system_windows.c:54
+msgid "cannot load library"
+msgstr "kan inte ladda bibliotek"
+
+#: Programs/system_windows.c:61
+msgid "cannot find procedure"
+msgstr "kan inte hitta proceduren"
+
+#: Programs/tbl2hex.c:54
+msgid "Write the hexadecimal array representation of a compiled table."
+msgstr "Skriv den hexadecimala arrayrepresentationen av en kompilerad tabell."
+
+#: Programs/ttb_translate.c:275
+msgid "cannot compile text table"
+msgstr "kan inte sammanställa texttabell"
+
+#: Programs/ttb_translate.c:295
+msgid "cannot load text table"
+msgstr "kan inte ladda texttabell"
+
+#: Programs/update.c:1026
+msgid "blank"
+msgstr "blank"
+
+#: Programs/xbrlapi.c:96
+msgid "[host][:port]"
+msgstr "[värd][:port]"
+
+#: Programs/xbrlapi.c:98
+msgid "BrlAPI host and/or port to connect to"
+msgstr "BrlAPI-värd och/eller -port att ansluta till"
+
+#: Programs/xbrlapi.c:103
+msgid "scheme+..."
+msgstr "schema+..."
+
+#: Programs/xbrlapi.c:105
+msgid "BrlAPI authorization/authentication schemes"
+msgstr "BrlAPI auktoriserings-/autentiseringsscheman"
+
+#: Programs/xbrlapi.c:110
+msgid "display"
+msgstr "display"
+
+#: Programs/xbrlapi.c:112
+msgid "X display to connect to"
+msgstr "X skärm att ansluta till"
+
+#: Programs/xbrlapi.c:118
+msgid "Do not write any text to the braille device"
+msgstr "Skriv inte någon text på punktskriftsenheten"
+
+#: Programs/xbrlapi.c:124
+msgid "Write debugging output to stdout"
+msgstr "Skriva felsökningsutdata till stdout"
+
+#: Programs/xbrlapi.c:130
+msgid "Remain a foreground process"
+msgstr "Fortsätta vara en förgrundsprocess"
+
+#: Programs/xbrlapi.c:137
+msgid "file to write the name of the focused command to"
+msgstr "fil för att skriva namnet på det fokuserade kommandot till"
+
+#: Programs/xbrlapi.c:144
+msgid "file to write the name of the focused window to"
+msgstr "fil för att skriva namnet på det fokuserade fönstret till"
+
+#: Programs/xbrlapi.c:156
+msgid ""
+"Augment an X session by supporting input typed on the braille device, "
+"showing the title of the focused window on the braille display, and "
+"switching braille focus to it."
+msgstr ""
+"Förbättra en X-session genom att stödja inmatning som skrivs på "
+"punktskriftsenheten, visa titeln på det fokuserade fönstret på "
+"punktskriftsdisplayen och växla punktskriftsfokus till det."
+
+#. This is the first attempt to connect to BRLTTY, and it failed.
+#. * Return the error immediately to the user, to provide feedback to users
+#. * running xbrlapi by hand, but not fill logs, eat battery, spam
+#. * 127.0.0.1 with reconnection attempts.
+#: Programs/xbrlapi.c:245
+#, c-format
+msgid "cannot connect to braille devices daemon brltty at %s\n"
+msgstr "kan inte ansluta till daemon för punktskriftsenheter brltty på %s\n"
+
+#: Programs/xbrlapi.c:300
+msgid "cannot get tty\n"
+msgstr "kan inte få tty\n"
+
+#: Programs/xbrlapi.c:306
+#, c-format
+msgid "cannot get tty %d\n"
+msgstr "kan inte hämta tty %d\n"
+
+#: Programs/xbrlapi.c:313
+msgid "cannot ignore keys\n"
+msgstr "kan inte ignorera tangenter\n"
+
+#: Programs/xbrlapi.c:357
+#, c-format
+msgid "xbrlapi: cannot write window name %s\n"
+msgstr "xbrlapi: kan inte skriva fönsternamnet %s\n"
+
+#: Programs/xbrlapi.c:378
+#, c-format
+msgid "cannot set focus to %#010x\n"
+msgstr "kan inte sätta fokus på %#010x\n"
+
+#. Server refused our Xkb remapping request, probably the buggy version 21,
+#. ignore error
+#: Programs/xbrlapi.c:613
+#, c-format
+msgid "xbrlapi: server refused our mapping request, could not synthesize key\n"
+msgstr ""
+"xbrlapi: servern nekade vår mappningsbegäran, kunde inte syntetisera "
+"nyckeln\n"
+
+#: Programs/xbrlapi.c:619
+#, c-format
+msgid "xbrlapi: X Error %d, %s on display %s\n"
+msgstr "xbrlapi: X-fel %d, %s på displayen %s\n"
+
+#: Programs/xbrlapi.c:620
+#, c-format
+msgid "xbrlapi: resource %#010lx, req %u:%u\n"
+msgstr "xbrlapi: resurs %#010lx, req %u:%u\n"
+
+#: Programs/xbrlapi.c:637
+#, c-format
+msgid "xbrlapi: no XFree86_VT atom\n"
+msgstr "xbrlapi: ingen XFree86_VT-atom\n"
+
+#: Programs/xbrlapi.c:643
+#, c-format
+msgid "xbrlapi: cannot get root window XFree86_VT property\n"
+msgstr "xbrlapi: kan inte få rotfönstret XFree86_VT-egenskap\n"
+
+#: Programs/xbrlapi.c:648
+#, c-format
+msgid "xbrlapi: no items for VT number\n"
+msgstr "xbrlapi: inga objekt för VT-nummer\n"
+
+#: Programs/xbrlapi.c:652
+#, c-format
+msgid "xbrlapi: more than one item for VT number\n"
+msgstr "xbrlapi: mer än ett objekt för VT-nummer\n"
+
+#: Programs/xbrlapi.c:661
+#, c-format
+msgid "xbrlapi: bad format for VT number\n"
+msgstr "xbrlapi: dåligt format för VT-nummer\n"
+
+#: Programs/xbrlapi.c:664
+#, c-format
+msgid "xbrlapi: bad type for VT number\n"
+msgstr "xbrlapi: fel typ för VT-nummer\n"
+
+#: Programs/xbrlapi.c:735
+#, c-format
+msgid "xbrlapi: didn't grab window %#010lx but got focus\n"
+msgstr "xbrlapi: tog inte tag i fönster %#010lx men fick fokus\n"
+
+#: Programs/xbrlapi.c:817
+#, c-format
+msgid "cannot connect to display %s\n"
+msgstr "kan inte ansluta till displayen %s\n"
+
+#: Programs/xbrlapi.c:819
+msgid "strange old error handler\n"
+msgstr "konstig gammal felhanterare\n"
+
+#: Programs/xbrlapi.c:828
+msgid "Incompatible XKB library\n"
+msgstr "Inkompatibelt XKB-bibliotek\n"
+
+#: Programs/xbrlapi.c:830
+msgid "Incompatible XKB server support\n"
+msgstr "Inkompatibelt stöd för XKB-server\n"
+
+#: Programs/xbrlapi.c:832
+msgid "Could not get XKB major opcode\n"
+msgstr "Kunde inte få XKB major opcode\n"
+
+#: Programs/xbrlapi.c:868
+#, c-format
+msgid "cannot grab windows on screen %d\n"
+msgstr "kan inte ta tag i fönster på skärmen %d\n"
+
+#: Programs/xbrlapi.c:875
+msgid "failed to get first focus\n"
+msgstr "lyckades inte få första fokus\n"
+
+#: Programs/xbrlapi.c:931
+#, c-format
+msgid "xbrlapi: didn't grab parent of %#010lx\n"
+msgstr "xbrlapi: tog inte tag i föräldern till %#010lx\n"
+
+#: Programs/xbrlapi.c:952 Programs/xbrlapi.c:971
+#, c-format
+msgid "xbrlapi: didn't grab window %#010lx\n"
+msgstr "xbrlapi: tog inte tag i fönstret %#010lx\n"
+
+#: Programs/xbrlapi.c:956
+msgid "XFree(wm_name) for change"
+msgstr "XFree(wm_name) för förändring"
+
+#: Programs/xbrlapi.c:964
+#, c-format
+msgid "xbrlapi: window %#010lx changed to NULL name\n"
+msgstr "xbrlapi: fönster %#010lx ändrat till NULL-namn\n"
+
+#: Programs/xbrlapi.c:975
+msgid "XFree(wm_command) for change"
+msgstr "XFree(wm_command) för förändring"
+
+#: Programs/xbrlapi.c:980
+#, c-format
+msgid "xbrlapi: window %#010lx changed to NULL command\n"
+msgstr "xbrlapi: fönstret %#010lx ändrades till NULL-kommando\n"
+
+#. "shouldn't happen" events
+#: Programs/xbrlapi.c:1005
+#, c-format
+msgid "xbrlapi: unhandled event type: %d\n"
+msgstr "xbrlapi: obehandlad händelsetyp: %d\n"
+
+#: Programs/xbrlapi.c:1058
+msgid "unexpected cmd"
+msgstr "oväntad cmd"
+
+#: Programs/xbrlapi.c:1068
+#, c-format
+msgid "xbrlapi: Couldn't translate keysym %08X to keycode.\n"
+msgstr "xbrlapi: Kunde inte översätta keysym %08X till keycode.\n"
+
+#: Programs/xbrlapi.c:1092
+#, c-format
+msgid ""
+"xbrlapi: Couldn't find modifiers to apply to %d for getting keysym %08X\n"
+msgstr ""
+"xbrlapi: Kunde inte hitta modifierare att tillämpa på %d för att få keysym "
+"%08X\n"
+
+#: Programs/xbrlapi.c:1105
+#, c-format
+msgid ""
+"xbrlapi: Couldn't find a keycode to remap for simulating unbound keysym "
+"%08X\n"
+msgstr ""
+"xbrlapi: Kunde inte hitta en tangentkod att ommappa för att simulera obunden"
+" keysym %08X\n"
+
+#: Programs/xbrlapi.c:1168
+msgid "unexpected block type"
+msgstr "oväntad blocktyp"
