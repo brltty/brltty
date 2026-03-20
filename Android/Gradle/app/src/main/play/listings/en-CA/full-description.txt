@@ -1,4 +1,5 @@
-This app uses Android's AccessibilityService API. See below for the details.
+This app uses Android's AccessibilityService API. There's an important section at the bottom entitled "To All Reviewers and Testers".
+
 BRLTTY is an accessibility app. It's a screen reader that's been primarily designed for those who use a refreshable braille display (although it also includes support for speech). Detailed documentation for using it on Android is at: https://brltty.app/doc/Android.html
 
 Bluetooth and USB braille devices are supported (USB devices require the use of an OTG cable). Both computer and literary (contracted) braille are supported. Braille tables for many languages are included.
@@ -17,3 +18,9 @@ Many standard Android actions can be performed right from the braille device. Th
   * Tapping (clicking) and holding (long pressing) widgets.
   * Opening a widget's context-dependent menu.
   * Executing a widget's accessibility actions.
+
+To All Reviewers and Testers:
+
+BRLTTY is an accessibility service that provides screen-reading functionality for blind and visually impaired users. To test the app, start it and grant all requested permissions.
+To start it, toggle the service to "On". If a physical Braille display is not connected via USB or Bluetooth, the app will remain in a "waiting" state - this is expected behaviour.
+BRLTTY has been classified as "for family use" because even a blind child deserves full access to his/her device's screen. Parents can always use Android's parental controls to govern what the child can have access to, when the device can be used, etc.
