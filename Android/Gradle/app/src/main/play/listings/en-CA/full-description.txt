@@ -19,8 +19,21 @@ Many standard Android actions can be performed right from the braille device. Th
   * Opening a widget's context-dependent menu.
   * Executing a widget's accessibility actions.
 
+Compatibility Information:
+
+Required OS Version: Android 8.1 or higher (API level 27 - Oreo MR1).
+Targeted OS Version: Android 16 (API level 36 - Baklava).
+Compatible Devices: All standard Android smartphones and tablets with Bluetooth and/or USB-OTG support.
+Primarily Tested On: Google Pixel.
+Required Companion Apps: None.
+Note: BRLTTY is a standalone app, i.e. no other apps need to be installed for it to work. This being said, it works much better while TalkBack is running because, if available and enabled, it takes advantage of built-in TalkBack features such as Accessibility Focus and Explore By Touch.
+
 To All Reviewers and Testers:
 
-BRLTTY is an accessibility service that provides screen-reading functionality for blind and visually impaired users. To test the app, start it and grant all requested permissions.
-To start it, toggle the service to "On". If a physical Braille display is not connected via USB or Bluetooth, the app will remain in a "waiting" state - this is expected behaviour.
-BRLTTY has been classified as "for family use" because even a blind child deserves full access to his/her device's screen. Parents can always use Android's parental controls to govern what the child can have access to, when the device can be used, etc.
+BRLTTY is an accessibility service that provides screen-reading functionality for blind and visually impaired users.
+It's been classified as "for family use" because blind children deserve full access to their device's screen. Parents can always use Android's parental controls to govern what their child can have access to, when the device can be used, etc.
+
+Note that accessibility services don't show up within the All Apps list. After installing it, start it by going to Settings -> Accessibility -> Downloaded Apps, and tapping BRLTTY. On that screen, enable BRLTTY, and grant all requested permissions.
+When enabling BRLTTY, you'll get an ominous warning which you must confirm by tapping Allow.
+You'll be asked to set the Accessibility Button method. In order not to conflict with TalkBack's default for this same setting, select Accessibility Button.
+If a physical braille display isn't connected (via Bluetooth or USB), the app will remain in a "waiting" state. This is expected behaviour.
