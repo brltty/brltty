@@ -1,6 +1,63 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+April 7, 2026:
+ - BRLTTY 6.9.1 released:
+   New commands:
+      CLIP_CLEAR: Remove the current clipboard content.
+      CLIP_SHOW: Show the current clipboard content as a message.
+      COPY_SMART_NEW: Copy the selected item to the clipboard.
+      COPY_SMART_ADD: Append the selected item to the clipboard.
+   Clipboard changes:
+      CLIP_COPY and CLIP_APPEND no longer interfere with the COPY_LINE or COPY_RECT start location.
+      The clipboard now uses a new line (rather than a carriage return) to delimit lines.
+      this normalizes the text retrieved via:
+	 Reading the CLIPBOARD_CONTENT BrlAPI parameter.
+	 The brltty-clip --get-content (-g) host command.
+	 Reading the file written by the CLIP_SAVE command (/var/lib/brltty/clipboard).
+      The CLIP_CLEAR and CLIP_SHOW commands have been added.
+      CLIP_CLEAR has been bound to a long press of CLIP_RESTORE (Space + x + Dot7).
+      CLIP_SHOW has been bound to a long press of CLIP_SAVE (Space + x + Dot8).
+   Smart Copy:
+      The COPY_SMART_NEW and COPY_SMART_ADD commands have been added.
+      COPY_SMART_NEW has been bound to a long press of CLIP_NEW.
+      COPY_SMART_ADD has been bound to a long press of CLIP_ADD.
+   Alert Messages and Alert Dots:
+      Alert messages now have a higher priority than alert dots.
+      Alert dots now work correctly when viewing messages and frozen screen images.
+      Event Alerts submenu changes:
+	 Both Alert Messages and Alert Dots now default to On.
+	 The Alert Dots Duration setting has been added (defaults to 0.4 seconds).
+      Some alert dots patterns have been modified and more have been added:
+	 ⠭ (x, dots 1,3,4,6): reject: the key combination was invalid or the command couldn't be executed
+	 ⢁ (dots 1,8): copy begin: a copy to the clipboard has been started
+	 ⡈ (dots 4,7): copy end: the copy to the clipboard has completed
+	 ⠶ (low g, dots 2,3,5,6): no change: an adjustment is at its limit (e.g. volume can't be increased further)
+	 ⣛ (dots 1,4,2,5,7,8): toggle on: a capability has been enabled
+	 ⣭ (dots 1,4,3,6,7,8) toggle off: a capability has been disabled
+	 ⢞ (t + 8, dots 2,3,4,5,8): tracking on: the braille window is tracking the screen cursor
+	 ⡞ (t + 7, dots 2,3,4,5,7): tracking off: the braille window isn't tracking the screen cursor
+	 ⢋ (f + 8, dots 1,2,4,8): frozen screen: you're currently viewing a frozen image of the screen
+	 ⡋ (f + 7, dots 1,2,4,7): live screen: you're currently viewing the live screen
+	 ⠋ (f7, dots 1,2,4): frozen screen half-minute reminder
+	 ⢎ (dots 4,2,3,8): wrap up: panning left wrapped from the beginning of the current line to the end of the previous one
+	 ⡱ (dots 1,5,6,7): wrap down: panning right wrapped from the end of the current line to the beginning of the next one
+	 ⣉ (dots 1,4,7,8): skip identical: line(s) identical to the current one have been skipped
+	 ⣿ (dots 1,4,2,5,3,6,7,8): screen edge: vertical navigation hit the top or bottom of the screen without being able to complete
+   Alva braille driver changes:
+      6.9 broke USB connectivity for Satellite (5nn) and BC (6nn) models.
+   BrlAPI braille driver changes:
+      Connecting to the current BRLTTY instance is no longer permitted.
+   HandyTech braille driver changes:
+      6.9 broke USB connectivity for some models.
+   BrlAPI changes:
+      Clients are now always presented with the original navigation command.
+      The LUA bindings weren't installing on some systems.
+   Build changes:
+      A message catalog for the Swedish language has been added.
+      The matchtest command has been added.
+      Building for DOS has been revived.
+
 February 17, 2026:
  - BRLTTY 6.9 released:
    General changes:

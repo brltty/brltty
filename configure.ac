@@ -17,7 +17,7 @@
 ###############################################################################
 
 AC_PREREQ([2.64])
-AC_INIT([BRLTTY], [6.9], [BRLTTY@brltty.app], [brltty], [https://brltty.app/])
+AC_INIT([BRLTTY], [6.9.1], [BRLTTY@brltty.app], [brltty], [https://brltty.app/])
 AC_CONFIG_SRCDIR([Programs/brltty.c])
 
 AC_CONFIG_MACRO_DIR([m4])
