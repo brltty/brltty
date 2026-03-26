@@ -35,10 +35,12 @@ Alphabetical Command Index
 * `CHRRT`_
 * `CLIP_ADD`_
 * `CLIP_APPEND`_
+* `CLIP_CLEAR`_
 * `CLIP_COPY`_
 * `CLIP_NEW`_
 * `CLIP_RESTORE`_
 * `CLIP_SAVE`_
+* `CLIP_SHOW`_
 * `COLOR`_
 * `COMPBRL6`_
 * `CONTEXT`_
@@ -271,7 +273,7 @@ The following modifiers may be specified:
 
 .. _FREEZE:
 
-**FREEZE** - Set screen image frozen/unfrozen.
+**FREEZE** - Set screen image frozen/live.
 
 The following modifiers may be specified:
 
@@ -804,6 +806,8 @@ The following modifiers may be specified:
 Clipboard Functions
 ===================
 
+* `CLIP_SHOW`_
+* `CLIP_CLEAR`_
 * `CLIP_NEW`_
 * `CLIP_ADD`_
 * `COPY_LINE`_
@@ -820,6 +824,14 @@ Clipboard Functions
 * `NXSEARCH`_
 * `CLIP_SAVE`_
 * `CLIP_RESTORE`_
+
+.. _CLIP_SHOW:
+
+**CLIP_SHOW** - Show current clipboard content.
+
+.. _CLIP_CLEAR:
+
+**CLIP_CLEAR** - Clear the clipboard.
 
 .. _CLIP_NEW:
 
