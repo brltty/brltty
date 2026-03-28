@@ -1,0 +1,3 @@
+BRLTTY is an accessibility app so it won't show up within the All Apps list.
+To start/stop it, go to Settings -> Accessibility -> Downloaded Apps -> BRLTTY.
+Full details for using BRLTTY on Android are at: https://brltty.app/doc/Android.html

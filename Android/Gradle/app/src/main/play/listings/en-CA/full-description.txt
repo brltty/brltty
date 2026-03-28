@@ -1,9 +1,13 @@
-This app uses Android's AccessibilityService API.
+BRLTTY is a system-level background service that provides full access to an Android screen via a refreshable braille device connected over Bluetooth or USB.
+It supports both braille output and keyboard input, allowing for full navigation and text entry from the braille device's controls.
 There's an important section at the bottom entitled: "<b>To All Reviewers and Testers</b>" ࡛↓
 
-BRLTTY is an accessibility app. It's a screen reader that's been primarily designed for those who use a refreshable braille display (although it also includes support for speech). Detailed documentation for using it on Android is at: https://brltty.app/doc/Android.html
+• While BRLTTY is primarily designed for braille rendering, speech rendering is also supported.
+• USB connectivity requires either a USB-C or a USB-OTG cable.
+• Both computer and literary (contracted) braille are supported.
+• Braille tables for many languages are included.
 
-Bluetooth and USB braille devices are supported (USB devices require the use of an OTG cable). Both computer and literary (contracted) braille are supported. Braille tables for many languages are included.
+Detailed documentation for BRLTTY on Android is at: https://brltty.app/doc/Android.html
 
 The content of the screen is rendered on the braille display. Standard widgets (check boxes, switches, radio buttons, etc) are rendered in braille-friendly ways. If the braille device has a keyboard then it can be used for typing within an input area.
 
