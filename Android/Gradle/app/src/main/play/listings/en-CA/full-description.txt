@@ -1,4 +1,5 @@
-This app uses Android's AccessibilityService API. There's an important section at the bottom entitled "To All Reviewers and Testers".
+This app uses Android's AccessibilityService API.
+There's an important section at the bottom entitled: "<b>To All Reviewers and Testers</b>" ࡛↓
 
 BRLTTY is an accessibility app. It's a screen reader that's been primarily designed for those who use a refreshable braille display (although it also includes support for speech). Detailed documentation for using it on Android is at: https://brltty.app/doc/Android.html
 
@@ -8,18 +9,19 @@ The content of the screen is rendered on the braille display. Standard widgets (
 
 Many standard Android actions can be performed right from the braille device. These include:
 
-  * Going to the Home screen.
-  * Going Back to the previous screen.
-  * Going to the Overview (Recent Apps) screen.
-  * Going to the Notifications screen.
-  * Going to the Quick Settings screen.
-  * Going to the Device Options (Power Off) screen.
-  * Opening the current app's options menu.
-  * Tapping (clicking) and holding (long pressing) widgets.
-  * Opening a widget's context-dependent menu.
-  * Executing a widget's accessibility actions.
+  • Going to the Home screen.
+  • Going Back to the previous screen.
+  • Going to the Overview (Recent Apps) screen.
+  • Going to the Notifications screen.
+  • Going to the Quick Settings screen.
+  • Going to the Device Options (Power Off) screen.
+  • Opening the current app's options menu.
+  • Tapping (clicking) and holding (long pressing) widgets.
+  • Opening a widget's context-dependent menu.
+  • Executing a widget's accessibility actions.
 
-Compatibility Information:
+
+<b>Compatibility Information</b>
 
 Required OS Version: Android 8.1 or higher (API level 27 - Oreo MR1).
 Targeted OS Version: Android 16 (API level 36 - Baklava).
@@ -28,7 +30,8 @@ Primarily Tested On: Google Pixel.
 Required Companion Apps: None.
 Note: BRLTTY is a standalone app, i.e. no other apps need to be installed for it to work. This being said, it works much better while TalkBack is running because, if available and enabled, it takes advantage of built-in TalkBack features such as Accessibility Focus and Explore By Touch.
 
-To All Reviewers and Testers:
+
+<b>To All Reviewers and Testers</b>
 
 BRLTTY is an accessibility service that provides screen-reading functionality for blind and visually impaired users.
 It's been classified as "for family use" because blind children deserve full access to their device's screen. Parents can always use Android's parental controls to govern what their child can have access to, when the device can be used, etc.
