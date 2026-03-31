@@ -78,7 +78,7 @@ BuildRequires: groff
 BuildRequires: doxygen
 BuildRequires: linuxdoc-tools
 BuildRequires: python3-docutils
-BuildRequires: rst2txt
+BuildRequires: pandoc-cli
 
 AutoProv: no
 AutoReq: yes
