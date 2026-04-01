@@ -42,7 +42,7 @@ BrlAPIref:
 	rst2html --config "$(SRC_TOP)docutils.conf" $< $@
 
 %.txt: $(SRC_DIR)/README.%
-	docutils --config "$(SRC_TOP)docutils.conf" --writer html -- $< - | pandoc --from html --to plain --output $@
+	$(SRC_TOP)rst2txt -- $< $@
 
 clean::
 	-rm -f *.made *.html
