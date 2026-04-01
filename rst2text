@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -25,12 +25,24 @@ Convert a document from reStructured text to plain text.
 END_OF_PROGRAM_USAGE_PURPOSE
 }
 
-addProgramParameter input rstFile "source document - reStructured text"
-addProgramParameter output txtFile "generated document - plain text"
+showProgramUsageNotes() {
+cat <<END_OF_PROGRAM_USAGE_NOTES
+If the input file is specified as a minus sign (-) then the reStructured text is read from standard input.
+Likewise, if the output file is specified as a minus sign (-) then the plain text is written to standard output.
+END_OF_PROGRAM_USAGE_NOTES
+}
+
+addProgramParameter input rstFile "an existing document formatted as reStructured text"
+addProgramParameter output textFile "where to write the plain text document"
 parseProgramArguments "${@}"
 
-verifyInputFile $rstFile
-verifyOutputFile $txtFile
+[ "${rstFile}" = "-" ] || verifyInputFile "${rstFile}"
+pandocOptions=(--from html --to plain)
+
+[ "${textFile}" = "-" ] || {
+   verifyOutputFile "${textFile}"
+   pandocOptions+=(--output "${textFile}")
+}
 
 needTemporaryDirectory
 htmlFile="${temporaryDirectory}/document.html"
@@ -41,7 +53,7 @@ rst2html --config "${programDirectory}/docutils.conf" -- "${rstFile}" "${htmlFil
 
 sed --expression '
 /<div .* id="contents"/,/<\/div>/d
-' --in-place "${htmlFile}"
+' --in-place -- "${htmlFile}"
 
-pandoc --from html --to plain --output "${txtFile}" -- "${htmlFile}"
+pandoc "${pandocOptions[@]}" -- "${htmlFile}"
 exit 0

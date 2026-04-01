@@ -42,7 +42,7 @@ BrlAPIref:
 	rst2html --config "$(SRC_TOP)docutils.conf" $< $@
 
 %.txt: $(SRC_DIR)/README.%
-	$(SRC_TOP)rst2txt -- $< $@
+	$(SRC_TOP)rst2text -- $< $@
 
 clean::
 	-rm -f *.made *.html
