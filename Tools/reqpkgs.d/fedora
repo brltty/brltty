@@ -38,6 +38,7 @@ ncurses-devel
 Xaw3d
 ocaml
 ocaml-findlib
+pandoc-cli
 pcre2-devel
 pkgconf-pkg-config
 polkit-devel
@@ -46,7 +47,6 @@ python3-Cython
 python3-devel
 python3-docutils
 python3-setuptools
-rst2txt
 speech-dispatcher-devel
 systemd
 systemd-devel
