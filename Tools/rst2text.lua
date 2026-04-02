@@ -50,11 +50,18 @@ function Link (element)
 end
 
 function Header (element)
-  local content = element.content
+  local start = string.rep("#", element.level)
+  local finish = start
 
-  local marker = string.rep("#", element.level)
-  table.insert(content, 1, pandoc.Str(marker .. " "))
-  table.insert(content, pandoc.Str(" " .. marker))
+  if element.classes and element.classes:includes("title")
+  then
+    start = "[" .. start
+    finish = finish .. "]"
+  end
+
+  local content = element.content
+  table.insert(content, 1, pandoc.Str(start .. " "))
+  table.insert(content, pandoc.Str(" " .. finish))
 
   return pandoc.Plain(content)
 end
