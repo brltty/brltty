@@ -32,6 +32,7 @@ Likewise, if the output file is specified as a minus sign (-) then the plain tex
 END_OF_PROGRAM_USAGE_NOTES
 }
 
+addProgramOption k flag htmlKeep "keep the intermediate HTML document"
 addProgramParameter input rstFile "an existing document formatted as reStructured text"
 addProgramParameter output textFile "where to write the plain text document"
 parseProgramArguments "${@}"
@@ -46,12 +47,17 @@ pandocOptions+=(--lua-filter "${programPath}.lua")
    pandocOptions+=(--output "${textFile}")
 }
 
-needTemporaryDirectory
-htmlFile="${temporaryDirectory}/document.html"
+if "${htmlKeep}"
+then
+   htmlFile="${programPath}.html"
+   verifyOutputFile "${htmlFile}"
+else
+   needTemporaryDirectory
+   htmlFile="${temporaryDirectory}/document.html"
+fi
 
 set -e
 cd "${initialDirectory}"
 rst2html --config "${programDirectory}/docutils.conf" -- "${rstFile}" "${htmlFile}"
-
 pandoc "${pandocOptions[@]}" -- "${htmlFile}"
 exit 0
