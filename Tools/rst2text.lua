@@ -39,15 +39,15 @@ function Link (element)
 
   if element.classes and not element.classes:includes("toc-backref")
   then
-    table.insert(content, 1, pandoc.Str("["))
-    table.insert(content, pandoc.Str("]"))
+    content:insert(1, pandoc.Str("["))
+    content:insert(pandoc.Str("]"))
 
     local target = element.target
     local isInternal = target:match("^#")
 
     if not isInternal
     then
-      table.insert(content, pandoc.Str(" {" .. target .. "}"))
+      content:insert(pandoc.Str(" {" .. target .. "}"))
     end
   end
 
@@ -65,8 +65,8 @@ function Header (element)
   end
 
   local content = element.content
-  table.insert(content, 1, pandoc.Str(start .. " "))
-  table.insert(content, pandoc.Str(" " .. finish))
+  content:insert(1, pandoc.Str(start .. " "))
+  content:insert(pandoc.Str(" " .. finish))
 
   return pandoc.Plain(content)
 end
