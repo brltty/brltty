@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/brltty-prologue.sh"
+. "`dirname "${0}"`/../brltty-prologue.sh"
 
 showProgramUsagePurpose() {
 cat <<END_OF_PROGRAM_USAGE_PURPOSE
@@ -37,7 +37,9 @@ addProgramParameter output textFile "where to write the plain text document"
 parseProgramArguments "${@}"
 
 [ "${rstFile}" = "-" ] || verifyInputFile "${rstFile}"
+
 pandocOptions=(--from html --to plain)
+pandocOptions+=(--lua-filter "${programPath}.lua")
 
 [ "${textFile}" = "-" ] || {
    verifyOutputFile "${textFile}"
@@ -50,10 +52,6 @@ htmlFile="${temporaryDirectory}/document.html"
 set -e
 cd "${initialDirectory}"
 rst2html --config "${programDirectory}/docutils.conf" -- "${rstFile}" "${htmlFile}"
-
-sed --expression '
-/<div .* id="contents"/,/<\/div>/d
-' --in-place -- "${htmlFile}"
 
 pandoc "${pandocOptions[@]}" -- "${htmlFile}"
 exit 0
