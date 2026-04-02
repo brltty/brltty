@@ -16,6 +16,17 @@
   This software is maintained by Dave Mielke <dave@mielke.cc>.
 ]]
 
+local function addHighlightIndicator (element, start, finish)
+  start = start or ""
+  finish = finish or start
+
+  return {
+    pandoc.Str(start),
+    element,
+    pandoc.Str(finish)
+  }
+end
+
 function Div (element)
   if element.identifier == "contents"
   then
@@ -48,17 +59,6 @@ function Header (element)
   return pandoc.Plain(content)
 end
 
-local function addHighlightIndicator (element, start, finish)
-  start = start or ""
-  finish = finish or start
-
-  return {
-    pandoc.Str(start),
-    element,
-    pandoc.Str(finish)
-  }
-end
-
 function Strong (element)
   return addHighlightIndicator(element, "**")
 end
@@ -68,7 +68,7 @@ function Emph (element)
 end
 
 function Underline (element)
-  return addHighlightIndicator(element, "_")
+  return addHighlightIndicator(element, "__")
 end
 
 function Code (element)
@@ -76,10 +76,10 @@ function Code (element)
 end
 
 function CodeBlock (element)
-  return addHighlightIndicator(element, "```")
+  return addHighlightIndicator(element, "<```", "```>")
 end
 
 function BlockQuote (element)
-  return addHighlightIndicator(element, '"""')
+  return addHighlightIndicator(element, '<"""', '""">')
 end
 
