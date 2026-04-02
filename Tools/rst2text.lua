@@ -16,17 +16,6 @@
   This software is maintained by Dave Mielke <dave@mielke.cc>.
 ]]
 
-local function addHighlightIndicator (element, start, finish)
-  start = start or ""
-  finish = finish or start
-
-  return {
-    pandoc.Str(start),
-    element,
-    pandoc.Str(finish)
-  }
-end
-
 function Div (element)
   if element.identifier == "contents"
   then
@@ -71,27 +60,55 @@ function Header (element)
   return pandoc.Plain(content)
 end
 
+local function addElementIndicator (element, start, finish)
+  start = start or ""
+  finish = finish or start
+
+  return {
+    pandoc.Str(start),
+    element,
+    pandoc.Str(finish)
+  }
+end
+
 function Strong (element)
-  return addHighlightIndicator(element, "**")
+  return addElementIndicator(element, "**")
 end
 
 function Emph (element)
-  return addHighlightIndicator(element, "<", ">")
+  return addElementIndicator(element, "<", ">")
 end
 
 function Underline (element)
-  return addHighlightIndicator(element, "__")
+  return addElementIndicator(element, "__")
 end
 
 function Code (element)
-  return addHighlightIndicator(element, "`")
+  return addElementIndicator(element, "`")
+end
+
+local function addTextIndicator (element, start, finish)
+  local text = element.text
+  text = text:match("^%s*\n(.-)%s*$") or text
+  text = start .. "\n" .. text
+  text = text .. "\n" .. finish
+  element.text = text
+  return element
 end
 
 function CodeBlock (element)
-  return addHighlightIndicator(element, "<```", "```>")
+  return addTextIndicator(element, "<```", "```>")
+end
+
+local function addContentIndicator (element, start, finish)
+  local content = element.content
+  content:insert(1, pandoc.Str(start))
+  content:insert(pandoc.Str(finish))
+  element.content = content
+  return element
 end
 
 function BlockQuote (element)
-  return addHighlightIndicator(element, '<"""', '""">')
+  return addContentIndicator(element, '<"""', '""">')
 end
 
