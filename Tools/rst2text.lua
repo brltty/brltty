@@ -36,14 +36,19 @@ end
 
 function Link (element)
   local content = element.content
-  local target = element.target
-  local isInternal = target:match("^#")
 
-  if not isInternal
+  if element.classes and not element.classes:includes("toc-backref")
   then
     table.insert(content, 1, pandoc.Str("["))
     table.insert(content, pandoc.Str("]"))
-    table.insert(content, pandoc.Str(" {" .. target .. "}"))
+
+    local target = element.target
+    local isInternal = target:match("^#")
+
+    if not isInternal
+    then
+      table.insert(content, pandoc.Str(" {" .. target .. "}"))
+    end
   end
 
   return content
