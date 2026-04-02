@@ -16,9 +16,8 @@ Using BRLTTY
 Activation and Configuration
 ----------------------------
 
-At this point, BRLTTY has been installed. Next, you'll need to go into
-``Settings`` -> ``Accessibility`` -> ``BRLTTY`` in order to start the ``BRLTTY``
-accessibility service, adjust its settings, and select your braille device.
+Go to ``Settings`` -> ``Accessibility`` -> ``Downloaded Apps`` -> ``BRLTTY``
+in order to start/stop ``BRLTTY``, adjust its settings, and select your braille device(s).
 
 If you'll be connecting to your braille device via Bluetooth,
 see `Connecting Via Bluetooth`_.
@@ -32,20 +31,19 @@ see `Using a Braille Keyboard`_.
 Starting and Stopping BRLTTY
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-BRLTTY isn't a regular Android application - it's an accessibility service. As
-such, it can't be started and stopped in the usual way, i.e. from the launcher.
-In fact, it can't even be found within the applications list.
+BRLTTY isn't a regular Android application - it's an accessibility service.
+As such, it can't be started and stopped in the usual way, i.e. from the launcher.
+In fact, it won't even show up within the ``All Apps`` list.
 
 BRLTTY must be started and stopped from the ``Accessibility Settings`` screen.
-To get there, launch the ``Settings`` application, and then tap on
-``Accessibility`` (near the bottom). This screen contains a "Services" section
-that lists all of the accessibility services that are currently installed on
-the device. For each installed accessibility service, there's an associated
-indicator that says ``On`` if that service is currently running, and ``Off`` if
-it isn't.
+To get there, launch the ``Settings`` application, and then tap on ``Accessibility`` (near the bottom).
+This screen contains a "Downloaded Apps" section which lists all of the
+accessibility services that are currently installed on the device.
+For each of them, there's an associated indicator that shows
+either ``On`` if it's currently running or ``Off`` if it isn't.
 
-Find ``BRLTTY`` and tap on it. This brings up a window with two items in it.
-One is a "switch" for turning BRLTTY on and off. The other is a button that
+Find ``BRLTTY`` and tap on it. This brings up a window with a few items in it.
+One is a "switch" for turning BRLTTY on and off. Another is a button that
 takes you to BRLTTY's ``Settings`` screen. You can go through BRLTTY's
 settings, making changes as desired, as well as define your braille device(s),
 either before starting BRLTTY or while it's running.
