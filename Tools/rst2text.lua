@@ -48,11 +48,14 @@ function Header (element)
   return pandoc.Plain(content)
 end
 
-local function addHighlightIndicator (element, indicator)
+local function addHighlightIndicator (element, start, finish)
+  start = start or ""
+  finish = finish or start
+
   return {
-    pandoc.Str(indicator),
+    pandoc.Str(start),
     element,
-    pandoc.Str(indicator)
+    pandoc.Str(finish)
   }
 end
 
@@ -61,6 +64,10 @@ function Strong (element)
 end
 
 function Emph (element)
+  return addHighlightIndicator(element, "<", ">")
+end
+
+function Underline (element)
   return addHighlightIndicator(element, "_")
 end
 
