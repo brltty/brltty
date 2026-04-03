@@ -16,6 +16,15 @@
   This software is maintained by Dave Mielke <dave@mielke.cc>.
 ]]
 
+require("brltty-prologue")
+
+function Pandoc (document)
+  local blocks = document.blocks
+  local meta = document.meta
+
+  return document
+end
+
 function Div (element)
   if element.identifier == "contents"
   then

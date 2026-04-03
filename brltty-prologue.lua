@@ -15,10 +15,6 @@
   This software is maintained by Dave Mielke <dave@mielke.cc>.
 ]]
 
-programName = string.match(arg[0], "([^/]*)$")
-programArgumentCount = #arg
-programArgumentNumber = 1
-
 function writeProgramMessage (message)
   io.stderr:write(string.format("%s: %s\n", programName, message))
 end
@@ -28,18 +24,44 @@ function syntaxError (message)
   os.exit(2)
 end
 
-function haveMoreProgramArguments () 
-  return programArgumentNumber <= programArgumentCount
-end
+if arg
+then
+  programName = string.match(arg[0], "([^/]*)$")
+  programArgumentCount = #arg
+  programArgumentNumber = 1
 
-function nextProgramArgument (label)
-  if not haveMoreProgramArguments() then
-    syntaxError(string.format("missing %s", label))
+  function haveMoreProgramArguments () 
+    return programArgumentNumber <= programArgumentCount
   end
 
-  local argument = arg[programArgumentNumber]
-  programArgumentNumber = programArgumentNumber + 1
-  return argument
+  function nextProgramArgument (label)
+    if not haveMoreProgramArguments()
+    then
+      syntaxError(string.format("missing %s", label))
+    end
+
+    local argument = arg[programArgumentNumber]
+    programArgumentNumber = programArgumentNumber + 1
+    return argument
+  end
+end
+
+function listTable (object)
+  print("begin " .. type(object) .. " listing")
+
+  if object
+  then
+    for name, item in pairs(object)
+    do
+      print(type(item) .. " " .. name)
+    end
+  end
+
+  print("end " .. type(object) .. " listing")
+end
+
+function listGlobalTable ()
+  listTable(_G)
 end
 
 function stringContains (string, substring)

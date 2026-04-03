@@ -141,5 +141,6 @@ else
 fi
 
 pandocOptions+=(--from "${pandocFormat}")
+export LUA_PATH="${programDirectory}/../?.lua;;"
 pandoc "${pandocOptions[@]}" -- "${pandocInput}"
 exit 0
