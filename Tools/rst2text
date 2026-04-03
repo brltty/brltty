@@ -19,16 +19,6 @@
 
 . "`dirname "${0}"`/../brltty-prologue.bash"
 
-htmlFile="${programName}.html"
-declare -A inputExtensionsArray=(
-   [html]=html
-   [md]=markdown
-   [rst]=rst
-)
-
-inputExtensionsList="${!inputExtensionsArray[*]}"
-inputExtensionsString="${inputExtensionsList// /, }"
-
 showProgramUsagePurpose() {
 cat <<END_OF_PROGRAM_USAGE_PURPOSE
 Convert a document from reStructured text to plain text with some simple markup.
@@ -66,7 +56,22 @@ Some simple markup is added to the plain text:
 END_OF_PROGRAM_USAGE_NOTES
 }
 
-addProgramOption k flag htmlKeep "keep the intermediate HTML document as ${htmlFile}"
+htmlFile="${programName}.html"
+rstFormat=rst
+inputFormat="${rstFormat}"
+
+declare -A inputFormatsArray=(
+   [rst]=rst
+   [html]=html
+   [md]=markdown
+   [csv]=csv
+   [tsv]=tsv
+)
+
+inputExtensionsList="${!inputFormatsArray[*]}"
+inputExtensionsString="${inputExtensionsList// /, }"
+
+addProgramOption k flag keepHTML "keep the intermediate HTML document as ${htmlFile}"
 addProgramOption x flag useInputExtension "use the extensiin of the input file to determine the input format - supported extensions are: ${inputExtensionsString}"
 addProgramParameter input inputFile "an existing document formatted as reStructured text"
 addProgramParameter output textFile "where to write the plain text document"
@@ -82,8 +87,11 @@ pandocOptions+=(--lua-filter "${programPath}.lua")
    "${useInputExtension}" && {
       inputName="${inputFile##*/}"
       inputExtension="${inputName##*.}"
-      verifyChoice "input file extension" inputExtension "${!inputExtensionsArray[@]}"
-      pandocFormat="${inputExtensionsArray["${inputExtension}"]}"
+
+      [ "${inputExtension}" = "${inputName}" ] || {
+         verifyChoice "input file extension" inputExtension "${!inputFormatsArray[@]}"
+         inputFormat="${inputFormatsArray["${inputExtension}"]}"
+      }
    }
 }
 
@@ -92,7 +100,7 @@ pandocOptions+=(--lua-filter "${programPath}.lua")
    pandocOptions+=(--output "${textFile}")
 }
 
-if "${htmlKeep}"
+if "${keepHTML}"
 then
    verifyOutputFile "${htmlFile}"
 else
@@ -103,13 +111,14 @@ fi
 set -e
 cd "${initialDirectory}"
 
-if [ -n "${pandocFormat}" ]
+if [ "${inputFormat}" = "${rstFormat}" ]
 then
-   pandocInput="${inputFile}"
-else
    rst2html --config "${programDirectory}/docutils.conf" -- "${inputFile}" "${htmlFile}"
-   pandocFormat="html"
    pandocInput="${htmlFile}"
+   pandocFormat="html"
+else
+   pandocInput="${inputFile}"
+   pandocFormat="${inputFormat}"
 fi
 
 pandocOptions+=(--from "${pandocFormat}")
