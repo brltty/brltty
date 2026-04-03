@@ -72,17 +72,19 @@ defineInputExtension() {
 }
 
 defineInputExtension csv csv
+defineInputExtension db docbook
 defineInputExtension docbook docbook
 defineInputExtension docx docx
 defineInputExtension epub epub
+defineInputExtension htm html
 defineInputExtension html html
 defineInputExtension json json
-defineInputExtension latex latex
 defineInputExtension man man
 defineInputExtension md markdown
 defineInputExtension odt odt
 defineInputExtension rst rst
 defineInputExtension rtf rtf
+defineInputExtension tex latex
 defineInputExtension tsv tsv
 
 inputExtensionsString="${inputExtensionsList[*]}"
