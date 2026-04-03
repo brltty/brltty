@@ -60,16 +60,33 @@ htmlFile="${programName}.html"
 rstFormat=rst
 inputFormat="${rstFormat}"
 
-declare -A inputFormatsArray=(
-   [rst]=rst
-   [html]=html
-   [md]=markdown
-   [csv]=csv
-   [tsv]=tsv
-)
+declare -a inputExtensionsList=()
+declare -A inputFormatsArray=()
 
-inputExtensionsList="${!inputFormatsArray[*]}"
-inputExtensionsString="${inputExtensionsList// /, }"
+defineInputExtension() {
+   local extension="${1}"
+   local format="${2}"
+
+   inputFormatsArray["${extension}"]="${format}"
+   inputExtensionsList+=("${extension}")
+}
+
+defineInputExtension csv csv
+defineInputExtension docbook docbook
+defineInputExtension docx docx
+defineInputExtension epub epub
+defineInputExtension html html
+defineInputExtension json json
+defineInputExtension latex latex
+defineInputExtension man man
+defineInputExtension md markdown
+defineInputExtension odt odt
+defineInputExtension rst rst
+defineInputExtension rtf rtf
+defineInputExtension tsv tsv
+
+inputExtensionsString="${inputExtensionsList[*]}"
+inputExtensionsString="${inputExtensionsString// /, }"
 
 addProgramOption k flag keepHTML "keep the intermediate HTML document as ${htmlFile}"
 addProgramOption x flag useInputExtension "use the extensiin of the input file to determine the input format - supported extensions are: ${inputExtensionsString}"
