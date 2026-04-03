@@ -15,20 +15,20 @@
   This software is maintained by Dave Mielke <dave@mielke.cc>.
 ]]
 
-function writeProgramMessage (message)
-  io.stderr:write(string.format("%s: %s\n", programName, message))
-end
-
-function syntaxError (message)
-  writeProgramMessage(message)
-  os.exit(2)
-end
-
 if arg
 then
   programName = string.match(arg[0], "([^/]*)$")
   programArgumentCount = #arg
   programArgumentNumber = 1
+
+  function writeProgramMessage (message)
+    io.stderr:write(string.format("%s: %s\n", programName, message))
+  end
+
+  function syntaxError (message)
+    writeProgramMessage(message)
+    os.exit(2)
+  end
 
   function haveMoreProgramArguments () 
     return programArgumentNumber <= programArgumentCount
@@ -46,18 +46,28 @@ then
   end
 end
 
-function listTable (object)
-  print("begin " .. type(object) .. " listing")
+function listTable (tbl)
+  print("begin " .. type(tbl) .. " listing")
 
-  if object
+  if tbl
   then
-    for name, item in pairs(object)
+    local keys = {}
+
+    for key in pairs(tbl)
     do
-      print(type(item) .. " " .. name)
+      table.insert(keys, key)
+    end
+
+    table.sort(keys)
+
+    for _, key in ipairs(keys)
+    do
+      local value = tbl[key]
+      print(type(value) .. " " .. key)
     end
   end
 
-  print("end " .. type(object) .. " listing")
+  print("end " .. type(tbl) .. " listing")
 end
 
 function listGlobalTable ()
