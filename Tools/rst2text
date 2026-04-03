@@ -17,30 +17,75 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/../brltty-prologue.sh"
+. "`dirname "${0}"`/../brltty-prologue.bash"
+
+htmlFile="${programName}.html"
+declare -A inputExtensionsArray=(
+   [html]=html
+   [md]=markdown
+   [rst]=rst
+)
+
+inputExtensionsList="${!inputExtensionsArray[*]}"
+inputExtensionsString="${inputExtensionsList// /, }"
 
 showProgramUsagePurpose() {
 cat <<END_OF_PROGRAM_USAGE_PURPOSE
-Convert a document from reStructured text to plain text.
+Convert a document from reStructured text to plain text with some simple markup.
 END_OF_PROGRAM_USAGE_PURPOSE
 }
 
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
-If the input file is specified as a minus sign (-) then the reStructured text is read from standard input.
-Likewise, if the output file is specified as a minus sign (-) then the plain text is written to standard output.
+If the input file is specified as a minus sign (-) then reStructured text is read from standard input.
+Likewise, if the output file is specified as a minus sign (-) then plain text is written to standard output.
+
+Some simple markup is added to the plain text:
+  [# document header #]
+  # level 1 header #
+  ## level 2 header ##
+  ### level 3 header ###
+  [internal reference text]
+  [external reference text] {URL}
+  **bold text**
+  <italic text>
+  __underlined text__
+  \`literal text\`
+  "quoted text"
+  ~~strike text~~
+  ^(superscript text)
+  _(subscript text)
+
+  <\`\`\`
+  literal block
+  \`\`\`>
+
+  <"""
+  block quote
+  """>
 END_OF_PROGRAM_USAGE_NOTES
 }
 
-addProgramOption k flag htmlKeep "keep the intermediate HTML document"
-addProgramParameter input rstFile "an existing document formatted as reStructured text"
+addProgramOption k flag htmlKeep "keep the intermediate HTML document as ${htmlFile}"
+addProgramOption x flag useInputExtension "use the extensiin of the input file to determine the input format - supported extensions are: ${inputExtensionsString}"
+addProgramParameter input inputFile "an existing document formatted as reStructured text"
 addProgramParameter output textFile "where to write the plain text document"
 parseProgramArguments "${@}"
 
-[ "${rstFile}" = "-" ] || verifyInputFile "${rstFile}"
-
-pandocOptions=(--from html --to plain)
+pandocFormat=""
+pandocOptions=(--to plain)
 pandocOptions+=(--lua-filter "${programPath}.lua")
+
+[ "${inputFile}" = "-" ] || {
+   verifyInputFile "${inputFile}"
+
+   "${useInputExtension}" && {
+      inputName="${inputFile##*/}"
+      inputExtension="${inputName##*.}"
+      verifyChoice "input file extension" inputExtension "${!inputExtensionsArray[@]}"
+      pandocFormat="${inputExtensionsArray["${inputExtension}"]}"
+   }
+}
 
 [ "${textFile}" = "-" ] || {
    verifyOutputFile "${textFile}"
@@ -49,15 +94,24 @@ pandocOptions+=(--lua-filter "${programPath}.lua")
 
 if "${htmlKeep}"
 then
-   htmlFile="${programPath}.html"
    verifyOutputFile "${htmlFile}"
 else
    needTemporaryDirectory
-   htmlFile="${temporaryDirectory}/document.html"
+   htmlFile="${temporaryDirectory}/${htmlFile}"
 fi
 
 set -e
 cd "${initialDirectory}"
-rst2html --config "${programDirectory}/docutils.conf" -- "${rstFile}" "${htmlFile}"
-pandoc "${pandocOptions[@]}" -- "${htmlFile}"
+
+if [ -n "${pandocFormat}" ]
+then
+   pandocInput="${inputFile}"
+else
+   rst2html --config "${programDirectory}/docutils.conf" -- "${inputFile}" "${htmlFile}"
+   pandocFormat="html"
+   pandocInput="${htmlFile}"
+fi
+
+pandocOptions+=(--from "${pandocFormat}")
+pandoc "${pandocOptions[@]}" -- "${pandocInput}"
 exit 0
