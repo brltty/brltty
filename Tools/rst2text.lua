@@ -109,6 +109,24 @@ local function addContentIndicator (element, start, finish)
 end
 
 function BlockQuote (element)
-  return addContentIndicator(element, '<"""', '""">')
+  local start = '<"""'
+  local finish = '""">'
+
+  if #element.content == 1
+  then
+    local quote = element.content[1]
+
+    if quote.t == "Plain"
+    then
+      local content = quote.content
+      content:insert(1, pandoc.LineBreak())
+      content:insert(1, pandoc.Str(start))
+      content:insert(pandoc.LineBreak())
+      content:insert(pandoc.Str(finish))
+      return element
+    end
+  end
+
+  return addContentIndicator(element, start, finish)
 end
 
