@@ -49,6 +49,10 @@ local function listMathObjects ()
   listTable(math)
 end
 
+local function listUTF8Objects ()
+  listTable(utf8)
+end
+
 local function showLibraryDirectory ()
   local localDirectory = nil
 
@@ -112,18 +116,27 @@ local actionHandlers = {
   string = listStringObjects,
   table = listTableObjects,
   math = listMathObjects,
+  utf8 = listUTF8Objects,
 
   libdir = showLibraryDirectory
 }
 
-local action = nextProgramArgument("action")
-local handler = actionHandlers[action]
+local function listActionNames ()
+  for _, key in ipairs(getSortedTableKeys(actionHandlers))
+  do
+    print(key)
+  end
+end
 
-if handler
+actionHandlers.actions = listActionNames
+local actionName = nextProgramArgument("action")
+local actionHandler = actionHandlers[actionName]
+
+if actionHandler
 then
-  handler()
+  actionHandler()
 else
-  syntaxError(string.format("unknown action: %s", action))
+  syntaxError(string.format("unknown action: %s", actionName))
 end
 
 os.exit()

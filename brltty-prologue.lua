@@ -46,21 +46,24 @@ then
   end
 end
 
+function getSortedTableKeys (tbl)
+  local keys = {}
+
+  for key in pairs(tbl)
+  do
+    table.insert(keys, key)
+  end
+
+  table.sort(keys)
+  return keys
+end
+
 function listTable (tbl)
   print("begin " .. type(tbl) .. " listing")
 
   if tbl
   then
-    local keys = {}
-
-    for key in pairs(tbl)
-    do
-      table.insert(keys, key)
-    end
-
-    table.sort(keys)
-
-    for _, key in ipairs(keys)
+    for _, key in ipairs(getSortedTableKeys(tbl))
     do
       local value = tbl[key]
       print(type(value) .. " " .. key)
