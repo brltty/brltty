@@ -17,10 +17,42 @@
 
 require("brltty-prologue")
 
-function showLibraryDirectory ()
+local function showInterpreterVersion ()
+  print(_VERSION)
+end
+
+local function listGlobalObjects ()
+  listGlobalTable()
+end
+
+local function listOSObjects ()
+  listTable(os)
+end
+
+local function listIOObjects ()
+  listTable(io)
+end
+
+local function listPackageObjects ()
+  listTable(package)
+end
+
+local function listStringObjects ()
+  listTable(string)
+end
+
+local function listTableObjects ()
+  listTable(table)
+end
+
+local function listMathObjects ()
+  listTable(math)
+end
+
+local function showLibraryDirectory ()
   local localDirectory = nil
 
-  for number, component in ipairs(splitString(package.cpath, ";"))
+  for _, component in ipairs(splitString(package.cpath, ";"))
   do
     local directory, name = component:match("^(.*)/(.-)$")
 
@@ -69,11 +101,27 @@ function showLibraryDirectory ()
   end
 end
 
-action = nextProgramArgument("action")
+local actionHandlers = {
+  version = showInterpreterVersion,
+  global = listGlobalObjects,
 
-if action == "libdir"
+  os = listOSObjects,
+  io = listIOObjects,
+  package = listPackageObjects,
+
+  string = listStringObjects,
+  table = listTableObjects,
+  math = listMathObjects,
+
+  libdir = showLibraryDirectory
+}
+
+local action = nextProgramArgument("action")
+local handler = actionHandlers[action]
+
+if handler
 then
-  showLibraryDirectory()
+  handler()
 else
   syntaxError(string.format("unknown action: %s", action))
 end
