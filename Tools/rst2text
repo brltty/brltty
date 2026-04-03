@@ -97,7 +97,7 @@ addProgramParameter output textFile "where to write the plain text document"
 parseProgramArguments "${@}"
 
 pandocFormat=""
-pandocOptions=(--to plain)
+pandocOptions=()
 pandocOptions+=(--lua-filter "${programPath}.lua")
 
 [ "${inputFile}" = "-" ] || {
@@ -141,6 +141,8 @@ else
 fi
 
 pandocOptions+=(--from "${pandocFormat}")
+pandocOptions+=(--to plain)
+
 export LUA_PATH="${programDirectory}/../?.lua;;"
 pandoc "${pandocOptions[@]}" -- "${pandocInput}"
 exit 0
