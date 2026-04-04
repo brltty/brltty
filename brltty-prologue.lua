@@ -82,13 +82,17 @@ function splitString (string, delimiter)
   local count = 0
   local oldPosition = 1
 
-  while true do
+  while true
+  do
     local newPosition = string:find(delimiter, oldPosition, true)
-    if not newPosition then break end
+
+    if not newPosition
+    then
+      break
+    end
 
     count = count + 1
     components[count] = string:sub(oldPosition, newPosition-1)
-
     oldPosition = newPosition + #delimiter
   end
 
