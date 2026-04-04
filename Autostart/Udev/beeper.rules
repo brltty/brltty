@@ -17,26 +17,25 @@
 ###############################################################################
 
 ######################################################
-# Udev rules for giving BRLTTY access to /dev/uinput #
+# Udev rules for giving BRLTTY access to /dev/tty0 #
 ######################################################
 
 #############################################################################
 # BRLTTY is now able to switch to running as an unprivileged user, using    #
 # only a few capabilities), and we don't want to be using CAP_DAC_OVERRIDE. #
-# It uses uinput in order to support some important features, including:    #
-# *  Keyboard Key Tables                                                    #
-# *  Injecting arbitrary key combinations typed on braille devices.         #
+# It uses tty0 in order to support some important features, including:    #
+# *  Playing alert tunes when the tune device is set to beeper.         #
 #############################################################################
 
-KERNEL=="uinput", ACTION=="add|change", GOTO="brltty_uinput_add"
-GOTO="brltty_uinput_end"
+KERNEL=="tty0", ACTION=="add|change", GOTO="brltty_tty0_add"
+GOTO="brltty_tty0_end"
 
-LABEL="brltty_uinput_add"
-TEST=="/usr/bin/setfacl", GOTO="brltty_uinput_setfacl"
-GOTO="brltty_uinput_end"
+LABEL="brltty_tty0_add"
+TEST=="/usr/bin/setfacl", GOTO="brltty_tty0_setfacl"
+GOTO="brltty_tty0_end"
 
-LABEL="brltty_uinput_setfacl"
+LABEL="brltty_tty0_setfacl"
 RUN+="/usr/bin/setfacl -m u:brltty:rw /dev/$name"
-GOTO="brltty_uinput_end"
+GOTO="brltty_tty0_end"
 
-LABEL="brltty_uinput_end"
+LABEL="brltty_tty0_end"

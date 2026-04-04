@@ -26,6 +26,7 @@ UDEV_RULES_DIRECTORY = $(INSTALL_ROOT)$(UDEV_RULES_LOCATION)
 UDEV_PATH_PREFIX = $(UDEV_RULES_DIRECTORY)/$(UDEV_RULES_SEQUENCE)-$(PACKAGE_TARNAME)-
 UDEV_RULES_EXTENSION = rules
 
+UDEV_NAME_BEEPER = beeper.$(UDEV_RULES_EXTENSION)
 UDEV_NAME_HID = hid.$(UDEV_RULES_EXTENSION)
 UDEV_NAME_UINPUT = uinput.$(UDEV_RULES_EXTENSION)
 
@@ -50,7 +51,10 @@ install-wrapper: install-helpers-directory
 install-rules-directory:
 	$(INSTALL_DIRECTORY) $(UDEV_RULES_DIRECTORY)
 
-install-rules: install-rules-hid install-rules-uinput install-rules-usb
+install-rules: install-rules-beeper install-rules-hid install-rules-uinput install-rules-usb
+
+install-rules-beeper: install-rules-directory
+	$(INSTALL_DATA) $(SRC_DIR)/$(UDEV_NAME_BEEPER) $(UDEV_PATH_PREFIX)$(UDEV_NAME_BEEPER)
 
 install-rules-hid: install-rules-directory
 	$(INSTALL_DATA) $(SRC_DIR)/$(UDEV_NAME_HID) $(UDEV_PATH_PREFIX)$(UDEV_NAME_HID)
