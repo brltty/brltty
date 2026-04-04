@@ -60,6 +60,58 @@ local actionHandlers = {
 
   utf8 = function ()
     listTable(utf8)
+  end,
+
+  libdir = function ()
+    local localDirectory = nil
+
+    for _, component in ipairs(splitString(package.cpath, ";"))
+    do
+      local directory, name = component:match("^(.*)/(.-)$")
+
+      if name ~= "?.so"
+      then
+        goto nextComponent
+      end
+
+      if not directory
+      then
+        goto nextComponent
+      end
+
+      if #directory == 0
+      then
+        goto nextComponent
+      end
+
+      if directory:sub(1,1) ~= "/"
+      then
+        goto nextComponent
+      end
+
+      if stringContains(directory, "?")
+      then
+        goto nextComponent
+      end
+
+      if not stringContains(directory, "/local/")
+      then
+        print(directory)
+        return
+      end
+
+      if not localDirectory
+      then
+        localDirectory = directory
+      end
+
+    ::nextComponent::
+    end
+
+    if localDirectory
+    then
+      print(localDirectory)
+    end
   end
 }
 
@@ -67,58 +119,6 @@ actionHandlers.help = function ()
   for _, key in ipairs(getSortedTableKeys(actionHandlers))
   do
     print(key)
-  end
-end
-
-actionHandlers.libdir = function ()
-  local localDirectory = nil
-
-  for _, component in ipairs(splitString(package.cpath, ";"))
-  do
-    local directory, name = component:match("^(.*)/(.-)$")
-
-    if name ~= "?.so"
-    then
-      goto nextComponent
-    end
-
-    if not directory
-    then
-      goto nextComponent
-    end
-
-    if #directory == 0
-    then
-      goto nextComponent
-    end
-
-    if directory:sub(1,1) ~= "/"
-    then
-      goto nextComponent
-    end
-
-    if stringContains(directory, "?")
-    then
-      goto nextComponent
-    end
-
-    if not stringContains(directory, "/local/")
-    then
-      print(directory)
-      return
-    end
-
-    if not localDirectory
-    then
-      localDirectory = directory
-    end
-
-  ::nextComponent::
-  end
-
-  if localDirectory
-  then
-    print(localDirectory)
   end
 end
 
@@ -132,6 +132,6 @@ do
   else
     syntaxError(string.format("unknown action: %s", action))
   end
-
-  os.exit()
 end
+
+os.exit()
