@@ -17,51 +17,60 @@
 
 require("brltty-prologue")
 
-local function showInterpreterVersion ()
-  print(_VERSION)
+local actionHandlers = {
+  version = function ()
+    print(_VERSION)
+  end,
+
+  global = function ()
+    listTable(_G)
+  end,
+
+  os = function ()
+    listTable(os)
+  end,
+
+  io = function ()
+    listTable(io)
+  end,
+
+  package = function ()
+    listTable(package)
+  end,
+
+  coroutine = function ()
+    listTable(coroutine)
+  end,
+
+  debug = function ()
+    listTable(debug)
+  end,
+
+  string = function ()
+    listTable(string)
+  end,
+
+  table = function ()
+    listTable(table)
+  end,
+
+  math = function ()
+    listTable(math)
+  end,
+
+  utf8 = function ()
+    listTable(utf8)
+  end
+}
+
+actionHandlers.help = function ()
+  for _, key in ipairs(getSortedTableKeys(actionHandlers))
+  do
+    print(key)
+  end
 end
 
-local function listGlobalObjects ()
-  listTable(_G)
-end
-
-local function listOSObjects ()
-  listTable(os)
-end
-
-local function listIOObjects ()
-  listTable(io)
-end
-
-local function listPackageObjects ()
-  listTable(package)
-end
-
-local function listCoroutineObjects ()
-  listTable(coroutine)
-end
-
-local function listDebugObjects ()
-  listTable(debug)
-end
-
-local function listStringObjects ()
-  listTable(string)
-end
-
-local function listTableObjects ()
-  listTable(table)
-end
-
-local function listMathObjects ()
-  listTable(math)
-end
-
-local function listUTF8Objects ()
-  listTable(utf8)
-end
-
-local function showLibraryDirectory ()
+actionHandlers.libdir = function ()
   local localDirectory = nil
 
   for _, component in ipairs(splitString(package.cpath, ";"))
@@ -113,40 +122,16 @@ local function showLibraryDirectory ()
   end
 end
 
-local actionHandlers = {
-  version = showInterpreterVersion,
-  global = listGlobalObjects,
+do
+  local action = nextProgramArgument("action")
+  local handler = actionHandlers[action]
 
-  os = listOSObjects,
-  io = listIOObjects,
-  package = listPackageObjects,
-  coroutine = listCoroutineObjects,
-  debug = listDebugObjects,
-
-  string = listStringObjects,
-  table = listTableObjects,
-  math = listMathObjects,
-  utf8 = listUTF8Objects,
-
-  libdir = showLibraryDirectory
-}
-
-local function showHelp ()
-  for _, key in ipairs(getSortedTableKeys(actionHandlers))
-  do
-    print(key)
+  if handler
+  then
+    handler()
+  else
+    syntaxError(string.format("unknown action: %s", action))
   end
+
+  os.exit()
 end
-
-actionHandlers.help = showHelp
-local actionName = nextProgramArgument("action")
-local actionHandler = actionHandlers[actionName]
-
-if actionHandler
-then
-  actionHandler()
-else
-  syntaxError(string.format("unknown action: %s", actionName))
-end
-
-os.exit()
