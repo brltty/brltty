@@ -73,10 +73,6 @@ function listTable (tbl)
   print("end " .. type(tbl) .. " listing")
 end
 
-function listGlobalTable ()
-  listTable(_G)
-end
-
 function stringContains (string, substring)
   return not not string:find(substring, 1, true)
 end

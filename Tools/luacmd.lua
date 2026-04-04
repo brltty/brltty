@@ -22,7 +22,7 @@ local function showInterpreterVersion ()
 end
 
 local function listGlobalObjects ()
-  listGlobalTable()
+  listTable(_G)
 end
 
 local function listOSObjects ()
@@ -35,6 +35,14 @@ end
 
 local function listPackageObjects ()
   listTable(package)
+end
+
+local function listCoroutineObjects ()
+  listTable(coroutine)
+end
+
+local function listDebugObjects ()
+  listTable(debug)
 end
 
 local function listStringObjects ()
@@ -112,6 +120,8 @@ local actionHandlers = {
   os = listOSObjects,
   io = listIOObjects,
   package = listPackageObjects,
+  coroutine = listCoroutineObjects,
+  debug = listDebugObjects,
 
   string = listStringObjects,
   table = listTableObjects,
@@ -121,14 +131,14 @@ local actionHandlers = {
   libdir = showLibraryDirectory
 }
 
-local function listActionNames ()
+local function showHelp ()
   for _, key in ipairs(getSortedTableKeys(actionHandlers))
   do
     print(key)
   end
 end
 
-actionHandlers.actions = listActionNames
+actionHandlers.help = showHelp
 local actionName = nextProgramArgument("action")
 local actionHandler = actionHandlers[actionName]
 
