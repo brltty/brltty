@@ -69,12 +69,17 @@ function Link (element)
   return content
 end
 
+local function addElementTitle (element, title)
+  return {
+    pandoc.Para{pandoc.Str("<-- " .. element.t .. " - " .. title .. " -->")},
+    element
+  }
+end
+
 function Table (element)
   local caption = pandoc.utils.stringify(element.caption.long)
   element.caption = {short={}, long={}}
-
-  local title = pandoc.Para{pandoc.Str("<-- Table - " .. caption .. " -->")}
-  return {title, element}
+  return addElementTitle(element, caption)
 end
 
 local function addElementIndicator (element, start, finish)
