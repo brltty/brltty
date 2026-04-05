@@ -17,31 +17,36 @@
 
 if arg
 then
-  programName = string.match(arg[0], "([^/]*)$")
-  programArgumentCount = #arg
-  programArgumentNumber = 1
+  script = {}
 
-  function writeProgramMessage (message)
-    io.stderr:write(string.format("%s: %s\n", programName, message))
+  script.path = arg[0]
+  script.directory = script.path:match("^(.*/)") or "."
+  script.name = script.path:match("([^/]*)$")
+  script.argumentList = arg
+  script.argumentCount = #arg
+  script.argumentNumber = 1
+
+  function script.writeMessage (message)
+    io.stderr:write(string.format("%s: %s\n", script.name, message))
   end
 
-  function syntaxError (message)
-    writeProgramMessage(message)
+  function script.syntaxError (message)
+    script.writeMessage(message)
     os.exit(2)
   end
 
-  function haveMoreProgramArguments () 
-    return programArgumentNumber <= programArgumentCount
+  function script.haveMoreArguments () 
+    return script.argumentNumber <= script.argumentCount
   end
 
-  function nextProgramArgument (label)
-    if not haveMoreProgramArguments()
+  function script.nextArgument (label)
+    if not script.haveMoreArguments()
     then
-      syntaxError(string.format("missing %s", label))
+      script.syntaxError(string.format("missing %s", label))
     end
 
-    local argument = arg[programArgumentNumber]
-    programArgumentNumber = programArgumentNumber + 1
+    local argument = script.argumentList[script.argumentNumber]
+    script.argumentNumber = script.argumentNumber + 1
     return argument
   end
 end

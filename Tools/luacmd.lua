@@ -123,14 +123,14 @@ actionHandlers.help = function ()
 end
 
 do
-  local action = nextProgramArgument("action")
+  local action = script.nextArgument("action")
   local handler = actionHandlers[action]
 
   if handler
   then
     handler()
   else
-    syntaxError(string.format("unknown action: %s", action))
+    script.syntaxError(string.format("unknown action: %s", action))
   end
 end
 
