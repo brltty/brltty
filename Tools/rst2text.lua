@@ -32,6 +32,23 @@ function Div (element)
   end
 end
 
+function Header (element)
+  local start = string.rep("#", element.level)
+  local finish = start
+
+  if element.classes and element.classes:includes("title")
+  then
+    start = "[" .. start
+    finish = finish .. "]"
+  end
+
+  local content = element.content
+  content:insert(1, pandoc.Str(start .. " "))
+  content:insert(pandoc.Str(" " .. finish))
+
+  return pandoc.Plain(content)
+end
+
 function Link (element)
   local content = element.content
 
@@ -52,21 +69,12 @@ function Link (element)
   return content
 end
 
-function Header (element)
-  local start = string.rep("#", element.level)
-  local finish = start
+function Table (element)
+  local caption = pandoc.utils.stringify(element.caption.long)
+  element.caption = {short={}, long={}}
 
-  if element.classes and element.classes:includes("title")
-  then
-    start = "[" .. start
-    finish = finish .. "]"
-  end
-
-  local content = element.content
-  content:insert(1, pandoc.Str(start .. " "))
-  content:insert(pandoc.Str(" " .. finish))
-
-  return pandoc.Plain(content)
+  local title = pandoc.Para{pandoc.Str("<-- Table - " .. caption .. " -->")}
+  return {title, element}
 end
 
 local function addElementIndicator (element, start, finish)
