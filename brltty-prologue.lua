@@ -46,7 +46,7 @@ then
   end
 end
 
-function getSortedTableKeys (tbl)
+function getSortedObjectKeys (tbl)
   local keys = {}
 
   for key in pairs(tbl)
@@ -58,12 +58,12 @@ function getSortedTableKeys (tbl)
   return keys
 end
 
-function listTable (tbl)
+function listObjectKeys (tbl)
   print("begin " .. type(tbl) .. " listing")
 
   if tbl
   then
-    for _, key in ipairs(getSortedTableKeys(tbl))
+    for _, key in ipairs(getSortedObjectKeys(tbl))
     do
       local value = tbl[key]
       print(type(value) .. " " .. key)

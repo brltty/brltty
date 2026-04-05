@@ -23,43 +23,43 @@ local actionHandlers = {
   end,
 
   global = function ()
-    listTable(_G)
+    listObjectKeys(_G)
   end,
 
   os = function ()
-    listTable(os)
+    listObjectKeys(os)
   end,
 
   io = function ()
-    listTable(io)
+    listObjectKeys(io)
   end,
 
   package = function ()
-    listTable(package)
+    listObjectKeys(package)
   end,
 
   coroutine = function ()
-    listTable(coroutine)
+    listObjectKeys(coroutine)
   end,
 
   debug = function ()
-    listTable(debug)
+    listObjectKeys(debug)
   end,
 
   string = function ()
-    listTable(string)
+    listObjectKeys(string)
   end,
 
   table = function ()
-    listTable(table)
+    listObjectKeys(table)
   end,
 
   math = function ()
-    listTable(math)
+    listObjectKeys(math)
   end,
 
   utf8 = function ()
-    listTable(utf8)
+    listObjectKeys(utf8)
   end,
 
   libdir = function ()
@@ -116,7 +116,7 @@ local actionHandlers = {
 }
 
 actionHandlers.help = function ()
-  for _, key in ipairs(getSortedTableKeys(actionHandlers))
+  for _, key in ipairs(getSortedObjectKeys(actionHandlers))
   do
     print(key)
   end
