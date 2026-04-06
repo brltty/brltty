@@ -37,6 +37,7 @@ Some simple markup is added to the plain text:
   ### level 3 header ###
   [internal reference text]
   [external reference text] {URL}
+  <-- Table - caption text -->
   **bold text**
   <italic text>
   __underlined text__
