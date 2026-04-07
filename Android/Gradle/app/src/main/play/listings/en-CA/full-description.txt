@@ -1,6 +1,7 @@
 BRLTTY is a system-level background service that provides full access to an Android screen via a refreshable braille device connected over Bluetooth or USB.
 It supports both braille output and keyboard input, allowing for full navigation and text entry from the braille device's controls.
-There's an important section at the bottom entitled: "<b>To All Reviewers and Testers</b>" ࡛↓
+
+Note to Reviewers and Testers: Please see the section at the bottom entitled "<b>To All Reviewers and Testers</b>" ࡛for important technical and compliance details.
 
 • While BRLTTY is primarily designed for braille rendering, speech rendering is also supported.
 • USB connectivity requires either a USB-C or a USB-OTG cable.
