@@ -92,6 +92,7 @@ inputExtensionsString="${inputExtensionsList[*]}"
 inputExtensionsString="${inputExtensionsString// /, }"
 
 addProgramOption k flag keepHTML "keep the intermediate HTML document as ${htmlFile}"
+addProgramOption l string.length lineLength "the length at which an output line is to be word-wrapped"
 addProgramOption x flag useInputExtension "use the extensiin of the input file to determine the input format - supported extensions are: ${inputExtensionsString}"
 addProgramParameter input inputFile "an existing document formatted as reStructured text"
 addProgramParameter output textFile "where to write the plain text document"
@@ -100,6 +101,16 @@ parseProgramArguments "${@}"
 pandocFormat=""
 pandocOptions=()
 pandocOptions+=(--lua-filter "${programPath}.lua")
+
+[ -n "${lineLength}" ] || lineLength=0
+verifyInteger "line length" "${lineLength}" 0
+
+if [ "${lineLength}" -eq 0 ]
+then
+   pandocOptions+=(--wrap none)
+else
+   pandocOptions+=(--wrap auto --columns "${lineLength}")
+fi
 
 [ "${inputFile}" = "-" ] || {
    verifyInputFile "${inputFile}"
