@@ -151,11 +151,8 @@ How the Handoff Works
 
 When **the terminal emulator gains focus**:
 
-1. Hammerspoon checks whether the focused app is the terminal running brltty.
-   Before brltty has started, the ``TERMINAL_BUNDLES`` allowlist is used.
-   Once brltty is detected running, its process ancestry is walked
-   (brltty → sudo → shell → terminal app) to identify the exact terminal and
-   the result is cached for the rest of the session.
+1. Hammerspoon confirms the focused app is the terminal running brltty
+   (via process ancestry detection or the ``TERMINAL_BUNDLES`` fallback).
 2. Hammerspoon polls every 0.5 s until BRLTTY is confirmed running.
 3. VoiceOver is told to quit via AppleScript (clean shutdown, releases USB).
 4. Hammerspoon waits until both VoiceOver and BrailleTranslationService
@@ -180,7 +177,7 @@ It is disabled again when VoiceOver resumes.  The original setting is
 restored when Hammerspoon exits.
 
 VoiceOver IOKit Device Release
-===============================
+------------------------------
 
 On macOS, killing VoiceOver with ``SIGTERM`` or ``SIGKILL`` leaves the
 IOKit USB user-client seize unreleased.  Any attempt to open the same USB
@@ -192,7 +189,7 @@ VoiceOver's normal AppleScript shutdown path, which releases the USB device
 cleanly before exiting.
 
 BrailleTranslationService
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 VoiceOver's braille support runs in a separate XPC process called
 ``BrailleTranslationService`` (inside ``ScreenReader.framework``).  After
@@ -205,7 +202,7 @@ The Hammerspoon config polls for both ``VoiceOver`` and
 ``brltty-handoff resume``.
 
 VoiceOver Utility
------------------
+~~~~~~~~~~~~~~~~~
 
 When VoiceOver Utility (the VoiceOver configuration app) is open, it keeps
 ``BrailleTranslationService`` alive indefinitely even after VoiceOver itself
