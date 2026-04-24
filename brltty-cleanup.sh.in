@@ -1,0 +1,35 @@
+#!/bin/sh
+# @configure_input@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2026 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Remove stale BrlAPI socket files only when brltty is not running.
+# Stale sockets accumulate when brltty exits uncleanly (e.g. after a crash
+# or after being killed), and prevent a new brltty instance from creating
+# its BrlAPI socket.
+
+brlapi_socket_dir="@api_socket_path@"
+
+if pgrep -x brltty >/dev/null 2>&1; then
+  exit 0
+fi
+
+# BrlAPI socket files are hidden (names begin with '.').
+find "${brlapi_socket_dir}" -maxdepth 1 -name ".*" -delete 2>/dev/null
+
+exit 0

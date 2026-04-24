@@ -1,0 +1,376 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Notes Specific to Apple's macOS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. include:: prologue.rst
+
+.. contents::
+
+Overview
+========
+
+This document describes platform-specific behaviour, build requirements,
+and workarounds relevant when running BRLTTY on macOS.
+
+Building from Source
+====================
+
+BRLTTY must be built from source on macOS.  Configure with
+``--prefix=/usr/local`` so that the install targets do not attempt to write
+to the read-only root filesystem (``/``):
+
+.. code-block:: bash
+
+   ./configure --prefix=/usr/local
+   make -j4
+   sudo make install
+
+The build requires Xcode Command Line Tools (``xcode-select --install``) and
+the following Homebrew packages:
+
+* ``pkg-config`` — for locating library headers and flags
+* ``liblouis`` — braille translation tables (optional but recommended)
+* ``espeak-ng`` — speech synthesis (optional)
+
+Running as Root
+===============
+
+BRLTTY needs root privileges to open USB and serial braille devices.
+``brltty-term`` uses ``sudo`` to start BRLTTY.  Add the following entry to
+``/etc/sudoers.d/brltty`` (adjust the username as needed)::
+
+   username ALL=(root) NOPASSWD,SETENV: /usr/local/bin/brltty, /usr/local/bin/brltty-cleanup
+
+The ``SETENV`` flag is required because ``brltty-term`` passes the user
+environment to BRLTTY via ``sudo --preserve-env``.
+
+BRLTTY Configuration
+====================
+
+A minimal ``/usr/local/etc/brltty.conf`` for a USB braille display::
+
+   braille-driver NAME
+   braille-device usb:
+   api-parameters auth=none
+
+Replace ``NAME`` with the two-letter driver code for your display
+(e.g. ``fs`` for Freedom Scientific, ``ht`` for Handy Tech).
+
+The ``api-parameters auth=none`` line disables BrlAPI key-file authentication.
+The default key file is empty on a fresh macOS install, which causes the
+server to reject connections; disabling authentication works around this.
+
+The screen driver (``-xem``) is set on the command line by ``brltty-term``
+and should not be set in ``brltty.conf``.
+
+Sharing the Braille Display with VoiceOver
+==========================================
+
+VoiceOver and BRLTTY cannot share a USB braille display simultaneously.
+When VoiceOver holds the device, BRLTTY cannot open it, and vice versa.
+
+``brltty-handoff`` — described below — provides a mechanism to transfer
+control of the display between the two.  Hammerspoon_ (a macOS automation
+tool) can use ``brltty-handoff`` to perform the transfer automatically
+whenever focus moves between the terminal emulator running brltty and any
+other application.
+
+brltty-handoff
+--------------
+
+``brltty-handoff`` is a small program that connects to the running BRLTTY
+via BrlAPI and either suspends or resumes the braille driver:
+
+``brltty-handoff suspend``
+   Queries the active driver name, calls ``brlapi_suspendDriver()``, forks
+   a background worker that holds the BrlAPI connection open (keeping the
+   driver suspended), and writes the worker's PID to
+   ``/tmp/brltty-handoff.pid``.  The parent returns immediately once the
+   driver is confirmed suspended.
+
+``brltty-handoff resume``
+   Sends ``SIGUSR1`` to the background worker, which calls
+   ``brlapi_resumeDriver()`` and exits.  If no worker is running (no PID
+   file) the command is a no-op.
+
+The background worker is necessary because the braille driver stays
+suspended only while the BrlAPI connection remains open.  When the worker
+receives ``SIGUSR1`` it resumes the driver and closes the connection so
+BRLTTY can reclaim the device.
+
+brltty-cleanup
+--------------
+
+``brltty-cleanup`` removes stale BrlAPI socket files from the BrlAPI socket
+directory (``/usr/local/var/lib/BrlAPI`` by default).  Stale sockets
+accumulate when BRLTTY exits uncleanly (crash, kill signal).  The cleanup
+is a no-op when BRLTTY is already running.
+
+``brltty-term`` calls ``brltty-cleanup`` automatically before starting
+BRLTTY.
+
+Hammerspoon Automation
+----------------------
+
+The following Hammerspoon_ configuration watches for the terminal emulator
+that is running brltty to gain or lose focus, and automatically hands off
+the braille display between BRLTTY and VoiceOver.
+
+The active terminal emulator is detected automatically by walking up
+brltty's process ancestry (brltty → sudo → shell → terminal app), so no
+hardcoded application name is needed.  ``TERMINAL_BUNDLES`` is a fallback
+allowlist used before brltty has started and automatic detection is
+possible; extend it if you use a terminal not listed there.
+
+.. code-block:: lua
+
+   pcall(require, "hs.ipc")
+
+   local HANDOFF = "/usr/local/bin/brltty-handoff"
+
+   -- Fallback allowlist: recognised before brltty has started.
+   -- Add bundle IDs of any terminal emulators you use that are not listed.
+   local TERMINAL_BUNDLES = {
+     ["com.apple.Terminal"]     = true,  -- Terminal.app
+     ["com.googlecode.iterm2"]  = true,  -- iTerm2
+     ["io.alacritty"]           = true,  -- Alacritty
+     ["net.kovidgoyal.kitty"]   = true,  -- kitty
+     ["com.github.wez.wezterm"] = true,  -- WezTerm
+   }
+
+   -- Bundle ID of the terminal that started this brltty session (set at runtime).
+   local detectedTerminalBundle = nil
+
+   local BRLTTY_POLL_INTERVAL = 0.5
+   local HANDOFF_COOLDOWN = 3.0
+   local blowSound = hs.sound.getByFile("/System/Library/Sounds/Blow.aiff")
+
+   local SPEECH_DOMAIN = "com.apple.speech.synthesis.general.prefs"
+   local SPEECH_KEY    = "TalkingAlertsSpeakTextFlag"
+
+   local function spokenAnnouncementsGet()
+     local out = hs.execute("defaults read " .. SPEECH_DOMAIN .. " " .. SPEECH_KEY .. " 2>/dev/null")
+     out = out:gsub("%s+", "")
+     return out == "1"
+   end
+
+   local function spokenAnnouncementsSet(enable)
+     local val = enable and "true" or "false"
+     hs.execute("defaults write " .. SPEECH_DOMAIN .. " " .. SPEECH_KEY .. " -bool " .. val)
+   end
+
+   local spokenAnnouncementsOriginal = spokenAnnouncementsGet()
+
+   -- Walk up brltty's ancestor chain to find the terminal emulator that
+   -- started it.  Returns the bundle ID of the first ancestor that is a
+   -- running GUI application, or nil if not found.
+   local function detectTerminalApp()
+     local out = hs.execute("pgrep -x brltty 2>/dev/null")
+     if not out or out == "" then return nil end
+     local pid = tonumber(out:match("%d+"))
+     while pid and pid > 1 do
+       local ppid_out = hs.execute("ps -o ppid= -p " .. pid .. " 2>/dev/null")
+       pid = tonumber(ppid_out and ppid_out:match("%d+"))
+       if pid then
+         local app = hs.application.applicationForPID(pid)
+         if app then return app:bundleID() end
+       end
+     end
+     return nil
+   end
+
+   local function isTerminalApp(bid)
+     if not bid then return false end
+     if detectedTerminalBundle then return bid == detectedTerminalBundle end
+     return TERMINAL_BUNDLES[bid] == true
+   end
+
+   local function voiceoverOn()
+     if hs.application.get("VoiceOver") then return end
+     spokenAnnouncementsSet(false)
+     hs.task.new("/System/Library/CoreServices/VoiceOver.app/Contents/MacOS/VoiceOverStarter", nil, {}):start()
+   end
+
+   local function voiceoverOff()
+     if not hs.application.get("VoiceOver") then return end
+     if blowSound then blowSound:play() end
+     spokenAnnouncementsSet(true)
+     -- AppleScript quit triggers VoiceOver's normal shutdown path, which
+     -- releases the USB device cleanly through IOKit.  kill() leaves the
+     -- IOKit user-client seize unreleased for 60+ seconds.
+     hs.task.new("/usr/bin/osascript", nil, {"-e", "tell application \"VoiceOver\" to quit"}):start()
+   end
+
+   local function brlttyRunning()
+     local out = hs.execute("pgrep -x brltty")
+     return out ~= nil and out ~= ""
+   end
+
+   local brlttyPoller = nil
+   local handoffCooldown = false
+
+   local function brlttyResume()
+     hs.task.new(HANDOFF, function(exitCode) end, {"resume"}):start()
+   end
+
+   local function brlttySuspend(callback)
+     hs.execute("pkill -SIGKILL -x brltty-handoff 2>/dev/null; rm -f /tmp/brltty-handoff.pid")
+     hs.execute(HANDOFF .. " suspend")
+     callback()
+   end
+
+   local function brailleTranslationServiceRunning()
+     local out = hs.execute("pgrep -x BrailleTranslationService")
+     return out ~= nil and out ~= ""
+   end
+
+   local function waitForVoiceOverExitThenResume()
+     if hs.application.get("VoiceOver") or brailleTranslationServiceRunning() then
+       hs.timer.doAfter(0.1, waitForVoiceOverExitThenResume)
+     else
+       brlttyResume()
+     end
+   end
+
+   local function waitForBrlttyThenHandoff()
+     if brlttyRunning() then
+       brlttyPoller = nil
+       if not detectedTerminalBundle then
+         detectedTerminalBundle = detectTerminalApp()
+       end
+       voiceoverOff()
+       waitForVoiceOverExitThenResume()
+     else
+       brlttyPoller = hs.timer.doAfter(BRLTTY_POLL_INTERVAL, waitForBrlttyThenHandoff)
+     end
+   end
+
+   local inTerminal = false
+
+   local function onAppSwitch(name, event, app)
+     if event == hs.application.watcher.activated then
+       local bid = app and app:bundleID() or "nil"
+       if isTerminalApp(bid) then
+         if not inTerminal then
+           inTerminal = true
+           handoffCooldown = true
+           hs.timer.doAfter(HANDOFF_COOLDOWN, function() handoffCooldown = false end)
+           waitForBrlttyThenHandoff()
+         end
+       else
+         if handoffCooldown then return end
+         if inTerminal then
+           inTerminal = false
+           if brlttyPoller then brlttyPoller:stop(); brlttyPoller = nil end
+           if brlttyRunning() then
+             brlttySuspend(voiceoverOn)
+           else
+             voiceoverOn()
+           end
+         end
+       end
+     end
+   end
+
+   appWatcher = hs.application.watcher.new(onAppSwitch)
+   appWatcher:start()
+
+   hs.cleanupAtExit(function()
+     spokenAnnouncementsSet(spokenAnnouncementsOriginal)
+   end)
+
+Place this in ``~/.hammerspoon/init.lua``.
+
+Before the Hammerspoon config will work:
+
+1. Install Hammerspoon: ``brew install --cask hammerspoon``
+2. Grant Hammerspoon Accessibility permission in
+   System Settings → Privacy & Security → Accessibility
+3. In VoiceOver Utility → General, enable
+   "Allow VoiceOver to be controlled with AppleScript"
+
+How the Handoff Works
+~~~~~~~~~~~~~~~~~~~~~
+
+When **the terminal emulator gains focus**:
+
+1. Hammerspoon checks whether the focused app is the terminal running brltty.
+   Before brltty has started, the ``TERMINAL_BUNDLES`` allowlist is used.
+   Once brltty is detected running, its process ancestry is walked
+   (brltty → sudo → shell → terminal app) to identify the exact terminal and
+   the result is cached for the rest of the session.
+2. Hammerspoon polls every 0.5 s until BRLTTY is confirmed running.
+3. VoiceOver is told to quit via AppleScript (clean shutdown, releases USB).
+4. Hammerspoon waits until both VoiceOver and BrailleTranslationService
+   have exited.
+5. ``brltty-handoff resume`` is called so BRLTTY reclaims the display.
+
+When **the terminal emulator loses focus**:
+
+1. ``brltty-handoff suspend`` is called synchronously.
+2. VoiceOver is started via VoiceOverStarter.
+
+The ``HANDOFF_COOLDOWN`` (3 s) suppresses the spurious "away from terminal"
+event that macOS fires when VoiceOver emits its startup announcement.
+
+Spoken Announcements
+~~~~~~~~~~~~~~~~~~~~
+
+While VoiceOver is off (during terminal use), macOS "Speak announcements"
+(System Settings → Accessibility → Spoken Content → Speak announcements)
+is enabled automatically so that system notifications are still read aloud.
+It is disabled again when VoiceOver resumes.  The original setting is
+restored when Hammerspoon exits.
+
+VoiceOver IOKit Device Release
+===============================
+
+On macOS, killing VoiceOver with ``SIGTERM`` or ``SIGKILL`` leaves the
+IOKit USB user-client seize unreleased.  Any attempt to open the same USB
+device (``USBDeviceOpenSeize``) fails with ``kIOReturnExclusiveAccess``
+(``0xE00002C5``) for 60 seconds or more.
+
+Using ``osascript -e 'tell application "VoiceOver" to quit'`` triggers
+VoiceOver's normal AppleScript shutdown path, which releases the USB device
+cleanly before exiting.
+
+BrailleTranslationService
+--------------------------
+
+VoiceOver's braille support runs in a separate XPC process called
+``BrailleTranslationService`` (inside ``ScreenReader.framework``).  After
+VoiceOver quits, ``BrailleTranslationService`` continues to hold the USB
+device for a few seconds.  BRLTTY must wait for this process to exit before
+attempting to open the device.
+
+The Hammerspoon config polls for both ``VoiceOver`` and
+``BrailleTranslationService`` to be gone before calling
+``brltty-handoff resume``.
+
+Troubleshooting
+===============
+
+**Terminal shows blank on braille display**
+   BRLTTY is using ``poll(2)`` instead of ``select(2)`` to monitor the PTY
+   master.  On macOS ``poll(2)`` does not report activity on PTY or character
+   devices; ``select(2)`` must be used instead.  Ensure the macOS fix in
+   ``Programs/async_io.c`` is included in the build and reinstall BRLTTY.
+
+**brltty-term prompts for a password**
+   The sudoers entry is missing or lacks ``SETENV``.  Reinstall
+   ``/etc/sudoers.d/brltty`` with the entry shown above.
+
+**make install fails with "Read-only file system"**
+   ``configure`` was run without ``--prefix=/usr/local``.  Re-run configure
+   with the correct prefix, rebuild, and reinstall.
+
+**Display not connecting after VoiceOver quits**
+   Wait for ``BrailleTranslationService`` to exit (up to ~5 s).  The
+   Hammerspoon config handles this automatically.
+
+**BRLTTY fails with "another BrlAPI server is already listening"**
+   A stale socket file exists from a previous crash.  ``brltty-cleanup``
+   removes these automatically when called from ``brltty-term``.  Check
+   that the sudoers entry permits running ``brltty-cleanup`` as root.
+
+.. _Hammerspoon: https://www.hammerspoon.org/

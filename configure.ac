@@ -900,6 +900,18 @@ AC_SUBST([all_xbrlapi])
 AC_SUBST([install_xbrlapi])
 AC_SUBST([xsel_object])
 
+all_brltty_handoff=""
+install_brltty_handoff=""
+case "${host_os}"
+in
+   darwin*)
+      all_brltty_handoff="all-brltty-handoff"
+      install_brltty_handoff="install-brltty-handoff"
+      ;;
+esac
+AC_SUBST([all_brltty_handoff])
+AC_SUBST([install_brltty_handoff])
+
 test -z "$gui_toolkit_package" && {
    case "${host_os}"
    in
@@ -2062,6 +2074,7 @@ s%\([^ ][^ ]*\)%\1/Makefile:prologue.mk:\1/Makefile.in%g
 AC_CONFIG_FILES([
    config.mk
    brltty.spec
+   brltty-cleanup:brltty-cleanup.sh.in
    brltty-config.sh
    brltty.pc
    Documents/brltty.conf

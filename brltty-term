@@ -113,5 +113,6 @@ SUDO="sudo --bell --preserve-env --preserve-env=USER,LOGNAME --"
 [ -u "${brlttyPath}" ] && SUDO=""
 [ "${currentUser}" -eq 0 ] && SUDO=""
 
+findSiblingCommand cleanupPath brltty-cleanup && ${SUDO} "${cleanupPath}"
 exec ${SUDO} "${brlttyPath}" -n -z -x"${screenDriver}" "${screenParameters[@]}" "${@}"
 exit "${?}"
