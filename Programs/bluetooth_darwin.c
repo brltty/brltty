@@ -31,6 +31,7 @@
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 #include "system_darwin.h"
+#include "async_io.h"
 
 @interface ServiceQueryResult: AsynchronousResult
 - (void) sdpQueryComplete
@@ -256,7 +257,7 @@ bthDiscoverChannel (
 
 int
 bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback, void *data) {
-  return 0;
+  return asyncMonitorFileInput(NULL, connection->extension->inputPipe[0], callback, data);
 }
 
 int
