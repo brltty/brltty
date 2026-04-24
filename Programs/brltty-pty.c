@@ -299,6 +299,11 @@ static unsigned char slaveHasBeenClosed;
 static
 ASYNC_CONDITION_TESTER(parentTerminationTester) {
   if (parentIsQuitting) return 1;
+#ifdef __APPLE__
+  /* On macOS the PTY slave is not closed by the kernel when the child exits,
+   * so slaveHasBeenClosed never fires.  Exit as soon as the child terminates. */
+  if (childHasTerminated) return 1;
+#endif /* __APPLE__ */
   return childHasTerminated && slaveHasBeenClosed;
 }
 
