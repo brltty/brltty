@@ -112,174 +112,31 @@ BRLTTY.
 Hammerspoon Automation
 ----------------------
 
-The following Hammerspoon_ configuration watches for the terminal emulator
-that is running brltty to gain or lose focus, and automatically hands off
-the braille display between BRLTTY and VoiceOver.
+``Autostart/Hammerspoon/brltty.lua`` in the BRLTTY source tree is a
+Hammerspoon_ configuration that watches for the terminal emulator running
+brltty to gain or lose focus, and automatically hands off the braille
+display between BRLTTY and VoiceOver.
 
 The active terminal emulator is detected automatically by walking up
 brltty's process ancestry (brltty → sudo → shell → terminal app), so no
-hardcoded application name is needed.  ``TERMINAL_BUNDLES`` is a fallback
-allowlist used before brltty has started and automatic detection is
-possible; extend it if you use a terminal not listed there.
+hardcoded application name is needed.  ``TERMINAL_BUNDLES`` near the top
+of the file is a fallback allowlist used before brltty has started;
+extend it if you use a terminal emulator not listed there.
 
-.. code-block:: lua
+**If Hammerspoon is not yet configured** on your machine, copy or symlink
+``brltty.lua`` as your Hammerspoon entry point::
 
-   pcall(require, "hs.ipc")
+   cp Autostart/Hammerspoon/brltty.lua ~/.hammerspoon/init.lua
+   # or: ln -s /usr/local/share/brltty/Autostart/Hammerspoon/brltty.lua ~/.hammerspoon/init.lua
 
-   local HANDOFF = "/usr/local/bin/brltty-handoff"
+**If you already have a** ``~/.hammerspoon/init.lua``, place ``brltty.lua``
+in your Hammerspoon directory and load it from your existing config::
 
-   -- Fallback allowlist: recognised before brltty has started.
-   -- Add bundle IDs of any terminal emulators you use that are not listed.
-   local TERMINAL_BUNDLES = {
-     ["com.apple.Terminal"]     = true,  -- Terminal.app
-     ["com.googlecode.iterm2"]  = true,  -- iTerm2
-     ["io.alacritty"]           = true,  -- Alacritty
-     ["net.kovidgoyal.kitty"]   = true,  -- kitty
-     ["com.github.wez.wezterm"] = true,  -- WezTerm
-   }
+   cp Autostart/Hammerspoon/brltty.lua ~/.hammerspoon/brltty.lua
 
-   -- Bundle ID of the terminal that started this brltty session (set at runtime).
-   local detectedTerminalBundle = nil
+Then add the following line to your ``~/.hammerspoon/init.lua``::
 
-   local BRLTTY_POLL_INTERVAL = 0.5
-   local HANDOFF_COOLDOWN = 3.0
-   local blowSound = hs.sound.getByFile("/System/Library/Sounds/Blow.aiff")
-
-   local SPEECH_DOMAIN = "com.apple.speech.synthesis.general.prefs"
-   local SPEECH_KEY    = "TalkingAlertsSpeakTextFlag"
-
-   local function spokenAnnouncementsGet()
-     local out = hs.execute("defaults read " .. SPEECH_DOMAIN .. " " .. SPEECH_KEY .. " 2>/dev/null")
-     out = out:gsub("%s+", "")
-     return out == "1"
-   end
-
-   local function spokenAnnouncementsSet(enable)
-     local val = enable and "true" or "false"
-     hs.execute("defaults write " .. SPEECH_DOMAIN .. " " .. SPEECH_KEY .. " -bool " .. val)
-   end
-
-   local spokenAnnouncementsOriginal = spokenAnnouncementsGet()
-
-   -- Walk up brltty's ancestor chain to find the terminal emulator that
-   -- started it.  Returns the bundle ID of the first ancestor that is a
-   -- running GUI application, or nil if not found.
-   local function detectTerminalApp()
-     local out = hs.execute("pgrep -x brltty 2>/dev/null")
-     if not out or out == "" then return nil end
-     local pid = tonumber(out:match("%d+"))
-     while pid and pid > 1 do
-       local ppid_out = hs.execute("ps -o ppid= -p " .. pid .. " 2>/dev/null")
-       pid = tonumber(ppid_out and ppid_out:match("%d+"))
-       if pid then
-         local app = hs.application.applicationForPID(pid)
-         if app then return app:bundleID() end
-       end
-     end
-     return nil
-   end
-
-   local function isTerminalApp(bid)
-     if not bid then return false end
-     if detectedTerminalBundle then return bid == detectedTerminalBundle end
-     return TERMINAL_BUNDLES[bid] == true
-   end
-
-   local function voiceoverOn()
-     if hs.application.get("VoiceOver") then return end
-     spokenAnnouncementsSet(false)
-     hs.task.new("/System/Library/CoreServices/VoiceOver.app/Contents/MacOS/VoiceOverStarter", nil, {}):start()
-   end
-
-   local function voiceoverOff()
-     if not hs.application.get("VoiceOver") then return end
-     if blowSound then blowSound:play() end
-     spokenAnnouncementsSet(true)
-     -- AppleScript quit triggers VoiceOver's normal shutdown path, which
-     -- releases the USB device cleanly through IOKit.  kill() leaves the
-     -- IOKit user-client seize unreleased for 60+ seconds.
-     hs.task.new("/usr/bin/osascript", nil, {"-e", "tell application \"VoiceOver\" to quit"}):start()
-   end
-
-   local function brlttyRunning()
-     local out = hs.execute("pgrep -x brltty")
-     return out ~= nil and out ~= ""
-   end
-
-   local brlttyPoller = nil
-   local handoffCooldown = false
-
-   local function brlttyResume()
-     hs.task.new(HANDOFF, function(exitCode) end, {"resume"}):start()
-   end
-
-   local function brlttySuspend(callback)
-     hs.execute("pkill -SIGKILL -x brltty-handoff 2>/dev/null; rm -f /tmp/brltty-handoff.pid")
-     hs.execute(HANDOFF .. " suspend")
-     callback()
-   end
-
-   local function brailleTranslationServiceRunning()
-     local out = hs.execute("pgrep -x BrailleTranslationService")
-     return out ~= nil and out ~= ""
-   end
-
-   local function waitForVoiceOverExitThenResume()
-     if hs.application.get("VoiceOver") or brailleTranslationServiceRunning() then
-       hs.timer.doAfter(0.1, waitForVoiceOverExitThenResume)
-     else
-       brlttyResume()
-     end
-   end
-
-   local function waitForBrlttyThenHandoff()
-     if brlttyRunning() then
-       brlttyPoller = nil
-       if not detectedTerminalBundle then
-         detectedTerminalBundle = detectTerminalApp()
-       end
-       voiceoverOff()
-       waitForVoiceOverExitThenResume()
-     else
-       brlttyPoller = hs.timer.doAfter(BRLTTY_POLL_INTERVAL, waitForBrlttyThenHandoff)
-     end
-   end
-
-   local inTerminal = false
-
-   local function onAppSwitch(name, event, app)
-     if event == hs.application.watcher.activated then
-       local bid = app and app:bundleID() or "nil"
-       if isTerminalApp(bid) then
-         if not inTerminal then
-           inTerminal = true
-           handoffCooldown = true
-           hs.timer.doAfter(HANDOFF_COOLDOWN, function() handoffCooldown = false end)
-           waitForBrlttyThenHandoff()
-         end
-       else
-         if handoffCooldown then return end
-         if inTerminal then
-           inTerminal = false
-           if brlttyPoller then brlttyPoller:stop(); brlttyPoller = nil end
-           if brlttyRunning() then
-             brlttySuspend(voiceoverOn)
-           else
-             voiceoverOn()
-           end
-         end
-       end
-     end
-   end
-
-   appWatcher = hs.application.watcher.new(onAppSwitch)
-   appWatcher:start()
-
-   hs.cleanupAtExit(function()
-     spokenAnnouncementsSet(spokenAnnouncementsOriginal)
-   end)
-
-Place this in ``~/.hammerspoon/init.lua``.
+   require("brltty")
 
 Before the Hammerspoon config will work:
 
@@ -346,6 +203,19 @@ attempting to open the device.
 The Hammerspoon config polls for both ``VoiceOver`` and
 ``BrailleTranslationService`` to be gone before calling
 ``brltty-handoff resume``.
+
+VoiceOver Utility
+-----------------
+
+When VoiceOver Utility (the VoiceOver configuration app) is open, it keeps
+``BrailleTranslationService`` alive indefinitely even after VoiceOver itself
+has quit.  The USB device therefore remains held and BRLTTY can never reclaim
+it.
+
+The Hammerspoon config detects this and quits VoiceOver Utility automatically
+as part of the handoff sequence, before quitting VoiceOver.  VoiceOver Utility
+settings take effect immediately and have no unsaved state, so closing it
+silently is safe.
 
 Troubleshooting
 ===============
