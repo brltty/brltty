@@ -39,7 +39,7 @@
 
 typedef HANDLE MonitorEntry;
 
-#elif defined(HAVE_SYS_POLL_H)
+#elif defined(HAVE_SYS_POLL_H) && !defined(__APPLE__)
 #define ASYNC_CAN_MONITOR_IO
 
 #include <poll.h>
@@ -129,7 +129,7 @@ struct FunctionEntryStruct {
     OVERLAPPED overlapped;
   } windows;
 
-#elif defined(HAVE_SYS_POLL_H)
+#elif defined(HAVE_SYS_POLL_H) && !defined(__APPLE__)
   struct {
     short int events;
   } poll;
@@ -350,7 +350,7 @@ cancelWindowsTransferOperation (OperationEntry *operation) {
 
 #else /* __MINGW32__ */
 
-#ifdef HAVE_SYS_POLL_H
+#if defined(HAVE_SYS_POLL_H) && !defined(__APPLE__)
 static void
 prepareMonitors (void) {
 }
