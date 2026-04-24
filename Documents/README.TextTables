@@ -4,6 +4,11 @@ Text Tables
 
 .. include:: prologue.rst
 
+For a conceptual introduction — what text tables are for
+and how to select one at run time —
+see the *Tables* chapter of the *BRLTTY Reference Manual*.
+This file documents the text-table file format and directive reference.
+
 Description
 ===========
 

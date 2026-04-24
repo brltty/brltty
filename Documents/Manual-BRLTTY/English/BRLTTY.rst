@@ -2340,139 +2340,53 @@ or until any key on the display is pressed.
 Tables
 ======
 
+BRLTTY's behaviour is customised through four kinds of plain-text
+table files.
+They all share the same basic syntax —
+one directive per line,
+``UTF-8`` encoding,
+blank lines and ``#``-comment lines ignored —
+and they can be split across subtables
+(``*.tti``, ``*.ati``, ``*.cti``, ``*.kti``)
+pulled in with an ``include`` directive.
+This chapter explains what each kind of table is for
+and how to select one at runtime.
+For the exact directive syntax —
+the reference material you need in order to write or edit a table —
+see the topic-specific README file pointed to from each section.
+
 
 .. _table-text:
 
 Text Tables
 -----------
 
-Files with names of the form ``*.ttb`` are text tables,
-and with names of the form ``*.tti`` are text subtables.
-They are used by BRLTTY to translate the characters on the screen
-into their corresponding 8-dot computer braille representations.
+Files named ``*.ttb`` are text tables.
+They tell BRLTTY how to translate each character on the screen
+into its corresponding 8-dot computer-braille dot pattern.
+Because the mapping between characters and dots
+varies from language to language
+(and even between conventions within a language),
+BRLTTY ships one text table per locale.
 
-BRLTTY is initially configured to use the
+A text table is selected automatically at startup
+based on your locale,
+falling back to the
 :ref:`North American Braille Computer Code <nabcc>`
-(NABCC) text table.
-In addition to this default,
-the following alternatives are provided:
+(NABCC) table if no better match is found.
+To pick one explicitly, use the
+:ref:`-t <options-text-table>` command line option,
+the :ref:`text-table <configure-text-table>` configuration file directive,
+or the Text Table preference.
+
+The following text tables are provided:
 
 .. csv-table::
    :header-rows: 1
    :file: ../../text-table.csv
 
-See the :ref:`-t <options-text-table>` command line option,
-the :ref:`text-table <configure-text-table>` configuration file directive,
-and the ``--with-text-table`` build option
-for details regarding how to use an alternate text table.
-
-
-Text Table Format
-~~~~~~~~~~~~~~~~~
-
-A text table consists of a sequence of directives, one per line,
-which define how each character is to be represented in braille.
-``UTF-8`` character encoding must be used.
-White-space (blanks, tabs) at the beginning of a line,
-as well as before and/or after any operand of any directive,
-is ignored.
-Lines containing only white-space are ignored.
-If the first non-white-space character of a line is "#"
-then that line is a comment and is ignored.
-
-
-Text Table Directives
-~~~~~~~~~~~~~~~~~~~~~
-
-The following directives are provided:
-
-``char`` *character* *dots* # *comment*
-  Use the ``char`` directive to specify how a Unicode character is to be represented in braille. Characters defined with this directive can also be entered from a braille keyboard. If several characters have the same braille representation then only one of them should be defined with the ``char`` directive - the others should be defined with the ``glyph`` directive (which has the same syntax). If more than one character with the same braille representation is defined with the ``char`` directive (which is currently allowed for backward compatibility) then the first one is selected.
-
-  *character*
-    The Unicode character being defined. It may be:
-
-    - Any single character other than a backslash or a white-space character.
-    - A backslash-prefixed special character. These are:
-
-      ``\b``
-        The backspace character.
-
-      ``\f``
-        The formfeed character.
-
-      ``\n``
-        The newline character.
-
-      ``\o###``
-        The three-digit octal representation of a character.
-
-      ``\r``
-        The carriage return character.
-
-      ``\s``
-        The space character.
-
-      ``\t``
-        The horizontal tab character.
-
-      ``\u####``
-        The four-digit hexadecimal representation of a character.
-
-      ``\U########``
-        The eight-digit hexadecimal representation of a character.
-
-      ``\v``
-        The vertical tab character.
-
-      ``\x##``
-        The two-digit hexadecimal representation of a character.
-
-      ``\X##``
-        ... (the case of the X and of the digits isn't significant)
-
-      \#
-        A literal number sign.
-
-      \<name>
-        The Unicode name of a character (use _ for space).
-
-      \\
-        A literal backslash.
-
-
-  *dots*
-    The braille representation of the Unicode character. It is a sequence of one to eight dot numbers. If the dot number sequence is enclosed within parentheses then the dot numbers may be separated from one another by white-space. A dot number is a digit within the range ``1``-``8`` as defined by the :ref:`Standard Braille Dot Numbering Convention <dots>`. The special dot number ``0`` is recognized when not enclosed within parentheses, and means no dots; it may not be used in conjunction with any other dot number.
-
-  Examples:
-
-  - ``char a 1``
-  - ``char b (12)``
-  - ``char c ( 4  1   )``
-  - ``char \\ 12567``
-  - ``char \s 0``
-  - ``char \x20 ()``
-  - ``char \<LATIN_SMALL_LETTER_D> 145``
-
-``glyph`` *character* *dots* # *comment*
-  Use the ``glyph`` directive to specify how a Unicode character is to be represented in braille. Characters defined with this directive are output-only. They cannot be entered from a braille keyboard.
-
-  See the ``char`` directive for syntax details and for examples.
-
-``byte`` *byte* *dots* # *comment*
-  Use the ``byte`` directive to specify how a character in the local character set is to be represented in braille. It has been retained for backward compatibility but should not be used. Unicode characters should be defined (via the ``char`` directive) so that the text table remains valid regardless of what the local character set is.
-
-  *byte*
-    The local character being defined. It may be specified in the same ways as the *character* operand of the ``char`` directive except that the Unicode-specific forms (\u, \U, \<) may not be used.
-
-  *dots*
-    The braille representation of the local character. It may be specified in the same ways as the *dots* operand of the ``char`` directive.
-
-``include`` *file* # *comment*
-  Use the ``include`` directive to include the content of a text subtable. It is recursive, which means that any text subtable can itself include yet another text subtable. Care must be taken to ensure that an "include loop" is not created.
-
-  *file*
-    The file to be included. It may be either a relative or an absolute path. If relative, it is anchored at the directory containing the including file.
+See ``Documents/README.TextTables`` for the text-table file format
+and the directive reference.
 
 
 .. _table-attributes:
@@ -2480,187 +2394,29 @@ The following directives are provided:
 Attributes Tables
 -----------------
 
-Files with names of the form ``*.atb`` are attributes tables,
-and with names of the form ``*.ati`` are attributes subtables.
-They are used when BRLTTY
-is displaying screen attributes rather than screen content
-(see the :ref:`DISPMD <command-DISPMD>` command).
-Each of the eight braille dots represents
-one of the eight ``VGA`` attribute bits.
+Files named ``*.atb`` are attributes tables.
+Instead of showing the text on the screen,
+they let you display its *visual* attributes —
+foreground and background colour, intensity, blink —
+as braille dot patterns.
+Attributes mode is toggled on and off with the
+:ref:`DISPMD <command-DISPMD>` command;
+an attributes table controls how
+the eight ``VGA`` attribute bits map to the eight dots of a braille cell.
 
-The following attributes tables are provided:
+The attributes tables shipped with BRLTTY are:
 
-left_right
-  The lefthand column represents the foreground colours:
+.. csv-table::
+   :header-rows: 1
+   :file: ../../attributes-table.csv
 
-  Dot 1
-    Blue
-
-  Dot 2
-    Green
-
-  Dot 3
-    Red
-
-  Dot 7
-    Bright
-
-  The righthand column represents the background colours:
-
-  Dot 4
-    Blue
-
-  Dot 5
-    Green
-
-  Dot 6
-    Red
-
-  Dot 8
-    Blink
-
-  A dot is raised when its corresponding attribute bit is on. This is the default attributes table because it's the most intuitive. One of its problems, though, is that it's difficult to discern the difference between normal (white on black) and reverse (black on white) video.
-
-invleft_right
-  The lefthand column represents the foreground colours:
-
-  Dot 1
-    Blue
-
-  Dot 2
-    Green
-
-  Dot 3
-    Red
-
-  Dot 7
-    Bright
-
-  The righthand column represents the background colours:
-
-  Dot 4
-    Blue
-
-  Dot 5
-    Green
-
-  Dot 6
-    Red
-
-  Dot 8
-    Blink
-
-  A background bit being on triggers its corresponding dot, whereas a foreground bit being off triggers its corresponding dot. This unintuitive logic actually makes it easier to read the most commonly used attribute combinations.
-
-upper_lower
-  The upper square represents the foreground colours:
-
-  Dot 1
-    Red
-
-  Dot 4
-    Green
-
-  Dot 2
-    Blue
-
-  Dot 5
-    Bright
-
-  The lower square represents the background colours:
-
-  Dot 3
-    Red
-
-  Dot 6
-    Green
-
-  Dot 7
-    Blue
-
-  Dot 8
-    Blink
-
-  A dot is raised when its corresponding attribute bit is on.
-
-See the :ref:`-a <options-attributes-table>` command line option,
+To select one, use the
+:ref:`-a <options-attributes-table>` command line option,
 the :ref:`attributes-table <configure-attributes-table>` configuration file directive,
-and the ``--with-attributes-table`` build option
-for details regarding how to use an alternate attributes table.
+or the Attributes Table preference.
 
-
-Attributes Table Format
-~~~~~~~~~~~~~~~~~~~~~~~
-
-An attributes table consists of a sequence of directives, one per line,
-which define how combinations of ``VGA`` attributes
-are to be represented in braille.
-``UTF-8`` character encoding must be used.
-White-space (blanks, tabs) at the beginning of a line,
-as well as before and/or after any operand of any directive,
-is ignored.
-Lines containing only white-space are ignored.
-If the first non-white-space character of a line is "#"
-then that line is a comment and is ignored.
-
-
-Attributes Table Directives
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The following directives are provided:
-
-``dot`` *dot* *state* # *comment*
-  Use the ``dot`` directive to specify what a specific dot represents.
-
-  *dot*
-    The dot being defined. It is a single digit within the range ``1``-``8`` as defined by the :ref:`Standard Braille Dot Numbering Convention <dots>`.
-
-  *state*
-    What the dot represents. It may be:
-
-    ``=``\ *attribute*
-      The dot is raised if the named attribute is on.
-
-    ``~``\ *attribute*
-      The dot is raised if the named attribute is off.
-
-    The names of the attribute bits are:
-
-    0X01
-      ``fg-blue``
-
-    0X02
-      ``fg-green``
-
-    0X04
-      ``fg-red``
-
-    0X08
-      ``fg-bright``
-
-    0X10
-      ``bg-blue``
-
-    0X20
-      ``bg-green``
-
-    0X40
-      ``bg-red``
-
-    0X80
-      ``blink``
-
-
-  Examples:
-
-  - ``dot 1 =fg-red``
-  - ``dot 2 ~bg-blue``
-
-``include`` *file* # *comment*
-  Use the ``include`` directive to include the content of an attributes subtable. It is recursive, which means that any attributes subtable can itself include yet another attributes subtable. Care must be taken to ensure that an "include loop" is not created.
-
-  *file*
-    The file to be included. It may be either a relative or an absolute path. If relative, it is anchored at the directory containing the including file.
+See ``Documents/README.AttributesTables`` for the attributes-table
+file format and the directive reference.
 
 
 .. _table-contraction:
@@ -2668,18 +2424,31 @@ The following directives are provided:
 Contraction Tables
 ------------------
 
-Files with names of the form ``*.ctb`` are contraction tables,
-and with names of the form ``*.cti`` are contraction subtables.
-They are used by BRLTTY to translate character sequences on the screen
-into their corresponding contracted braille representations.
+Files named ``*.ctb`` are contraction tables.
+Where a text table maps one character to one braille cell,
+a contraction table encodes the shorthand conventions
+used by literary braille:
+common letter sequences, whole words, and punctuation patterns
+each map to shorter sequences of cells.
+This is what lets far more reading fit on a small display.
+The shorthand is historically called "grade 2" braille
+(as opposed to uncontracted "grade 1");
+rules differ per language,
+so contraction tables, like text tables, come one per locale.
 
-BRLTTY presents contracted braille if:
+Contracted braille is displayed when both conditions hold:
 
-- A contraction table has been selected. See the :ref:`-c <options-contraction-table>` command line option and the :ref:`contraction-table <configure-contraction-table>` configuration file directive for details.
-- The 6-dot braille feature has been activated. See the :ref:`SIXDOTS <command-SIXDOTS>` command and the :ref:`Text Style <preference-text-style>` preference for details.
+- a contraction table has been selected —
+  see the :ref:`-c <options-contraction-table>` command line option
+  and the :ref:`contraction-table <configure-contraction-table>` configuration file directive,
+  and
+- 6-dot braille mode is active —
+  toggle it with the :ref:`SIXDOTS <command-SIXDOTS>` command,
+  or set the starting state via the
+  :ref:`Text Style <preference-text-style>` preference.
 
-This feature isn't available if the
-``--disable-contracted-braille`` build option was specified.
+Contraction support isn't compiled in
+if the ``--disable-contracted-braille`` build option was used.
 
 The following contraction tables are provided:
 
@@ -2687,379 +2456,10 @@ The following contraction tables are provided:
    :header-rows: 1
    :file: ../../contraction-table.csv
 
-See the :ref:`-c <options-contraction-table>` command line option,
-and the :ref:`contraction-table <configure-contraction-table>` configuration file directive
-for details regarding how to use a contraction table.
-
-
-Contraction Table Format
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-A contraction table consists of a sequence of entries, one per line,
-which define how character sequences are to be represented in braille.
-``UTF-8`` character encoding must be used.
-White-space (blanks, tabs) at the beginning of a line,
-as well as before and/or after any operand,
-is ignored.
-Lines containing only white-space are ignored.
-If the first non-white-space character of a line is "#"
-then that line is a comment and is ignored.
-
-The format of a contraction table entry is:
-
-.. parsed-literal::
-
-  *directive* *operand* ... [*comment*]
-
-Each directive has a specific number of operands.
-Any text beyond the last operand of a directive is interpreted as a comment.
-The order of the entries within a contraction table is, in general,
-anything that is convenient for its maintainer(s).
-An entry which defines an entity, e.g. ``class``,
-must precede all references to that entity.
-
-Entries which match character sequences
-are automatically rearranged from longest to shortest
-so that longer matches are always preferred.
-If more than one entry matches the same character sequence
-then their original table ordering is maintained.
-Thus, the same sequence may be translated differently under different circumstances.
-
-
-Contraction Table Operands
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-*characters*
-  The first operand of a character sequence matching directive is the character sequence to be matched. Each character within the sequence may be:
-
-  - Any single character other than a backslash or a white-space character.
-  - A backslash-prefixed special character. These are:
-
-    ``\b``
-      The backspace character.
-
-    ``\f``
-      The formfeed character.
-
-    ``\n``
-      The newline character.
-
-    ``\o###``
-      The three-digit octal representation of a character.
-
-    ``\r``
-      The carriage return character.
-
-    ``\s``
-      The space character.
-
-    ``\t``
-      The horizontal tab character.
-
-    ``\u####``
-      The four-digit hexadecimal representation of a character.
-
-    ``\U########``
-      The eight-digit hexadecimal representation of a character.
-
-    ``\v``
-      The vertical tab character.
-
-    ``\x##``
-      The two-digit hexadecimal representation of a character.
-
-    ``\X##``
-      ... (the case of the X and of the digits isn't significant)
-
-    \#
-      A literal number sign.
-
-    \<name>
-      The Unicode name of a character (use _ for space).
-
-    \\
-      A literal backslash.
-
-
-*representation*
-  The second operand of those character sequence matching directives which have one is the braille representation of the sequence. Each braille cell is specified as a sequence of one to eight dot numbers. A dot number is a digit within the range ``1``-``8`` as defined by the :ref:`Standard Braille Dot Numbering Convention <dots>`. The special dot number ``0``, which may not be used in conjunction with any other dot number, means no dots.
-
-
-.. _contraction-opcodes:
-
-Opcodes
-~~~~~~~
-
-An opcode is a keyword which tells the translator how to interpret the operands.
-The opcodes are grouped here by function.
-
-
-.. _contraction-opcodes-administration:
-
-Table Administration
-^^^^^^^^^^^^^^^^^^^^
-
-These opcodes make it easier to write contraction tables.
-They have no direct effect on the character translation.
-
-.. _contraction-opcode-include:
-
-``include`` *path*
-  Include the contents of another file. Nesting can be to any depth. Relative paths are anchored at the directory of the including file.
-
-.. _contraction-opcode-locale:
-
-``locale`` *locale*
-  Define the locale for character interpretation (lowercase, uppercase, numeric, etc.). The locale may be specified as:
-
-  *language*\ [``_``\ *country*\ ][``.``\ *charset*\ ][``@``\ *modifier*\ ]
-    The *language* component is required and should be a two-letter ``ISO-639`` language code. The *country* component is optional and should be a two-letter ``ISO-3166`` country code. The *charset* component is optional and should be a character set name, e.g. ``ISO-8859-1``.
-
-  C
-    7-bit ASCII.
-
-  -
-    No locale.
-
-  The last locale specification applies to the entire table. If this opcode isn't used then the ``C`` locale is assumed.
-
-
-.. _contraction-opcodes-symbols:
-
-Special Symbol Definition
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-These opcodes define special symbols which must be
-inserted into the braille text in order to clarify it.
-
-.. _contraction-opcode-capsign:
-
-``capsign`` *dots*
-  The symbol which capitalizes a single letter.
-
-.. _contraction-opcode-begcaps:
-
-``begcaps`` *dots*
-  The symbol which begins a block of capital letters within a word.
-
-.. _contraction-opcode-endcaps:
-
-``endcaps`` *dots*
-  The symbol which ends a block of capital letters within a word.
-
-.. _contraction-opcode-letsign:
-
-``letsign`` *dots*
-  The symbol which marks a letter which isn't part of a word.
-
-.. _contraction-opcode-numsign:
-
-``numsign`` *dots*
-  The symbol which marks the beginning of a number.
-
-
-.. _contraction-opcodes-translation:
-
-Character Translation
-^^^^^^^^^^^^^^^^^^^^^
-
-These opcodes define the braille representations for character sequences.
-Each of them defines an entry within the contraction table.
-These entries may be defined in any order except, as noted below,
-when they define alternate representations for the same character sequence.
-
-Each of these opcodes has
-a *characters* operand (which must be specified as a *string*),
-and a built-in condition governing its eligibility for use.
-The text is processed strictly from left to right, character by character,
-with the most eligible entry for each position being used.
-If there's more than one eligible entry for a given position,
-then the one with the longest character string is used.
-If there's more than one eligible entry for the same character string,
-then the one defined nearest to the beginning of the table is used
-(this is the only order dependency).
-
-Many of these opcodes have a *dots* operand
-which defines the braille representation for its *characters* operand.
-It may also be specified as an equals sign (``=``),
-in which case it means one of two things.
-If the entry is for a single character,
-then it means that the currently selected computer braille representation
-(see the :ref:`-t <options-text-table>` command line option
-and the :ref:`text-table <configure-text-table>` configuration file directive)
-for that character is to be used.
-If it's for a multi-character sequence,
-then the default representation for each character
-(see :ref:`always <contraction-opcode-always>`)
-within the sequence is to be used.
-
-Some special terms are used within the descriptions of these opcodes.
-
-word
-  A maximal sequence of one or more consecutive letters.
-
-
-Now, finally, here are the opcode descriptions themselves:
-
-.. _contraction-opcode-literal:
-
-``literal`` *characters*
-  Translate the entire white-space-bounded containing character sequence into computer braille (see the :ref:`-t <options-text-table>` command line option and the :ref:`text-table <configure-text-table>` configuration file directive).
-
-.. _contraction-opcode-replace:
-
-``replace`` *characters* *characters*
-  Replace the first set of characters, no matter where they appear, with the second. The replaced characters aren't reprocessed.
-
-.. _contraction-opcode-always:
-
-``always`` *characters* *dots*
-  Translate the characters no matter where they appear. If there's only one character, then, in addition, define the default representation for that character.
-
-.. _contraction-opcode-repeatable:
-
-``repeatable`` *characters* *dots*
-  Translate the characters no matter where they appear. Ignore any consecutive repetitions of the same sequence.
-
-.. _contraction-opcode-largesign:
-
-``largesign`` *characters* *dots*
-  Translate the characters no matter where they appear. Remove white-space between consecutive words matched by this opcode.
-
-.. _contraction-opcode-lastlargesign:
-
-``lastlargesign`` *characters* *dots*
-  Translate the characters no matter where they appear. Remove preceding white-space if the previous word was matched by the :ref:`largesign <contraction-opcode-largesign>` opcode.
-
-.. _contraction-opcode-word:
-
-``word`` *characters* *dots*
-  Translate the characters if they're a word.
-
-.. _contraction-opcode-joinword:
-
-``joinword`` *characters* *dots*
-  Translate the characters if they're a word. Remove the following white-space if the first character after it is a letter.
-
-.. _contraction-opcode-lowword:
-
-``lowword`` *characters* *dots*
-  Translate the characters if they're a white-space-bounded word.
-
-.. _contraction-opcode-contraction:
-
-``contraction`` *characters*
-  Prefix the characters with a letter sign (see :ref:`letsign <contraction-opcode-letsign>`) if they're a word.
-
-.. _contraction-opcode-sufword:
-
-``sufword`` *characters* *dots*
-  Translate the characters if they're either a word or at the beginning of a word.
-
-.. _contraction-opcode-prfword:
-
-``prfword`` *characters* *dots*
-  Translate the characters if they're either a word or at the end of a word.
-
-.. _contraction-opcode-begword:
-
-``begword`` *characters* *dots*
-  Translate the characters if they're at the beginning of a word.
-
-.. _contraction-opcode-begmidword:
-
-``begmidword`` *characters* *dots*
-  Translate the characters if they're either at the beginning or in the middle of a word.
-
-.. _contraction-opcode-midword:
-
-``midword`` *characters* *dots*
-  Translate the characters if they're in the middle of a word.
-
-.. _contraction-opcode-midendword:
-
-``midendword`` *characters* *dots*
-  Translate the characters if they're either in the middle or at the end of a word.
-
-.. _contraction-opcode-endword:
-
-``endword`` *characters* *dots*
-  Translate the characters if they're at the end of a word.
-
-.. _contraction-opcode-prepunc:
-
-``prepunc`` *characters* *dots*
-  Translate the characters if they're part of punctuation at the beginning of a word.
-
-.. _contraction-opcode-postpunc:
-
-``postpunc`` *characters* *dots*
-  Translate the characters if they're part of punctuation at the end of a word.
-
-.. _contraction-opcode-begnum:
-
-``begnum`` *characters* *dots*
-  Translate the characters if they're at the beginning of a number.
-
-.. _contraction-opcode-midnum:
-
-``midnum`` *characters* *dots*
-  Translate the characters if they're in the middle of a number.
-
-.. _contraction-opcode-endnum:
-
-``endnum`` *characters* *dots*
-  Translate the characters if they're at the end of a number.
-
-
-.. _contraction-opcodes-classes:
-
-Character Classes
-^^^^^^^^^^^^^^^^^
-
-These opcodes define and use character classes.
-A character class associates a set of characters with a name.
-The name then refers to any character within the class.
-A character may belong to more than one class.
-
-The following character classes are automatically predefined
-based on the selected locale:
-
-digit
-  Numeric characters.
-
-letter
-  Both uppercase and lowercase alphabetic characters. Some locales have additional letters which are neither uppercase nor lowercase.
-
-lowercase
-  Lowercase alphabetic characters.
-
-punctuation
-  Printable characters which are neither white-space nor alphanumeric.
-
-space
-  White-space characters. In the default locale these are: space, horizontal tab, vertical tab, carriage return, new line, form feed.
-
-uppercase
-  Uppercase alphabetic characters.
-
-
-The opcodes which define and use character classes are:
-
-.. _contraction-opcode-class:
-
-``class`` *name* *characters*
-  Define a new character class. The *characters* operand must be specified as a *string*. A character class may not be used until it's been defined.
-
-.. _contraction-opcode-after:
-
-``after`` *class* *opcode* ...
-  The specified opcode is further constrained in that the matched character sequence must be immediately preceded by a character belonging to the specified class. If this opcode is used more than once on the same line then the union of the characters in all the classes is used.
-
-.. _contraction-opcode-before:
-
-``before`` *class* *opcode* ...
-  The specified opcode is further constrained in that the matched character sequence must be immediately followed by a character belonging to the specified class. If this opcode is used more than once on the same line then the union of the characters in all the classes is used.
+See ``Documents/README.ContractionTables`` for
+the contraction-table file format,
+the opcode reference,
+and the character-class machinery.
 
 
 .. _table-key:
@@ -3067,480 +2467,47 @@ The opcodes which define and use character classes are:
 Key Tables
 ----------
 
-Files with names of the form ``*.ktb`` are key tables,
-and with names of the form ``*.kti`` are key subtables.
-They are used by BRLTTY to bind
-braille display and keyboard key combinations
+Files named ``*.ktb`` are key tables.
+They bind physical keys —
+on a braille display, on a standard keyboard, or on both —
 to BRLTTY commands.
-
-The names of braille display key table files begin with ``brl-``\ *xx*\ ``-``",
-where *xx* is the two-letter
-:ref:`driver identification code <drivers>`.
-The rest of the name identifies the model(s)
-for which the key table is used.
-
-The names of keyboard table files begin with ``kbd-``.
-The rest of the name describes the kind of keyboard
-for which the keyboard table has been designed.
-
-The following keyboard tables are provided:
-
-braille
-  bindings for braille keyboards
-
-desktop
-  bindings for full keyboards
-
-keypad
-  bindings for keypad-based navigation
-
-laptop
-  bindings for keyboards without a keypad
-
-sun_type6
-  bindings for Sun Type 6 keyboards
-
-See the :ref:`-k <options-keyboard-table>` command line option,
-and the :ref:`keyboard-table <configure-keyboard-table>` configuration file directive
-for details regarding how to select a keyboard table.
-
-
-Key Table Directives
-~~~~~~~~~~~~~~~~~~~~
-
-A key table consists of a sequence of directives, one per line,
-which define how keys and key combinations are to be interpreted.
-``UTF-8`` character encoding must be used.
-White-space (blanks, tabs) at the beginning of a line,
-as well as before and/or after any operand,
-is ignored.
-Lines containing only white-space are ignored.
-If the first non-white-space character of a line is a number (``#``) sign
-then that line is a comment and is ignored.
-
-The precedence for resolving each key press/release event is as follows:
-#. A hotkey press or release defined within the current context. See the :ref:`hotkey <key-table-hotkey>` directive for details.
-#. A key combination defined within the current context. See the :ref:`bind <key-table-bind>` directive for details.
-#. A braille keyboard command defined within the current context. See the :ref:`map <key-table-map>` and :ref:`superimpose <key-table-superimpose>` directives for details.
-#. A key combination defined within the default context. See the :ref:`bind <key-table-bind>` directive for details.
-
-
-The following directives are provided:
-
-
-.. _key-table-assign:
-
-The Assign Directive
-^^^^^^^^^^^^^^^^^^^^
-
-Create or update a variable associated with the current include level.
-The variable is visible to the current and to lower include levels,
-but not to higher include levels.
-
-``assign`` *variable* [*value*]
-
-*variable*
-  The name of the variable. If the variable doesn't already exist at the current include level then it is created.
-
-*value*
-  The value which is to be assigned to the variable. If it's not supplied then a zero-length (null) value is assigned.
-
-
-The escape sequence \{variable} is substituted
-with the value of the variable named within the braces.
-The variable must have been defined
-at the current or at a higher include level.
-
-Examples:
-
-- ``assign nullValue``
-- ``assign ReturnKey Key1``
-- ``bind \{ReturnKey} RETURN``
-
-
-.. _key-table-bind:
-
-The Bind Directive
-^^^^^^^^^^^^^^^^^^
-
-Define which BRLTTY command is executed
-when a particular combination of one or more keys is pressed.
-The binding is defined within the current context.
-
-``bind`` *keys* *command*
-
-*keys*
-  The key combination which is to be bound. It's a sequence of one or more key names separated by plus (``+``) signs. The final (or only) key name may be optionally prefixed with an exclamation (``!``) point. The keys may be pressed in any order, with the exception that if the final key name is prefixed with an exclamation point then it must be pressed last. The exclamation point prefix means that the command is executed as soon as that key is pressed. If not used, the command is executed as soon as any of the keys is released.
-
-*command*
-  The name of a BRLTTY command. One or more modifiers may be optionally appended to the command name by using a plus (``+``) sign as the separator.
-
-  - For commands which enable/disable a feature:
-    - If the modifier ``+on`` is specified then the feature is enabled.
-    - If the modifier ``+off`` is specified then the feature is disabled.
-    - If neither ``+on`` nor ``+off`` is specified then the state of the feature is toggled on/off.
-
-  - For commands which move the braille window:
-    - If the modifier ``+route`` is specified then, if necessary, the cursor is automatically routed so that it's always visible on the braille display.
-
-  - For commands which move the braille window to a specific line on the screen:
-    - If the modifier ``+toleft`` is specified then the braille window is also moved to the beginning of that line.
-    - If the modifier ``+scaled`` is specified then the set of keys bound to the command is interpreted as though it were a scroll bar. If it isn't, then there's a one-to-one correspondence between keys and lines.
-
-  - For commands which require an offset:
-    - The modifier +*offset*, where *offset* is a non-negative integer, may be specified. If it isn't supplied then ``+0`` is assumed.
-
-
-Examples:
-
-- ``bind Key1 CSRTRK``
-- ``bind Key1+Key2 CSRTRK+off``
-- ``bind Key1+Key3 CSRTRK+on``
-- ``bind Key4 TOP``
-- ``bind Key5 TOP+route``
-- ``bind VerticalSensor GOTOLINE+toleft+scaled``
-- ``bind Key6 CONTEXT+1``
-
-
-.. _key-table-context:
-
-The Context Directive
-^^^^^^^^^^^^^^^^^^^^^
-
-Define alternate ways to interpret certain key events and/or combinations.
-A context contains definitions created by the
-:ref:`bind <key-table-bind>`,
-:ref:`hotkey <key-table-hotkey>`,
-:ref:`ignore <key-table-ignore>`,
-:ref:`map <key-table-map>`,
-and
-:ref:`superimpose <key-table-superimpose>`
-directives.
-
-``context`` *name* [*title*]
-
-*name*
-  Which context subsequent definitions are to be created within. These special contexts are predefined:
-
-  default
-    The default context. If a key combination hasn't been defined within the current context then its definition within the default context is used. This only applies to definitions created by the :ref:`bind <key-table-bind>` directive.
-
-  menu
-    This context is used when within BRLTTY's preferences menu.
-
-*title*
-  A person-readable description of the context. It may contain spaces, and standard capitalization conventions should be used. This operand is optional. If supplied when selecting a context which already has a title then the two must match. Special contexts already have internally-assigned titles.
-
-
-A context is created the first time it's selected.
-It may be reselected any number of times thereafter.
-
-All subsequent definitions until
-either the next :ref:`context <key-table-context>` directive
-or the end of the current include level
-are created within the selected context.
-The initial context of the top-level key table is ``default``.
-The initial context of an included key subtable
-is the context which was selected when it was included.
-Context changes within included key subtables
-don't affect the context of the including key table or subtable.
-
-If a context has a title
-then it is persistent.
-When a key event causes a persistent context to be activated,
-that context remains current until a subsequent key event
-causes a different persistent context to be activated.
-
-If a context doesn't have a title
-then it is temporary.
-When a key event causes a temporary context to be activated,
-that context is only used to interpret the very next key event.
-
-Examples:
-
-- ``context menu``
-- ``context braille Braille Input``
-- ``context DESCCHAR``
-
-
-.. _key-table-hide:
-
-The Hide Directive
-^^^^^^^^^^^^^^^^^^
-
-Specify whether or not certain definitions (see the
-:ref:`bind <key-table-bind>`,
-:ref:`hotkey <key-table-hotkey>`,
-:ref:`map <key-table-map>`,
-and
-:ref:`superimpose <key-table-superimpose>`
-directives) and notes (see the
-:ref:`note <key-table-note>`
-directive) are included within the key table's help text.
-
-``hide`` *state*
-
-*state*
-  One of these keywords:
-
-  on
-    They're excluded.
-
-  off
-    They're included.
-
-
-The specified state applies to all subsequent definitions and notes
-until either the next ``hide`` directive
-or the end of the current include level.
-The initial state of the top-level key table is ``off``.
-The initial state of an included key subtable
-is the state which was selected when it was included.
-State changes within included key subtables
-don't affect the state of the including key table or subtable.
-
-Examples:
-
-- ``hide on``
-
-
-.. _key-table-hotkey:
-
-The Hotkey Directive
-^^^^^^^^^^^^^^^^^^^^
-
-Bind the press and release events of a specific key
-to two separate BRLTTY commands.
-The bindings are defined within the current context.
-
-``hotkey`` *key* *press* *release*
-
-*key*
-  The name of the key which is to be bound.
-
-*press*
-  The name of the BRLTTY command which is to be executed whenever the key is pressed.
-
-*release*
-  The name of the BRLTTY command which is to be executed whenever the key is released.
-
-
-Modifiers may be appended to the command names.
-See the *command* operand
-of the :ref:`bind <key-table-bind>` directive
-for details.
-
-Specify ``NOOP`` if no command is to be executed.
-Specifying ``NOOP`` for both commands
-effectively disables the key.
-
-Examples:
-
-- ``hotkey Key1 CSRVIS+off CSRVIS+on``
-- ``hotkey Key2 NOOP NOOP``
-
-
-.. _key-table-ifkey:
-
-The IfKey Directive
-^^^^^^^^^^^^^^^^^^^
-
-Conditionally process a key table directive
-only if the device has a particular key.
-
-``ifkey`` *key* *directive*
-
-*key*
-  The name of the key whose availability is to be tested.
-
-*directive*
-  The key table directive which is to be conditionally processed.
-
-
-Examples:
-
-- ``ifkey Key1 ifkey Key2 bind Key1+Key2 HOME``
-
-
-.. _key-table-include:
-
-The Include Directive
-^^^^^^^^^^^^^^^^^^^^^
-
-Process the directives within a key subtable.
-It's recursive, which means that
-any key subtable can itself include yet another key subtable.
-Care must be taken to ensure that an "include loop" is not created.
-
-``include`` *file*
-
-*file*
-  The key subtable which is to be included. It may be either a relative or an absolute path. If relative, it's anchored at the directory containing the including key table or subtable.
-
-
-Examples:
-
-- ``include common.kti``
-- ``include /path/to/my/keys.kti``
-
-
-.. _key-table-ignore:
-
-The Ignore Directive
-^^^^^^^^^^^^^^^^^^^^
-
-Ignore a specific key while within the current context.
-
-``ignore`` *key*
-
-*key*
-  The name of the key which is to be ignored.
-
-
-Examples:
-
-- ``ignore Key1``
-
-
-.. _key-table-map:
-
-The Map Directive
-^^^^^^^^^^^^^^^^^
-
-Map a key to a braille keyboard function.
-The mapping is defined within the current context.
-
-``map`` *key* *function*
-
-*key*
-  The name of the key which is to be mapped. More than one key may be mapped to the same braille keyboard function.
-
-*function*
-  The name of the braille keyboard function. It may be one of the following keywords:
-
-  DOT1
-    The upper-left standard braille dot.
-
-  DOT2
-    The middle-left standard braille dot.
-
-  DOT3
-    The lower-left standard braille dot.
-
-  DOT4
-    The upper-right standard braille dot.
-
-  DOT5
-    The middle-right standard braille dot.
-
-  DOT6
-    The lower-right standard braille dot.
-
-  DOT7
-    The lower-left computer braille dot.
-
-  DOT8
-    The lower-right computer braille dot.
-
-  SPACE
-    The space bar.
-
-  SHIFT
-    The shift key.
-
-  UPPER
-    If a lowercase letter is being entered then translate it to its uppercase equivalent.
-
-  CONTROL
-    The control key.
-
-  META
-    The left alt key.
-
-
-If a key combination consists only of keys
-which have been mapped to braille keyboard functions,
-and if those functions when combined form a valid braille keyboard command,
-then that command is executed as soon as any of the keys is released.
-A valid braille keyboard command must include
-either any combination of dot keys or the space bar (but not both).
-If at least one dot key is included
-then the braille keyboard functions specified by the
-:ref:`superimpose <key-table-superimpose>`
-directives within the same context are also implicitly included.
-
-Examples:
-
-- ``map Key1 DOT1``
-
-
-.. _key-table-note:
-
-The Note Directive
-^^^^^^^^^^^^^^^^^^
-
-Add a person-readable explanation to the key table's help text.
-Notes are commonly used, for example,
-to describe the placement, sizes, and shapes of the keys on the device.
-
-``note`` *text*
-
-*text*
-  The explanation which is to be added. It may contain spaces, and should be grammatically correct.
-
-
-Each note specifies exactly one line of explanatory text.
-Leading space is ignored so indentation cannot be specified.
-
-There's no limit to the number of notes which may be specified.
-All of them are gathered together
-and presented in a single block
-at the start of the key table's help text.
-
-Examples:
-
-- ``note Key1 is the round key at the far left on the front surface.``
-
-
-.. _key-table-superimpose:
-
-The Superimpose Directive
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Implicitly include a braille keyboard function whenever
-a braille keyboard command consisting of at least one dot is executed.
-The implicit inclusion is defined within the current context.
-Any number of them may be specified.
-
-``superimpose`` *function*
-
-*function*
-  The name of the braille keyboard function. See the *function* operand of the :ref:`map <key-table-map>` directive for details.
-
-
-Examples:
-
-- ``superimpose DOT7``
-
-
-.. _key-table-title:
-
-The Title Directive
-^^^^^^^^^^^^^^^^^^^
-
-Provide a person-readable summary of the key table's purpose.
-
-``title`` *text*
-
-*text*
-  A one-line summary of what the key table is used for. It may contain spaces, and standard capitalization conventions should be used.
-
-
-The title of the key table may be specified only once.
-
-Examples:
-
-- ``title Bindings for Keypad-based Navigation``
+Most users never have to think about key tables:
+each braille display driver ships with a sensible default binding
+for every supported model,
+so plugging in a display "just works".
+A key table becomes interesting when you want to remap keys,
+adapt a newer display to an older driver,
+or use your computer keyboard as braille input.
+
+There are two naming conventions:
+
+- **Braille display key tables** have names of the form
+  ``brl-``\ *xx*\ ``-``\ *model*\ ``.ktb``,
+  where *xx* is the two-letter
+  :ref:`driver identification code <drivers>`
+  and *model* identifies the display.
+
+- **Keyboard tables** have names of the form
+  ``kbd-``\ *kind*\ ``.ktb``
+  and drive the ordinary computer keyboard
+  when BRLTTY is monitoring it.
+
+The keyboard tables shipped with BRLTTY are:
+
+.. csv-table::
+   :header-rows: 1
+   :file: ../../keyboard-table.csv
+
+Specify a keyboard table with the
+:ref:`-k <options-keyboard-table>` command line option,
+the :ref:`keyboard-table <configure-keyboard-table>` configuration file directive,
+or the :ref:`Keyboard Table <preference-keyboard-table>` preference.
+
+See ``Documents/README.KeyTables`` for the key-table file format
+and the full directive reference
+(``bind``, ``context``, ``hotkey``, ``map``, ``hide``,
+``superimpose``, ``assign``, ``ifkey``, ``ignore``,
+``include``, ``note``, ``title``).
 
 
 .. _keyboard-properties:
@@ -3548,27 +2515,34 @@ Examples:
 Keyboard Properties
 ~~~~~~~~~~~~~~~~~~~
 
-The default is that all keyboards are monitored.
-A subset of the keyboards may be selected by specifying one or more of the following properties
-(see the :ref:`-K <options-keyboard-properties>` command line option,
-and the :ref:`keyboard-properties <configure-keyboard-properties>` configuration file directive):
+By default BRLTTY monitors every keyboard it can find.
+To narrow that down —
+useful when several keyboards are attached
+and only one is to be used for braille input —
+specify one or more of the following properties
+via the
+:ref:`-K <options-keyboard-properties>` command line option
+or the
+:ref:`keyboard-properties <configure-keyboard-properties>` configuration file directive:
 
 type
-  The bus type, specified as one of the following keywords: ``any``, ``ps2``, ``usb``, ``bluetooth``.
+  The bus type:
+  one of ``any``, ``ps2``, ``usb``, ``bluetooth``.
 
 vendor
-  The vendor identifier, specified as a 16-bit unsigned integer.
+  The USB vendor identifier,
+  a 16-bit unsigned integer.
 
 product
-  The product identifier, specified as a 16-bit unsigned integer.
+  The USB product identifier,
+  a 16-bit unsigned integer.
 
-
-The vendor and product identifiers may be specified in
+Vendor and product identifiers may be given in
 decimal (no prefix),
-octal (prefixed by ``0``),
-or hexadecimal (prefixed by ``0x``).
-Specifying ``0`` means match any value
-(as if the property weren't specified).
+octal (``0``-prefixed),
+or hexadecimal (``0x``-prefixed).
+A value of ``0`` means "match any",
+equivalent to not specifying the property at all.
 
 
 Supported Braille Displays

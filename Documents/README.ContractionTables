@@ -4,6 +4,12 @@ Contraction Tables
 
 .. include:: prologue.rst
 
+For a conceptual introduction — what contracted braille is
+and how to activate a contraction table —
+see the *Tables* chapter of the *BRLTTY Reference Manual*.
+This file documents the contraction-table file format,
+opcodes, and character-class machinery.
+
 Description
 ===========
 

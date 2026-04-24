@@ -4,6 +4,11 @@ Key Tables
 
 .. include:: prologue.rst
 
+For a conceptual introduction — what key tables are for
+and how to choose a keyboard table at run time —
+see the *Tables* chapter of the *BRLTTY Reference Manual*.
+This file documents the key-table file format and the full directive reference.
+
 Description
 ===========
 
