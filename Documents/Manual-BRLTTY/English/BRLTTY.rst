@@ -160,871 +160,9 @@ BRLTTY provides the following capabilities:
 - An Application Programming Interface.
 
 
-System Requirements
--------------------
-
-To date, BRLTTY runs under Linux, Solaris, OpenBSD, FreeBSD, NetBSD, and Windows.
-While ports to other Unix-like operating systems aren't currently planned,
-we do welcome any interest in such projects.
-
-Linux
-  This software has been tested on a variety of Linux systems:
-
-  - Desktops, laptops, and some PDAs.
-  - Processors from a 386SX20 to a Pentium.
-  - A huge range of memory sizes.
-  - Several distributions including Debian, Red Hat, Slackware, and SuSE.
-  - Many kernels, including 1.2.13, 2.0, 2.2, and 2.4.
-
-Solaris
-  This software has been tested on the following Solaris systems:
-
-  - The Sparc architecture (releases 7, 8, and 9).
-  - The Intel architecture (release 9).
-
-OpenBSD
-  This software has been tested on the following OpenBSD systems:
-
-  - The Intel architecture (release 3.4).
-
-FreeBSD
-  This software has been tested on the following FreeBSD systems:
-
-  - The Intel architecture (release 5.1).
-
-NetBSD
-  This software has been tested on the following NetBSD systems:
-
-  - The Intel architecture (release 1.6).
-
-.. _preference-skip-blank-windows:
-
-Windows
-  This software has been tested on Windows 95, 98, and XP.
-
-
-On Linux, BRLTTY can inspect the content of the screen
-completely independently of any logged in user.
-It does this by using a special device
-which provides easy access to the contents of the current virtual console.
-This device was introduced in version 1.1.92 of the Linux kernel,
-and is normally called either ``/dev/vcsa`` or ``/dev/vcsa0``
-(on systems with ``devfs`` it's called ``/dev/vcc/a``).
-For this reason, Linux kernel 1.1.92 or later is required
-if BRLTTY is to be used in this way.
-This capability:
-
-- Allows BRLTTY to be started very early in the system boot sequence.
-- Enables the braille display to be fully operational during the login prompt.
-- Makes it much easier for a braille user to perform boot-time system administration tasks.
-
-
-A patch for the ``screen`` program is provided
-(see the ``Patches`` subdirectory).
-It allows BRLTTY to access ``screen``'s screen image via shared memory,
-and, therefore, allows BRLTTY to be used quite effectively on platforms
-which don't have their own screen content inspection facility.
-The main weakness of the ``screen`` approach is that
-BRLTTY can't be started until the user has logged in.
-
-BRLTTY only works with text-based consoles and applications.
-It can be used with ``curses``-based applications,
-but not with any application which
-either uses special VGA features
-or requires a graphics console (like the X Window system).
-
-You must also, of course, possess a supported refreshable braille display
-(see section :ref:`Supported Braille Displays <displays>` for the complete list).
-We hope that additional displays will be supported in the future, so,
-if you have any vaguely technical programming information
-for a device which you'd like to see supported,
-then please let us know (see section :ref:`Contact Information <contact>`).
-
-Finally, you need tools to build the executable from its source:
-``make``, ``C`` and ``C++`` compilers, ``yacc``, ``awk``, etc.
-The development tools provided with standard Unix distributions should suffice.
-If you have problems,
-then contact us and we'll compile a binary for you.
-
-
-The Build Procedure
-===================
-
-BRLTTY can be downloaded from its web site
-(see section :ref:`Contact Information <contact>` for its location).
-All releases are provided as compressed :ref:`tar balls <tar>`.
-Newer releases are also provided as :ref:`RPM <rpm>` (RedHat Package Manager) files.
-
-That tidbit of information has probably peaked your curiosity,
-and now you just can't wait to get started.
-It's a good idea, though,
-to first become familiar with the files which will ultimately be installed.
-
-
-.. _hierarchy:
-
-Installed File Hierarchy
-------------------------
-
-The build procedure should result in the installation of the following files:
-/bin/
-
-  brltty
-    The BRLTTY program.
-
-  :ref:`brltty-install <utility-brltty-install>`
-    A utility for copying BRLTTY's :ref:`installed file hierarchy <hierarchy>` from one location to another.
-
-  :ref:`brltty-config <utility-brltty-config>`
-    A utility which sets a number of environment variables to values which reflect the current installation of BRLTTY.
-
-/lib/
-
-  libbrlapi.a
-    Static archive of the Application Programming Interface.
-
-  libbrlapi.so
-    Dynamically loadable object for the Application Programming Interface.
-
-/lib/brltty/
-  Your installation of BRLTTY may not have all of the following types of files. They're only created as needed based on the build options you select (see :ref:`Build Options <build>`).
-
-  brltty-brl.lst
-    A list of the braille display drivers which have been built as dynamically loadable shared objects, and, therefore, which can be selected at run-time. Each line consists of the two-letter identification code for a driver, a tab character, and a description of the braille display which that driver is for.
-
-  libbrlttyb*driver*.so.1
-    The dynamically loadable driver for a braille display, where *driver* is the two-letter :ref:`driver identification code <drivers>`.
-
-  brltty-spk.lst
-    A list of the speech synthesizer drivers which have been built as dynamically loadable shared objects, and, therefore, which can be selected at run-time. Each line consists of the two-letter identification code for a driver, a tab character, and a description of the speech synthesizer which that driver is for.
-
-  libbrlttys*driver*.so.1
-    The dynamically loadable driver for a speech synthesizer, where *driver* is the two-letter :ref:`driver identification code <drivers>`.
-
-/lib/brltty/rw/
-  Files created at run-time, e.g. needed but missing system resources.
-
-/etc/
-
-  brltty.conf
-    System defaults for BRLTTY.
-
-  brlapi.key
-    The access key for BrlAPI.
-
-/etc/brltty/
-  Your installation of BRLTTY may not have all of the following types of files. They're only created as needed based on the build options you select (see :ref:`Build Options <build>`).
-
-  \*.conf
-    Driver-specific configuration data. Their names look more or less like ``brltty-``\ *driver*\ ``.conf``, where *driver* is the two-letter :ref:`driver identification code <drivers>`.
-
-  \*.atb
-    Attributes tables (see section :ref:`Attributes Tables <table-attributes>` for details). Their names look like *name*\ ``.atb``.
-
-  \*.ati
-    Include files for attributes tables.
-
-  \*.ctb
-    Contraction tables (see section :ref:`Contraction Tables <table-contraction>` for details). Their names look like *language*\ ``-``\ *country*\ ``-``\ *level*\ ``.ctb``.
-
-  \*.cti
-    Include files for contraction tables.
-
-  \*.ktb
-    Key tables (see section :ref:`Key Tables <table-key>` for details). Their names look like *name*\ ``.ktb``.
-
-  \*.kti
-    Include files for key tables.
-
-  \*.ttb
-    Text tables (see section :ref:`Text Tables <table-text>` for details). Their names look like *language*\ ``.ttb``.
-
-  \*.tti
-    Include files for text tables.
-
-  \*.hlp
-    Driver-specific help pages. Their names look more or less like ``brltty-``\ *driver*\ ``.hlp``, where *driver* is the two-letter :ref:`driver identification code <drivers>`.
-
-/var/lib/BrlAPI/
-  Local sockets for connecting to the Application Programming Interface.
-
-/include/
-  C header files for the Application Programming Interface. Their names look like ``brlapi-``\ *function*\ ``.h``. The main header is ``brlapi.h``.
-
-/include/brltty/
-  C header files for accessing braille hardware. Their names look like ``brldefs-``\ *driver*\ ``.h`` (where *driver* is the two-letter :ref:`driver identification code <drivers>`). The headers ``brldefs.h`` and ``api.h`` are provided for backward compatibility and shouldn't be used.
-
-/man/
-  Man pages.
-
-  man1/*name*.1
-    Man pages for BRLTTY-related user commands.
-
-  man3/*name*.3
-    Man pages for Application Programming Interface library routines.
-
-
-Some optional files which you should be aware of,
-although they aren't part of the installed file hierarchy, are:
-
-/etc/brltty.conf
-  The system defaults configuration file. It's created by the system administrator. See :ref:`The Configuration File <configure>` for details.
-
-/etc/brltty-*driver*.prefs
-  The saved preferences settings file (*driver* is a two-letter :ref:`driver identification code <drivers>`). It's created by the :ref:`PREFSAVE <command-PREFSAVE>` command. See :ref:`Preferences Settings <preferences>` for details.
-
-
-.. _tar:
-
-Installing from a TAR Ball
---------------------------
-
-Here's what to do if you just want to install BRLTTY as quickly as possible,
-trusting that all of our defaults are correct.
-#. Download the source. It'll be a file named ``brltty-``\ *release*\ ``.tar.gz``, e.g. ``brltty-3.0.tar.gz``.
-#. Unpack the source into its native hierarchical structure.
-
-
-   .. parsed-literal::
-
-     tar xzf brltty-*release*.tar.gz
-
-#. This should create the directory ``brltty-``\ *release*.
-#. Change to the source directory, configure, compile, and install BRLTTY.
-
-
-   .. parsed-literal::
-
-     cd brltty-*release*
-     ./configure
-     make install
-
-#. This should be done as **root**.
-
-
-To uninstall BRLTTY, do:
-
-.. parsed-literal::
-
-  cd brltty-*release*
-  make uninstall
-
-
-That's all there's to it.
-Now, for those who really want to know what's going on, here are the details.
-
-
-.. _build:
-
-Build Options
-~~~~~~~~~~~~~
-
-The first step in building BRLTTY is to configure it
-for your system and/or for your personal needs.
-This is done by running the ``configure`` script in BRLTTY's top-level directory.
-We've tried to make the defaults fit the most common case, so,
-assuming that you're not attempting to do anything out of the ordinary,
-you may not need to do anything more complicated than
-invoke this script without specifying any options at all.
-
-.. parsed-literal::
-
-  ./configure
-
-If, however, you have some special requirements,
-or even if you're just adventurous,
-you should find out what your choices are.
-
-.. parsed-literal::
-
-  ./configure --help
-
-You should also check out the ``README`` file in the subdirectory
-containing the driver for your braille display
-for any additional display-specific instructions.
-
-
-.. _build-defaults:
-
-System Defaults
-^^^^^^^^^^^^^^^
-
-.. _build-braille-driver:
-
-``--with-braille-driver=``\ *driver*
-  Specify the braille display drivers which are to be linked into the BRLTTY binary. Those drivers which aren't listed via this option are built as dynamically loadable shared objects and can still be selected at run-time. Each driver must be identified either by its two-letter :ref:`driver identification code <drivers>` or by its proper name (full or abbreviated). The driver identifiers must be separated from one another by a single comma. If a driver identifier is prefixed by a minus sign (``-``), then that driver is excluded from the build. Any of the following words can also be used as the operand of this option:
-
-  all
-    Link all of the drivers into the binary. Don't build any of them as dynamically loadable shared objects. This word may also be specified as the final element of a driver list. This is how to specify the default driver when all the drivers are to be linked in.
-
-  -all
-    Only build those drivers which have been explicitly included via this option.
-
-  no
-    Don't build any drivers at all. This is equivalent to specifying ``--without-braille-driver``.
-
-  yes
-    Build all of the drivers as dynamically loadable shared objects. Don't link any of them into the binary. This is equivalent to specifying ``--with-braille-driver``.
-
-  See the :ref:`braille-driver <configure-braille-driver>` configuration file directive and the :ref:`-b <options-braille-driver>` command line option for run-time selection.
-
-.. _build-braille-parameters:
-
-``--with-braille-parameters=``\ [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``...
-  Specify the default parameter settings for the braille display drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Driver Identification Codes <drivers>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the :ref:`braille-parameters <configure-braille-parameters>` configuration file directive and the :ref:`-B <options-braille-parameters>` command line option for run-time selection.
-
-.. _build-braille-device:
-
-``--with-braille-device=``\ *device*\ ``,``...
-  Specify the default device to which the braille display is connected (see section :ref:`Braille Device Specification <operand-braille-device>`). If this option isn't specified then ``usb:`` is assumed if USB support is available, ``bluetooth:`` is assumed if Bluetooth support is available, and ``usb:,bluetooth:`` is assumed if both are available. If neither USB nor Bluetooth support is available then an operating system appropriate path for the primary (first) serial port (device) is assumed. See the :ref:`braille-device <configure-braille-device>` configuration file directive and the :ref:`-d <options-braille-device>` command line option for run-time selection.
-
-.. _build-libbraille:
-
-``--with-libbraille=``\ *directory*
-  Specify the installed location of the Libbraille package, and build the Libbraille braille display driver (see :ref:`Build Restrictions <restrictions-libbraille>`). Any of the following words can also be used as the operand of this option:
-
-  no
-    Don't build the driver. This is equivalent to specifying ``--without-libbraille``.
-
-  yes
-    Build the driver if the package can be found in ``/usr``, ``/usr/local``, ``/usr/local/Libbraille``, ``/usr/local/libbraille``, ``/opt/Libbraille``, or ``/opt/libbraille``. This is equivalent to specifying ``--with-libbraille``.
-
-.. _build-text-table:
-
-``--with-text-table=``\ *file*
-  Specify the built-in (fallback) text table (see section :ref:`Text Tables <table-text>` for details). The specified table is linked into the BRLTTY binary, and is used either if locale-based autoselection fails or if the requested table can't be loaded. The absolute path to a table outside the source tree may be specified. The ``.ttb`` extension is optional. If this option isn't specified, then ``en-nabcc``, a commonly (in North America) used 8-dot variant of the :ref:`North American Braille Computer Code <nabcc>`, is assumed. See the :ref:`text-table <configure-text-table>` configuration file directive and the :ref:`-t <options-text-table>` command line option for run-time selection. This setting can be changed with the :ref:`Text Table <preference-text-table>` preference.
-
-.. _build-attributes-table:
-
-``--with-attributes-table=``\ *file*
-  Specify the built-in (fallback) attributes table (see section :ref:`Attributes Translation <table-attributes>` for details). The specified table is linked into the BRLTTY binary, and is used if the requested table can't be loaded. The absolute path to a table outside the source tree may be specified. The ``.atb`` extension is optional. If this option isn't specified, then ``left_right`` is assumed. Change it to ``invleft_right`` if you'd like it done the old way. See the :ref:`attributes-table <configure-attributes-table>` configuration file directive and the :ref:`-a <options-attributes-table>` command line option for run-time selection. This setting can be changed with the :ref:`Attributes Table <preference-attributes-table>` preference.
-
-.. _build-speech-driver:
-
-``--with-speech-driver=``\ *driver*
-  Specify the speech synthesizer drivers which are to be linked into the BRLTTY binary. Those drivers which aren't listed via this option are built as dynamically loadable shared objects and can still be selected at run-time. Each driver must be identified either by its two-letter :ref:`driver identification code <drivers>` or by its proper name (full or abbreviated). The driver identifiers must be separated from one another by a single comma. If a driver identifier is prefixed by a minus sign (``-``), then that driver is excluded from the build. Any of the following words can also be used as the operand of this option:
-
-  all
-    Link all of the drivers into the binary. Don't build any of them as dynamically loadable shared objects. This word may also be specified as the final element of a driver list. This is how to specify the default driver when all the drivers are to be linked in.
-
-  -all
-    Only build those drivers which have been explicitly included via this option.
-
-  no
-    Don't build any drivers at all. This is equivalent to specifying ``--without-speech-driver``.
-
-  yes
-    Build all of the drivers as dynamically loadable shared objects. Don't link any of them into the binary. This is equivalent to specifying ``--with-speech-driver``.
-
-  See the :ref:`speech-driver <configure-speech-driver>` configuration file directive and the :ref:`-s <options-speech-driver>` command line option for run-time selection.
-
-.. _build-speech-parameters:
-
-``--with-speech-parameters=``\ [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``...
-  Specify the default parameter settings for the speech synthesizer drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Driver Identification Codes <drivers>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the :ref:`speech-parameters <configure-speech-parameters>` configuration file directive and the :ref:`-S <options-speech-parameters>` command line option for run-time selection.
-
-.. _build-flite:
-
-``--with-flite=``\ *directory*
-  Specify the installed location of the FestivalLite text-to-speech package, and build the FestivalLite speech synthesizer driver (see :ref:`Build Restrictions <restrictions-flite>`). Any of the following words can also be used as the operand of this option:
-
-  no
-    Don't build the driver. This is equivalent to specifying ``--without-flite``.
-
-  yes
-    Build the driver if the package can be found in ``/usr``, ``/usr/local``, ``/usr/local/FestivalLite``, ``/usr/local/flite``, ``/opt/FestivalLite``, or ``/opt/flite``. This is equivalent to specifying ``--with-flite``.
-
-.. _build-flite-language:
-
-``--with-flite-language=``\ *language*
-  Specify the language which the FestivalLite text to speech engine is to use. The default language is ``usenglish``.
-
-.. _build-flite-lexicon:
-
-``--with-flite-lexicon=``\ *lexicon*
-  Specify the lexicon which the FestivalLite text to speech engine is to use. The default lexicon is ``cmulex``.
-
-.. _build-flite-voice:
-
-``--with-flite-voice=``\ *voice*
-  Specify the voice which the FestivalLite text to speech engine is to use. The default voice is ``cmu_us_kal16``.
-
-.. _build-mikropuhe:
-
-``--with-mikropuhe=``\ *directory*
-  Specify the installed location of the Mikropuhe text-to-speech package, and build the Mikropuhe speech synthesizer driver (see :ref:`Build Restrictions <restrictions-mikropuhe>`). Any of the following words can also be used as the operand of this option:
-
-  no
-    Don't build the driver. This is equivalent to specifying ``--without-mikropuhe``.
-
-  yes
-    Build the driver if the package can be found in ``/usr``, ``/usr/local``, ``/usr/local/Mikropuhe``, ``/usr/local/mikropuhe``, ``/opt/Mikropuhe``, or ``/opt/mikropuhe``. This is equivalent to specifying ``--with-mikropuhe``.
-
-.. _build-speechd:
-
-``--with-speechd=``\ *directory*
-  Specify the installed location of the speech-dispatcher text-to-speech package, and build the speech-dispatcher speech synthesizer driver. Any of the following words can also be used as the operand of this option:
-
-  no
-    Don't build the driver. This is equivalent to specifying ``--without-speechd``.
-
-  yes
-    Build the driver if the package can be found in ``/usr``, ``/usr/local``, ``/usr/local/speech-dispatcher``, ``/usr/local/speechd``, ``/opt/speech-dispatcher``, or ``/opt/speechd``. This is equivalent to specifying ``--with-speechd``.
-
-.. _build-swift:
-
-``--with-swift=``\ *directory*
-  Specify the installed location of the Swift text-to-speech package, and build the Swift speech synthesizer driver. Any of the following words can also be used as the operand of this option:
-
-  no
-    Don't build the driver. This is equivalent to specifying ``--without-swift``.
-
-  yes
-    Build the driver if the package can be found in ``/usr``, ``/usr/local``, ``/usr/local/Swift``, ``/usr/local/swift``, ``/opt/Swift``, or ``/opt/swift``. This is equivalent to specifying ``--with-swift``.
-
-.. _build-theta:
-
-``--with-theta=``\ *directory*
-  Specify the installed location of the Theta text-to-speech package, and build the Theta speech synthesizer driver (see :ref:`Build Restrictions <restrictions-theta>`). Any of the following words can also be used as the operand of this option:
-
-  no
-    Don't build the driver. This is equivalent to specifying ``--without-theta``.
-
-  yes
-    Build the driver if the package can be found in ``/usr``, ``/usr/local``, ``/usr/local/Theta``, ``/usr/local/theta``, ``/opt/Theta``, or ``/opt/theta``. This is equivalent to specifying ``--with-theta``.
-
-.. _build-screen-driver:
-
-``--with-screen-driver=``\ *driver*
-  Specify the screen drivers which are to be linked into the BRLTTY binary. Those drivers which aren't listed via this option are built as dynamically loadable shared objects and can still be selected at run-time. Each driver must be identified either by its two-letter driver identification code (see section :ref:`Supported Screen Drivers <screen>`) or by its proper name (full or abbreviated). The driver identifiers must be separated from one another by a single comma. If a driver identifier is prefixed by a minus sign (``-``), then that driver is excluded from the build. Any of the following words can also be used as the operand of this option:
-
-  all
-    Link all of the drivers into the binary. Don't build any of them as dynamically loadable shared objects. This word may also be specified as the final element of a driver list. This is how to specify the default driver when all the drivers are to be linked in.
-
-  -all
-    Only build those drivers which have been explicitly included via this option.
-
-  no
-    Don't build any drivers at all. This is equivalent to specifying ``--without-screen-driver``.
-
-  yes
-    Build all of the drivers as dynamically loadable shared objects. Don't link any of them into the binary. This is equivalent to specifying ``--with-screen-driver``.
-
-  The first non-excluded driver becomes the default driver. If this option isn't specified, or if no driver is specifically included, then an operating system appropriate default is selected. If a native driver for the current operating system is available, then that driver is selected; if not, then ``sc`` is selected. See the :ref:`screen-driver <configure-screen-driver>` configuration file directive and the :ref:`-x <options-screen-driver>` command line option for run-time selection.
-
-.. _build-screen-parameters:
-
-``--with-screen-parameters=``\ [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``...
-  Specify the default parameter settings for the screen drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Supported Screen Drivers <screen>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the :ref:`screen-parameters <configure-screen-parameters>` configuration file directive and the :ref:`-X <options-screen-parameters>` command line option for run-time selection.
-
-.. _build-usb-package:
-
-``--with-usb-package=``\ *package*\ ``,``...
-  Specify the package which is to be used for USB I/O. The package names must be separated from one another by a single comma, and are processed from left to right. The first one which is installed on the system is selected. The following packages are supported:
-
-  #. libusb
-  #. libusb-1.0
-
-  Any of the following words can also be used as the operand of this option:
-
-  no
-    Don't support USB I/O. This is equivalent to specifying ``--without-usb-package``.
-
-  yes
-    Use native support for USB I/O. If native support isn't available for the current platform then use the first available supported package (as per the order specified above). This is equivalent to specifying ``--with-usb-package``.
-
-.. _build-bluetooth-package:
-
-``--with-bluetooth-package=``\ *package*\ ``,``...
-  Specify the package which is to be used for Bluetooth I/O. The package names must be separated from one another by a single comma, and are processed from left to right. The first one which is installed on the system is selected. The following packages are supported:
-
-  #. (no packages are currently supported)
-
-  Any of the following words can also be used as the operand of this option:
-
-  no
-    Don't support Bluetooth I/O. This is equivalent to specifying ``--without-bluetooth-package``.
-
-  yes
-    Use native support for Bluetooth I/O. If native support isn't available for the current platform then use the first available supported package (as per the order specified above). This is equivalent to specifying ``--with-bluetooth-package``.
-
-
-.. _build-directoreis:
-
-Directory Specification
-^^^^^^^^^^^^^^^^^^^^^^^
-
-.. _build-execute-root:
-
-``--with-execute-root=``\ *directory*
-  Specify the directory at which the :ref:`installed file hierarchy <hierarchy>` is to be rooted at run-time. The absolute path should be supplied. If this option isn't specified, then the system's root directory is assumed. Use this option if you need to install BRLTTY's run-time files in a non-standard location. You need to use this feature, for example, if you'd like to have more than one version of BRLTTY installed at the same time (see section :ref:`Installing Multiple Versions <multiple>` for an example of how to do this).
-
-.. _build-install-root:
-
-``--with-install-root=``\ *directory*
-  Specify the directory beneath which the :ref:`installed file hierarchy <hierarchy>` is to be installed. The absolute path should be supplied. If this option isn't specified, then the run-time package root (see the :ref:`--with-execute-root <build-execute-root>` build option) is assumed. This directory is only used by :ref:`make install <make-install>` and :ref:`make uninstall <make-uninstall>`. Use this option if you need to install BRLTTY in a different location than the one from which it'll ultimately be executed. You need to use this feature, for example, if you're building BRLTTY on one system for use on another.
-
-.. _build-portable-root:
-
-``--prefix=``\ *directory*
-  Specify the directory within the :ref:`installed file hierarchy <hierarchy>` where the default directories for the architecture-independent files are to be rooted. These directories include:
-
-  - the :ref:`writable directory <build-writable-directory>`
-  - the :ref:`data directory <build-data-directory>`
-  - the :ref:`configuration directory <build-configuration-directory>`
-  - the :ref:`manpage directory <build-manpage-directory>`
-  - the :ref:`include directory <build-include-directory>`
-
-  The absolute path should be supplied. If this option isn't specified, then the system's root directory is assumed. This directory is rooted at the directory specified by the :ref:`--with-execute-root <build-execute-root>` build option.
-
-.. _build-architecture-root:
-
-``--exec-prefix=``\ *directory*
-  Specify the directory within the :ref:`installed file hierarchy <hierarchy>` where the default directories for the architecture-dependent files are to be rooted. These directories include:
-
-  - the :ref:`program directory <build-program-directory>`
-  - the :ref:`library directory <build-library-directory>`
-  - the :ref:`API directory <build-api-directory>`
-
-  The absolute path should be supplied. If this option isn't specified, then the directory specified via the :ref:`--prefix <build-portable-root>` build option is assumed. This directory is rooted at the directory specified by the :ref:`--with-execute-root <build-execute-root>` build option.
-
-.. _build-api-directory:
-
-``--libdir=``\ *directory*
-  Specify the directory within the :ref:`installed file hierarchy <hierarchy>` where the static archive and the dynamically loadable object for the Application Programming Interface are to be installed. The absolute path should be supplied. If this option isn't specified, then the directory specified via the standard configure option ``--libdir`` (which defaults to ``/lib`` rooted at the directory specified by the :ref:`--exec-prefix <build-architecture-root>` build option) is assumed. The directory is created if it doesn't exist.
-
-.. _build-configuration-directory:
-
-``--sysconfdir=``\ *directory*
-  Specify the directory within the :ref:`installed file hierarchy <hierarchy>` where the configuration files are to be installed. The absolute path should be supplied. If this option isn't specified, then the directory specified via the standard configure option ``--sysconfdir`` (which defaults to ``/etc`` rooted at the directory specified by the :ref:`--prefix <build-portable-root>` build option) is assumed. The directory is created if it doesn't exist.
-
-.. _build-program-directory:
-
-``--with-program-directory=``\ *directory*
-  Specify the directory within the :ref:`installed file hierarchy <hierarchy>` where the runnable programs (binaries, executables) are to be installed. The absolute path should be supplied. If this option isn't specified, then the directory specified via the standard configure option ``--bindir`` (which defaults to ``/bin`` rooted at the directory specified by the :ref:`--exec-prefix <build-architecture-root>` build option) is assumed. The directory is created if it doesn't exist.
-
-.. _build-library-directory:
-
-``--with-library-directory=``\ *directory*
-  Specify the directory within the :ref:`installed file hierarchy <hierarchy>` where the drivers and other architecture-dependent files are to be installed. The absolute path should be supplied. If this option isn't specified, then the ``brltty`` subdirectory of the directory specified via the standard configure option ``--libdir`` (which defaults to ``/lib`` rooted at the directory specified by the :ref:`--exec-prefix <build-architecture-root>` build option) is assumed. The directory is created if it doesn't exist.
-
-.. _build-writable-directory:
-
-``--with-writable-directory=``\ *directory*
-  Specify the directory within the :ref:`installed file hierarchy <hierarchy>` which may be written to. The absolute path should be supplied. Any of the following words can also be used as the operand of this option:
-
-  no
-    Don't define a writable directory. This is equivalent to specifying ``--without-writable-directory``.
-
-  yes
-    Use the default location. This is equivalent to specifying ``--with-writable-directory``.
-
-  If this option isn't specified, then the ``rw`` subdirectory of the directory specified via the :ref:`--with-library-directory <build-library-directory>` build option is assumed. The directory is created if it doesn't exist.
-
-.. _build-data-directory:
-
-``--with-data-directory=``\ *directory*
-  Specify the directory within the :ref:`installed file hierarchy <hierarchy>` where the tables, help pages, and other architecture-independent files are to be installed. The absolute path should be supplied. If this option isn't specified, then the ``brltty`` subdirectory of the directory specified via the standard configure option ``--sysconfdir`` (which defaults to ``/etc`` rooted at the directory specified by the :ref:`--prefix <build-portable-root>` build option) is assumed. The directory is created if it doesn't exist.
-
-.. _build-manpage-directory:
-
-``--with-manpage-directory=``\ *directory*
-  Specify the directory within the :ref:`installed file hierarchy <hierarchy>` where the man pages are to be installed. The absolute path should be supplied. If this option isn't specified, then the directory specified via the standard configure option ``--mandir`` (which defaults to ``/man`` rooted at the directory specified by the :ref:`--prefix <build-portable-root>` build option) is assumed. The directory is created if it doesn't exist.
-
-.. _build-include-directory:
-
-``--with-include-directory=``\ *directory*
-  Specify the directory within the :ref:`installed file hierarchy <hierarchy>` where the C header files for the Application Programming Interface are to be installed. The absolute path should be supplied. If this option isn't specified, then the ``brltty`` subdirectory of the directory specified via the standard configure option ``--includedir`` (which defaults to ``/include`` rooted at the directory specified by the :ref:`--prefix <build-portable-root>` build option) is assumed. The directory is created if it doesn't exist.
-
-
-.. _build-features:
-
-Build Features
-^^^^^^^^^^^^^^
-
-These options are primarily useful when building BRLTTY for use on a boot disk.
-
-.. _build-standalone-programs:
-
-``--enable-standalone-programs``
-  Create statically linked, rather than dynamically linked, programs. This option removes all dependencies on shared objects at run-time. Only the default drivers (see the :ref:`--with-braille-driver <build-braille-driver>`, :ref:`--with-speech-driver <build-speech-driver>`, and :ref:`--with-screen-driver <build-screen-driver>` build options) are compiled.
-
-.. _build-relocatable-install:
-
-``--enable-relocatable-install``
-  If this feature is enabled then all internal paths are recalculated to be relative to the program directory. If it's disabled then all internal paths are absolute. This feature allows the entire installed file hierarchy to be copied or moved, in tact, from one place to another, and is primarily intended for use on Windows platforms.
-
-.. _build-stripping:
-
-``--disable-stripping``
-  Don't remove the symbol tables from executables and shared objects when installing them.
-
-.. _command-LEARN:
-
-.. _build-learn-mode:
-
-``--disable-learn-mode``
-  Reduce program size by excluding command learn mode (see section :ref:`Command Learn Mode <learn>`).
-
-.. _build-contracted-braille:
-
-``--disable-contracted-braille``
-  Reduce program size by excluding support for contracted braille (see section :ref:`Contraction Tables <table-contraction>`).
-
-.. _build-speech-support:
-
-``--disable-speech-support``
-  Reduce program size by excluding support for speech synthesizers.
-
-.. _build-iconv:
-
-``--disable-iconv``
-  Reduce program size by excluding support for character set conversion.
-
-.. _build-icu:
-
-``--disable-icu``
-  Reduce program size by excluding support for Unicode-based internationalization.
-
-.. _build-x:
-
-``--disable-x``
-  Reduce program size by excluding support for X11.
-
-.. _build-beeper-support:
-
-``--disable-beeper-support``
-  Reduce program size by excluding support for the console tone generator.
-
-.. _build-pcm-support:
-
-``--disable-pcm-support``
-  Reduce program size by excluding support for the digital audio interface on the sound card.
-
-``--enable-pcm-support=``\ *interface*
-  If a platform provides more than one digital audio interface then the one which is to be used may be specified.
-
-
-  .. list-table::
-     :header-rows: 1
-
-     * - Platform
-       - Interface
-       - Description
-
-     * - Linux
-       - oss
-       - Open Sound System
-
-     * -
-       - alsa
-       - Advanced Linux Sound Architecture
-
-.. _build-midi-support:
-
-``--disable-midi-support``
-  Reduce program size by excluding support for the Musical Instrument Digital Interface of the sound card.
-
-``--enable-midi-support=``\ *interface*
-  If a platform provides more than one Musical Instrument Digital Interface then the one which is to be used may be specified.
-
-
-  .. list-table::
-     :header-rows: 1
-
-     * - Platform
-       - Interface
-       - Description
-
-     * - Linux
-       - oss
-       - Open Sound System
-
-     * -
-       - alsa
-       - Advanced Linux Sound Architecture
-
-.. _build-fm-support:
-
-``--disable-fm-support``
-  Reduce program size by excluding support for the FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card.
-
-.. _build-pm-configfile:
-
-``--disable-pm-configfile``
-  Reduce program size by excluding support for the Papenmeier driver's configuration file.
-
-.. _build-gpm:
-
-``--disable-gpm``
-  Reduce program size by excluding the interface to the ``gpm`` application which allows BRLTTY to interact with the pointer (mouse) device (see section :ref:`Pointer (Mouse) Support via GPM <gpm>`).
-
-.. _build-api:
-
-``--disable-api``
-  Reduce program size by excluding the Application Programming Interface.
-
-.. _build-api-parameters:
-
-``--with-api-parameters=``\ *name*\ ``=``\ *value*\ ``,``...
-  Specify the default parameter settings for the Application Programming Interface. If the same parameter is specified more than once, then its rightmost assignment is used. For a description of the parameters accepted by the interface, please see the **BrlAPI** reference manual. See the :ref:`api-parameters <configure-api-parameters>` configuration file directive and the :ref:`-A <options-api-parameters>` command line option for run-time selection.
-
-.. _build-caml-bindings:
-
-``--disable-caml-bindings``
-  Don't build the Caml bindings for the Application Programming Interface.
-
-.. _build-java-bindings:
-
-``--disable-java-bindings``
-  Don't build the Java bindings for the Application Programming Interface.
-
-.. _build-lisp-bindings:
-
-``--disable-lisp-bindings``
-  Don't build the Lisp bindings for the Application Programming Interface.
-
-.. _build-python-bindings:
-
-``--disable-python-bindings``
-  Don't build the Python bindings for the Application Programming Interface.
-
-.. _build-tcl-bindings:
-
-``--disable-tcl-bindings``
-  Don't build the Tcl bindings for the Application Programming Interface.
-
-.. _build-tcl-config:
-
-``--with-tcl-config=``\ *path*
-  Specify the location of the Tcl configuration script (``tclConfig.sh``). Either the path to the script itself or to the directory containing it may be supplied. Any of the following words can also be used as the operand of this option:
-
-  no
-    Use other means to guess if Tcl is available, and, if so, where it has been installed. This is equivalent to specifying ``--without-tcl-config``.
-
-  yes
-    Search for the script in a few commonly used directories. This is equivalent to specifying ``--with-tcl-config``.
-
-
-.. _build-miscellaneous:
-
-Miscellaneous Options
-^^^^^^^^^^^^^^^^^^^^^
-
-.. _build-init-path:
-
-``--with-init-path=``\ *path*
-  Specify the path to the real ``init`` program for the system. The absolute path should be supplied. If this option is specified, then:
-
-  #. The ``init`` program should be moved to a new location.
-  #. ``brltty`` should be moved to the ``init`` program's original location.
-  #. When the system runs ``init`` at startup, ``brltty`` is actually run. It puts itself into the background, and runs the real ``init`` in the foreground. This is one (somewhat sneaky) way to have braille right at the outset. It's especially useful for some install/rescue disks.
-
-  If this option isn't specified, then this feature isn't activated. This option is primarily intended for building a braillified installer image.
-
-.. _build-stderr-path:
-
-``--with-stderr-path=``\ *path*
-  Specify the path to the file or device where standard error output is to be written. The absolute path should be supplied. If this option isn't specified, then this feature isn't activated. This option is primarily intended for building a braillified installer image.
-
-
-.. _make:
-
-Make File Targets
-~~~~~~~~~~~~~~~~~
-
-Once BRLTTY has been configured,
-the next steps are to compile and to install it.
-These are done by applying the system's ``make`` command
-to BRLTTY's main make file (``Makefile`` in the top-level directory).
-BRLTTY's make file supports most of the common application maintenance targets.
-They include:
-
-.. _make-uninstall:
-
-make
-  A shortcut for ``make all``.
-
-.. _make-all:
-
-make all
-  Compile and link the BRLTTY executable, its drivers and their help pages, its test programs, and a few other small utilities.
-
-.. _make-install:
-
-make install
-  Complete the compile and link phase (see :ref:`make all <make-all>`), and then install the BRLTTY executable, its data files, drivers, and help pages, in the correct places and with the correct permissions.
-
-make uninstall
-  Remove the BRLTTY executable, its data files, drivers, and help pages, from the system.
-
-.. _make-clean:
-
-make clean
-  Ensure that the next compile and link (see :ref:`make all <make-all>`) will be done from scratch by removing the results of compiling, linking, and testing from the source directory structure. This includes the removal of object files, executables, dynamically loadable shared objects, driver lists, help pages, temporary header files, and core files.
-
-.. _make-distclean:
-
-make distclean
-  In addition to removing the results of compiling and linking (see :ref:`make clean <make-clean>`):
-
-  - Remove the results of BRLTTY configuration (see :ref:`Build Options <build>`). This includes the removal of ``config.mk``, ``config.h``, ``config.cache``, ``config.status``, and ``config.log``.
-  - Remove other files from the source directory structure which tend to accumulate over time but which don't belong there. This includes the removal of editor backup files, test case results, rejected patch hunks, and copies of original source files.
-
-
-Testing BRLTTY
---------------
-
-After compiling, linking, and installing BRLTTY,
-it's a good idea to give it a quick test before activating it permanently.
-To do so, invoke it with the command:
-
-.. parsed-literal::
-
-  brltty -b*driver* -d*device*
-
-For *driver*, specify the two-letter
-:ref:`driver identification code <drivers>`
-corresponding to your braille display.
-For *device*, specify the full path
-for the device to which your braille display is connected.
-
-If you don't want to explicitly identify the driver and device
-each time you start BRLTTY, then you can take two approaches.
-You can establish system defaults
-via the :ref:`braille-driver <configure-braille-driver>`
-and the :ref:`braille-device <configure-braille-device>`
-configuration file directives,
-and/or compile your needs right into BRLTTY
-via the :ref:`--with-braille-driver <build-braille-driver>`
-and the :ref:`--with-braille-device <build-braille-device>`
-build options.
-
-If all is well, BRLTTY's version identification message
-should appear on the braille display for a few seconds
-(see the :ref:`-M <options-message-timeout>` command line option).
-After it goes away (which you can hasten by pressing any key on the display),
-the area of the screen where the cursor is should appear.
-This means that you should expect to see your shell's command prompt.
-Then, as you enter your next command,
-each character should appear on the display as it's typed on the keyboard.
-
-If this is your experience, then leave BRLTTY running, and enjoy it.
-If this isn't your experience, then it may be necessary
-to test each driver separately in order to isolate the source of the problem.
-The screen driver can be tested with :ref:`scrtest <utility-scrtest>`,
-and the braille display driver can be tested with :ref:`brltest <utility-brltest>`.
-
-If you experience a problem which requires a lot of digging,
-then you may wish to use the following ``brltty`` command line options:
-
-- :ref:`-ldebug <options-log-level>` to log lots of diagnostic messages.
-- :ref:`-n <options-no-daemon>` to keep BRLTTY in the foreground.
-- :ref:`-e <options-standard-error>` to direct diagnostic messages to standard error rather than to the system log.
-
 
 Starting BRLTTY
----------------
+===============
 
 BRLTTY, when properly installed, is invoked with the single command ``brltty``.
 A configuration file
@@ -1187,116 +325,17 @@ Red Hat
 
 If you want to start BRLTTY before any file systems are mounted, then
 ensure that all of its components are installed within the root file system.
-See the :ref:`--with-execute-root <build-execute-root>`,
-:ref:`--bindir <build-program-directory>`,
-:ref:`--libdir <build-library-directory>`,
-:ref:`--with-writable-directory <build-writable-directory>`,
-and :ref:`--with-data-directory <build-data-directory>`
+See the ``--with-execute-root``,
+``--bindir``,
+``--libdir``,
+``--with-writable-directory``,
+and ``--with-data-directory``
 build options.
 
 
-Security Considerations
------------------------
-
-BRLTTY needs to run with root privileges because it needs
-read and write access for the port to which the braille display is connected,
-read access to ``/dev/vcsa`` or equivalent
-(to query the screen dimensions and the cursor position,
-and to review the current screen content and highlighting),
-and read and write access to the system console
-(for arrow key entry during cursor routing,
-for input character insertion during paste,
-for special key simulation using keys on the braille display,
-for retrieving output character translation and screen font mapping tables,
-and for activation of the internal beeper).
-Access to the needed devices can, of course, be granted to a non-root user
-by changing the file permissions associated with the devices.
-Merely having access to the console, however, isn't enough because
-activating the internal beeper and simulating key strokes still require root privilege.
-So, if you're willing to give up Cursor Routing, Copy and Paste, beeps,
-and all that, you can run BRLTTY without root privilege.
-
-
-Build and Run-Time Restrictions
--------------------------------
-
-.. _preference-alert-tunes:
-
-.. _restrictions-tunes:
-
-Alert Tunes
-  Some platforms don't support all of the tune devices. See the :ref:`Tune Device <preference-tune-device>` preference for details.
-
-.. _restrictions-flite:
-
-FestivalLite Speech Synthesizer Driver
-  The driver for the FestivalLite text to speech engine is only built if that package has been installed.
-
-  This driver and the driver for the Theta text to speech engine (see the :ref:`--with-theta <build-theta>` build option) cannot be simultaneously linked into the BRLTTY binary (see the :ref:`--with-speech-driver <build-speech-driver>` build option) because their run-time libraries contain conflicting symbols.
-
-.. _restrictions-libbraille:
-
-Libbraille Braille Display Driver
-  The driver for the Libbraille package is only built if that package has been installed.
-
-.. _restrictions-mikropuhe:
-
-Mikropuhe Speech Synthesizer Driver
-  The driver for the Mikropuhe text to speech engine is only built if that package has been installed.
-
-  This driver cannot be included if the BRLTTY binary is statically linked (see the :ref:`--enable-standalone-programs <build-standalone-programs>` build option) because a static archive isn't included with the package.
-
-.. _restrictions-theta:
-
-Theta Speech Synthesizer Driver
-  The driver for the Theta text to speech engine is only built if that package has been installed.
-
-  This driver and the driver for the FestivalLite text to speech engine (see the :ref:`--with-flite <build-flite>` build option) cannot be simultaneously linked into the BRLTTY binary (see the :ref:`--with-speech-driver <build-speech-driver>` build option) because their run-time libraries contain conflicting symbols.
-
-  If this driver is built as a dynamically loadable shared object then ``$THETA_HOME/lib`` must be added to the ``LD_LIBRARY_PATH`` environment variable before BRLTTY is invoked because the shared objects within the package don't contain run-time search paths for their dependencies.
-
-.. _restrictions-viavoice:
-
-ViaVoice Speech Synthesizer Driver
-  The driver for the ViaVoice text to speech engine is only built if that package has been installed.
-
-  This driver cannot be included if the BRLTTY binary is statically linked (see the :ref:`--enable-standalone-programs <build-standalone-programs>` build option) because a static archive isn't included with the package.
-
-.. _restrictions-videobraille:
-
-VideoBraille Braille Display Driver
-  The driver for the VideoBraille braille display is built on all systems, but only works on Linux.
-
-
-.. _rpm:
-
-Installing from an RPM File
----------------------------
-
-To install BRLTTY from an RPM (RedHat Package Manager) file, do the following:
-#. Download the binary package which corresponds to your hardware. It'll be a file named ``brltty-``\ *release*\ ``-``\ *version*\ ``.``\ *architecture*\ ``.rpm``, e.g. ``brltty-3.0-1.i386.rpm``.
-#. Install the package.
-
-
-   .. parsed-literal::
-
-     rpm -Uvh brltty-*release*-*version*.*architecture*.rpm
-
-#. This should be done as **root**. Strictly speaking, the ``-U`` (update) option is the only one which is necessary. The ``-v`` (verbose) option displays the name of the package as it's being installed. The ``-h`` (hashes) option displays a progress meter (using hash signs).
-
-For the brave,
-we also provide the source RPM (``.src.rpm``) file,
-but that's beyond the scope of this document.
-
-To uninstall BRLTTY, do:
-
-.. parsed-literal::
-
-  rpm -e brltty
-
 
 Other Utilities
----------------
+===============
 
 Building BRLTTY also results in the building of
 a few small helper and diagnostic utilities.
@@ -1305,11 +344,11 @@ a few small helper and diagnostic utilities.
 .. _utility-brltty-config:
 
 brltty-config
-~~~~~~~~~~~~~
+-------------
 
 This utility sets a number of environment variables to values
 which reflect the current installation of BRLTTY
-(see :ref:`Build Options <build>`).
+(see Build Options).
 It should be executed within an existing shell environment,
 i.e. not as a command in its own right,
 and can only be used by scripts which support **Bourne Shell** syntax.
@@ -1325,25 +364,25 @@ BRLTTY_VERSION
   The version number of the BRLTTY package.
 
 BRLTTY_EXECUTE_ROOT
-  Run-time root for the installed package. Configured via the :ref:`--with-execute-root <build-execute-root>` build option.
+  Run-time root for the installed package. Configured via the ``--with-execute-root`` build option.
 
 BRLTTY_PROGRAM_DIRECTORY
-  Directory for runnable programs (binaries, executables). Configured via the :ref:`--with-program-directory <build-program-directory>` build option.
+  Directory for runnable programs (binaries, executables). Configured via the ``--with-program-directory`` build option.
 
 BRLTTY_LIBRARY_DIRECTORY
-  Directory for drivers. Configured via the :ref:`--with-library-directory <build-library-directory>` build option.
+  Directory for drivers. Configured via the ``--with-library-directory`` build option.
 
 BRLTTY_WRITABLE_DIRECTORY
-  Directory which can be written to. Configured via the :ref:`--with-writable-directory <build-writable-directory>` build option.
+  Directory which can be written to. Configured via the ``--with-writable-directory`` build option.
 
 BRLTTY_DATA_DIRECTORY
-  Directory for tables and help pages. Configured via the :ref:`--with-data-directory <build-data-directory>` build option.
+  Directory for tables and help pages. Configured via the ``--with-data-directory`` build option.
 
 BRLTTY_MANPAGE_DIRECTORY
-  Directory for manual pages. Configured via the :ref:`--with-manpage-directory <build-manpage-directory>` build option.
+  Directory for manual pages. Configured via the ``--with-manpage-directory`` build option.
 
 BRLTTY_INCLUDE_DIRECTORY
-  Directory for BrlAPI's C header files. Configured via the :ref:`--with-include-directory <build-include-directory>` build option.
+  Directory for BrlAPI's C header files. Configured via the ``--with-include-directory`` build option.
 
 BRLAPI_VERSION
   The version number of BrlAPI (BRLTTY's Application Programming Interface).
@@ -1358,34 +397,34 @@ BRLAPI_AUTH
 In addition, the following standard **autoconf** environment variables are also set:
 
 prefix
-  Subroot for architecture-independent files. Configured via the :ref:`--prefix <build-portable-root>` build option.
+  Subroot for architecture-independent files. Configured via the ``--prefix`` build option.
 
 exec_prefix
-  Subroot for architecture-dependent files. Configured via the :ref:`--exec-prefix <build-architecture-root>` build option.
+  Subroot for architecture-dependent files. Configured via the ``--exec-prefix`` build option.
 
 bindir
-  Default location for :ref:`program directory <build-program-directory>`. Configured via the ``--bindir`` build option.
+  Default location for ``program directory``. Configured via the ``--bindir`` build option.
 
 libdir
-  Directory for BrlAPI's static archive and dynamically loadable object. Default anchor for :ref:`library directory <build-library-directory>`. Configured via the :ref:`--libdir <build-api-directory>` build option.
+  Directory for BrlAPI's static archive and dynamically loadable object. Default anchor for ``library directory``. Configured via the ``--libdir`` build option.
 
 sysconfdir
-  Directory for configuration files. Default anchor for :ref:`data directory <build-data-directory>`. Configured via the :ref:`--sysconfdir <build-configuration-directory>` build option.
+  Directory for configuration files. Default anchor for ``data directory``. Configured via the ``--sysconfdir`` build option.
 
 mandir
-  Default location for :ref:`manual pages directory <build-manpage-directory>`. Configured via the ``--mandir`` build option.
+  Default location for ``manual pages directory``. Configured via the ``--mandir`` build option.
 
 includedir
-  Default anchor for :ref:`header files directory <build-include-directory>`. Configured via the ``--includedir`` build option.
+  Default anchor for ``header files directory``. Configured via the ``--includedir`` build option.
 
 
 .. _utility-brltty-install:
 
 brltty-install
-~~~~~~~~~~~~~~
+--------------
 
 This utility copies BRLTTY's
-:ref:`installed file hierarchy <hierarchy>`
+installed file hierarchy
 from one location to another.
 
 .. parsed-literal::
@@ -1393,10 +432,10 @@ from one location to another.
   brltty-install *to* [*from*]
 
 *to*
-  The location to which the :ref:`installed file hierarchy <hierarchy>` is to be copied. It must be an existing directory.
+  The location to which the installed file hierarchy is to be copied. It must be an existing directory.
 
 *from*
-  The location from which the :ref:`installed file hierarchy <hierarchy>` is to be taken. If it's specified, then it must be an existing directory. If it's not specified, then the location used for the build is assumed.
+  The location from which the installed file hierarchy is to be taken. If it's specified, then it must be an existing directory. If it's not specified, then the location used for the build is assumed.
 
 
 This utility can be used, for example, to copy BRLTTY to a root disk.
@@ -1420,7 +459,7 @@ This is worth investigating if you have difficulties.
 .. _utility-brltest:
 
 brltest
-~~~~~~~
+-------
 
 This utility tests a braille display driver,
 and also provides an interactive way to learn
@@ -1432,22 +471,22 @@ It should be run as root.
   brltest -*option* ... [*driver* [*name*=*value* ...]]
 
 *driver*
-  The driver for the braille display. It must be a two-letter :ref:`driver identification code <drivers>`. If it's not specified, then the first driver configured via the :ref:`--with-braille-driver <build-braille-driver>` build option is assumed.
+  The driver for the braille display. It must be a two-letter :ref:`driver identification code <drivers>`. If it's not specified, then the first driver configured via the ``--with-braille-driver`` build option is assumed.
 
 *name*\ ``=``\ *value*
   Set a braille display driver parameter. For a description of the parameters accepted by a specific driver, please see the documentation for that driver.
 
 ``-d``\ *device* ``--device=``\ *device*
-  The absolute path for the device to which the braille display is connected. If it's not specified, then the device configured via the :ref:`--with-braille-device <build-braille-device>` build option is assumed.
+  The absolute path for the device to which the braille display is connected. If it's not specified, then the device configured via the ``--with-braille-device`` build option is assumed.
 
 ``-D``\ *directory* ``--data-directory=``\ *directory*
-  The absolute path for the directory wherein the driver data files reside. If it's not specified, then the directory configured via the :ref:`--with-data-directory <build-data-directory>` build option is assumed.
+  The absolute path for the directory wherein the driver data files reside. If it's not specified, then the directory configured via the ``--with-data-directory`` build option is assumed.
 
 ``-L``\ *directory* ``--library-directory=``\ *directory*
-  The absolute path for the directory wherein the drivers reside. If it's not specified, then the directory configured via the :ref:`--libdir <build-library-directory>` build option is assumed.
+  The absolute path for the directory wherein the drivers reside. If it's not specified, then the directory configured via the ``--libdir`` build option is assumed.
 
 ``-W``\ *directory* ``--writable-directory=``\ *directory*
-  The absolute path for a directory which can be written to. If it's not specified, then the directory configured via the :ref:`--with-writable-directory <build-writable-directory>` build option is assumed.
+  The absolute path for a directory which can be written to. If it's not specified, then the directory configured via the ``--with-writable-directory`` build option is assumed.
 
 ``-h`` ``--help``
   Display a summary of the command line options, and then exit.
@@ -1465,7 +504,7 @@ is ``4`` seconds.
 .. _utility-spktest:
 
 spktest
-~~~~~~~
+-------
 
 This utility tests a speech synthesizer driver.
 It may need to be run as root.
@@ -1475,7 +514,7 @@ It may need to be run as root.
   spktest -*option* ... [*driver* [*name*=*value* ...]]
 
 *driver*
-  The driver for the speech synthesizer. It must be a two-letter :ref:`driver identification code <drivers>`. If it's not specified, then the first driver configured via the :ref:`--with-speech-driver <build-speech-driver>` build option is assumed.
+  The driver for the speech synthesizer. It must be a two-letter :ref:`driver identification code <drivers>`. If it's not specified, then the first driver configured via the ``--with-speech-driver`` build option is assumed.
 
 *name*\ ``=``\ *value*
   Set a speech synthesizer driver parameter. For a description of the parameters accepted by a specific driver, please see the documentation for that driver.
@@ -1484,10 +523,10 @@ It may need to be run as root.
   The text to be spoken. If it's not specified, then standard input is read.
 
 ``-D``\ *directory* ``--data-directory=``\ *directory*
-  The absolute path for the directory wherein the driver data files reside. If it's not specified, then the directory configured via the :ref:`--with-data-directory <build-data-directory>` build option is assumed.
+  The absolute path for the directory wherein the driver data files reside. If it's not specified, then the directory configured via the ``--with-data-directory`` build option is assumed.
 
 ``-L``\ *directory* ``--library-directory=``\ *directory*
-  The absolute path for the directory wherein the drivers reside. If it's not specified, then the directory configured via the :ref:`--libdir <build-library-directory>` build option is assumed.
+  The absolute path for the directory wherein the drivers reside. If it's not specified, then the directory configured via the ``--libdir`` build option is assumed.
 
 ``-h`` ``--help``
   Display a summary of the command line options, and then exit.
@@ -1496,7 +535,7 @@ It may need to be run as root.
 .. _utility-scrtest:
 
 scrtest
-~~~~~~~
+-------
 
 This utility tests the screen driver.
 It must be run as root.
@@ -1558,7 +597,7 @@ The following is written to standard output:
 .. _utility-ttbtest:
 
 ttbtest
-~~~~~~~
+-------
 
 This utility tests a text table
 (see section :ref:`Text Tables <table-text>`).
@@ -1568,7 +607,7 @@ This utility tests a text table
   ttbtest -*option* ... *input-table* *output-table*
 
 *input-table*
-  The file system path to the input text table. If it's relative then it's anchored at the directory configured via the :ref:`--with-data-directory <build-data-directory>` build option.
+  The file system path to the input text table. If it's relative then it's anchored at the directory configured via the ``--with-data-directory`` build option.
 
 *output-table*
   The file system path to the output text table. If it's relative then it's anchored at the current working directory. If this parameter isn't supplied then no output table is written.
@@ -1611,7 +650,7 @@ gnb
 .. _utility-ctbtest:
 
 ctbtest
-~~~~~~~
+-------
 
 .. _preference-contraction-table:
 
@@ -1628,10 +667,10 @@ is rewritten to standard output as contracted braille.
   The list of files to be processed. Any number of files may be specified. They're processed from left to right. The special file name ``-`` is interpreted to mean standard input. If no files are specified then standard input is processed.
 
 ``-c``\ *file* ``--contraction-table=``\ *file*
-  The file system path to the contraction table. If it's relative then it's anchored at the directory configured via the :ref:`--with-data-directory <build-data-directory>` build option. The ``.ctb`` extension is optional. If this option isn't supplied then ``en-us-g2`` is assumed.
+  The file system path to the contraction table. If it's relative then it's anchored at the directory configured via the ``--with-data-directory`` build option. The ``.ctb`` extension is optional. If this option isn't supplied then ``en-us-g2`` is assumed.
 
 ``-t``\ *file*\ \|\ ``auto`` ``--text-table=``\ *file*\ \|\ ``auto``
-  Specify the text table (see section :ref:`Text Tables <table-text>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the :ref:`--with-data-directory <build-data-directory>` and the :ref:`--with-execute-root <build-execute-root>` build options for more details). The ``.ttb`` extension is optional. See the :ref:`text-table <configure-text-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Text Table <preference-text-table>` preference.
+  Specify the text table (see section :ref:`Text Tables <table-text>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ttb`` extension is optional. See the :ref:`text-table <configure-text-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Text Table <preference-text-table>` preference.
 
 ``-w``\ *columns* ``--output-width=``\ *columns*
   The maximum length of an output line. Each contracted input line is wrapped into as many output lines as necessary. If this option isn't specified then there's no limit, and there's a one-to-one correspondence between input and output lines.
@@ -1657,7 +696,7 @@ This table effectively allows this utility to be used as a text to braille trans
 .. _utility-tunetest:
 
 tunetest
-~~~~~~~~
+--------
 
 .. _command-TUNES:
 
@@ -1696,10 +735,10 @@ It may need to be run as root.
   Specify the output volume (loudness) as a percentage of the maximum. The default output volume is ``50``.
 
 ``-p``\ *device* ``--pcm-device=``\ *device*
-  Specify the device to use for digital audio (see section :ref:`PCM Device Specification <operand-pcm-device>`). This option isn't available if the :ref:`--disable-pcm-support <build-pcm-support>` build option was specified.
+  Specify the device to use for digital audio (see section :ref:`PCM Device Specification <operand-pcm-device>`). This option isn't available if the ``--disable-pcm-support`` build option was specified.
 
 ``-m``\ *device* ``--midi-device=``\ *device*
-  Specify the device to use for the Musical Instrument Digital Interface (see section :ref:`MIDI Device Specification <operand-midi-device>`). This option isn't available if the :ref:`--disable-midi-support <build-midi-support>` build option was specified.
+  Specify the device to use for the Musical Instrument Digital Interface (see section :ref:`MIDI Device Specification <operand-midi-device>`). This option isn't available if the ``--disable-midi-support`` build option was specified.
 
 ``-i``\ *instrument* ``--instrument=``\ *instrument*
   The instrument to use if the selected device is ``midi``. For the complete list of instruments, see the :ref:`MIDI Instrument Table <midi>`. The default instrument is an ``acoustic grand piano``. The words comprising the instrument name must be separated from one another by a single minus sign rather than by spaces, and any of the words may be abbreviated. An ``acoustic grand piano``, for example, may be specified as ``a-gra-pi``.
@@ -1721,12 +760,12 @@ run BRLTTY simply by typing the command ``brltty`` at a shell prompt
 Check the
 :ref:`-d <options-braille-device>` command line option,
 the :ref:`braille-device <configure-braille-device>` configuration file directive,
-and the :ref:`--with-braille-device <build-braille-device>` build option
+and the ``--with-braille-device`` build option
 for alternatives regarding how to tell BRLTTY which device your display is connected to.
 Check the
 :ref:`-b <options-braille-driver>` command line option,
 the :ref:`braille-driver <configure-braille-driver>` configuration file directive,
-and the :ref:`--with-braille-driver <build-braille-driver>` build option
+and the ``--with-braille-driver`` build option
 for alternatives regarding how to tell BRLTTY which kind of braille display you have.
 Check the
 :ref:`-B <options-braille-parameters>` command line option,
@@ -1921,7 +960,7 @@ FREEZE
 .. _command-DISPMD:
 
 DISPMD
-  Show the highlighting (the attributes) of each character within the braille window, rather than the characters themselves (the content). This feature is useful, for example, when you need to locate a highlighted item. When showing screen content, the text table is used (see the :ref:`-t <options-text-table>` command line option, the :ref:`text-table <configure-text-table>` configuration file directive, and the :ref:`--with-text-table <build-text-table>` build option). When showing screen attributes, the attributes table is used (see the :ref:`-a <options-attributes-table>` command line option, the :ref:`attributes-table <configure-attributes-table>` configuration file directive, and the :ref:`--with-attributes-table <build-attributes-table>` build option). This feature only affects the current virtual terminal.
+  Show the highlighting (the attributes) of each character within the braille window, rather than the characters themselves (the content). This feature is useful, for example, when you need to locate a highlighted item. When showing screen content, the text table is used (see the :ref:`-t <options-text-table>` command line option, the :ref:`text-table <configure-text-table>` configuration file directive, and the ``--with-text-table`` build option). When showing screen attributes, the attributes table is used (see the :ref:`-a <options-attributes-table>` command line option, the :ref:`attributes-table <configure-attributes-table>` configuration file directive, and the ``--with-attributes-table`` build option). This feature only affects the current virtual terminal.
 
 .. _command-SIXDOTS:
 
@@ -1941,7 +980,7 @@ SKPIDLNS
 .. _command-SKPBLNKWINS:
 
 SKPBLNKWINS
-  Skip past blank windows when reading either forward or backward. This feature affects the :ref:`FWINLT/FWINRT <command-FWINLT-FWINRT>` commands. This setting can also be changed with the :ref:`Skip Blank Windows <preference-skip-blank-windows>` preference.
+  Skip past blank windows when reading either forward or backward. This feature affects the :ref:`FWINLT/FWINRT <command-FWINLT-FWINRT>` commands. This setting can also be changed with the Skip Blank Windows preference.
 
 .. _command-CSRVIS:
 
@@ -1995,7 +1034,7 @@ CAPBLINK
   Blink (turn on and off according to a predefined interval) capital (uppercase) letters. This setting can also be changed with the :ref:`Blinking Capitals <preference-blinking-capitals>` preference.
 
 TUNES
-  Play a short predefined tune (see :ref:`Alert Tunes <tunes>`) whenever a significant event occurs. This feature is initially **on**. This setting can also be changed with the :ref:`Alert Tunes <preference-alert-tunes>` preference.
+  Play a short predefined tune (see :ref:`Alert Tunes <tunes>`) whenever a significant event occurs. This feature is initially **on**. This setting can also be changed with the :ref:`Alert Tunes <tunes>` preference.
 
 .. _preference-autorepeat:
 
@@ -2032,7 +1071,7 @@ INFO
   Switch to the status display (see section :ref:`The Status Display <status>` for full details). It presents a summary including the position of the cursor, the position of the braille window, and the states of a number of BRLTTY's features. Invoke this command again to return to the screen.
 
 LEARN
-  Switch to command learn mode (see section :ref:`Command Learn Mode <learn>` for full details). This is how you can interactively learn what your braille display's keys do. Invoke this command again to return to the screen. This command isn't available if the :ref:`--disable-learn-mode <build-learn-mode>` build option was specified.
+  Switch to command learn mode (see section :ref:`Command Learn Mode <learn>` for full details). This is how you can interactively learn what your braille display's keys do. Invoke this command again to return to the screen. This command isn't available if the --disable-learn-mode build option was specified.
 
 
 .. _preference-maintenance:
@@ -2261,17 +1300,17 @@ The following directives are recognized:
 .. _configure-api-parameters:
 
 ``api-parameters`` *name*\ ``=``\ *value*\ ``,``...
-  Specify parameters for the Application Programming Interface. If the same parameter is specified more than once, then its rightmost assignment is used. For a description of the parameters accepted by the interface, please see the **BrlAPI** reference manual. See the :ref:`--with-api-parameters <build-api-parameters>` build option for the defaults established during the build procedure. This directive can be overridden with the :ref:`-A <options-api-parameters>` command line option.
+  Specify parameters for the Application Programming Interface. If the same parameter is specified more than once, then its rightmost assignment is used. For a description of the parameters accepted by the interface, please see the **BrlAPI** reference manual. See the ``--with-api-parameters`` build option for the defaults established during the build procedure. This directive can be overridden with the :ref:`-A <options-api-parameters>` command line option.
 
 .. _configure-attributes-table:
 
 ``attributes-table`` *file*
-  Specify the attributes table (see section :ref:`Attributes Tables <table-attributes>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the :ref:`--with-data-directory <build-data-directory>` and the :ref:`--with-execute-root <build-execute-root>` build options for more details). The ``.atb`` extension is optional. The default is to use the built-in table (see the :ref:`--with-attributes-table <build-attributes-table>` build option). This directive can be overridden with the :ref:`-a <options-attributes-table>` command line option.
+  Specify the attributes table (see section :ref:`Attributes Tables <table-attributes>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.atb`` extension is optional. The default is to use the built-in table (see the ``--with-attributes-table`` build option). This directive can be overridden with the :ref:`-a <options-attributes-table>` command line option.
 
 .. _configure-braille-device:
 
 ``braille-device`` *device*\ ``,``...
-  Specify the device to which the braille display is connected (see section :ref:`Braille Device Specification <operand-braille-device>`). See the :ref:`--with-braille-device <build-braille-device>` build option for the default established during the build procedure. This directive can be overridden with the :ref:`-d <options-braille-device>` command line option.
+  Specify the device to which the braille display is connected (see section :ref:`Braille Device Specification <operand-braille-device>`). See the ``--with-braille-device`` build option for the default established during the build procedure. This directive can be overridden with the :ref:`-d <options-braille-device>` command line option.
 
 .. _configure-braille-driver:
 
@@ -2281,17 +1320,17 @@ The following directives are recognized:
 .. _configure-braille-parameters:
 
 ``braille-parameters`` [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``...
-  Specify parameters for the braille display drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Driver Identification Codes <drivers>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the :ref:`--with-braille-parameters <build-braille-parameters>` build option for the defaults established during the build procedure. This directive can be overridden with the :ref:`-B <options-braille-parameters>` command line option.
+  Specify parameters for the braille display drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Driver Identification Codes <drivers>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the ``--with-braille-parameters`` build option for the defaults established during the build procedure. This directive can be overridden with the :ref:`-B <options-braille-parameters>` command line option.
 
 .. _configure-contraction-table:
 
 ``contraction-table`` *file*
-  Specify the contraction table (see section :ref:`Contraction Tables <table-contraction>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the :ref:`--with-data-directory <build-data-directory>` and the :ref:`--with-execute-root <build-execute-root>` build options for more details). The ``.ctb`` extension is optional. The contraction table is used when the 6-dot braille feature is activated (see the :ref:`SIXDOTS <command-SIXDOTS>` command and the :ref:`Text Style <preference-text-style>` preference). The default is to display uncontracted 6-dot braille. This directive can be overridden with the :ref:`-c <options-contraction-table>` command line option. It isn't available if the :ref:`--disable-contracted-braille <build-contracted-braille>` build option was specified.
+  Specify the contraction table (see section :ref:`Contraction Tables <table-contraction>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ctb`` extension is optional. The contraction table is used when the 6-dot braille feature is activated (see the :ref:`SIXDOTS <command-SIXDOTS>` command and the :ref:`Text Style <preference-text-style>` preference). The default is to display uncontracted 6-dot braille. This directive can be overridden with the :ref:`-c <options-contraction-table>` command line option. It isn't available if the ``--disable-contracted-braille`` build option was specified.
 
 .. _configure-keyboard-table:
 
 ``keyboard-table`` *file*\ \|\ ``auto``
-  Specify the keyboard table (see section :ref:`Key Tables <table-key>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the :ref:`--with-data-directory <build-data-directory>` and the :ref:`--with-execute-root <build-execute-root>` build options for more details). The ``.ktb`` extension is optional. The default is not to use a keyboard table. This directive can be overridden with the :ref:`-k <options-keyboard-table>` command line option.
+  Specify the keyboard table (see section :ref:`Key Tables <table-key>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ktb`` extension is optional. The default is not to use a keyboard table. This directive can be overridden with the :ref:`-k <options-keyboard-table>` command line option.
 
 .. _configure-keyboard-properties:
 
@@ -2301,12 +1340,12 @@ The following directives are recognized:
 .. _configure-midi-device:
 
 ``midi-device`` *device*
-  Specify the device to use for the Musical Instrument Digital Interface (see section :ref:`MIDI Device Specification <operand-midi-device>`). This directive can be overridden with the :ref:`-m <options-midi-device>` command line option. It isn't available if the :ref:`--disable-midi-support <build-midi-support>` build option was specified.
+  Specify the device to use for the Musical Instrument Digital Interface (see section :ref:`MIDI Device Specification <operand-midi-device>`). This directive can be overridden with the :ref:`-m <options-midi-device>` command line option. It isn't available if the ``--disable-midi-support`` build option was specified.
 
 .. _configure-pcm-device:
 
 ``pcm-device`` *device*
-  Specify the device to use for digital audio (see section :ref:`PCM Device Specification <operand-pcm-device>`). This directive can be overridden with the :ref:`-p <options-pcm-device>` command line option. It isn't available if the :ref:`--disable-pcm-support <build-pcm-support>` build option was specified.
+  Specify the device to use for digital audio (see section :ref:`PCM Device Specification <operand-pcm-device>`). This directive can be overridden with the :ref:`-p <options-pcm-device>` command line option. It isn't available if the ``--disable-pcm-support`` build option was specified.
 
 .. _configure-preferences-file:
 
@@ -2329,32 +1368,32 @@ The following directives are recognized:
 .. _configure-screen-driver:
 
 ``screen-driver`` *driver*
-  Specify the screen driver (see section :ref:`Supported Screen Drivers <screen>`). See the :ref:`--with-screen-driver <build-screen-driver>` build option for the default established during the build procedure. This directive can be overridden with the :ref:`-x <options-screen-driver>` command line option.
+  Specify the screen driver (see section :ref:`Supported Screen Drivers <screen>`). See the ``--with-screen-driver`` build option for the default established during the build procedure. This directive can be overridden with the :ref:`-x <options-screen-driver>` command line option.
 
 .. _configure-screen-parameters:
 
 ``screen-parameters`` [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``...
-  Specify parameters for the screen drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Supported Screen Drivers <screen>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the :ref:`--with-screen-parameters <build-screen-parameters>` build option for the defaults established during the build procedure. This directive can be overridden with the :ref:`-X <options-screen-parameters>` command line option.
+  Specify parameters for the screen drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Supported Screen Drivers <screen>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the ``--with-screen-parameters`` build option for the defaults established during the build procedure. This directive can be overridden with the :ref:`-X <options-screen-parameters>` command line option.
 
 .. _configure-speech-driver:
 
 ``speech-driver`` *driver*\ ``,``...|\ ``auto``
-  Specify the speech synthesizer driver (see section :ref:`Driver Specification <operand-driver>`). The default is to perform autodetection. This directive can be overridden with the :ref:`-s <options-speech-driver>` command line option. It isn't available if the :ref:`--disable-speech-support <build-speech-support>` build option was specified.
+  Specify the speech synthesizer driver (see section :ref:`Driver Specification <operand-driver>`). The default is to perform autodetection. This directive can be overridden with the :ref:`-s <options-speech-driver>` command line option. It isn't available if the ``--disable-speech-support`` build option was specified.
 
 .. _configure-speech-input:
 
 ``speech-input`` *name*
-  Specify the name of the file system object (FIFO, named pipe, named socket, etc) which can be used by other applications for text-to-speech conversion via BRLTTY's speech driver. This directive can be overridden with the :ref:`-i <options-speech-input>` command line option. It isn't available if the :ref:`--disable-speech-support <build-speech-support>` build option was specified.
+  Specify the name of the file system object (FIFO, named pipe, named socket, etc) which can be used by other applications for text-to-speech conversion via BRLTTY's speech driver. This directive can be overridden with the :ref:`-i <options-speech-input>` command line option. It isn't available if the ``--disable-speech-support`` build option was specified.
 
 .. _configure-speech-parameters:
 
 ``speech-parameters`` [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``...
-  Specify parameters for the speech synthesizer drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Driver Identification Codes <drivers>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the :ref:`--with-speech-parameters <build-speech-parameters>` build option for the defaults established during the build procedure. This directive can be overridden with the :ref:`-S <options-speech-parameters>` command line option.
+  Specify parameters for the speech synthesizer drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Driver Identification Codes <drivers>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the ``--with-speech-parameters`` build option for the defaults established during the build procedure. This directive can be overridden with the :ref:`-S <options-speech-parameters>` command line option.
 
 .. _configure-text-table:
 
 ``text-table`` *file*\ \|\ ``auto``
-  Specify the text table (see section :ref:`Text Tables <table-text>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the :ref:`--with-data-directory <build-data-directory>` and the :ref:`--with-execute-root <build-execute-root>` build options for more details). The ``.ttb`` extension is optional. The default is to perform locale-based autoselection, with fallback to the built-in table (see the :ref:`--with-text-table <build-text-table>` build option). This directive can be overridden with the :ref:`-t <options-text-table>` command line option.
+  Specify the text table (see section :ref:`Text Tables <table-text>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ttb`` extension is optional. The default is to perform locale-based autoselection, with fallback to the built-in table (see the ``--with-text-table`` build option). This directive can be overridden with the :ref:`-t <options-text-table>` command line option.
 
 
 .. _options:
@@ -2368,7 +1407,7 @@ The ``brltty`` command accepts the following options:
 .. _options-attributes-table:
 
 ``-a``\ *file* ``--attributes-table=``\ *file*
-  Specify the attributes table (see section :ref:`Attributes Tables <table-attributes>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the :ref:`--with-data-directory <build-data-directory>` and the :ref:`--with-execute-root <build-execute-root>` build options for more details). The ``.atb`` extension is optional. See the :ref:`attributes-table <configure-attributes-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Attributes Table <preference-attributes-table>` preference.
+  Specify the attributes table (see section :ref:`Attributes Tables <table-attributes>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.atb`` extension is optional. See the :ref:`attributes-table <configure-attributes-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Attributes Table <preference-attributes-table>` preference.
 
 .. _options-braille-driver:
 
@@ -2378,7 +1417,7 @@ The ``brltty`` command accepts the following options:
 .. _options-contraction-table:
 
 ``-c``\ *file* ``--contraction-table=``\ *file*
-  Specify the contraction table (see section :ref:`Contraction Tables <table-contraction>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the :ref:`--with-data-directory <build-data-directory>` and the :ref:`--with-execute-root <build-execute-root>` build options for more details). The ``.ctb`` extension is optional. The contraction table is used when the 6-dot braille feature is activated (see the :ref:`SIXDOTS <command-SIXDOTS>` command and the :ref:`Text Style <preference-text-style>` preference). See the :ref:`contraction-table <configure-contraction-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Contraction Table <preference-contraction-table>` preference. This option isn't available if the :ref:`--disable-contracted-braille <build-contracted-braille>` build option was specified.
+  Specify the contraction table (see section :ref:`Contraction Tables <table-contraction>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ctb`` extension is optional. The contraction table is used when the 6-dot braille feature is activated (see the :ref:`SIXDOTS <command-SIXDOTS>` command and the :ref:`Text Style <preference-text-style>` preference). See the :ref:`contraction-table <configure-contraction-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Contraction Table <preference-contraction-table>` preference. This option isn't available if the ``--disable-contracted-braille`` build option was specified.
 
 .. _options-braille-device:
 
@@ -2403,12 +1442,12 @@ The ``brltty`` command accepts the following options:
 .. _options-speech-input:
 
 ``-i``\ *name* ``--speech-input=``\ *name*
-  Specify the name of the file system object (FIFO, named pipe, named socket, etc) which can be used by other applications for text-to-speech conversion via BRLTTY's speech driver. If not specified, the file system object is not created. See the :ref:`speech-input <configure-speech-input>` configuration file directive for the default run-time setting. This option isn't available if the :ref:`--disable-speech-support <build-speech-support>` build option was specified.
+  Specify the name of the file system object (FIFO, named pipe, named socket, etc) which can be used by other applications for text-to-speech conversion via BRLTTY's speech driver. If not specified, the file system object is not created. See the :ref:`speech-input <configure-speech-input>` configuration file directive for the default run-time setting. This option isn't available if the ``--disable-speech-support`` build option was specified.
 
 .. _options-keyboard-table:
 
 ``-k``\ *file* ``--keyboard-table=``\ *file*
-  Specify the keyboard table (see section :ref:`Key Tables <table-key>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the :ref:`--with-data-directory <build-data-directory>` and the :ref:`--with-execute-root <build-execute-root>` build options for more details). The ``.ktb`` extension is optional. See the :ref:`keyboard-table <configure-keyboard-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Keyboard Table <preference-keyboard-table>` preference.
+  Specify the keyboard table (see section :ref:`Key Tables <table-key>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ktb`` extension is optional. See the :ref:`keyboard-table <configure-keyboard-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Keyboard Table <preference-keyboard-table>` preference.
 
 ``-l``\ *level* ``--log-level=``\ *level*
   Specify the severity threshold for diagnostic message generation. The following levels are recognized.
@@ -2442,7 +1481,7 @@ The ``brltty`` command accepts the following options:
 .. _options-midi-device:
 
 ``-m``\ *device* ``--midi-device=``\ *device*
-  Specify the device to use for the Musical Instrument Digital Interface (see section :ref:`MIDI Device Specification <operand-midi-device>`). See the :ref:`midi-device <configure-midi-device>` configuration file directive for the default run-time setting. This option isn't available if the :ref:`--disable-midi-support <build-midi-support>` build option was specified.
+  Specify the device to use for the Musical Instrument Digital Interface (see section :ref:`MIDI Device Specification <operand-midi-device>`). See the :ref:`midi-device <configure-midi-device>` configuration file directive for the default run-time setting. This option isn't available if the ``--disable-midi-support`` build option was specified.
 
 .. _options-no-daemon:
 
@@ -2452,7 +1491,7 @@ The ``brltty`` command accepts the following options:
 .. _options-pcm-device:
 
 ``-p``\ *device* ``--pcm-device=``\ *device*
-  Specify the device to use for digital audio (see section :ref:`PCM Device Specification <operand-pcm-device>`). See the :ref:`pcm-device <configure-pcm-device>` configuration file directive for the default run-time setting. This option isn't available if the :ref:`--disable-pcm-support <build-pcm-support>` build option was specified.
+  Specify the device to use for digital audio (see section :ref:`PCM Device Specification <operand-pcm-device>`). See the :ref:`pcm-device <configure-pcm-device>` configuration file directive for the default run-time setting. This option isn't available if the ``--disable-pcm-support`` build option was specified.
 
 .. _options-quiet:
 
@@ -2467,12 +1506,12 @@ The ``brltty`` command accepts the following options:
 .. _options-speech-driver:
 
 ``-s``\ *driver*\ ``,``...|\ ``auto`` ``--speech-driver=``\ *driver*\ ``,``...|\ ``auto``
-  Specify the speech synthesizer driver (see section :ref:`Driver Specification <operand-driver>`). See the :ref:`speech-driver <configure-speech-driver>` configuration file directive for the default run-time setting. This option isn't available if the :ref:`--disable-speech-support <build-speech-support>` build option was specified.
+  Specify the speech synthesizer driver (see section :ref:`Driver Specification <operand-driver>`). See the :ref:`speech-driver <configure-speech-driver>` configuration file directive for the default run-time setting. This option isn't available if the ``--disable-speech-support`` build option was specified.
 
 .. _options-text-table:
 
 ``-t``\ *file* ``--text-table=``\ *file*
-  Specify the text table (see section :ref:`Text Tables <table-text>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the :ref:`--with-data-directory <build-data-directory>` and the :ref:`--with-execute-root <build-execute-root>` build options for more details). The ``.ttb`` extension is optional. See the :ref:`text-table <configure-text-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Text Table <preference-text-table>` preference.
+  Specify the text table (see section :ref:`Text Tables <table-text>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ttb`` extension is optional. See the :ref:`text-table <configure-text-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Text Table <preference-text-table>` preference.
 
 .. _options-verify:
 
@@ -2734,7 +1773,7 @@ the :ref:`PRSEARCH/NXSEARCH <command-PRSEARCH-NXSEARCH>` commands.
 Pointer (Mouse) Support via GPM
 -------------------------------
 
-If BRLTTY is configured with the :ref:`--enable-gpm <build-gpm>` build option
+If BRLTTY is configured with the ``--enable-gpm`` build option
 on a system where the ``gpm`` application has been installed,
 then it'll interact with the pointer (mouse).
 
@@ -2780,7 +1819,7 @@ BRLTTY alerts you to the occurrence of significant events
 by playing short predefined tunes.
 This feature can be activated and deactivated with
 either the :ref:`TUNES <command-TUNES>` command
-or the :ref:`Alert Tunes <preference-alert-tunes>` preference.
+or the :ref:`Alert Tunes <tunes>` preference.
 The tunes are played via the internal beeper by default,
 but other alternatives can be selected
 with the :ref:`Tune Device <preference-tune-device>` preference.
@@ -2789,7 +1828,7 @@ Each significant event is associated, from highest to lowest priority,
 with one or more of the following:
 
 a tune
-  If a tune has been associated with the event, if the :ref:`Alert Tunes <preference-alert-tunes>` preference (see also the :ref:`TUNES <command-TUNES>` command) is active, and if the selected tune device (see the :ref:`Tune Device <preference-tune-device>` preference) can be opened, then the tune is played.
+  If a tune has been associated with the event, if the :ref:`Alert Tunes <tunes>` preference (see also the :ref:`TUNES <command-TUNES>` command) is active, and if the selected tune device (see the :ref:`Tune Device <preference-tune-device>` preference) can be opened, then the tune is played.
 
 a dot pattern
   If a dot pattern has been associated with the event, and if the :ref:`Alert Dots <preference-alert-dots>` preference is active, then the dot pattern is briefly displayed on every braille cell. Some braille displays don't respond quickly enough for this mechanism to work effectively.
@@ -3160,7 +2199,7 @@ Window Follows Pointer
   Yes
     Drag the braille window.
 
-  This preference is only presented if the :ref:`--enable-gpm <build-gpm>` build option was specified.
+  This preference is only presented if the ``--enable-gpm`` build option was specified.
 
 .. _preference-highlight-window:
 
@@ -3192,16 +2231,16 @@ Tune Device
   Play alert tunes via:
 
   Beeper
-    The internal beeper (console tone generator). This setting is supported on Linux, on OpenBSD, on FreeBSD, and on NetBSD. It's always safe to use, although it may be somewhat soft. This device isn't available if the :ref:`--disable-beeper-support <build-beeper-support>` build option was specified.
+    The internal beeper (console tone generator). This setting is supported on Linux, on OpenBSD, on FreeBSD, and on NetBSD. It's always safe to use, although it may be somewhat soft. This device isn't available if the ``--disable-beeper-support`` build option was specified.
 
   PCM
-    The digital audio interface on the sound card. This setting is supported on Linux (via ``/dev/dsp``), on Solaris (via ``/dev/audio``), on OpenBSD (via ``/dev/audio0``), on FreeBSD (via ``/dev/dsp``), and on NetBSD (via ``/dev/audio0``). It doesn't work when this device is already being used by another application. This device isn't available if the :ref:`--disable-pcm-support <build-pcm-support>` build option was specified.
+    The digital audio interface on the sound card. This setting is supported on Linux (via ``/dev/dsp``), on Solaris (via ``/dev/audio``), on OpenBSD (via ``/dev/audio0``), on FreeBSD (via ``/dev/dsp``), and on NetBSD (via ``/dev/audio0``). It doesn't work when this device is already being used by another application. This device isn't available if the ``--disable-pcm-support`` build option was specified.
 
   MIDI
-    The Musical Instrument Digital Interface on the sound card This setting is supported on Linux (via ``/dev/sequencer``). It doesn't work when this device is already being used by another application. This device isn't available if the :ref:`--disable-midi-support <build-midi-support>` build option was specified.
+    The Musical Instrument Digital Interface on the sound card This setting is supported on Linux (via ``/dev/sequencer``). It doesn't work when this device is already being used by another application. This device isn't available if the ``--disable-midi-support`` build option was specified.
 
   FM
-    The FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card. This setting is supported on Linux. It works even if the FM synthesizer is already being used by another application. The results are unpredictable, and potentially not very good, if it's used with a sound card which doesn't support this feature. This device isn't available if the :ref:`--disable-fm-support <build-fm-support>` build option was specified.
+    The FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card. This setting is supported on Linux. It works even if the FM synthesizer is already being used by another application. The results are unpredictable, and potentially not very good, if it's used with a sound card which doesn't support this feature. This device isn't available if the ``--disable-fm-support`` build option was specified.
 
   The initial setting is ``Beeper`` on those platforms which support it, and ``PCM`` on those platforms which don't.
 
@@ -3236,7 +2275,7 @@ Alert Dots
   Yes
     Briefly display the dot pattern.
 
-  If alert tunes are to be played (see the :ref:`TUNES <command-TUNES>` command and the :ref:`Alert Tunes <preference-alert-tunes>` preference), if a tune has been associated with the event, and if the selected tune device can be opened, then, regardless of the setting of this preference, the dot pattern isn't displayed.
+  If alert tunes are to be played (see the :ref:`TUNES <command-TUNES>` command and the :ref:`Alert Tunes <tunes>` preference), if a tune has been associated with the event, and if the selected tune device can be opened, then, regardless of the setting of this preference, the dot pattern isn't displayed.
 
 .. _preference-alert-messages:
 
@@ -3249,7 +2288,7 @@ Alert Messages
   Yes
     Display the message.
 
-  If alert tunes are to be played (see the :ref:`TUNES <command-TUNES>` command and the :ref:`Alert Tunes <preference-alert-tunes>` preference), if a tune has been associated with the event, and if the selected tune device can be opened, or if alert dot patterns are to be displayed (see the :ref:`Alert Dots <preference-alert-dots>` preference) and if a dot pattern has been associated with the event, then, regardless of the setting of this preference, the message isn't displayed.
+  If alert tunes are to be played (see the :ref:`TUNES <command-TUNES>` command and the :ref:`Alert Tunes <tunes>` preference), if a tune has been associated with the event, and if the selected tune device can be opened, or if alert dot patterns are to be displayed (see the :ref:`Alert Dots <preference-alert-dots>` preference) and if a dot pattern has been associated with the event, then, regardless of the setting of this preference, the message isn't displayed.
 
 .. _preference-sayline-mode:
 
@@ -3654,6 +2693,7 @@ in order to show the precise column layout.
 
 
 .. _learn:
+.. _command-LEARN:
 
 Command Learn Mode
 ------------------
@@ -3664,7 +2704,7 @@ It can be accessed
 either by the :ref:`LEARN <command-LEARN>` command
 or via the :ref:`brltest <utility-brltest>` utility.
 This feature isn't available if the
-:ref:`--disable-learn-mode <build-learn-mode>` build option was specified.
+--disable-learn-mode build option was specified.
 
 When this mode is entered,
 the message ``command learn mode`` is written to the braille display.
@@ -3716,7 +2756,7 @@ the following alternatives are provided:
 
 See the :ref:`-t <options-text-table>` command line option,
 the :ref:`text-table <configure-text-table>` configuration file directive,
-and the :ref:`--with-text-table <build-text-table>` build option
+and the ``--with-text-table`` build option
 for details regarding how to use an alternate text table.
 
 
@@ -3938,7 +2978,7 @@ upper_lower
 
 See the :ref:`-a <options-attributes-table>` command line option,
 the :ref:`attributes-table <configure-attributes-table>` configuration file directive,
-and the :ref:`--with-attributes-table <build-attributes-table>` build option
+and the ``--with-attributes-table`` build option
 for details regarding how to use an alternate attributes table.
 
 
@@ -4032,7 +3072,7 @@ BRLTTY presents contracted braille if:
 - The 6-dot braille feature has been activated. See the :ref:`SIXDOTS <command-SIXDOTS>` command and the :ref:`Text Style <preference-text-style>` preference for details.
 
 This feature isn't available if the
-:ref:`--disable-contracted-braille <build-contracted-braille>` build option was specified.
+``--disable-contracted-braille`` build option was specified.
 
 The following contraction tables are provided:
 
@@ -4937,8 +3977,8 @@ It's easy to have more than one version of BRLTTY
 installed on the same system at the same time.
 This capability allows you to test a new version before removing the old one.
 
-The :ref:`--with-execute-root <build-execute-root>` build option allows you
-to install the complete :ref:`installed file hierarchy <hierarchy>`
+The ``--with-execute-root`` build option allows you
+to install the complete installed file hierarchy
 anywhere you want such that it's entirely self-contained.
 Remembering that it's best to keep all of BRLTTY's components
 within the root file system, you can build it like this:
@@ -5005,10 +4045,10 @@ Installation/Rescue Root Disks for Linux
 
 BRLTTY can run as a stand-alone executable.
 Everything it needs to know can be explicitly configured at build-time
-(see :ref:`Build Options <build>`).
+(see Build Options).
 If the data directory
-(see the :ref:`--with-data-directory <build-data-directory>`
-and :ref:`--with-execute-root <build-execute-root>` build options)
+(see the ``--with-data-directory``
+and ``--with-execute-root`` build options)
 doesn't exist, then BRLTTY looks in ``/etc`` for the files it needs.
 Even if any of these files don't exist at all, BRLTTY still works!
 
@@ -5185,7 +4225,7 @@ Braille Device Specification
 The general form of a braille device specification
 (see the :ref:`-d <options-braille-device>` command line option,
 the :ref:`braille-device <configure-braille-device>` configuration file directive,
-and the :ref:`--with-braille-device <build-braille-device>` build option)
+and the ``--with-braille-device`` build option)
 is ``qualifier:``\ *data*.
 For backward compatibility with earlier releases,
 if the qualifier is omitted then ``serial:`` is assumed.
