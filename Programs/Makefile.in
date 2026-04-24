@@ -1342,7 +1342,6 @@ install-api-key:
 
 install-api-commands: all-brltty-clip $(ALL_BRLTTY_HANDOFF) install-program-directory $(INSTALL_BRLTTY_HANDOFF)
 	$(INSTALL_PROGRAM) brltty-clip$X $(INSTALL_PROGRAM_DIRECTORY)
-	$(INSTALL_SCRIPT) $(BLD_TOP)brltty-cleanup $(INSTALL_PROGRAM_DIRECTORY)
 
 install-brltty-handoff: install-program-directory
 	$(INSTALL_PROGRAM) brltty-handoff$X $(INSTALL_PROGRAM_DIRECTORY)

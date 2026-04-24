@@ -2074,7 +2074,6 @@ s%\([^ ][^ ]*\)%\1/Makefile:prologue.mk:\1/Makefile.in%g
 AC_CONFIG_FILES([
    config.mk
    brltty.spec
-   brltty-cleanup:brltty-cleanup.sh.in
    brltty-config.sh
    brltty.pc
    Documents/brltty.conf
@@ -2085,6 +2084,7 @@ AC_CONFIG_FILES([
    Bindings/Lisp/brlapi.asd
    Bindings/Lisp/brlapi_config.lisp
    Bindings/Python/setup.py
+   Autostart/Hammerspoon/sudoers.brltty:Autostart/Hammerspoon/sudoers.brltty.in
    Autostart/Systemd/brltty@.service
    Autostart/Systemd/tmpfiles
    Autostart/Udev/usb-template.rules

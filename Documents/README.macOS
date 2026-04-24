@@ -36,10 +36,16 @@ Running as Root
 ===============
 
 BRLTTY needs root privileges to open USB and serial braille devices.
-``brltty-term`` uses ``sudo`` to start BRLTTY.  Add the following entry to
-``/etc/sudoers.d/brltty`` (adjust the username as needed)::
+``brltty-term`` uses ``sudo`` to start BRLTTY.
 
-   username ALL=(root) NOPASSWD,SETENV: /usr/local/bin/brltty, /usr/local/bin/brltty-cleanup
+After running ``sudo make install-hammerspoon``, a sudoers template is
+installed at ``/usr/local/share/brltty/Autostart/Hammerspoon/sudoers.brltty``.
+Edit it to replace ``username`` with the account that will run ``brltty-term``,
+then install it::
+
+   sudo cp /usr/local/share/brltty/Autostart/Hammerspoon/sudoers.brltty \
+           /etc/sudoers.d/brltty
+   sudo visudo -cf /etc/sudoers.d/brltty
 
 The ``SETENV`` flag is required because ``brltty-term`` passes the user
 environment to BRLTTY via ``sudo --preserve-env``.
@@ -98,17 +104,6 @@ suspended only while the BrlAPI connection remains open.  When the worker
 receives ``SIGUSR1`` it resumes the driver and closes the connection so
 BRLTTY can reclaim the device.
 
-brltty-cleanup
---------------
-
-``brltty-cleanup`` removes stale BrlAPI socket files from the BrlAPI socket
-directory (``/usr/local/var/lib/BrlAPI`` by default).  Stale sockets
-accumulate when BRLTTY exits uncleanly (crash, kill signal).  The cleanup
-is a no-op when BRLTTY is already running.
-
-``brltty-term`` calls ``brltty-cleanup`` automatically before starting
-BRLTTY.
-
 Hammerspoon Automation
 ----------------------
 
@@ -123,16 +118,24 @@ hardcoded application name is needed.  ``TERMINAL_BUNDLES`` near the top
 of the file is a fallback allowlist used before brltty has started;
 extend it if you use a terminal emulator not listed there.
 
-**If Hammerspoon is not yet configured** on your machine, copy or symlink
-``brltty.lua`` as your Hammerspoon entry point::
+First install the Hammerspoon support files::
 
-   cp Autostart/Hammerspoon/brltty.lua ~/.hammerspoon/init.lua
-   # or: ln -s /usr/local/share/brltty/Autostart/Hammerspoon/brltty.lua ~/.hammerspoon/init.lua
+   sudo make install-hammerspoon
 
-**If you already have a** ``~/.hammerspoon/init.lua``, place ``brltty.lua``
-in your Hammerspoon directory and load it from your existing config::
+This installs ``brltty.lua`` to
+``/usr/local/share/brltty/Autostart/Hammerspoon/``.
 
-   cp Autostart/Hammerspoon/brltty.lua ~/.hammerspoon/brltty.lua
+**If Hammerspoon is not yet configured** on your machine, symlink ``brltty.lua``
+as your Hammerspoon entry point::
+
+   ln -s /usr/local/share/brltty/Autostart/Hammerspoon/brltty.lua \
+         ~/.hammerspoon/init.lua
+
+**If you already have a** ``~/.hammerspoon/init.lua``, copy ``brltty.lua``
+into your Hammerspoon directory and load it from your existing config::
+
+   cp /usr/local/share/brltty/Autostart/Hammerspoon/brltty.lua \
+      ~/.hammerspoon/brltty.lua
 
 Then add the following line to your ``~/.hammerspoon/init.lua``::
 
@@ -234,10 +237,5 @@ Troubleshooting
 **Display not connecting after VoiceOver quits**
    Wait for ``BrailleTranslationService`` to exit (up to ~5 s).  The
    Hammerspoon config handles this automatically.
-
-**BRLTTY fails with "another BrlAPI server is already listening"**
-   A stale socket file exists from a previous crash.  ``brltty-cleanup``
-   removes these automatically when called from ``brltty-term``.  Check
-   that the sudoers entry permits running ``brltty-cleanup`` as root.
 
 .. _Hammerspoon: https://www.hammerspoon.org/

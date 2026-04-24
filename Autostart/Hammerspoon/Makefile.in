@@ -1,5 +1,3 @@
-#!/bin/sh
-# @configure_input@
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -18,18 +16,25 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Remove stale BrlAPI socket files only when brltty is not running.
-# Stale sockets accumulate when brltty exits uncleanly (e.g. after a crash
-# or after being killed), and prevent a new brltty instance from creating
-# its BrlAPI socket.
+# Create an empty reldeps.mk if it does not already exist.
+# prologue.mk unconditionally includes $(SRC_DIR)/reldeps.mk; this rule
+# satisfies the include on a fresh source tree that has never been built.
+$(SRC_DIR)/reldeps.mk:
+	@touch "$@"
 
-brlapi_socket_dir="@api_socket_path@"
+HAMMERSPOON_INSTALL_DIRECTORY = $(INSTALL_ROOT)$(datadir)/brltty/Autostart/Hammerspoon
 
-if pgrep -x brltty >/dev/null 2>&1; then
-  exit 0
-fi
+install:
+	$(INSTALL_DIRECTORY) $(HAMMERSPOON_INSTALL_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/brltty.lua $(HAMMERSPOON_INSTALL_DIRECTORY)
+	$(INSTALL_DATA) $(BLD_DIR)/sudoers.brltty $(HAMMERSPOON_INSTALL_DIRECTORY)
 
-# BrlAPI socket files are hidden (names begin with '.').
-find "${brlapi_socket_dir}" -maxdepth 1 -name ".*" -delete 2>/dev/null
+uninstall:
+	-rm -f $(HAMMERSPOON_INSTALL_DIRECTORY)/brltty.lua
+	-rm -f $(HAMMERSPOON_INSTALL_DIRECTORY)/sudoers.brltty
+	-rmdir $(HAMMERSPOON_INSTALL_DIRECTORY) 2>/dev/null
 
-exit 0
+clean::
+
+distclean:: clean
+	-rm -f sudoers.brltty
