@@ -334,417 +334,23 @@ build options.
 
 
 
-Other Utilities
-===============
-
-Building BRLTTY also results in the building of
-a few small helper and diagnostic utilities.
-
-
 .. _utility-brltty-config:
 
-brltty-config
--------------
+The brltty-config Utility
+=========================
 
-This utility sets a number of environment variables to values
-which reflect the current installation of BRLTTY
-(see Build Options).
-It should be executed within an existing shell environment,
-i.e. not as a command in its own right,
-and can only be used by scripts which support **Bourne Shell** syntax.
-
-.. parsed-literal::
+A shell script that exposes BRLTTY's installation-time directory layout to
+other scripts. Source it (don't execute it) from a Bourne-compatible
+shell::
 
   . brltty-config
 
-
-The following environment variables are set:
-
-BRLTTY_VERSION
-  The version number of the BRLTTY package.
-
-BRLTTY_EXECUTE_ROOT
-  Run-time root for the installed package. Configured via the ``--with-execute-root`` build option.
-
-BRLTTY_PROGRAM_DIRECTORY
-  Directory for runnable programs (binaries, executables). Configured via the ``--with-program-directory`` build option.
-
-BRLTTY_LIBRARY_DIRECTORY
-  Directory for drivers. Configured via the ``--with-library-directory`` build option.
-
-BRLTTY_WRITABLE_DIRECTORY
-  Directory which can be written to. Configured via the ``--with-writable-directory`` build option.
-
-BRLTTY_DATA_DIRECTORY
-  Directory for tables and help pages. Configured via the ``--with-data-directory`` build option.
-
-BRLTTY_MANPAGE_DIRECTORY
-  Directory for manual pages. Configured via the ``--with-manpage-directory`` build option.
-
-BRLTTY_INCLUDE_DIRECTORY
-  Directory for BrlAPI's C header files. Configured via the ``--with-include-directory`` build option.
-
-BRLAPI_VERSION
-  The version number of BrlAPI (BRLTTY's Application Programming Interface).
-
-BRLAPI_RELEASE
-  The full release number of BrlAPI.
-
-BRLAPI_AUTH
-  The name of BrlAPI's key file.
-
-
-In addition, the following standard **autoconf** environment variables are also set:
-
-prefix
-  Subroot for architecture-independent files. Configured via the ``--prefix`` build option.
-
-exec_prefix
-  Subroot for architecture-dependent files. Configured via the ``--exec-prefix`` build option.
-
-bindir
-  Default location for ``program directory``. Configured via the ``--bindir`` build option.
-
-libdir
-  Directory for BrlAPI's static archive and dynamically loadable object. Default anchor for ``library directory``. Configured via the ``--libdir`` build option.
-
-sysconfdir
-  Directory for configuration files. Default anchor for ``data directory``. Configured via the ``--sysconfdir`` build option.
-
-mandir
-  Default location for ``manual pages directory``. Configured via the ``--mandir`` build option.
-
-includedir
-  Default anchor for ``header files directory``. Configured via the ``--includedir`` build option.
-
-
-.. _utility-brltty-install:
-
-brltty-install
---------------
-
-This utility copies BRLTTY's
-installed file hierarchy
-from one location to another.
-
-.. parsed-literal::
-
-  brltty-install *to* [*from*]
-
-*to*
-  The location to which the installed file hierarchy is to be copied. It must be an existing directory.
-
-*from*
-  The location from which the installed file hierarchy is to be taken. If it's specified, then it must be an existing directory. If it's not specified, then the location used for the build is assumed.
-
-
-This utility can be used, for example, to copy BRLTTY to a root disk.
-If a root floppy is mounted as ``/mnt``,
-and BRLTTY is installed on the main system,
-then typing
-
-::
-
-  brltty-install /mnt
-
-
-copies BRLTTY, along with all of its data and library files,
-to the root floppy.
-
-Some problems have been experienced when copying BRLTTY
-between systems with different versions of the shared C library.
-This is worth investigating if you have difficulties.
-
-
-.. _utility-brltest:
-
-brltest
--------
-
-This utility tests a braille display driver,
-and also provides an interactive way to learn
-what the keys on the braille display do.
-It should be run as root.
-
-.. parsed-literal::
-
-  brltest -*option* ... [*driver* [*name*=*value* ...]]
-
-*driver*
-  The driver for the braille display. It must be a two-letter :ref:`driver identification code <drivers>`. If it's not specified, then the first driver configured via the ``--with-braille-driver`` build option is assumed.
-
-*name*\ ``=``\ *value*
-  Set a braille display driver parameter. For a description of the parameters accepted by a specific driver, please see the documentation for that driver.
-
-``-d``\ *device* ``--device=``\ *device*
-  The absolute path for the device to which the braille display is connected. If it's not specified, then the device configured via the ``--with-braille-device`` build option is assumed.
-
-``-D``\ *directory* ``--data-directory=``\ *directory*
-  The absolute path for the directory wherein the driver data files reside. If it's not specified, then the directory configured via the ``--with-data-directory`` build option is assumed.
-
-``-L``\ *directory* ``--library-directory=``\ *directory*
-  The absolute path for the directory wherein the drivers reside. If it's not specified, then the directory configured via the ``--libdir`` build option is assumed.
-
-``-W``\ *directory* ``--writable-directory=``\ *directory*
-  The absolute path for a directory which can be written to. If it's not specified, then the directory configured via the ``--with-writable-directory`` build option is assumed.
-
-``-h`` ``--help``
-  Display a summary of the command line options, and then exit.
-
-
-This utility uses BRLTTY's :ref:`Command Learn Mode <learn>`.
-The key press timeout
-(after which this utility exits)
-is ``10`` seconds.
-The message hold time
-(used for non-final segments of long messages)
-is ``4`` seconds.
-
-
-.. _utility-spktest:
-
-spktest
--------
-
-This utility tests a speech synthesizer driver.
-It may need to be run as root.
-
-.. parsed-literal::
-
-  spktest -*option* ... [*driver* [*name*=*value* ...]]
-
-*driver*
-  The driver for the speech synthesizer. It must be a two-letter :ref:`driver identification code <drivers>`. If it's not specified, then the first driver configured via the ``--with-speech-driver`` build option is assumed.
-
-*name*\ ``=``\ *value*
-  Set a speech synthesizer driver parameter. For a description of the parameters accepted by a specific driver, please see the documentation for that driver.
-
-``-t``\ *string* ``--text-string=``\ *string*
-  The text to be spoken. If it's not specified, then standard input is read.
-
-``-D``\ *directory* ``--data-directory=``\ *directory*
-  The absolute path for the directory wherein the driver data files reside. If it's not specified, then the directory configured via the ``--with-data-directory`` build option is assumed.
-
-``-L``\ *directory* ``--library-directory=``\ *directory*
-  The absolute path for the directory wherein the drivers reside. If it's not specified, then the directory configured via the ``--libdir`` build option is assumed.
-
-``-h`` ``--help``
-  Display a summary of the command line options, and then exit.
-
-
-.. _utility-scrtest:
-
-scrtest
--------
-
-This utility tests the screen driver.
-It must be run as root.
-
-.. parsed-literal::
-
-  scrtest -*option* ... [*name*=*value* ...]
-
-*name*\ ``=``\ *value*
-  Set a screen driver parameter. For a description of the parameters accepted by a specific driver, please see the documentation for that driver.
-
-``-l``\ *column* ``--left=``\ *column*
-  Specify the starting (left) column (zero-origin) of the region. If this value isn't supplied, then a default value, based on the specified width, is selected such that the region is horizontally centred.
-
-``-c``\ *count* ``--columns=``\ *count*
-  Specify the width of the region (in columns). If this value isn't supplied, then a default value, based on the specified starting column, is selected such that the region is horizontally centred.
-
-``-t``\ *row* ``--top=``\ *row*
-  Specify the starting (top) row (zero-origin) of the region. If this value isn't supplied, then a default value, based on the specified height, is selected such that the region is vertically centred.
-
-``-r``\ *count* ``--rows=``\ *count*
-  Specify the height of the region (in rows). If this value isn't supplied, then a default value, based on the specified starting row, is selected such that the region is vertically centred.
-
-``-h`` ``--help``
-  Display a summary of the command line options, and then exit.
-
-
-Notes:
-
-- If neither a starting column nor a region width is specified, then the region is horizontally-centred and starts at column 5.
-- If neither a starting row nor a region height is specified, then the region is vertically-centred and starts at row 5.
-
-
-The following is written to standard output:
-#. A line detailing the dimensions of the screen.
-
-
-   .. parsed-literal::
-
-     Screen: *width*x*height*
-
-#. A line detailing the position (zero-origin) of the cursor.
-
-
-   .. parsed-literal::
-
-     Cursor: [*column*,*row*]
-
-#. A line detailing the size of the selected screen region, and the position (zero-origin) of its top-left corner.
-
-
-   .. parsed-literal::
-
-     Region: *width*x*height*@[*column*,*row*]
-
-#. The contents of the selected screen region. Unprintable characters are written as blanks.
-
-
-.. _utility-ttbtest:
-
-ttbtest
--------
-
-This utility tests a text table
-(see section :ref:`Text Tables <table-text>`).
-
-.. parsed-literal::
-
-  ttbtest -*option* ... *input-table* *output-table*
-
-*input-table*
-  The file system path to the input text table. If it's relative then it's anchored at the directory configured via the ``--with-data-directory`` build option.
-
-*output-table*
-  The file system path to the output text table. If it's relative then it's anchored at the current working directory. If this parameter isn't supplied then no output table is written.
-
-``-i``\ *format* ``--input-format=``\ *format*
-  Specify the format of the input table. If this option isn't supplied then the format of the input table is deduced from the extension of the input table's file name.
-
-``-o``\ *format* ``--output-format=``\ *format*
-  Specify the format of the output table. If this option isn't supplied then the format of the output table is deduced from the extension of the output table's file name.
-
-``-c``\ *charset* ``--charset=``\ *charset*
-  Specify the name of the 8-bit character set to use when interpreting the tables. If this option isn't supplied then the host's character set is used.
-
-``-e`` ``--edit``
-  Invoke the text table editor. If the output table is specified then changes are written to it. If not then the input table is rewritten.
-
-``-h`` ``--help``
-  Display a summary of the command line options, and then exit.
-
-
-If no special action is requested then the output table is optional.
-If it is not specified then the input table is checked.
-If it is specified then the input table is converted.
-
-The following table formats are supported:
-
-ttb
-  BRLTTY
-
-sbl
-  SuSE Blinux
-
-a2b
-  Gnopernicus
-
-gnb
-  Gnome Braille
-
-
-.. _utility-ctbtest:
-
-ctbtest
--------
-
-.. _preference-contraction-table:
-
-This utility tests a contraction table
-(see section :ref:`Contraction Tables <table-contraction>`).
-The text read from the input files (or standard input)
-is rewritten to standard output as contracted braille.
-
-.. parsed-literal::
-
-  ctbtest -*option* ... *input-file* ...
-
-*input-file*
-  The list of files to be processed. Any number of files may be specified. They're processed from left to right. The special file name ``-`` is interpreted to mean standard input. If no files are specified then standard input is processed.
-
-``-c``\ *file* ``--contraction-table=``\ *file*
-  The file system path to the contraction table. If it's relative then it's anchored at the directory configured via the ``--with-data-directory`` build option. The ``.ctb`` extension is optional. If this option isn't supplied then ``en-us-g2`` is assumed.
-
-``-t``\ *file*\ \|\ ``auto`` ``--text-table=``\ *file*\ \|\ ``auto``
-  Specify the text table (see section :ref:`Text Tables <table-text>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ttb`` extension is optional. See the :ref:`text-table <configure-text-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Text Table <preference-text-table>` preference.
-
-``-w``\ *columns* ``--output-width=``\ *columns*
-  The maximum length of an output line. Each contracted input line is wrapped into as many output lines as necessary. If this option isn't specified then there's no limit, and there's a one-to-one correspondence between input and output lines.
-
-``-h`` ``--help``
-  Display a summary of the command line options, and then exit.
-
-
-The text table is used:
-
-- To define the output character set so that the contracted braille will be displayed correctly. The same table as will be used by BRLTTY when the output is read should be specified.
-- To define the braille representations of those characters defined within the contraction table as ``=`` (see section :ref:`Character Translation <contraction-opcodes-translation>`).
-
-
-The ``brf.ttb`` text table is provided for use with this utility.
-It defines the format used within ``.brf`` files.
-This is also the preferred format used
-by most braille printers
-and within electronically distributed braille documents.
-This table effectively allows this utility to be used as a text to braille translator.
-
-
-.. _utility-tunetest:
-
-tunetest
---------
-
-.. _command-TUNES:
-
-This utility tests the alert tunes facility,
-and also provides an easy way to compose new tunes.
-It may need to be run as root.
-
-.. parsed-literal::
-
-  tunetest -*option* ... {*note* *duration*} ...
-
-*note*
-  A standard ``MIDI`` note number. It must be an integer from ``1`` through ``127``, with ``60`` representing ``Middle C``. Each value represents a standard chromatic semi-tone, with the next lower and higher values representing, respectively, the next lower and higher notes. The lowest value (``1``) represents the fifth ``C-Sharp`` below ``Middle C``, and the highest value (``127``) represents the sixth ``G`` above ``Middle C``.
-
-*duration*
-  The duration of the note in milliseconds. It must be an integer from ``1`` through ``255``.
-
-``-d``\ *device* ``--device=``\ *device*
-  The device on which to play the tune.
-
-  beeper
-    The internal beeper (console tone generator).
-
-  pcm
-    The digital audio interface on the sound card.
-
-  midi
-    The Musical Instrument Digital Interface on the sound card.
-
-  fm
-    The FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card.
-
-  The device name may be abbreviated. See the :ref:`Tune Device <preference-tune-device>` preference for details regarding the default device and platform restrictions.
-
-``-v``\ *loudness* ``--volume=``\ *loudness*
-  Specify the output volume (loudness) as a percentage of the maximum. The default output volume is ``50``.
-
-``-p``\ *device* ``--pcm-device=``\ *device*
-  Specify the device to use for digital audio (see section :ref:`PCM Device Specification <operand-pcm-device>`). This option isn't available if the ``--disable-pcm-support`` build option was specified.
-
-``-m``\ *device* ``--midi-device=``\ *device*
-  Specify the device to use for the Musical Instrument Digital Interface (see section :ref:`MIDI Device Specification <operand-midi-device>`). This option isn't available if the ``--disable-midi-support`` build option was specified.
-
-``-i``\ *instrument* ``--instrument=``\ *instrument*
-  The instrument to use if the selected device is ``midi``. For the complete list of instruments, see the :ref:`MIDI Instrument Table <midi>`. The default instrument is an ``acoustic grand piano``. The words comprising the instrument name must be separated from one another by a single minus sign rather than by spaces, and any of the words may be abbreviated. An ``acoustic grand piano``, for example, may be specified as ``a-gra-pi``.
-
-``-h`` ``--help``
-  Display a summary of the command line options, and then exit.
+The script sets environment variables reflecting the runtime layout chosen
+at build time: ``BRLTTY_VERSION``, ``BRLTTY_EXECUTE_ROOT``,
+``BRLTTY_PROGRAM_DIRECTORY``, ``BRLTTY_LIBRARY_DIRECTORY``,
+``BRLTTY_WRITABLE_DIRECTORY``, ``BRLTTY_DATA_DIRECTORY``,
+``BRLTTY_MANPAGE_DIRECTORY``, ``BRLAPI_VERSION``, and others. Run it once
+and inspect the environment for the full list.
 
 
 Using BRLTTY
@@ -1417,7 +1023,7 @@ The ``brltty`` command accepts the following options:
 .. _options-contraction-table:
 
 ``-c``\ *file* ``--contraction-table=``\ *file*
-  Specify the contraction table (see section :ref:`Contraction Tables <table-contraction>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ctb`` extension is optional. The contraction table is used when the 6-dot braille feature is activated (see the :ref:`SIXDOTS <command-SIXDOTS>` command and the :ref:`Text Style <preference-text-style>` preference). See the :ref:`contraction-table <configure-contraction-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Contraction Table <preference-contraction-table>` preference. This option isn't available if the ``--disable-contracted-braille`` build option was specified.
+  Specify the contraction table (see section :ref:`Contraction Tables <table-contraction>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ctb`` extension is optional. The contraction table is used when the 6-dot braille feature is activated (see the :ref:`SIXDOTS <command-SIXDOTS>` command and the :ref:`Text Style <preference-text-style>` preference). See the :ref:`contraction-table <configure-contraction-table>` configuration file directive for the default run-time setting. This setting can be changed with the Contraction Table preference. This option isn't available if the ``--disable-contracted-braille`` build option was specified.
 
 .. _options-braille-device:
 
@@ -1811,6 +1417,7 @@ here are some notes on how it works.
 
 
 .. _tunes:
+.. _command-TUNES:
 
 Alert Tunes
 -----------
@@ -2702,7 +2309,7 @@ Command learn mode is an interactive way to learn
 what the keys on the braille display do.
 It can be accessed
 either by the :ref:`LEARN <command-LEARN>` command
-or via the :ref:`brltest <utility-brltest>` utility.
+or via the ``brltest`` utility.
 This feature isn't available if the
 --disable-learn-mode build option was specified.
 
