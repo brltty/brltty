@@ -1326,14 +1326,13 @@ Preferences Settings
 --------------------
 
 When BRLTTY starts, it loads a file which contains your preferences settings.
-The file doesn't need to exist,
-and is created the first time the settings are saved
-with the :ref:`PREFSAVE <command-PREFSAVE>` command.
-The most recently saved settings can be restored at any time
-with the :ref:`PREFLOAD <command-PREFLOAD>` command.
+The file doesn't need to exist, and is created the first time the settings
+are saved with the :ref:`PREFSAVE <command-PREFSAVE>` command. The most
+recently saved settings can be restored at any time with the
+:ref:`PREFLOAD <command-PREFLOAD>` command.
 
-The name for this file is ``/etc/brltty-``\ *driver*\ ``.prefs``.
-where *driver* is the two-letter :ref:`driver identification code <drivers>`.
+The file is named ``/etc/brltty-``\ *driver*\ ``.prefs``, where *driver* is
+the two-letter :ref:`driver identification code <drivers>`.
 
 
 .. _preferences-menu:
@@ -1341,617 +1340,193 @@ where *driver* is the two-letter :ref:`driver identification code <drivers>`.
 The Preferences Menu
 ~~~~~~~~~~~~~~~~~~~~
 
-The preferences settings are saved as binary data
-which, therefore, can't be edited by hand.
-BRLTTY, however, has a simple menu from which you can easily change them.
+Preferences are saved as binary data, so they can't be edited by hand —
+BRLTTY provides a built-in menu instead. The menu is activated by the
+:ref:`PREFMENU <command-PREFMENU>` command; invoke it again to leave the
+new settings in effect, exit the menu, and resume normal operation.
+``PREFLOAD`` undoes any changes made since entering the menu. See
+:ref:`Menu Navigation Commands <menu-navigation>` for the full set of
+keys that select items and adjust settings; the routing keys can also
+be used to pick a setting directly.
 
-The menu is activated by the :ref:`PREFMENU <command-PREFMENU>` command.
-The braille display briefly
-(see the :ref:`-M <options-message-timeout>` command line option)
-shows the menu title,
-and then presents the current item and its current setting.
-
-
-Navigating the Menu
-^^^^^^^^^^^^^^^^^^^
-
-See :ref:`Menu Navigation Commands <menu-navigation>` for the full list of
-commands which enable you to select items and change settings within the menu.
-For backward compatibility with old drivers, the window motion commands,
-which have modified meanings in this context, can also be used.
-
-``TOP``/``BOT``, ``TOP_LEFT``/``BOT_LEFT``, ``PAGE_UP``/``PAGE_DOWN``
-  Go to the first/last item in the menu (same as :ref:`MENU_FIRST_ITEM/MENU_LAST_ITEM <command-MENU_FIRST_ITEM-MENU_LAST_ITEM>`).
-
-``LNUP``/``LNDN``, ``PRDIFLN``/``NXDIFLN``, ``CURSOR_UP``/``CURSOR_DOWN``
-  Go to the previous/next item in the menu (same as :ref:`MENU_PREV_ITEM/MENU_NEXT_ITEM <command-MENU_PREV_ITEM-MENU_NEXT_ITEM>`).
-
-``WINUP``/``WINDN``, ``CHRLT``/``CHRRT``, ``CURSOR_LEFT``/``CURSOR_RIGHT``, ``BACK``/``HOME``
-  Decrement/increment the current menu item's setting (same as :ref:`MENU_PREV_SETTING/MENU_NEXT_SETTING <command-MENU_PREV_SETTING-MENU_NEXT_SETTING>`).
+The menu is self-documenting and is the authoritative list of
+available preferences — items not listed below behave as their menu
+name implies. The remainder of this section covers the preferences
+that the rest of this manual cross-references, the new ones added
+since BRLTTY 6.5, and a handful that new users typically adjust early
+on.
 
 
-Notes:
-
-- The routing keys can also be used to select a setting for the current item. If the item has numeric settings, then the entire row of routing keys acts as a scroll bar which covers the full range of valid values. If the item has named settings, then the routing keys correspond ordinally with the settings.
-- Use the ``PREFLOAD`` command to undo all of the changes which were made since entering the menu.
-- Use the ``PREFMENU`` command (again) to leave the new settings in effect, exit the menu, and resume normal operation. If the <sq/Save Settings on Exit/ item is set, then, in addition, the new settings are written to the preferences settings file. Any command not recognized by the menu system also does these same things.
-
-
-The Menu Items
-^^^^^^^^^^^^^^
-
-.. _preference-save-on-exit:
-
-Save on Exit
-  When exiting the preferences menu:
-
-  No
-    Don't automatically save the preferences settings.
-
-  Yes
-    Automatically save the preferences settings.
-
-  The initial setting is ``No``.
+Selected Preferences
+~~~~~~~~~~~~~~~~~~~~
 
 .. _preference-text-style:
 
 Text Style
-  When displaying screen content (see the :ref:`DISPMD <command-DISPMD>` command), show characters:
-
-  8-dot
-    With all eight dots.
-
-  6-dot
-    With only dots 1 through 6. If a contraction table has been selected (see the :ref:`-c <options-contraction-table>` command line option and the :ref:`contraction-table <configure-contraction-table>` configuration file directive), then it is used.
-
-  This setting can also be changed with the :ref:`SIXDOTS <command-SIXDOTS>` command.
+  Display screen content using all eight dots (``8-dot``) or only dots
+  1 through 6 (``6-dot``). When 6-dot mode is in effect and a
+  contraction table has been selected, contracted braille is shown.
+  Also changeable via the :ref:`SIXDOTS <command-SIXDOTS>` command.
 
 .. _preference-skip-identical-lines:
 
 Skip Identical Lines
-  When moving either up or down exactly one line with the :ref:`LNUP/LNDN <command-LNUP-LNDN>` commands, as well as the line wrapping feature of the :ref:`FWINLT/FWINRT <command-FWINLT-FWINRT>` and :ref:`FWINLTSKIP/FWINRTSKIP <command-FWINLTSKIP-FWINRTSKIP>` commands:
-
-  No
-    Don't skip past lines which have the same content as the current line.
-
-  Yes
-    Skip past lines which have the same content as the current line.
-
-  This setting can also be changed with the :ref:`SKPIDLNS <command-SKPIDLNS>` command.
-
-Skip Blank Windows
-  When moving either left or right with the :ref:`FWINLT/FWINRT <command-FWINLT-FWINRT>` commands:
-
-  No
-    Don't skip past blank windows.
-
-  Yes
-    Skip past blank windows.
-
-  This setting can also be changed with the :ref:`SKPBLNKWINS <command-SKPBLNKWINS>` command.
-
-.. _preference-which-blank-windows:
-
-Which Blank Windows
-  If blank windows are to be skipped:
-
-  All
-    Skip all of them.
-
-  End of Line
-    Only skip those which are at the end (on the right side) of a line.
-
-  Rest of Line
-    Only skip those which are at the end (on the right side) of a line when reading forward, and at the beginning (on the left side) of a line when reading backward.
+  When moving up or down by one line, skip past lines whose content
+  matches the current line. Also changeable via the
+  :ref:`SKPIDLNS <command-SKPIDLNS>` command.
 
 .. _preference-sliding-window:
 
 Sliding Window
-  If the cursor is being tracked (see the :ref:`CSRTRK <command-CSRTRK>` command), and the cursor moves too close to (or beyond) either end of the braille window:
-
-  No
-    Horizontally reposition the window such that its left end is a multiple of its width from the left edge of the screen.
-
-  Yes
-    Horizontally reposition the window such that the cursor, while remaining on that side of the window, is nearer the centre.
-
-  This setting can also be changed with the :ref:`SLIDEWIN <command-SLIDEWIN>` command.
-
-.. _preference-eager-sliding-window:
-
-Eager Sliding Window
-  If the braille window is to slide:
-
-  No
-    Reposition it whenever the cursor moves beyond either end.
-
-  Yes
-    Reposition it whenever the cursor moves too close to either end.
-
-  The initial setting is ``No``.
-
-.. _preference-window-overlap:
-
-Window Overlap
-  When moving either left or right with the :ref:`FWINLT/FWINRT <command-FWINLT-FWINRT>` commands, this setting specifies how many characters horizontally adjacent braille windows should overlap each other by. The initial setting is ``0``.
-
-Autorepeat
-  While the key (combination) for a command remains pressed:
-
-  No
-    Don't automatically repeat the command.
-
-  Yes
-    Automatically repeat the command at a regular interval after an initial delay.
-
-  The following commands are eligible for autorepeating:
-
-  - The :ref:`LNUP/LNDN <command-LNUP-LNDN>` commands.
-  - The :ref:`PRDIFLN/NXDIFLN <command-PRDIFLN-NXDIFLN>` commands.
-  - The :ref:`CHRLT/CHRRT <command-CHRLT-CHRRT>` commands.
-  - Braille window panning operations (see the :ref:`Autorepeat Panning <preference-autorepeat-panning>` preference).
-  - The Page-Up and Page-Down operations.
-  - The Cursor-Up and Cursor-Down operations.
-  - The Cursor-Left and Cursor-Right operations.
-  - The Backspace and Delete operations.
-  - Character entry.
-
-  Only some drivers support this functionality, the primary limitation being that many braille displays don't signal both key presses and key releases as distinctly separate events. This setting can also be changed with the :ref:`AUTOREPEAT <command-AUTOREPEAT>` command. The initial setting is ``Yes``.
-
-.. _preference-autorepeat-panning:
-
-Autorepeat Panning
-  When the :ref:`Autorepeat <preference-autorepeat>` preference is enabled:
-
-  No
-    Don't autorepeat braille window panning operations.
-
-  Yes
-    Autorepeat braille window panning operations.
-
-  This preference affects the :ref:`FWINLT/FWINRT <command-FWINLT-FWINRT>` commands. The initial setting is ``No``.
-
-.. _preference-autorepeat-delay:
-
-Autorepeat Delay
-  When a character is to be autorepeated, this setting specifies the amount of time (see the note on :ref:`time settings <time-settings>` below) which must pass before autorepeating begins. The initial setting is ``50``.
-
-.. _preference-autorepeat-interval:
-
-Autorepeat Interval
-  When a character is being autorepeated, this setting specifies the amount of time (see the note on :ref:`time settings <time-settings>` below) between each reexecution. The initial setting is ``10``.
+  When cursor tracking would otherwise push the cursor off the edge
+  of the braille window, slide the window so the cursor stays nearer
+  the centre instead of jumping by full window widths. Also
+  changeable via the :ref:`SLIDEWIN <command-SLIDEWIN>` command.
 
 .. _preference-show-cursor:
 
 Show Cursor
-  When displaying screen content (see the :ref:`DISPMD <command-DISPMD>` command):
-
-  No
-    Don't show the cursor.
-
-  Yes
-    Show the cursor.
-
-  This setting can also be changed with the :ref:`CSRVIS <command-CSRVIS>` command. The initial setting is ``Yes``.
+  Whether to show the screen cursor on the braille display. Also
+  changeable via the :ref:`CSRVIS <command-CSRVIS>` command.
 
 .. _preference-cursor-style:
 
 Cursor Style
-  When showing the cursor, represent it:
-
-  Underline
-    With dots 7 and 8.
-
-  Block
-    With all eight dots.
-
-  This setting can also be changed with the :ref:`CSRSIZE <command-CSRSIZE>` command.
+  Represent the cursor with all eight dots (a solid block) or with
+  just dots 7 and 8 (an underline). Also changeable via the
+  :ref:`CSRSIZE <command-CSRSIZE>` command.
 
 .. _preference-blinking-cursor:
 
 Blinking Cursor
-  When the cursor is to be shown:
-
-  No
-    Leave it visible all the time.
-
-  Yes
-    Make it alternately visible and invisible according to a predefined interval.
-
-  This setting can also be changed with the :ref:`CSRBLINK <command-CSRBLINK>` command.
-
-.. _preference-cursor-visible-time:
-
-Cursor Visible Time
-  When the cursor is to be blinked, this setting specifies the length of time (see the note on :ref:`time settings <time-settings>` below) during each cycle that it is to be visible. The initial setting is ``40``.
-
-.. _preference-cursor-invisible-time:
-
-Cursor Invisible Time
-  When the cursor is to be blinked, this setting specifies the length of time (see the note on :ref:`time settings <time-settings>` below) during each cycle that it is to be invisible. The initial setting is ``40``.
+  Make the cursor alternately visible and invisible at a fixed rate.
+  Also changeable via the :ref:`CSRBLINK <command-CSRBLINK>` command.
 
 .. _preference-show-attributes:
 
 Show Attributes
-  When displaying screen content (see the :ref:`DISPMD <command-DISPMD>` command):
-
-  No
-    Don't underline highlighted characters.
-
-  Yes
-    Underline highlighted characters.
-
-  This setting can also be changed with the :ref:`ATTRVIS <command-ATTRVIS>` command.
+  Underline characters that have screen highlighting (bold, reverse,
+  etc.). Also changeable via the :ref:`ATTRVIS <command-ATTRVIS>`
+  command.
 
 .. _preference-blinking-attributes:
 
 Blinking Attributes
-  When highlighted characters are to be underlined:
-
-  No
-    Leave the indicator visible all the time.
-
-  Yes
-    Make the indicator alternately visible and invisible according to a predefined interval.
-
-  This setting can also be changed with the :ref:`ATTRBLINK <command-ATTRBLINK>` command.
-
-.. _preference-attributes-visible-time:
-
-Attributes Visible Time
-  When the highlighted character underline is to be blinked, this setting specifies the length of time (see the note on :ref:`time settings <time-settings>` below) during each cycle that it is to be visible. The initial setting is ``20``.
-
-.. _preference-attributes-invisible-time:
-
-Attributes Invisible Time
-  When the highlighted character underline is to be blinked, this setting specifies the length of time (see the note on :ref:`time settings <time-settings>` below) during each cycle that it is to be invisible. The initial setting is ``60``.
+  Make the attribute underline blink. Also changeable via the
+  :ref:`ATTRBLINK <command-ATTRBLINK>` command.
 
 .. _preference-blinking-capitals:
 
 Blinking Capitals
-  When displaying screen content (see the :ref:`DISPMD <command-DISPMD>` command):
+  Make capital letters blink so they stand out. Also changeable via
+  the :ref:`CAPBLINK <command-CAPBLINK>` command.
 
-  No
-    Leave capital letters visible all the time.
-
-  Yes
-    Make capital letters alternately visible and invisible according to a predefined interval.
-
-  This setting can also be changed with the :ref:`CAPBLINK <command-CAPBLINK>` command.
-
-.. _preference-capitals-visible-time:
-
-Capitals Visible Time
-  When capital letters are to be blinked, this setting specifies the length of time (see the note on :ref:`time settings <time-settings>` below) during each cycle that they're to be visible. The initial setting is ``60``.
-
-.. _preference-capitals-invisible-time:
-
-Capitals Invisible Time
-  When capital letters are to be blinked, this setting specifies the length of time (see the note on :ref:`time settings <time-settings>` below) during each cycle that they're to be invisible. The initial setting is ``20``.
-
-.. _preference-braille-firmness:
-
-Braille Firmness
-  Adjust the firmness (or stiffness) of the braille dots. It can be set to:
-
-  - Maximum
-  - High
-  - Medium
-  - Low
-  - Minimum
-
-  This preference is only available if a driver which supports it is being used. The initial setting is ``Medium``.
-
-.. _preference-braille-sensitivity:
-
-Braille Sensitivity
-  Adjust the sensitivity of the braille dots to touch. It can be set to:
-
-  - Maximum
-  - High
-  - Medium
-  - Low
-  - Minimum
-
-  This preference is only available if a driver which supports it is being used. The initial setting is ``Medium``.
+Autorepeat
+  While the key combination for an autorepeatable command remains
+  pressed, repeat the command at a regular interval after an initial
+  delay. Whether key-release events are reliable enough to support
+  this depends on the braille display driver. Also changeable via the
+  :ref:`AUTOREPEAT <command-AUTOREPEAT>` command.
 
 .. _preference-window-follows-pointer:
 
 Window Follows Pointer
-  When moving the pointer device (mouse):
-
-  No
-    Don't drag the braille window.
-
-  Yes
-    Drag the braille window.
-
-  This preference is only presented if the ``--enable-gpm`` build option was specified.
-
-.. _preference-highlight-window:
-
-Highlight Window
-  When moving the braille window:
-
-  No
-    Don't highlight the new screen area.
-
-  Yes
-    Highlight the new screen area.
-
-  This feature enables a sighted observer to see where the braille window is, and, therefore, to know what the braille user is reading. Any motion of the braille window (manual, cursor tracking, etc.), other than when it moves in response to pointer (mouse) motion (see the :ref:`Window Follows Pointer <preference-window-follows-pointer>` preference), causes the area of the screen corresponding to the new location of the braille window to be highlighted. If the :ref:`Show Attributes <preference-show-attributes>` preference is enabled then only the character corresponding to the upper-left corner of the braille window is highlighted.
-
-Alert Tunes
-  Whenever a significant event with an associated tune occurs (see :ref:`Alert Tunes <tunes>`):
-
-  No
-    Don't play the tune.
-
-  Yes
-    Play the tune.
-
-  This setting can also be changed with the :ref:`TUNES <command-TUNES>` command. The initial setting is ``Yes``.
+  When the mouse pointer moves, drag the braille window along with
+  it. Only available when GPM support is built in.
 
 .. _preference-tune-device:
 
 Tune Device
-  Play alert tunes via:
-
-  Beeper
-    The internal beeper (console tone generator). This setting is supported on Linux, on OpenBSD, on FreeBSD, and on NetBSD. It's always safe to use, although it may be somewhat soft. This device isn't available if the ``--disable-beeper-support`` build option was specified.
-
-  PCM
-    The digital audio interface on the sound card. This setting is supported on Linux (via ``/dev/dsp``), on Solaris (via ``/dev/audio``), on OpenBSD (via ``/dev/audio0``), on FreeBSD (via ``/dev/dsp``), and on NetBSD (via ``/dev/audio0``). It doesn't work when this device is already being used by another application. This device isn't available if the ``--disable-pcm-support`` build option was specified.
-
-  MIDI
-    The Musical Instrument Digital Interface on the sound card This setting is supported on Linux (via ``/dev/sequencer``). It doesn't work when this device is already being used by another application. This device isn't available if the ``--disable-midi-support`` build option was specified.
-
-  FM
-    The FM synthesizer on an AdLib, OPL3, Sound Blaster, or equivalent sound card. This setting is supported on Linux. It works even if the FM synthesizer is already being used by another application. The results are unpredictable, and potentially not very good, if it's used with a sound card which doesn't support this feature. This device isn't available if the ``--disable-fm-support`` build option was specified.
-
-  The initial setting is ``Beeper`` on those platforms which support it, and ``PCM`` on those platforms which don't.
-
-.. _preference-pcm-volume:
-
-PCM Volume
-  If the digital audio interface of the sound card is being used to play the alert tunes, this setting specifies the loudness (as a percentage of the maximum) at which they are to be played. The initial setting is ``70``.
-
-.. _preference-midi-volume:
-
-MIDI Volume
-  If the Musical Instrument Digital Interface (MIDI) of the sound card is being used to play the alert tunes, this setting specifies the loudness (as a percentage of the maximum) at which they are to be played. The initial setting is ``70``.
-
-.. _preference-midi-instrument:
-
-MIDI Instrument
-  If the Musical Instrument Digital Interface (MIDI) of the sound card is being used to play the alert tunes, this setting specifies which instrument is to be used (see the :ref:`MIDI Instrument Table <midi>`). The initial setting is ``Acoustic Grand Piano``.
-
-.. _preference-fm-volume:
-
-FM Volume
-  If the FM synthesizer of the sound card is being used to play the alert tunes, this setting specifies the loudness (as a percentage of the maximum) at which they are to be played. The initial setting is ``70``.
+  Which audio device to play alert tunes through: the internal beeper,
+  PCM (the sound card's digital audio interface), MIDI, or FM
+  synthesis. Separate volume sub-settings are available for PCM, MIDI,
+  and FM. The default is ``Beeper`` where supported, otherwise ``PCM``.
 
 .. _preference-alert-dots:
 
 Alert Dots
-  Whenever a significant event with an associated dot pattern occurs (see :ref:`Alert Tunes <tunes>`):
-
-  No
-    Don't display the dot pattern.
-
-  Yes
-    Briefly display the dot pattern.
-
-  If alert tunes are to be played (see the :ref:`TUNES <command-TUNES>` command and the :ref:`Alert Tunes <tunes>` preference), if a tune has been associated with the event, and if the selected tune device can be opened, then, regardless of the setting of this preference, the dot pattern isn't displayed.
+  When a significant event has an associated dot pattern (see
+  :ref:`Alert Tunes <tunes>`), briefly display the pattern on every
+  braille cell. A separate *Alert Dots Duration* setting (added after
+  BRLTTY 6.5; default 0.4 seconds) controls how long the pattern is
+  held — useful for displays whose actuators respond slowly.
+  Suppressed if a tune fires for the same event.
 
 .. _preference-alert-messages:
 
 Alert Messages
-  Whenever a significant event with an associated message occurs (see :ref:`Alert Tunes <tunes>`):
-
-  No
-    Don't display the message.
-
-  Yes
-    Display the message.
-
-  If alert tunes are to be played (see the :ref:`TUNES <command-TUNES>` command and the :ref:`Alert Tunes <tunes>` preference), if a tune has been associated with the event, and if the selected tune device can be opened, or if alert dot patterns are to be displayed (see the :ref:`Alert Dots <preference-alert-dots>` preference) and if a dot pattern has been associated with the event, then, regardless of the setting of this preference, the message isn't displayed.
+  When a significant event has an associated message (see
+  :ref:`Alert Tunes <tunes>`), display it on the braille display for
+  a few seconds (see the :ref:`-M <options-message-timeout>` command
+  line option). Suppressed if a tune or alert dots fire for the same
+  event.
 
 .. _preference-sayline-mode:
 
 Say-Line Mode
-  When using the :ref:`SAY_LINE <command-SAY_LINE>` command:
-
-  Immediate
-    Discard pending speech.
-
-  Enqueue
-    Don't discard pending speech.
-
-  The initial setting is ``Immediate``.
+  When the :ref:`SAY_LINE <command-SAY_LINE>` command runs, either
+  discard pending speech (``Immediate``, the default) or queue the
+  new line behind it (``Enqueue``).
 
 Autospeak
-
-  No
-    Only speak when explicitly requested to do so.
-
-  Yes
-    Automatically speak:
-
-    - the new line when the braille window is moved vertically.
-    - characters which are entered or deleted.
-    - the character to which the cursor is moved.
-
-
-  This setting can also be changed with the :ref:`AUTOSPEAK <command-AUTOSPEAK>` command. The initial setting is ``No``.
+  When enabled, automatically speak the new line when the braille
+  window is moved vertically, characters as they're entered or
+  deleted, and the character the cursor is moved to. Also changeable
+  via the :ref:`AUTOSPEAK <command-AUTOSPEAK>` command.
 
 .. _preference-speech-rate:
 
 Speech Rate
-  Adjust the speech rate (``0`` is the slowest, ``20`` is the fastest). This preference is only available if a driver which supports it is being used. This setting can also be changed with the :ref:`SAY_SLOWER/SAY_FASTER <command-SAY_SLOWER-SAY_FASTER>` commands. The initial setting is ``10``.
+  Adjust the speech rate (``0`` slowest, ``20`` fastest).
+  Driver-dependent; also changeable via the
+  :ref:`SAY_SLOWER/SAY_FASTER <command-SAY_SLOWER-SAY_FASTER>` commands.
 
 .. _preference-speech-volume:
 
 Speech Volume
-  Adjust the speech volume (``0`` is the softest, ``20`` is the loudest). This preference is only available if a driver which supports it is being used. This setting can also be changed with the :ref:`SAY_SOFTER/SAY_LOUDER <command-SAY_SOFTER-SAY_LOUDER>` commands. The initial setting is ``10``.
+  Adjust the speech volume (``0`` softest, ``20`` loudest).
+  Driver-dependent; also changeable via the
+  :ref:`SAY_SOFTER/SAY_LOUDER <command-SAY_SOFTER-SAY_LOUDER>` commands.
 
-.. _preference-speech-pitch:
+Punctuation Level
+  How much punctuation the speech synthesizer reads aloud. The
+  available levels are ``None``, ``Some``, ``Most``, and ``All`` —
+  the ``Most`` level (added after BRLTTY 6.5) sits between ``Some``
+  and ``All`` for users who want most punctuation but find ``All``
+  too noisy. Driver-dependent.
 
-Speech Pitch
-  Adjust the speech pitch (``0`` is the lowest, ``20`` is the highest). This preference is only available if a driver which supports it is being used. The initial setting is ``10``.
-
-.. _preference-speech-punctuation:
-
-Speech Punctuation
-  Adjust the amount of punctuation which is spoken. It can be set to:
-
-  - None
-  - Some
-  - All
-
-  This preference is only available if a driver which supports it is being used. The initial setting is ``Some``.
-
-.. _preference-status-style:
-
-Status Style
-  This setting specifies the way that the status cells are to be used. You shouldn't normally need to play with it. It enables BRLTTY's developers to test status cell configurations for braille displays which they don't actually have.
-
-  None
-    Don't use the status cells. This setting is always safe, but it's also quite useless.
-
-  Alva
-    The status cells contain:
-
-    1
-      The location of the cursor (see below).
-
-    2
-      The location of the top-left corner of the braille window (see below).
-
-    3
-      A letter indicating BRLTTY's state. In order of precedence:
-
-      a
-        Screen attributes are being shown (see the :ref:`DISPMD <command-DISPMD>` command).
-
-      f
-        The screen image is frozen (see the :ref:`FREEZE <command-FREEZE>` command).
-
-      f
-        The cursor is being tracked (see the :ref:`CSRTRK <command-CSRTRK>` command).
-
-      *blank*
-        Nothing special.
-
-
-    The locations of the cursor and the braille window are presented in an interesting way. Dots 1 through 6 represent the line number with a letter from ``a`` (for 1) through ``y`` (for 25). Dots 7 and 8 (the extra two at the bottom) represent the horizontal braille window number as follows:
-
-    No Dots
-      The first (leftmost) window.
-
-    Dot 7
-      The second window.
-
-    Dot 8
-      The third window.
-
-    Dots 7 and 8
-      The fourth window.
-
-    In both cases, the indicators wrap: line 26 is represented by the letter ``a``, and the fifth horizontal braille window is represented by no dots at the bottom.
-
-  Tieman
-    The status cells contain:
-
-    1-2
-      The columns (counting from 1) of the cursor (shown in the top half of the cells) and the top-left corner of the braille window (shown in the bottom half of the cells).
-
-    3-4
-      The rows (counting from 1) of the cursor (shown in the top half of the cells) and the top-left corner of the braille window (shown in the bottom half of the cells).
-
-    5
-      Each dot indicates if a feature is turned on as follows:
-
-      Dot 1
-        The screen image is frozen (see the :ref:`FREEZE <command-FREEZE>` command).
-
-      Dot 2
-        Screen attributes are being displayed (see the :ref:`DISPMD <command-DISPMD>` command).
-
-      Dot 3
-        Alert tunes are being played (see the :ref:`TUNES <command-TUNES>` command).
-
-      Dot 4
-        The cursor is being shown (see the :ref:`CSRVIS <command-CSRVIS>` command).
-
-      Dot 5
-        The cursor is a solid block (see the :ref:`CSRSIZE <command-CSRSIZE>` command).
-
-      Dot 6
-        The cursor is blinking (see the :ref:`CSRBLINK <command-CSRBLINK>` command).
-
-      Dot 7
-        The cursor is being tracked (see the :ref:`CSRTRK <command-CSRTRK>` command).
-
-      Dot 8
-        The braille window will slide (see the :ref:`SLIDEWIN <command-SLIDEWIN>` command).
-
-
-  PowerBraille 80
-    The status cells contain:
-
-    1
-      The row (counting from 1) corresponding to the top of the braille window. The tens digit is shown in the top half of the cell, and the units digit is shown in the bottom half of the cell.
-
-  Generic
-    This setting passes a lot of information to the braille driver, and the driver itself decides how to present it.
-
-  MDV
-    The status cells contain:
-
-    1-2
-      The location of the top-left corner of the braille window. The row (counting from 1) is shown in the top half of the cells, and the column (counting from 1) is shown in the bottom half of the cells.
-
-  Voyager
-    The status cells contain:
-
-    1
-      The row (counting from 1) corresponding to the top of the braille window (see below).
-
-    2
-      The row (counting from 1) whereon the cursor is (see below).
-
-    3
-      If the screen is frozen (see the :ref:`FREEZE <command-FREEZE>` command), then the letter ``F``. If it isn't, then the column (counting from 1) wherein the cursor is (see below).
-
-    Row and column numbers are shown as two digits within a single cell. The tens digit is shown in the top half of the cell, and the units digit is shown in the bottom half of the cell.
-
-  The initial setting is braille display driver dependent.
+Speak Empty Line
+  When set to ``Yes`` (the default since being added after BRLTTY
+  6.5), announce when the cursor reaches an empty line so the line
+  break is audible. Set to ``No`` to skip empty lines silently.
 
 .. _preference-text-table:
 
 Text Table
-  Select the text table. See section :ref:`Text Tables <table-text>` for details. See the :ref:`-t <options-text-table>` command line option for the initial setting. This preference isn't saved.
+  Select the text table at runtime. See :ref:`Text Tables <table-text>`
+  and the :ref:`-t <options-text-table>` command line option. This
+  preference isn't saved.
 
 .. _preference-attributes-table:
 
 Attributes Table
-  Select the attributes table. See section :ref:`Attributes Tables <table-attributes>` for details. See the :ref:`-a <options-attributes-table>` command line option for the initial setting. This preference isn't saved.
+  Select the attributes table at runtime. See
+  :ref:`Attributes Tables <table-attributes>` and the
+  :ref:`-a <options-attributes-table>` command line option. This
+  preference isn't saved.
 
 Contraction Table
-  Select the contraction table. See section :ref:`Contraction Tables <table-contraction>` for details. See the :ref:`-c <options-contraction-table>` command line option for the initial setting. This preference isn't saved.
+  Select the contraction table at runtime. See
+  :ref:`Contraction Tables <table-contraction>` and the
+  :ref:`-c <options-contraction-table>` command line option. This
+  preference isn't saved.
 
 .. _preference-keyboard-table:
 
-.. _time-settings:
-
 Keyboard Table
-  Select the keyboard table. See section :ref:`Key Tables <table-key>` for details. See the :ref:`-k <options-keyboard-table>` command line option for the initial setting. This preference isn't saved.
-
-
-Notes:
-
-- All time settings are in hundredths of a second. They are multiples of 4 within the range 1 through 100.
+  Select the keyboard table at runtime. See :ref:`Key Tables <table-key>`
+  and the :ref:`-k <options-keyboard-table>` command line option. This
+  preference isn't saved.
 
 
 .. _status:
