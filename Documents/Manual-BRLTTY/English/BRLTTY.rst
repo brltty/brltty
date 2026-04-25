@@ -43,8 +43,6 @@ See the **GNU General Public License** for more details.
 
 .. _contact:
 
-.. _command-INFO:
-
 Contact Information
 -------------------
 
@@ -145,9 +143,6 @@ BRLTTY provides the following capabilities:
 - Optional use of ``blinking`` (rates individually settable) for cursor, special highlighting underline, and/or capital letters.
 - Screen freezing for leisurely review.
 - Intelligent cursor routing, allowing easy fetching of cursor within text editors, web browsers, etc., without moving ones hands from the braille display.
-
-.. _command-PASTE:
-
 - A cut-and-paste function (linear or rectangular) which is particularly useful for copying long file names, copying text between virtual terminals, entering complicated commands, etc.
 - Table driven in-line contracted braille (English and French provided).
 - Support for multiple braille codes.
@@ -264,24 +259,20 @@ which, in addition to a lot of other things, can also do exactly that.
 Commands
 --------
 
-Unfortunately, the various braille displays don't offer a standard set of controls.
-Some have the six standard dot keys, some have eight, and others have none.
-Some have thumb keys, but there's no standard number of them.
-Some have a button above each braille cell.
-Some have rocker switches.
-Some have an easy-to-reach bar which works much like a joystick.
-Most have varying combinations of the above.
-Because the nature and layout of each display is so different,
-please refer to the documentation for your particular display
-in order to find out exactly what its keys do.
+BRLTTY commands are referred to by name throughout this manual. The
+key (or key combination) that triggers each one depends on your braille
+display — drivers ship default bindings, which can be customised via
+key tables (see the :ref:`Tables <tables>` chapter).
 
-BRLTTY commands are referred to by name within this manual.
-If you forget which key(s) on your braille display to use
-for a particular command, then refer to its driver's help page.
-The main key you should immediately commit to memory, therefore, is the one
-for the :ref:`HELP <command-HELP>` command.
-Use the regular motion keys (as described below) to navigate the help page,
-and press the ``help`` key again to quit.
+The two commands worth memorising first are
+:ref:`HELP <command-HELP>`, which shows your driver's key map, and
+:ref:`LEARN <command-LEARN>`, which lets you press keys to discover
+what they do. Both toggle: invoke them again to return to normal
+operation.
+
+This chapter groups the most-used commands by purpose. For the full
+alphabetical list — including modifier syntax for character-anchored
+commands — see ``Documents/README.CommandReference``.
 
 
 .. _vertical-motion:
@@ -289,55 +280,60 @@ and press the ``help`` key again to quit.
 Vertical Motion
 ~~~~~~~~~~~~~~~
 
-See also
-the :ref:`PRINDENT/NXINDENT <command-PRINDENT-NXINDENT>`,
-and the :ref:`PRDIFCHAR/NXDIFCHAR <command-PRDIFCHAR-NXDIFCHAR>`
-routing key commands.
-
 .. _command-LNUP-LNDN:
 
 LNUP/LNDN
-  Go up/down one line. If identical line skipping has been activated (see the :ref:`SKPIDLNS <command-SKPIDLNS>` command), then these commands, rather than moving exactly one line, are aliases for the :ref:`PRDIFLN/NXDIFLN <command-PRDIFLN-NXDIFLN>` commands.
+  Up/down one line. With identical-line skipping
+  (:ref:`SKPIDLNS <command-SKPIDLNS>`) on, behaves like
+  :ref:`PRDIFLN/NXDIFLN <command-PRDIFLN-NXDIFLN>`.
 
 .. _command-WINUP-WINDN:
 
 WINUP/WINDN
-  Go up/down one window. If the window is only 1 line high then move 5 lines.
+  Up/down one window (five lines if the window is one line tall).
 
 .. _command-PRDIFLN-NXDIFLN:
 
 PRDIFLN/NXDIFLN
-  Go up/down to the nearest line with different content. If identical line skipping has been activated (see the :ref:`SKPIDLNS <command-SKPIDLNS>` command), then these commands, rather than skipping identical lines, are aliases for the :ref:`LNUP/LNDN <command-LNUP-LNDN>` commands.
+  Up/down to the nearest differing line.
 
 .. _command-ATTRUP-ATTRDN:
 
 ATTRUP/ATTRDN
-  Go up/down to the nearest line with different attributes (character highlighting).
+  Up/down to the nearest line whose character highlighting differs.
 
 .. _command-TOP-BOT:
 
 TOP/BOT
-  Go to the top/bottom line.
+  Top/bottom line.
 
 .. _command-TOP_LEFT-BOT_LEFT:
 
 TOP_LEFT/BOT_LEFT
-  Go to the top-left/bottom-left corner.
+  Top-left/bottom-left corner.
 
 .. _command-PRPGRPH-NXPGRPH:
 
 PRPGRPH/NXPGRPH
-  Go to the nearest line of the previous/next paragraph (the first non-blank line beyond the nearest blank line). The current line is included when searching for the inter-paragraph space.
+  Previous/next paragraph (the first non-blank line beyond a blank
+  line).
 
 .. _command-PRPROMPT-NXPROMPT:
 
 PRPROMPT/NXPROMPT
-  Go to the previous/next command prompt.
+  Previous/next command prompt.
 
 .. _command-PRSEARCH-NXSEARCH:
 
 PRSEARCH/NXSEARCH
-  Search backward/forward for the nearest occurrence of the character string within the cut buffer (see :ref:`Cut and Paste <cut>`) which isn't within the braille window. The search proceeds to the left/right, starting at the character immediately to the left/right of the window, and wrapping at the edge of the screen. The search isn't case sensitive.
+  Search backward/forward for the clipboard contents
+  (see :ref:`Cut and Paste <cut>`). Wraps at the screen edge; not
+  case-sensitive.
+
+The :ref:`PRINDENT/NXINDENT <command-PRINDENT-NXINDENT>` and
+:ref:`PRDIFCHAR/NXDIFCHAR <command-PRDIFCHAR-NXDIFCHAR>` commands also
+move vertically but take a column number (typically a routing key)
+specifying the column to inspect.
 
 
 .. _horizontal-motion:
@@ -345,34 +341,34 @@ PRSEARCH/NXSEARCH
 Horizontal Motion
 ~~~~~~~~~~~~~~~~~
 
-.. _command-SETLEFT:
-
-See also the :ref:`SETLEFT <command-SETLEFT>` routing key command.
-
 .. _command-CHRLT-CHRRT:
 
 CHRLT/CHRRT
-  Go left/right one character.
+  Left/right one character.
 
 .. _command-HWINLT-HWINRT:
 
 HWINLT/HWINRT
-  Go left/right half a window.
+  Left/right half a window.
 
 .. _command-FWINLT-FWINRT:
 
 FWINLT/FWINRT
-  Go left/right one window. These commands are particularly useful because they automatically wrap when they reach the edge of the screen. Other features, like their ability to skip blank windows (see the :ref:`SKPBLNKWINS <command-SKPBLNKWINS>` command), further enhance their usefulness.
+  Left/right one window. Wraps at the screen edge, and can skip blank
+  windows (see :ref:`SKPBLNKWINS <command-SKPBLNKWINS>`).
 
 .. _command-FWINLTSKIP-FWINRTSKIP:
 
 FWINLTSKIP/FWINRTSKIP
-  Go left/right to the nearest non-blank window.
+  Left/right to the nearest non-blank window.
 
 .. _command-LNBEG-LNEND:
 
 LNBEG/LNEND
-  Go to the beginning/end of the line.
+  Beginning/end of the line.
+
+The :ref:`SETLEFT <command-SETLEFT>` routing-key command also moves
+horizontally, to a specific column.
 
 
 .. _implicit-motion:
@@ -380,26 +376,29 @@ LNBEG/LNEND
 Implicit Motion
 ~~~~~~~~~~~~~~~
 
-.. _command-GOTOMARK:
-
-See also the :ref:`GOTOMARK <command-GOTOMARK>` routing key command.
-
-.. _command-BACK:
-
 .. _command-HOME:
 
 HOME
   Go to where the cursor is.
 
+.. _command-BACK:
+
 BACK
-  Go back to where the most recent motion command put the braille window. This is an easy way to get right back to where you were reading after an unexpected event (like cursor tracking) moves the braille window at an inopportune moment.
+  Go back to where the most recent motion command put the braille
+  window. Handy after cursor tracking (or another implicit move) has
+  taken you away from where you were reading.
 
 .. _command-RETURN:
 
 RETURN
+  - If the most recent motion of the braille window was automatic
+    (e.g. cursor tracking), behave like
+    :ref:`BACK <command-BACK>`.
+  - Otherwise, if the cursor is outside the braille window, behave
+    like :ref:`HOME <command-HOME>`.
 
-  - If the most recent motion of the braille window was automatic, e.g. as a result of cursor tracking, then go back to where the most recent motion command put it (see the :ref:`BACK <command-BACK>` command).
-  - If the cursor isn't within the braille window then go to where the cursor is (see the :ref:`HOME <command-HOME>` command).
+The :ref:`GOTOMARK <command-GOTOMARK>` routing-key command jumps to a
+position previously remembered by ``SETMARK``.
 
 
 .. _feature-activation:
@@ -407,77 +406,102 @@ RETURN
 Feature Activation
 ~~~~~~~~~~~~~~~~~~
 
-Each of these commands has three forms:
-**activate** (turn the feature on),
-**deactivate** (turn the feature off),
-and **toggle** (if it's off then turn it on, and if it's on then turn it off).
-Unless specifically noted, each of these features
-is initially **off**, and, when **on**, affects BRLTTY's operation as a whole.
-The initial setting of some of these features can be changed
-via the :ref:`preferences menu <preferences-menu>`.
+Each command in this section has three forms — **on**, **off**, and
+**toggle** — bound to separate keys (or key combinations) by your key
+table. Unless noted, each feature is initially off and applies
+globally; the corresponding initial value can also be set in the
+:ref:`preferences menu <preferences-menu>`.
 
 .. _command-FREEZE:
 
 FREEZE
-  Freeze the screen image. BRLTTY makes a copy of the screen (content and attributes) as of the moment when the screen image is frozen, and then ignores all updating of the screen until it's unfrozen. This feature makes it easy, for example, to sample the output of an application which writes too much too quickly.
+  Freeze the screen image, so you can read at leisure even while the
+  application is still writing.
 
 .. _command-DISPMD:
 
 DISPMD
-  Show the highlighting (the attributes) of each character within the braille window, rather than the characters themselves (the content). This feature is useful, for example, when you need to locate a highlighted item. When showing screen content, the text table is used (see the :ref:`-t <options-text-table>` command line option, the :ref:`text-table <configure-text-table>` configuration file directive, and the ``--with-text-table`` build option). When showing screen attributes, the attributes table is used (see the :ref:`-a <options-attributes-table>` command line option, the :ref:`attributes-table <configure-attributes-table>` configuration file directive, and the ``--with-attributes-table`` build option). This feature only affects the current virtual terminal.
+  Show character highlighting (attributes — colour, reverse video,
+  blink) instead of the characters themselves. Useful for locating a
+  highlighted item. Per virtual terminal.
 
 .. _command-SIXDOTS:
 
 SIXDOTS
-  Show characters using 6-dot, rather than 8-dot, braille. Dots 7 and 8 are still used by other features like cursor representation and highlighted character underlining. If a contraction table has been selected (see the :ref:`-c <options-contraction-table>` command line option and the :ref:`contraction-table <configure-contraction-table>` configuration file directive), then it is used. This setting can also be changed with the :ref:`Text Style <preference-text-style>` preference.
+  Show characters using 6-dot rather than 8-dot braille; dots 7 and 8
+  remain available for the cursor representation and attribute
+  underline. If a contraction table is in effect (see the
+  :ref:`-c <options-contraction-table>` option), it is used. Also
+  changeable via the
+  :ref:`Text Style <preference-text-style>` preference.
 
 .. _command-SLIDEWIN:
 
 SLIDEWIN
-  If cursor tracking (see the :ref:`CSRTRK <command-CSRTRK>` command) is **on**, then, whenever the cursor moves too close to (or beyond) either end of the braille window, horizontally reposition the window such that the cursor, while remaining on that side, is nearer the centre. If this feature is **off**, then the braille window is always positioned such that its left end is a multiple of its width from the left edge of the screen. This setting can also be changed with the :ref:`Sliding Window <preference-sliding-window>` preference.
+  When cursor tracking is on, slide the window horizontally so the
+  cursor stays near the centre, instead of jumping in window-sized
+  steps. Also changeable via the
+  :ref:`Sliding Window <preference-sliding-window>` preference.
 
 .. _command-SKPIDLNS:
 
 SKPIDLNS
-  Rather than explicitly moving exactly one line either up or down, skip past lines which have the same content as the current line. This feature affects the :ref:`LNUP/LNDN <command-LNUP-LNDN>` commands, as well as the line wrapping feature of the :ref:`FWINLT/FWINRT <command-FWINLT-FWINRT>` and :ref:`FWINLTSKIP/FWINRTSKIP <command-FWINLTSKIP-FWINRTSKIP>` commands. This setting can also be changed with the :ref:`Skip Identical Lines <preference-skip-identical-lines>` preference.
+  Skip past lines whose content matches the current line. Affects
+  :ref:`LNUP/LNDN <command-LNUP-LNDN>` and the wrap behaviour of
+  :ref:`FWINLT/FWINRT <command-FWINLT-FWINRT>` and
+  :ref:`FWINLTSKIP/FWINRTSKIP <command-FWINLTSKIP-FWINRTSKIP>`. Also
+  changeable via the
+  :ref:`Skip Identical Lines <preference-skip-identical-lines>`
+  preference.
 
 .. _command-SKPBLNKWINS:
 
 SKPBLNKWINS
-  Skip past blank windows when reading either forward or backward. This feature affects the :ref:`FWINLT/FWINRT <command-FWINLT-FWINRT>` commands. This setting can also be changed with the Skip Blank Windows preference.
+  Skip past blank windows when reading. Affects
+  :ref:`FWINLT/FWINRT <command-FWINLT-FWINRT>`.
 
 .. _command-CSRVIS:
 
 CSRVIS
-  Show the cursor by superimposing a dot pattern (see the :ref:`CSRSIZE <command-CSRSIZE>` command) on top of the character where it is. This feature is initially **on**. This setting can also be changed with the :ref:`Show Cursor <preference-show-cursor>` preference.
+  Show the cursor by superimposing a dot pattern on its character.
+  Initially **on**. Also changeable via the
+  :ref:`Show Cursor <preference-show-cursor>` preference.
 
 .. _command-CSRHIDE:
 
 CSRHIDE
-  Hide the cursor (see the :ref:`CSRVIS <command-CSRVIS>` command) in order to accurately read the character beneath it. This feature only affects the current virtual terminal.
+  Hide the cursor (overrides :ref:`CSRVIS <command-CSRVIS>` for the
+  current virtual terminal) so the underlying character can be read.
 
 .. _command-CSRTRK:
 
 CSRTRK
-  Track (follow) the cursor. If the cursor moves to a location which isn't within the braille window, then automatically move the braille window to the cursor's new location. You'll usually want this feature turned on since it minimizes the effects of screen scrolling, and since, during input, the region wherein you're currently typing is always visible. If this feature causes the braille window to jump at an inopportune moment, then use the :ref:`BACK <command-BACK>` command to get back to where you were reading. You may need to turn this feature off when using an application which continually updates the screen while maintaining a fixed data layout. This feature is initially **on**. This feature only affects the current virtual terminal.
+  Track the cursor: move the braille window automatically when the
+  cursor leaves it. Initially **on**, per virtual terminal. If the
+  cursor jumps at an inopportune moment, use
+  :ref:`BACK <command-BACK>` to return.
 
 .. _command-CSRSIZE:
 
 CSRSIZE
-  Represent the cursor with all eight dots (a solid block), rather than with just dots 7 and 8 (an underline). This setting can also be changed with the :ref:`Cursor Style <preference-cursor-style>` preference.
+  Represent the cursor as a solid block (all eight dots) rather than
+  as an underline (dots 7 and 8). Also changeable via the
+  :ref:`Cursor Style <preference-cursor-style>` preference.
 
 .. _command-CSRBLINK:
 
 CSRBLINK
-  Blink (turn on and off according to a predefined interval) the symbol representing the cursor (see the :ref:`CSRVIS <command-CSRVIS>` command). This setting can also be changed with the :ref:`Blinking Cursor <preference-blinking-cursor>` preference.
+  Blink the cursor representation. Also changeable via the
+  :ref:`Blinking Cursor <preference-blinking-cursor>` preference.
 
 .. _command-ATTRVIS:
 
 ATTRVIS
-  Underline (with combinations of dots 7 and 8) highlighted characters.
+  Underline highlighted characters with combinations of dots 7 and 8:
 
   no underline
-    White on black (normal), gray on black, white on blue, black on cyan.
+    White on black (normal), gray on black, white on blue, black on
+    cyan.
 
   dots 7 and 8
     Black on white (reverse video).
@@ -485,40 +509,48 @@ ATTRVIS
   dot 8
     Everything else.
 
-  This setting can also be changed with the :ref:`Show Attributes <preference-show-attributes>` preference.
+  Also changeable via the
+  :ref:`Show Attributes <preference-show-attributes>` preference.
 
 .. _command-ATTRBLINK:
 
 ATTRBLINK
-  Blink (turn on and off according to a predefined interval) the attribute underline (see the :ref:`ATTRVIS <command-ATTRVIS>` command). This feature is initially **on**. This setting can also be changed with the :ref:`Blinking Attributes <preference-blinking-attributes>` preference.
+  Blink the attribute underline. Initially **on**. Also changeable
+  via the
+  :ref:`Blinking Attributes <preference-blinking-attributes>`
+  preference.
 
 .. _command-CAPBLINK:
 
 CAPBLINK
-  Blink (turn on and off according to a predefined interval) capital (uppercase) letters. This setting can also be changed with the :ref:`Blinking Capitals <preference-blinking-capitals>` preference.
+  Blink uppercase letters. Also changeable via the
+  :ref:`Blinking Capitals <preference-blinking-capitals>` preference.
+
+.. _command-TUNES:
 
 TUNES
-  Play a short predefined tune (see :ref:`Alert Tunes <tunes>`) whenever a significant event occurs. This feature is initially **on**. This setting can also be changed with the :ref:`Alert Tunes <tunes>` preference.
-
-.. _preference-autorepeat:
+  Play a short tune (see :ref:`Alert Tunes <tunes>`) on significant
+  events. Initially **on**.
 
 .. _command-AUTOREPEAT:
 
 AUTOREPEAT
-  Automatically repeat a command at a regular interval after an initial delay while its key (combination) remains pressed. Only some drivers support this functionality, the primary limitation being that many braille displays don't signal key presses and key releases as distinctly separate events. This feature is initially **on**. This setting can also be changed with the :ref:`Autorepeat <preference-autorepeat>` preference.
+  Automatically repeat a command at a regular interval while its key
+  remains pressed. Only some drivers support this; many displays
+  don't signal key release as a distinct event. Initially **on**.
 
 .. _command-AUTOSPEAK:
 
-.. _preference-autospeak:
-
 AUTOSPEAK
-  Automatically speak:
+  Automatically speak the new line on vertical motion, characters as
+  they're typed or deleted, and the character to which the cursor
+  moves.
 
-  - the new line when the braille window is moved vertically.
-  - characters which are entered or deleted.
-  - the character to which the cursor is moved.
+.. _command-ASPK_EMP_LINE:
 
-  This feature is initially **off**. This setting can also be changed with the :ref:`Autospeak <preference-autospeak>` preference.
+ASPK_EMP_LINE
+  Toggle whether AUTOSPEAK announces empty lines (rather than skipping
+  over them silently).
 
 
 .. _mode-selection:
@@ -529,13 +561,25 @@ Mode Selection
 .. _command-HELP:
 
 HELP
-  Switch to the braille display driver's help page. This is where you can find an on-line summary of things like what your braille display's keys do, and how to interpret its status cells. Use the regular :ref:`vertical <vertical-motion>` and :ref:`horizontal <horizontal-motion>` motion commands to navigate the help page. Invoke the ``help`` command again to return to the screen.
+  Switch to the braille driver's help page — your key reference. Use
+  the regular :ref:`vertical <vertical-motion>` and
+  :ref:`horizontal <horizontal-motion>` motion commands to read it,
+  and invoke ``HELP`` again to leave.
+
+.. _command-INFO:
 
 INFO
-  Switch to the status display (see section :ref:`The Status Display <status>` for full details). It presents a summary including the position of the cursor, the position of the braille window, and the states of a number of BRLTTY's features. Invoke this command again to return to the screen.
+  Switch to the status display
+  (see :ref:`The Status Display <status>`): cursor and window
+  positions, feature states. Invoke again to leave.
+
+.. _command-LEARN:
 
 LEARN
-  Switch to command learn mode (see section :ref:`Command Learn Mode <learn>` for full details). This is how you can interactively learn what your braille display's keys do. Invoke this command again to return to the screen. This command isn't available if the --disable-learn-mode build option was specified.
+  Switch to command learn mode
+  (see :ref:`Command Learn Mode <learn>`). Press any key to find out
+  what command it sends. Invoke ``LEARN`` again to leave. Not
+  available if BRLTTY was built with ``--disable-learn-mode``.
 
 
 .. _preference-maintenance:
@@ -546,17 +590,19 @@ Preference Maintenance
 .. _command-PREFMENU:
 
 PREFMENU
-  Switch to the preferences menu (see :ref:`The Preferences Menu <preferences-menu>` for full details). Invoke this command again to return to normal operation.
+  Switch to the preferences menu
+  (see :ref:`The Preferences Menu <preferences-menu>`). Invoke again
+  to leave.
 
 .. _command-PREFSAVE:
 
 PREFSAVE
-  Save the current preferences settings (see :ref:`Preferences <preferences>` for full details).
+  Save the current preferences (see :ref:`Preferences <preferences>`).
 
 .. _command-PREFLOAD:
 
 PREFLOAD
-  Restore the most recently saved preferences settings (see :ref:`Preferences <preferences>` for full details).
+  Restore the most recently saved preferences.
 
 
 .. _menu-navigation:
@@ -567,17 +613,17 @@ Menu Navigation
 .. _command-MENU_FIRST_ITEM-MENU_LAST_ITEM:
 
 MENU_FIRST_ITEM/MENU_LAST_ITEM
-  Go to the first/last item in the menu.
+  First/last item in the menu.
 
 .. _command-MENU_PREV_ITEM-MENU_NEXT_ITEM:
 
-MENU_PREV_ITEMMENU_NEXT_ITEM/
-  Go to the previous/next item in the menu.
+MENU_PREV_ITEM/MENU_NEXT_ITEM
+  Previous/next item.
 
 .. _command-MENU_PREV_SETTING-MENU_NEXT_SETTING:
 
 MENU_PREV_SETTING/MENU_NEXT_SETTING
-  Decrement/increment the current menu item's setting.
+  Decrement/increment the current item's setting.
 
 
 .. _speech-controls:
@@ -588,17 +634,19 @@ Speech Controls
 .. _command-SAY_LINE:
 
 SAY_LINE
-  Speak the current line. The :ref:`Say-Line Mode <preference-sayline-mode>` preference determines if pending speech is discarded first.
+  Speak the current line. The
+  :ref:`Say-Line Mode <preference-sayline-mode>` preference controls
+  whether pending speech is interrupted first.
 
 .. _command-SAY_ABOVE:
 
 SAY_ABOVE
-  Speak the top portion of the screen (ending with the current line).
+  Speak from the top of the screen down to the current line.
 
 .. _command-SAY_BELOW:
 
 SAY_BELOW
-  Speak the bottom portion of the screen (starting with the current line).
+  Speak from the current line down to the bottom of the screen.
 
 .. _command-MUTE:
 
@@ -613,12 +661,22 @@ SPKHOME
 .. _command-SAY_SLOWER-SAY_FASTER:
 
 SAY_SLOWER/SAY_FASTER
-  Decrease/increase the speech rate (see also the :ref:`Speech Rate <preference-speech-rate>` preference). This command is only available if a driver which supports it is being used.
+  Decrease/increase the speech rate
+  (see :ref:`Speech Rate <preference-speech-rate>`). Driver-dependent.
 
 .. _command-SAY_SOFTER-SAY_LOUDER:
 
 SAY_SOFTER/SAY_LOUDER
-  Decrease/increase the speech volume (see also the :ref:`Speech Volume <preference-speech-volume>` preference). This command is only available if a driver which supports it is being used.
+  Decrease/increase the speech volume
+  (see :ref:`Speech Volume <preference-speech-volume>`).
+  Driver-dependent.
+
+.. _command-SPK_PUNCT_LEVEL:
+
+SPK_PUNCT_LEVEL
+  Cycle the punctuation level — *none*, *some*, *most*, *all* —
+  controlling how many punctuation characters are spoken aloud
+  (see :ref:`Punctuation Level <preference-punctuation-level>`).
 
 
 .. _speech-navigation:
@@ -626,19 +684,34 @@ SAY_SOFTER/SAY_LOUDER
 Speech Navigation
 ~~~~~~~~~~~~~~~~~
 
-SPEAK_CURR_CHAR
-  a
+These commands move the speech cursor and speak the unit it lands on.
+
+SPEAK_CURR_CHAR / SPEAK_PREV_CHAR / SPEAK_NEXT_CHAR
+  Speak the current, previous, or next character.
+
+SPEAK_FRST_CHAR / SPEAK_LAST_CHAR
+  Speak the first or last character of the current line.
+
+SPEAK_CURR_WORD / SPEAK_PREV_WORD / SPEAK_NEXT_WORD
+  Speak the current, previous, or next word.
+
+SPEAK_CURR_LINE / SPEAK_PREV_LINE / SPEAK_NEXT_LINE
+  Speak the current, previous, or next line.
+
+SPEAK_FRST_LINE / SPEAK_LAST_LINE
+  Speak the first or last line of the screen.
 
 
 Virtual Terminal Switching
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-See also the :ref:`SWITCHVT <command-SWITCHVT>` routing key command.
-
 .. _command-SWITCHVT_PREV-SWITCHVT_NEXT:
 
 SWITCHVT_PREV/SWITCHVT_NEXT
   Switch to the previous/next virtual terminal.
+
+The :ref:`SWITCHVT <command-SWITCHVT>` routing-key command jumps
+directly to a numbered terminal.
 
 
 Other Commands
@@ -647,20 +720,38 @@ Other Commands
 .. _command-CSRJMP_VERT:
 
 CSRJMP_VERT
-  Route (bring) the cursor to anywhere on the top line of the braille window (see :ref:`Cursor Routing <routing>` for full details). The cursor is moved by simulating vertical arrow-key presses. This command doesn't always work because some applications either move the cursor somewhat unpredictably or use the arrow keys for purposes other than cursor motion. It's somewhat safer than the other cursor routing commands, though, because it makes no attempt to simulate the left- and right-arrows.
+  Route the cursor to the top line of the braille window
+  (see :ref:`Cursor Routing <routing>`) by simulating up/down arrow
+  keys. Safer than the routing-key variant in that it doesn't
+  simulate horizontal arrows.
+
+.. _command-PASTE:
 
 PASTE
-  Insert the characters within the cut buffer at the current cursor location (see :ref:`Cut and Paste <cut>` for full details).
+  Insert the current clipboard contents at the cursor
+  (see :ref:`Cut and Paste <cut>`).
+
+.. _command-CLIP_SHOW:
+
+CLIP_SHOW
+  Display the current clipboard contents as a message. Bound by
+  default to a long press of ``CLIP_SAVE``.
+
+.. _command-CLIP_CLEAR:
+
+CLIP_CLEAR
+  Empty the clipboard. Bound by default to a long press of
+  ``CLIP_RESTORE``.
 
 .. _command-RESTARTBRL:
 
 RESTARTBRL
-  Stop, and then restart the braille display driver.
+  Stop and restart the braille display driver.
 
 .. _command-RESTARTSPEECH:
 
 RESTARTSPEECH
-  Stop, and then restart the speech synthesizer driver.
+  Stop and restart the speech synthesizer driver.
 
 
 .. _commands-characters:
@@ -668,63 +759,91 @@ RESTARTSPEECH
 Character Commands
 ~~~~~~~~~~~~~~~~~~
 
+These commands take a column number, typically supplied by pressing
+one of your display's routing keys.
+
 .. _command-ROUTE:
 
 ROUTE
-  Route (bring) the cursor to the character associated with the routing key (see :ref:`Cursor Routing <routing>` for full details). The cursor is moved by simulating arrow-key presses. This command doesn't always work because some applications either move the cursor somewhat unpredictably or use the arrow keys for purposes other than cursor motion.
+  Route the cursor to the character at the routing key
+  (see :ref:`Cursor Routing <routing>`), by simulating arrow-key
+  presses.
 
 .. _command-CUTBEGIN:
 
 CUTBEGIN
-  Anchor the start of the cut block at the character associated with the routing key (see :ref:`Cut and Paste <cut>` for full details). This command clears the cut buffer.
+  Anchor the start of a cut block at the routing key, replacing the
+  clipboard (see :ref:`Cut and Paste <cut>`).
 
 .. _command-CUTAPPEND:
 
 CUTAPPEND
-  Anchor the start of the cut block at the character associated with the routing key (see :ref:`Cut and Paste <cut>` for full details). This command doesn't clear the cut buffer.
+  Like :ref:`CUTBEGIN <command-CUTBEGIN>`, but keep the existing
+  clipboard contents.
 
 .. _command-CUTRECT:
 
 CUTRECT
-  Anchor the end of the cut block at the character associated with the routing key, and append the rectangular region to the cut buffer (see :ref:`Cut and Paste <cut>` for full details).
+  Anchor the end of the cut block at the routing key and append the
+  rectangular region to the clipboard.
 
 .. _command-CUTLINE:
 
 CUTLINE
-  Anchor the end of the cut block at the character associated with the routing key, and append the linear region to the cut buffer (see :ref:`Cut and Paste <cut>` for full details).
+  As :ref:`CUTRECT <command-CUTRECT>`, but a linear (line-wrapping)
+  region.
 
 .. _command-COPYCHARS:
 
 COPYCHARS
-  Copy the character block anchored by the two routing keys to the cut buffer (see :ref:`Cut and Paste <cut>` for full details).
+  Copy the character block anchored by the two routing keys to the
+  clipboard.
 
 .. _command-APNDCHARS:
 
 APNDCHARS
-  Append the character block anchored by the two routing keys to the cut buffer (see :ref:`Cut and Paste <cut>` for full details).
+  Like :ref:`COPYCHARS <command-COPYCHARS>`, but append.
+
+.. _command-COPY_SMART_NEW:
+
+COPY_SMART_NEW
+  Detect a URL, email address, or hostname at the routing-key column
+  and copy it to the clipboard, replacing previous contents. Saves
+  pinpointing both ends of a long selection by hand.
+
+.. _command-COPY_SMART_ADD:
+
+COPY_SMART_ADD
+  Like :ref:`COPY_SMART_NEW <command-COPY_SMART_NEW>`, but append.
 
 .. _command-PRINDENT-NXINDENT:
 
 PRINDENT/NXINDENT
-  Go up/down to the nearest line which isn't indented more than the column associated with the routing key.
+  Up/down to the nearest line whose indent is at most the routing-key
+  column.
 
 .. _command-DESCCHAR:
 
 DESCCHAR
-  Momentarily (see the :ref:`-M <options-message-timeout>` command line option) display a message describing the character associated with the routing key. It reveals the decimal and hexadecimal values of the character, the foreground and background colours, and, when present, special attributes (``bright`` and ``blink``). The message looks like this:
-
-
-  .. parsed-literal::
+  Briefly display a description of the character at the routing key —
+  decimal and hexadecimal value, foreground/background colours, and
+  attributes (``bright``, ``blink``). Example::
 
     char 65 (0x41): white on black bright blink
 
+.. _command-SETLEFT:
+
 SETLEFT
-  Horizontally reposition the braille window so that its left edge is at the column associated with the routing key. This feature makes it very easy to put the window exactly where it's needed, and, therefore, for displays which have routing keys, almost eliminates the need for a lot of elementary window motion (like the :ref:`CHRLT/CHRRT <command-CHRLT-CHRRT>` and :ref:`HWINLT/HWINRT <command-HWINLT-HWINRT>` commands).
+  Reposition the braille window so its left edge is at the routing-key
+  column. On displays with routing keys this largely replaces piecemeal
+  motion via :ref:`CHRLT/CHRRT <command-CHRLT-CHRRT>` and
+  :ref:`HWINLT/HWINRT <command-HWINLT-HWINRT>`.
 
 .. _command-PRDIFCHAR-NXDIFCHAR:
 
 PRDIFCHAR/NXDIFCHAR
-  Go up/down to the nearest line which has a different character in the column associated with the routing key.
+  Up/down to the nearest line whose character at the routing-key
+  column differs.
 
 
 .. _commands-base:
@@ -735,15 +854,22 @@ Base Commands
 .. _command-SWITCHVT:
 
 SWITCHVT
-  Switch to the virtual terminal whose number (counting from 1) matches that of the routing key. See also the :ref:`SWITCHVT_PREV/SWITCHVT_NEXT <command-SWITCHVT_PREV-SWITCHVT_NEXT>` virtual terminal switching commands.
+  Switch to the virtual terminal whose number (counting from 1)
+  matches the routing key. See also
+  :ref:`SWITCHVT_PREV/SWITCHVT_NEXT <command-SWITCHVT_PREV-SWITCHVT_NEXT>`.
 
 .. _command-SETMARK:
 
 SETMARK
-  Mark (remember) the current position of the braille window in a register associated with the routing key. See the :ref:`GOTOMARK <command-GOTOMARK>` command. This feature only affects the current virtual terminal.
+  Mark the current braille-window position in a register associated
+  with the routing key. Per virtual terminal.
+
+.. _command-GOTOMARK:
 
 GOTOMARK
-  Move the braille window to the position formerly marked (see the :ref:`SETMARK <command-SETMARK>` command) with the same routing key. This feature only affects the current virtual terminal.
+  Move the braille window to the position previously
+  :ref:`marked <command-SETMARK>` with the same routing key. Per
+  virtual terminal.
 
 
 .. _configure:
@@ -1277,7 +1403,6 @@ here are some notes on how it works.
 
 
 .. _tunes:
-.. _command-TUNES:
 
 Alert Tunes
 -----------
@@ -1487,6 +1612,8 @@ Speech Volume
   Adjust the speech volume (``0`` softest, ``20`` loudest).
   Driver-dependent; also changeable via the
   :ref:`SAY_SOFTER/SAY_LOUDER <command-SAY_SOFTER-SAY_LOUDER>` commands.
+
+.. _preference-punctuation-level:
 
 Punctuation Level
   How much punctuation the speech synthesizer reads aloud. The
@@ -1737,7 +1864,6 @@ in order to show the precise column layout.
 
 
 .. _learn:
-.. _command-LEARN:
 
 Command Learn Mode
 ------------------
