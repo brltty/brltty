@@ -1,6 +1,3 @@
-
-.. _options-log-level:
-
 ==============================
 BRLTTY Reference Manual
 ==============================
@@ -217,15 +214,13 @@ After your display has been set up,
 run BRLTTY simply by typing the command ``brltty`` at a shell prompt
 (this must be done as root).
 Check the
-:ref:`-d <options-braille-device>` command line option,
-the :ref:`braille-device <configure-braille-device>` configuration file directive,
-and the ``--with-braille-device`` build option
-for alternatives regarding how to tell BRLTTY which device your display is connected to.
+:ref:`-d <options-braille-device>` command line option
+and the :ref:`braille-device <configure-braille-device>` configuration file directive
+for ways to tell BRLTTY which device your display is connected to.
 Check the
-:ref:`-b <options-braille-driver>` command line option,
-the :ref:`braille-driver <configure-braille-driver>` configuration file directive,
-and the ``--with-braille-driver`` build option
-for alternatives regarding how to tell BRLTTY which kind of braille display you have.
+:ref:`-b <options-braille-driver>` command line option
+and the :ref:`braille-driver <configure-braille-driver>` configuration file directive
+for ways to tell BRLTTY which kind of braille display you have.
 Check the
 :ref:`-B <options-braille-parameters>` command line option,
 and the :ref:`braille-parameters <configure-braille-parameters>` configuration file directive
@@ -877,115 +872,88 @@ GOTOMARK
 The Configuration File
 ----------------------
 
-System defaults for many settings may be established within a configuration file.
-The default name for this file is ``/etc/brltty.conf``,
-although it may be overridden with the
-:ref:`-f <options-configuration-file>` command line option.
-It doesn't need to exist.
-A template for it can be found within the ``Documents`` subdirectory.
+A configuration file lets you set defaults so the same options don't
+have to be passed on every invocation. BRLTTY reads ``/etc/brltty.conf``
+by default, or whatever file the
+``-f`` option points at; the file is
+optional, and BRLTTY runs fine without one as long as the necessary
+settings are supplied another way.
 
-Blank lines are ignored.
-A comment begins with a number sign (``#``),
-and continues to the end of the line.
-The following directives are recognized:
+The authoritative reference for the file's contents is
+``Documents/brltty.conf`` in the source tree (also installed as
+``/etc/brltty.conf`` by most distributions). Every directive is
+documented there in an explanatory comment block, with examples — that
+is the file most users will edit, and reading its comments is the
+fastest way to learn the format.
 
-.. _configure-api-parameters:
-
-``api-parameters`` *name*\ ``=``\ *value*\ ``,``...
-  Specify parameters for the Application Programming Interface. If the same parameter is specified more than once, then its rightmost assignment is used. For a description of the parameters accepted by the interface, please see the **BrlAPI** reference manual. See the ``--with-api-parameters`` build option for the defaults established during the build procedure. This directive can be overridden with the :ref:`-A <options-api-parameters>` command line option.
-
-.. _configure-attributes-table:
-
-``attributes-table`` *file*
-  Specify the attributes table (see section :ref:`Attributes Tables <table-attributes>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.atb`` extension is optional. The default is to use the built-in table (see the ``--with-attributes-table`` build option). This directive can be overridden with the :ref:`-a <options-attributes-table>` command line option.
-
-.. _configure-braille-device:
-
-``braille-device`` *device*\ ``,``...
-  Specify the device to which the braille display is connected (see section :ref:`Braille Device Specification <operand-braille-device>`). See the ``--with-braille-device`` build option for the default established during the build procedure. This directive can be overridden with the :ref:`-d <options-braille-device>` command line option.
+Each directive is a keyword followed by an operand on a single line.
+Blank lines are ignored, as is anything from a ``#`` to the end of a
+line. Keywords are case-insensitive. The directives that come up most
+often in user configurations:
 
 .. _configure-braille-driver:
 
 ``braille-driver`` *driver*\ ``,``...|\ ``auto``
-  Specify the braille display driver (see section :ref:`Driver Specification <operand-driver>`). The default is to perform autodetection. This directive can be overridden with the :ref:`-b <options-braille-driver>` command line option.
+  The braille display driver (see :ref:`Driver Specification
+  <operand-driver>`). ``auto`` autodetects, which is also the default.
+  Overridable with :ref:`-b <options-braille-driver>`.
+
+.. _configure-braille-device:
+
+``braille-device`` *device*\ ``,``...
+  Where the display is connected (see :ref:`Braille Device
+  Specification <operand-braille-device>`).
+  Overridable with :ref:`-d <options-braille-device>`.
 
 .. _configure-braille-parameters:
 
 ``braille-parameters`` [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``...
-  Specify parameters for the braille display drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Driver Identification Codes <drivers>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the ``--with-braille-parameters`` build option for the defaults established during the build procedure. This directive can be overridden with the :ref:`-B <options-braille-parameters>` command line option.
-
-.. _configure-contraction-table:
-
-``contraction-table`` *file*
-  Specify the contraction table (see section :ref:`Contraction Tables <table-contraction>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ctb`` extension is optional. The contraction table is used when the 6-dot braille feature is activated (see the :ref:`SIXDOTS <command-SIXDOTS>` command and the :ref:`Text Style <preference-text-style>` preference). The default is to display uncontracted 6-dot braille. This directive can be overridden with the :ref:`-c <options-contraction-table>` command line option. It isn't available if the ``--disable-contracted-braille`` build option was specified.
-
-.. _configure-keyboard-table:
-
-``keyboard-table`` *file*\ \|\ ``auto``
-  Specify the keyboard table (see section :ref:`Key Tables <table-key>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ktb`` extension is optional. The default is not to use a keyboard table. This directive can be overridden with the :ref:`-k <options-keyboard-table>` command line option.
-
-.. _configure-keyboard-properties:
-
-``keyboard-properties`` *name*\ ``=``\ *value*\ ``,``...
-  Specify the properties of the keyboard(s) to be monitored. If the same property is specified more than once, then its rightmost assignment is used. See section :ref:`Keyboard Properties <keyboard-properties>` for a list of the properties which may be specified. The default is to monitor all keyboards. This directive can be overridden with the :ref:`-K <options-keyboard-properties>` command line option.
-
-.. _configure-midi-device:
-
-``midi-device`` *device*
-  Specify the device to use for the Musical Instrument Digital Interface (see section :ref:`MIDI Device Specification <operand-midi-device>`). This directive can be overridden with the :ref:`-m <options-midi-device>` command line option. It isn't available if the ``--disable-midi-support`` build option was specified.
-
-.. _configure-pcm-device:
-
-``pcm-device`` *device*
-  Specify the device to use for digital audio (see section :ref:`PCM Device Specification <operand-pcm-device>`). This directive can be overridden with the :ref:`-p <options-pcm-device>` command line option. It isn't available if the ``--disable-pcm-support`` build option was specified.
-
-.. _configure-preferences-file:
-
-``preferences-file`` *file*
-  Specify the location of the file which is to be used for the saving and loading of user preferences. If a relative path is supplied, then it's anchored at ``/var/lib/brltty``. The default is to use ``brltty.prefs``. This directive can be overridden with the :ref:`-F <options-preferences-file>` command line option.
-
-.. _configure-release-device:
-
-``release-device`` *boolean*
-  Whether or not to release the device to which the braille display is connected when the current screen or window can't be read.
-
-  on
-    Release the device.
-
-  off
-    Don't release the device.
-
-  The default setting is ``on`` on Windows platforms and ``off`` on all other platforms. This directive can be overridden with the :ref:`-r <options-release-device>` command line option.
-
-.. _configure-screen-driver:
-
-``screen-driver`` *driver*
-  Specify the screen driver (see section :ref:`Supported Screen Drivers <screen>`). See the ``--with-screen-driver`` build option for the default established during the build procedure. This directive can be overridden with the :ref:`-x <options-screen-driver>` command line option.
-
-.. _configure-screen-parameters:
-
-``screen-parameters`` [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``...
-  Specify parameters for the screen drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Supported Screen Drivers <screen>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the ``--with-screen-parameters`` build option for the defaults established during the build procedure. This directive can be overridden with the :ref:`-X <options-screen-parameters>` command line option.
-
-.. _configure-speech-driver:
-
-``speech-driver`` *driver*\ ``,``...|\ ``auto``
-  Specify the speech synthesizer driver (see section :ref:`Driver Specification <operand-driver>`). The default is to perform autodetection. This directive can be overridden with the :ref:`-s <options-speech-driver>` command line option. It isn't available if the ``--disable-speech-support`` build option was specified.
-
-.. _configure-speech-input:
-
-``speech-input`` *name*
-  Specify the name of the file system object (FIFO, named pipe, named socket, etc) which can be used by other applications for text-to-speech conversion via BRLTTY's speech driver. This directive can be overridden with the :ref:`-i <options-speech-input>` command line option. It isn't available if the ``--disable-speech-support`` build option was specified.
-
-.. _configure-speech-parameters:
-
-``speech-parameters`` [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``...
-  Specify parameters for the speech synthesizer drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Driver Identification Codes <drivers>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the ``--with-speech-parameters`` build option for the defaults established during the build procedure. This directive can be overridden with the :ref:`-S <options-speech-parameters>` command line option.
+  Driver-specific parameters. A name may be qualified by a driver code
+  (see :ref:`Driver Identification Codes <drivers>`) so that a given
+  setting only applies to that driver; otherwise it applies to all of
+  them. The available parameters are listed in each driver's own
+  README. Overridable with :ref:`-B <options-braille-parameters>`.
 
 .. _configure-text-table:
 
 ``text-table`` *file*\ \|\ ``auto``
-  Specify the text table (see section :ref:`Text Tables <table-text>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ttb`` extension is optional. The default is to perform locale-based autoselection, with fallback to the built-in table (see the ``--with-text-table`` build option). This directive can be overridden with the :ref:`-t <options-text-table>` command line option.
+  The :ref:`text table <table-text>` (character-to-braille mapping).
+  ``auto`` (the default) selects one based on the locale.
+  Overridable with :ref:`-t <options-text-table>`.
+
+.. _configure-attributes-table:
+
+``attributes-table`` *file*
+  The :ref:`attributes table <table-attributes>` used when displaying
+  screen-attribute information.
+  Overridable with :ref:`-a <options-attributes-table>`.
+
+.. _configure-contraction-table:
+
+``contraction-table`` *file*
+  The :ref:`contraction table <table-contraction>` used when 6-dot
+  contracted braille is active (see the :ref:`SIXDOTS
+  <command-SIXDOTS>` command and the :ref:`Text Style
+  <preference-text-style>` preference).
+  Overridable with :ref:`-c <options-contraction-table>`.
+
+.. _configure-keyboard-table:
+
+``keyboard-table`` *file*\ \|\ ``auto``
+  The :ref:`key table <table-key>` mapping keyboard keys to BRLTTY
+  commands. The default is not to use one.
+  Overridable with :ref:`-k <options-keyboard-table>`.
+
+.. _configure-keyboard-properties:
+
+``keyboard-properties`` *name*\ ``=``\ *value*\ ``,``...
+  Which keyboards BRLTTY should monitor (see :ref:`Keyboard Properties
+  <keyboard-properties>`). The default is to monitor all of them.
+  Overridable with :ref:`-K <options-keyboard-properties>`.
+
+For the directives not covered here — speech, screen, MIDI, PCM,
+BrlAPI, preferences-file, release-device, and a few others — see the
+comments in ``Documents/brltty.conf``.
 
 
 .. _options:
@@ -993,262 +961,123 @@ The following directives are recognized:
 Command Line Options
 --------------------
 
-Many settings can be explicitly specified when invoking BRLTTY.
-The ``brltty`` command accepts the following options:
+The options below are the ones first-time users most often reach for.
+For the full list — including platform-specific, advanced, and rarely
+used options — run ``brltty --help`` or read the ``brltty(1)`` man
+page.
 
-.. _options-attributes-table:
-
-``-a``\ *file* ``--attributes-table=``\ *file*
-  Specify the attributes table (see section :ref:`Attributes Tables <table-attributes>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.atb`` extension is optional. See the :ref:`attributes-table <configure-attributes-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Attributes Table <preference-attributes-table>` preference.
+Display, driver, and device:
 
 .. _options-braille-driver:
 
-``-b``\ *driver*\ ``,``...|\ ``auto`` ``--braille-driver=``\ *driver*\ ``,``...|\ ``auto``
-  Specify the braille display driver (see section :ref:`Driver Specification <operand-driver>`). See the :ref:`braille-driver <configure-braille-driver>` configuration file directive for the default run-time setting.
-
-.. _options-contraction-table:
-
-``-c``\ *file* ``--contraction-table=``\ *file*
-  Specify the contraction table (see section :ref:`Contraction Tables <table-contraction>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ctb`` extension is optional. The contraction table is used when the 6-dot braille feature is activated (see the :ref:`SIXDOTS <command-SIXDOTS>` command and the :ref:`Text Style <preference-text-style>` preference). See the :ref:`contraction-table <configure-contraction-table>` configuration file directive for the default run-time setting. This setting can be changed with the Contraction Table preference. This option isn't available if the ``--disable-contracted-braille`` build option was specified.
+``-b``\ *driver*\ ``,``...|\ ``auto`` ``--braille-driver=``\ *driver*\ ``,``...
+  Braille display driver (see :ref:`Driver Specification
+  <operand-driver>`). ``auto`` autodetects.
 
 .. _options-braille-device:
 
 ``-d``\ *device*\ ``,``... ``--braille-device=``\ *device*\ ``,``...
-  Specify the device to which the braille display is connected (see section :ref:`Braille Device Specification <operand-braille-device>`). See the :ref:`braille-device <configure-braille-device>` configuration file directive for the default run-time setting.
+  Where the display is connected.
 
-.. _options-standard-error:
+.. _options-braille-parameters:
 
-``-e`` ``--standard-error``
-  Write diagnostic messages to standard error. The default is to record them via ``syslog``.
+``-B``\ [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``... ``--braille-parameters=``\ ...
+  Driver-specific parameters; see each driver's README.
 
-.. _options-configuration-file:
+``-s``\ *driver*\ ``,``...|\ ``auto`` ``--speech-driver=``\ *driver*\ ``,``...
+  Speech synthesizer driver, or ``auto``.
 
-``-f``\ *file* ``--configuration-file=``\ *file*
-  Specify the location of the :ref:`configuration file <configure>` which is to be used for the establishing of default run-time settings.
+``-x``\ *driver* ``--screen-driver=``\ *driver*
+  Screen driver. Default: autodetected.
 
-.. _options-help:
-
-``-h`` ``--help``
-  Display a summary of the command line options accepted by BRLTTY, and then exit.
-
-.. _options-speech-input:
-
-``-i``\ *name* ``--speech-input=``\ *name*
-  Specify the name of the file system object (FIFO, named pipe, named socket, etc) which can be used by other applications for text-to-speech conversion via BRLTTY's speech driver. If not specified, the file system object is not created. See the :ref:`speech-input <configure-speech-input>` configuration file directive for the default run-time setting. This option isn't available if the ``--disable-speech-support`` build option was specified.
-
-.. _options-keyboard-table:
-
-``-k``\ *file* ``--keyboard-table=``\ *file*
-  Specify the keyboard table (see section :ref:`Key Tables <table-key>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ktb`` extension is optional. See the :ref:`keyboard-table <configure-keyboard-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Keyboard Table <preference-keyboard-table>` preference.
-
-``-l``\ *level* ``--log-level=``\ *level*
-  Specify the severity threshold for diagnostic message generation. The following levels are recognized.
-
-  0
-    emergency
-
-  1
-    alert
-
-  2
-    critical
-
-  3
-    error
-
-  4
-    warning
-
-  5
-    notice
-
-  6
-    information
-
-  7
-    debug
-
-  Either the number or the name may be supplied, and the name may be abbreviated. If not specified, then ``information`` is assumed (see the :ref:`-q <options-quiet>` option for more details).
-
-.. _options-midi-device:
-
-``-m``\ *device* ``--midi-device=``\ *device*
-  Specify the device to use for the Musical Instrument Digital Interface (see section :ref:`MIDI Device Specification <operand-midi-device>`). See the :ref:`midi-device <configure-midi-device>` configuration file directive for the default run-time setting. This option isn't available if the ``--disable-midi-support`` build option was specified.
-
-.. _options-no-daemon:
-
-``-n`` ``--no-daemon``
-  Specify that BRLTTY is to remain in the foreground. If not specified, then BRLTTY becomes a background process (daemon) after initializing itself but before starting any of the selected drivers.
-
-.. _options-pcm-device:
-
-``-p``\ *device* ``--pcm-device=``\ *device*
-  Specify the device to use for digital audio (see section :ref:`PCM Device Specification <operand-pcm-device>`). See the :ref:`pcm-device <configure-pcm-device>` configuration file directive for the default run-time setting. This option isn't available if the ``--disable-pcm-support`` build option was specified.
-
-.. _options-quiet:
-
-``-q`` ``--quiet``
-  Log less information. This option changes the default log level (see the :ref:`-l <options-log-level>` option) to ``notice`` if either the :ref:`-v <options-verify>` or the :ref:`-V <options-version>` option is specified, and to ``warning`` otherwise.
-
-.. _options-release-device:
-
-``-r`` ``--release-device``
-  Release the device to which the braille display is connected when the current screen or window can't be read. See the :ref:`release-device <configure-release-device>` configuration file directive for the default run-time setting.
-
-.. _options-speech-driver:
-
-``-s``\ *driver*\ ``,``...|\ ``auto`` ``--speech-driver=``\ *driver*\ ``,``...|\ ``auto``
-  Specify the speech synthesizer driver (see section :ref:`Driver Specification <operand-driver>`). See the :ref:`speech-driver <configure-speech-driver>` configuration file directive for the default run-time setting. This option isn't available if the ``--disable-speech-support`` build option was specified.
+Tables:
 
 .. _options-text-table:
 
 ``-t``\ *file* ``--text-table=``\ *file*
-  Specify the text table (see section :ref:`Text Tables <table-text>` for details). If a relative path is supplied, then it's anchored at ``/etc/brltty`` (see the ``--with-data-directory`` and the ``--with-execute-root`` build options for more details). The ``.ttb`` extension is optional. See the :ref:`text-table <configure-text-table>` configuration file directive for the default run-time setting. This setting can be changed with the :ref:`Text Table <preference-text-table>` preference.
+  :ref:`Text table <table-text>`. Default: locale-based.
 
-.. _options-verify:
+.. _options-attributes-table:
 
-``-v`` ``--verify``
-  Display the current versions of BRLTTY itself, of the server side of its application programming interface, and of the selected braille and speech drivers, and then exit. If the :ref:`-q <options-quiet>` option isn't specified, then also display the values of the options after all sources have been considered. If more than one braille driver (see the :ref:`-b <options-braille-driver>` command line option) and/or more than one braille device (see the :ref:`-d <options-braille-device>` command line option) has been specified then braille display autodetection is performed. If more than one speech driver (see the :ref:`-s <options-speech-driver>` command line option) has been specified then speech synthesizer autodetection is performed.
+``-a``\ *file* ``--attributes-table=``\ *file*
+  :ref:`Attributes table <table-attributes>`.
 
-.. _options-screen-driver:
+.. _options-contraction-table:
 
-``-x``\ *driver* ``--screen-driver=``\ *driver*
-  Specify the screen driver (see section :ref:`Supported Screen Drivers <screen>`). See the :ref:`screen-driver <configure-screen-driver>` configuration file directive for the default run-time setting.
+``-c``\ *file* ``--contraction-table=``\ *file*
+  :ref:`Contraction table <table-contraction>` for 6-dot mode.
 
-.. _options-api-parameters:
+.. _options-keyboard-table:
 
-``-A``\ *name*\ ``=``\ *value*\ ``,``... ``--api-parameters=``\ *name*\ ``=``\ *value*\ ``,``...
-  Specify parameters for the Application Programming Interface. If the same parameter is specified more than once, then its rightmost assignment is used. For a description of the parameters accepted by the interface, please see the **BrlAPI** reference manual. See the :ref:`api-parameters <configure-api-parameters>` configuration file directive for the default run-time settings.
-
-.. _options-braille-parameters:
-
-``-B``\ [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``... ``--braille-parameters=``\ [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``...
-  Specify parameters for the braille display drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Driver Identification Codes <drivers>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the :ref:`braille-parameters <configure-braille-parameters>` configuration file directive for the default run-time settings.
-
-.. _options-environment-variables:
-
-``-E`` ``--environment-variables``
-  Recognize environment variables when determining the default settings for unspecified command line options (see section :ref:`Command Line Options <options>`). If this option is specified, and if the environment variable associated with an unspecified option is defined, then the value of that environment variable is used. The names of these environment variables are based on the long names of the options they correspond to:
-
-  - All letters are in upper case.
-  - Underscores (``_``) are used instead of minus signs (``-``).
-  - The prefix ``BRLTTY_`` is added.
-
-  This option is particularly useful on the Linux operating system as it allows default settings to be passed to BRLTTY via boot parameters. The following environment variables are supported:
-
-  ``BRLTTY_API_PARAMETERS``
-    Parameters for the Application Programming Interface (see the :ref:`-A <options-api-parameters>` command line option).
-
-  ``BRLTTY_ATTRIBUTES_TABLE``
-    The attributes table (see the :ref:`-a <options-attributes-table>` command line option).
-
-  ``BRLTTY_BRAILLE_DEVICE``
-    The braille display device (see the :ref:`-d <options-braille-device>` command line option).
-
-  ``BRLTTY_BRAILLE_DRIVER``
-    The braille display driver (see the :ref:`-b <options-braille-driver>` command line option).
-
-  ``BRLTTY_BRAILLE_PARAMETERS``
-    Parameters for the braille display driver (see the :ref:`-B <options-braille-parameters>` command line option).
-
-  ``BRLTTY_CONFIGURATION_FILE``
-    The configuration file (see the :ref:`-f <options-configuration-file>` command line option).
-
-  ``BRLTTY_CONTRACTION_TABLE``
-    The contraction table (see the :ref:`-c <options-contraction-table>` command line option).
-
-  ``BRLTTY_KEYBOARD_TABLE``
-    The keyboard table (see the :ref:`-k <options-keyboard-table>` command line option).
-
-  ``BRLTTY_KEYBOARD_PROPERTIES``
-    The keyboard properties (see the :ref:`-K <options-keyboard-properties>` command line option).
-
-  ``BRLTTY_MIDI_DEVICE``
-    The Musical Instrument Digital Interface device (see the :ref:`-m <options-midi-device>` command line option).
-
-  ``BRLTTY_PCM_DEVICE``
-    The digital audio device (see the :ref:`-p <options-pcm-device>` command line option).
-
-  ``BRLTTY_PREFERENCES_FILE``
-    The location of the file which is to be used for the saving and loading of user preferences (see the :ref:`-F <options-preferences-file>` command line option).
-
-  ``BRLTTY_RELEASE_DEVICE``
-    Whether or not to release the device to which the braille display is connected when the current screen or window can't be read (see the :ref:`-r <options-release-device>` command line option).
-
-  ``BRLTTY_SCREEN_PARAMETERS``
-    Parameters for the screen driver (see the :ref:`-X <options-screen-parameters>` command line option).
-
-  ``BRLTTY_SPEECH_DRIVER``
-    The speech synthesizer driver (see the :ref:`-s <options-speech-driver>` command line option).
-
-  ``BRLTTY_SPEECH_INPUT``
-    The name of the file system object which can be used by other applications for text-to-speech conversion via BRLTTY's speech driver (see the :ref:`-i <options-speech-input>` command line option).
-
-  ``BRLTTY_SPEECH_PARAMETERS``
-    Parameters for the speech synthesizer driver (see the :ref:`-S <options-speech-parameters>` command line option).
-
-  ``BRLTTY_TEXT_TABLE``
-    The text table (see the :ref:`-t <options-text-table>` command line option).
-
-.. _options-preferences-file:
-
-``-F``\ *file* ``--preferences-file=``\ *file*
-  Specify the location of the file which is to be used for the saving and loading of user preferences. If a relative path is supplied, then it's anchored at ``/var/lib/brltty``. See the :ref:`preferences-file <configure-preferences-file>` configuration file directive for the default run-time setting.
-
-.. _options-install-service:
-
-``-I`` ``--install-service``
-  Install BRLTTY as the BrlAPI service. This means that:
-
-  - BRLTTY will be automatically started when the system is booted.
-  - Applications can know that a BrlAPI server is running.
-
-  This option is only supported on the Windows platform.
+``-k``\ *file* ``--keyboard-table=``\ *file*
+  :ref:`Key table <table-key>` mapping keyboard keys to commands.
 
 .. _options-keyboard-properties:
 
-``-K``\ *name*\ ``=``\ *value*\ ``,``... ``--keyboard-properties=``\ *name*\ ``=``\ *value*\ ``,``...
-  Specify the properties of the keyboard(s) to be monitored. If the same property is specified more than once, then its rightmost assignment is used. See section :ref:`Keyboard Properties <keyboard-properties>` for a list of the properties which may be specified. See the :ref:`keyboard-properties <configure-keyboard-properties>` configuration file directive for the default run-time settings.
+``-K``\ *name*\ ``=``\ *value*\ ``,``... ``--keyboard-properties=``\ ...
+  Restrict which keyboards BRLTTY monitors (see :ref:`Keyboard
+  Properties <keyboard-properties>`).
+
+Files and runtime control:
+
+``-f``\ *file* ``--configuration-file=``\ *file*
+  Use a non-default :ref:`configuration file <configure>`.
+
+``-n`` ``--no-daemon``
+  Stay in the foreground (don't detach).
+
+``-N`` ``--no-api``
+  Disable the BrlAPI server.
 
 .. _options-message-timeout:
 
 ``-M``\ *csecs* ``--message-timeout=``\ *csecs*
-  Specify the amount of time (in hundredths of a second) that BRLTTY keeps its own internally generated messages on the braille display. If not specified, then ``400`` (4 seconds) is assumed.
+  How long BRLTTY shows its own messages on the display, in hundredths
+  of a second. Default: ``400`` (4 seconds).
 
-.. _options-no-api:
+Logging and diagnostics:
 
-``-N`` ``--no-api``
-  Disable the application programming interface.
+``-l``\ *level* ``--log-level=``\ *level*
+  Severity threshold for log messages. ``level`` may be a number 0-7
+  (0 = emergency, 7 = debug) or the name (which may be abbreviated).
+  Default: ``information``.
 
-.. _options-pid-file:
+``-q`` ``--quiet``
+  Lower the default log level. With :ref:`-v <options-verify>` or
+  :ref:`-V <options-version>` it becomes ``notice``; otherwise
+  ``warning``.
 
-``-P``\ *file* ``--pid-file=``\ *file*
-  Specify the file wherein BRLTTY is to write its process identifier (pid). If not specified, BRLTTY doesn't write its process identifier anywhere.
+``-e`` ``--standard-error``
+  Send diagnostic messages to standard error instead of ``syslog``.
 
-.. _options-remove-service:
+.. _options-help:
 
-``-R`` ``--remove-service``
-  Remove the BrlAPI service. This means that:
-
-  - BRLTTY will not be automatically started when the system is booted.
-  - Applications can know that no BrlAPI server is running.
-
-  This option is only supported on the Windows platform.
-
-.. _options-speech-parameters:
-
-``-S``\ [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``... ``--speech-parameters=``\ [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``...
-  Specify parameters for the speech synthesizer drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Driver Identification Codes <drivers>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the :ref:`speech-parameters <configure-speech-parameters>` configuration file directive for the default run-time settings.
+``-h`` ``--help``
+  Print the option summary and exit.
 
 .. _options-version:
 
 ``-V`` ``--version``
-  Display the current versions of BRLTTY itself, of the server side of its application programming interface, and of those drivers which have been linked into its binary, and then exit. If the :ref:`-q <options-quiet>` option isn't specified, then also display copyright information.
+  Print version information for BRLTTY, its API, and the linked-in
+  drivers, then exit. With ``-q`` only the versions are printed.
 
-.. _options-screen-parameters:
+.. _options-verify:
 
-``-X``\ [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``... ``--screen-parameters=``\ [*driver*\ ``:``]*name*\ ``=``\ *value*\ ``,``...
-  Specify parameters for the screen drivers. If the same parameter is specified more than once, then its rightmost assignment is used. If a parameter name is qualified by a driver (see section :ref:`Supported Screen Drivers <screen>`) then that setting only applies to that driver; if it isn't then it applies to all drivers. For a description of the parameters accepted by a specific driver, please see the documentation for that driver. See the :ref:`screen-parameters <configure-screen-parameters>` configuration file directive for the default run-time settings.
+``-v`` ``--verify``
+  Print the resolved option values (after merging defaults, the
+  configuration file, the command line, and — if :ref:`-E
+  <options-environment-variables>` is in effect — environment
+  variables), then exit. With multiple drivers or devices specified,
+  performs autodetection as part of verification.
+
+.. _options-environment-variables:
+
+``-E`` ``--environment-variables``
+  Default any unspecified option from a ``BRLTTY_*`` environment
+  variable. The variable name for an option is its long name, in upper
+  case, with hyphens replaced by underscores and a ``BRLTTY_`` prefix
+  (e.g., ``--braille-device`` is read from ``BRLTTY_BRAILLE_DEVICE``).
+  Useful for passing settings via Linux kernel boot parameters.
 
 
 Feature Descriptions
@@ -2191,9 +2020,8 @@ Braille Device Specification
 ----------------------------
 
 The general form of a braille device specification
-(see the :ref:`-d <options-braille-device>` command line option,
-the :ref:`braille-device <configure-braille-device>` configuration file directive,
-and the ``--with-braille-device`` build option)
+(see the :ref:`-d <options-braille-device>` command line option
+and the :ref:`braille-device <configure-braille-device>` configuration file directive)
 is ``qualifier:``\ *data*.
 For backward compatibility with earlier releases,
 if the qualifier is omitted then ``serial:`` is assumed.
