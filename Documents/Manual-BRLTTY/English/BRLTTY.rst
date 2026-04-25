@@ -93,17 +93,9 @@ As of this writing, the team includes:
   E-Mail
     `<nn201@cus.cam.ac.uk> <mailto:nn201@cus.cam.ac.uk>`_
 
-
-Questions, comments, suggestions, criticisms, and contributions are all welcome.
-Even though our e-mail addresses are listed above,
-the best way to contact us is via BRLTTY's mailing list.
-You can post to the list by sending e-mail to
-`<BRLTTY@brltty.app> <mailto:BRLTTY@brltty.app>`_.
-If you aren't subscribed to the list
-then your posts will be held for moderator approval.
-To subscribe, unsubscribe, change settings, view archives, etc,
-go to the list's information page at
-`http://brltty.app/mailman/listinfo/brltty <http://brltty.app/mailman/listinfo/brltty>`_.
+Questions, comments, suggestions, criticisms, and contributions are
+all welcome. The best way to reach the project is via the mailing
+list and the issue tracker — see :ref:`Getting Help <getting-help>`.
 
 
 Introduction
@@ -153,34 +145,107 @@ BRLTTY provides the following capabilities:
 
 
 
-Starting BRLTTY
+.. _getting-started:
+
+Getting Started
 ===============
 
-Once BRLTTY is installed, run it as ``brltty``. It reads its configuration
-from a file
+Installing
+----------
+
+Most Linux distributions ship BRLTTY as a package. Install it the
+usual way for your system — for example::
+
+  apt install brltty                # Debian, Ubuntu, derivatives
+  dnf install brltty                # Fedora, RHEL, derivatives
+  zypper install brltty             # openSUSE
+  pacman -S brltty                  # Arch
+
+If you'd rather build from source, clone or unpack the tarball, run
+``./configure`` (``./configure --help`` lists the build-time options),
+then ``make`` and ``make install``. The installed-files layout is
+described by the ``brltty-config`` shell script (see
+:ref:`The brltty-config Utility <utility-brltty-config>`).
+
+Connect your braille display before starting BRLTTY for the first
+time. Serial-port displays should be plugged in and powered on first;
+USB and Bluetooth displays can be hot-plugged once Udev integration
+is in place (see "Starting it at boot" below).
+
+Starting it manually
+--------------------
+
+Once installed, run BRLTTY as root::
+
+  brltty
+
+It reads its configuration from a file
 (see :ref:`The Configuration File <configure>`)
-which sets defaults such as the braille driver, the device to which the
-display is connected, and the text table. Most of those defaults can be
-overridden on the command line
+which sets defaults such as the braille driver, the device to which
+the display is connected, and the text table. Most of those defaults
+can be overridden on the command line
 (see :ref:`Command Line Options <options>`).
 
-A few options are particularly handy right after install:
+A few options come up a lot right after install:
 
 * :ref:`-h <options-help>` lists every option.
-* :ref:`-V <options-version>` prints BRLTTY's version, the API version,
-  and the selected drivers.
-* :ref:`-v <options-verify>` shows the option values BRLTTY will actually
-  run with after combining the configuration file, the environment, and
-  the command line.
+* :ref:`-V <options-version>` prints BRLTTY's version, its API version,
+  and the linked-in drivers.
+* :ref:`-v <options-verify>` reports the option values BRLTTY would
+  actually run with after merging the configuration file, the
+  environment, and the command line — useful for confirming a setting
+  before committing to it.
+* :ref:`-n <options>` keeps BRLTTY in the foreground (no daemonising)
+  and pairs well with :ref:`-e <options>` (log to standard error) and
+  :ref:`-l debug <options>` for diagnosing startup problems.
 
-You almost certainly want BRLTTY started automatically at boot so that
-your display is alive by the time the login prompt appears. On modern
-Linux distributions BRLTTY ships as a packaged systemd service — install
-your distribution's ``brltty`` package and enable the unit. See
-``Documents/README.Systemd`` for the unit names, the difference between
-the default instance and per-device instances, and how Udev hot-plug
-support is wired up so that connecting a USB display starts BRLTTY
-automatically.
+What you should see
+-------------------
+
+A startup banner with the program name and its version appears briefly
+on the display
+(see the :ref:`-M <options-message-timeout>` command line option for
+the timeout). The display then shows a small rectangular region of
+the screen including the cursor; by default the cursor itself is
+shown as dots 7 and 8 superimposed on the character it's on.
+
+As you type, the display follows the cursor — that's **cursor
+tracking**. Anything that changes on the screen is reflected on the
+display in real time.
+
+The slice of screen the display is currently showing is called the
+braille **window**. The window can be moved independently of the
+cursor when you want to read elsewhere on the screen (a long error
+message, the line above the prompt, another part of a man page) —
+that's what most BRLTTY commands do.
+
+Finding your way around
+-----------------------
+
+Two commands are worth memorising before any of the others:
+
+* :ref:`HELP <command-HELP>` — show one-line help for whichever key
+  you press next, then return to normal operation.
+* :ref:`LEARN <command-LEARN>` — read out the name of every command
+  as you press its key; useful for exploring an unfamiliar key map.
+  Press Enter on the keyboard to leave learn mode (see
+  :ref:`Command Learn Mode <learn>` for details).
+
+Both are toggles: invoke them again to come back. The full
+:ref:`Commands <commands>` chapter groups every command by purpose;
+``Documents/README.CommandReference`` is the alphabetical reference.
+
+Starting it at boot
+-------------------
+
+You almost certainly want BRLTTY started automatically at boot so
+that your display is alive by the time the login prompt appears. On
+modern Linux distributions BRLTTY ships as a packaged systemd
+service — install your distribution's ``brltty`` package and enable
+the unit. See ``Documents/README.Systemd`` for the unit names, the
+difference between the default instance and per-device instances,
+and how Udev hot-plug support is wired up so that connecting a USB
+display starts BRLTTY automatically.
 
 
 
@@ -206,47 +271,29 @@ and inspect the environment for the full list.
 Using BRLTTY
 ============
 
-Before starting BRLTTY, you need to set up your braille display.
-In most cases this is done simply
-by connecting it to an available serial port,
-and then turning it on.
-After your display has been set up,
-run BRLTTY simply by typing the command ``brltty`` at a shell prompt
-(this must be done as root).
-Check the
-:ref:`-d <options-braille-device>` command line option
-and the :ref:`braille-device <configure-braille-device>` configuration file directive
-for ways to tell BRLTTY which device your display is connected to.
-Check the
-:ref:`-b <options-braille-driver>` command line option
-and the :ref:`braille-driver <configure-braille-driver>` configuration file directive
-for ways to tell BRLTTY which kind of braille display you have.
-Check the
-:ref:`-B <options-braille-parameters>` command line option,
-and the :ref:`braille-parameters <configure-braille-parameters>` configuration file directive
-for alternatives regarding how to pass parameters to the driver for your braille display.
+This chapter describes how BRLTTY's commands, configuration, and
+options work once it's running. If you haven't yet got it running,
+:ref:`Getting Started <getting-started>` walks through that.
 
-A message giving the program name (BRLTTY) and its version number
-will appear briefly
-(see the :ref:`-M <options-message-timeout>` command line option)
-on the braille display.
-The display will then show a small area of the screen including the cursor.
-By default, the cursor is represented as
-dots 7 and 8 superimposed on the character it is on.
+The settings most often adjusted at the command line are the braille
+driver
+(:ref:`-b <options-braille-driver>` /
+:ref:`braille-driver <configure-braille-driver>`),
+the device the display is connected to
+(:ref:`-d <options-braille-device>` /
+:ref:`braille-device <configure-braille-device>`),
+and any driver-specific parameters
+(:ref:`-B <options-braille-parameters>` /
+:ref:`braille-parameters <configure-braille-parameters>`).
+Most other settings have sensible defaults.
 
-Any screen activity will be reflected on the braille display.
-The display will also follow the progress of the cursor on the screen.
-This feature is known as **cursor tracking**.
-
-Just typing on the keyboard and reading the display, however, isn't enough.
-Try entering a command which will cause an error, and pressing **enter**.
-The error appears on the screen, but, unless you have a multi-line display,
-the chances are that it isn't visible on the braille display.
-All you see thereon is another shell prompt.
-What's needed, then, is some way to move
-the braille *window* around the screen.
-The keys on the braille display itself can be used to send commands to BRLTTY
-which, in addition to a lot of other things, can also do exactly that.
+When BRLTTY is running, the slice of screen currently shown on the
+display is called the **window**. Anything you type or that the
+screen redraws is reflected in real time, and the window follows the
+cursor (cursor tracking). To read elsewhere on the screen — a long
+error message above the prompt, the line you just left in an editor,
+the bottom of a man page — you move the window independently of the
+cursor; that's what most BRLTTY commands do.
 
 
 .. _commands:
@@ -1935,6 +1982,51 @@ octal (``0``-prefixed),
 or hexadecimal (``0x``-prefixed).
 A value of ``0`` means "match any",
 equivalent to not specifying the property at all.
+
+
+.. _getting-help:
+
+Getting Help
+============
+
+Mailing list
+------------
+
+The fastest way to get a question answered is the project's mailing
+list. Post to `<BRLTTY@brltty.app> <mailto:BRLTTY@brltty.app>`_; if
+you're not subscribed, your post will be held briefly for moderator
+approval. To subscribe, browse the archives, or change settings, go
+to `http://brltty.app/mailman/listinfo/brltty
+<http://brltty.app/mailman/listinfo/brltty>`_.
+
+Bug reports and feature requests
+--------------------------------
+
+The issue tracker is on GitHub at
+`https://github.com/brltty/brltty/issues
+<https://github.com/brltty/brltty/issues>`_. A useful bug report
+includes:
+
+* The BRLTTY version (``brltty -V``).
+* The braille display make and model.
+* The host operating system and its version.
+* The configuration file in use, if non-default.
+* Relevant log output. Re-running BRLTTY with
+  ``-n -e -l debug`` keeps it in the foreground and emits detailed
+  diagnostics to standard error — paste the output that surrounds the
+  failure.
+
+Reading the source documentation
+--------------------------------
+
+For implementation questions or driver-specific behaviour the source
+tree carries a family of topic READMEs in ``Documents/``: ``Bluetooth``,
+``Devices``, ``Customize``, ``Profiles``, ``Polling``, ``Systemd``,
+``X11``, ``CommandReference``, ``TextTables``, ``AttributesTables``,
+``ContractionTables``, ``KeyTables``, ``BrailleDots``, and others.
+``Documents/brltty.conf`` is the heavily-commented configuration
+template — the fastest reference for any directive's syntax. The
+BrlAPI manual covers the application interface separately.
 
 
 Supported Braille Displays
