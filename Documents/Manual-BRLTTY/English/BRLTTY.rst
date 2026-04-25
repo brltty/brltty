@@ -164,173 +164,31 @@ BRLTTY provides the following capabilities:
 Starting BRLTTY
 ===============
 
-BRLTTY, when properly installed, is invoked with the single command ``brltty``.
-A configuration file
-(see section :ref:`The Configuration File <configure>` for details)
-can be created in order to establish system defaults for such things as
-the location of the preferences file,
-the braille display driver to be used,
-the device to which the braille display is connected,
+Once BRLTTY is installed, run it as ``brltty``. It reads its configuration
+from a file
+(see :ref:`The Configuration File <configure>`)
+which sets defaults such as the braille driver, the device to which the
+display is connected, and the text table. Most of those defaults can be
+overridden on the command line
+(see :ref:`Command Line Options <options>`).
 
-.. _preference-text-table:
+A few options are particularly handy right after install:
 
-and the text table to be used.
-Many options
-(see section :ref:`Command Line Options <options>` for details)
-allow explicit run-time specification of such things as
-the location of the configuration file,
-any defaults established within the configuration file,
-and some characteristics which have reasonable defaults
-but which those who think they know what they're doing may wish to play with.
-The :ref:`-h <options-help>` option
-displays a summary of all the options.
-The :ref:`-V <options-version>` option
-displays the current version of the program, the API, and the selected drivers.
-The :ref:`-v <options-verify>` option
-displays the values of the options after all sources have been considered.
+* :ref:`-h <options-help>` lists every option.
+* :ref:`-V <options-version>` prints BRLTTY's version, the API version,
+  and the selected drivers.
+* :ref:`-v <options-verify>` shows the option values BRLTTY will actually
+  run with after combining the configuration file, the environment, and
+  the command line.
 
-It's probably best to have the system automatically start BRLTTY
-as part of the boot sequence
-so that the braille display is already up and running when the login prompt appears.
-Most (probably all) distributions provide a script wherein
-user-supplied applications can be safely started near the end of the boot sequence.
-The name of this script is distribution-dependent.
-Here are the ones we know about so far:
-
-Red Hat
-  ``/etc/rc.d/rc.local``
-
-
-Starting BRLTTY from this script is a good approach (especially for new users).
-Just add a set of lines like these::
-
-  if [ -x /bin/brltty -a -f /etc/brltty.conf ]
-  then
-  /bin/brltty
-  fi
-
-This can usually be abbreviated to the somewhat less readable form::
-
-  [ -x /bin/brltty -a -f /etc/brltty.conf ] && /bin/brltty
-
-Don't add these lines before the first line
-(which usually looks like ``#!/bin/sh``).
-
-If the braille display is to be used by a system administrator,
-then it should probably be started as early as possible during the boot sequence
-(like before the file systems are checked)
-so that the display is usable
-in the event that something goes wrong during these checks
-and the system drops into single user mode.
-Again, exactly where it's best to do this is distribution-dependent.
-Here are the places we know about so far:
-
-Debian
-  ``/etc/init.d/boot`` (for older releases)
-
-  ``/etc/init.d/`` (for newer releases)
-
-  A ``brltty`` package is provided
-  (see `http://packages.debian.org/brltty <http://packages.debian.org/brltty>`_)
-  as of release ``3.0`` (``Woody``).
-  Since this package takes care of starting BRLTTY,
-  there's no need for user-supplied code to do so if it's installed.
-  If you need the daemon to run with some command-line options,
-  you can change the contents between quotes
-  on the directive ``ARGUMENTS``
-  in the ``/etc/default/brltty`` file.
-
-RedHat
-  ``/etc/rc.d/rc.sysinit``
-
-  Beware that later releases,
-  in order to support a more user-oriented system initialization procedure,
-  have this script reinvoke itself such that
-  it's under the control of ``initlog``.
-  Look, probably right up near the top, for a set of lines like these::
-
-    # Rerun ourselves through initlog
-    if [ -z "$IN_INITLOG" ]; then
-    [ -f /sbin/initlog ] && exec /sbin/initlog $INITLOG_ARGS -r /etc/rc.sysinit
-    fi
-
-  Starting BRLTTY before this reinvocation
-  results in two BRLTTY processes running at the same time,
-  and that'll give you no end of problems.
-  If your version of this script has this feature,
-  then make sure you start BRLTTY after the lines which implement it.
-
-Slackware
-  ``/etc/rc.d/rc.S``
-
-SuSE
-  ``/sbin/init.d/boot``
-
-An alternative is to start BRLTTY from ``/etc/inittab``.
-You have two choices if you choose this route.
-
-- If you want it to be started really early
-  but don't need it to be automatically restarted if it dies,
-  then add a line like this before the first ``:sysinit:`` line which is already in there.
-
-  ::
-
-    brl::sysinit:/bin/brltty
-
-- If you don't mind it being started later
-  but do want it to be automatically restarted if it dies,
-  then add a line like this anywhere within the file.
-
-  .. parsed-literal::
-
-    brl:12345:respawn:/bin/brltty -n
-
-  The :ref:`-n <options-no-daemon>` (``--nodaemon``) option is very
-  important when running BRLTTY with **init**'s ``respawn`` facility.
-  You'll end up with hundreds of BRLTTY processes all running at the same time
-  if you forget to specify it.
-
-Check that the identifier (``brl`` in these examples)
-isn't already being used by another entry,
-and, if it is, choose a different one which isn't.
-
-Note that a command like ``kill -TERM``
-is sufficient to stop BRLTTY in its tracks.
-If it dies during entry into single user mode, for example,
-it may well be due to a problem of this nature.
-
-Some systems, as part of the boot sequence, probe the serial ports
-(usually in order to automatically find the mouse and deduce its type).
-If your braille display is using a serial port,
-this kind of probing may be enough to get it confused.
-If this happens to you, then try restarting the braille driver
-
-.. _command-RESTARTBRL:
-
-(see the :ref:`RESTARTBRL <command-RESTARTBRL>` command).
-Better yet, turn off the serial port probing.
-Here's what we know so far about how to do this:
-
-Red Hat
-  The probing is done by a service named ``kudzu``. Use the command::
-
-      chkconfig --list kudzu
-
-  to see if it's been enabled. Use the command::
-
-      chkconfig kudzu off
-
-  to disable it. Later releases allow you to let ``kudzu`` run without probing the serial ports. To do this, edit the file ``/etc/sysconfig/kudzu``, and set ``SAFE`` to ``yes``.
-
-
-If you want to start BRLTTY before any file systems are mounted, then
-ensure that all of its components are installed within the root file system.
-See the ``--with-execute-root``,
-``--bindir``,
-``--libdir``,
-``--with-writable-directory``,
-and ``--with-data-directory``
-build options.
+You almost certainly want BRLTTY started automatically at boot so that
+your display is alive by the time the login prompt appears. On modern
+Linux distributions BRLTTY ships as a packaged systemd service — install
+your distribution's ``brltty`` package and enable the unit. See
+``Documents/README.Systemd`` for the unit names, the difference between
+the default instance and per-device instances, and how Udev hot-plug
+support is wired up so that connecting a USB display starts BRLTTY
+automatically.
 
 
 
@@ -793,6 +651,8 @@ CSRJMP_VERT
 
 PASTE
   Insert the characters within the cut buffer at the current cursor location (see :ref:`Cut and Paste <cut>` for full details).
+
+.. _command-RESTARTBRL:
 
 RESTARTBRL
   Stop, and then restart the braille display driver.
@@ -2067,6 +1927,8 @@ Status Style
     Row and column numbers are shown as two digits within a single cell. The tens digit is shown in the top half of the cell, and the units digit is shown in the bottom half of the cell.
 
   The initial setting is braille display driver dependent.
+
+.. _preference-text-table:
 
 Text Table
   Select the text table. See section :ref:`Text Tables <table-text>` for details. See the :ref:`-t <options-text-table>` command line option for the initial setting. This preference isn't saved.
