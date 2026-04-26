@@ -221,7 +221,7 @@ BrlAPI. Useful for piping the system clipboard (or any text) into
 BRLTTY's clipboard for braille pasting via the
 :ref:`PASTE <command-PASTE>` command, or for capturing a clip that
 :ref:`COPY_SMART_NEW <command-COPY_SMART_NEW>` or
-:ref:`CUTBEGIN <command-CUTBEGIN>` populated and feeding it to
+:ref:`CLIP_NEW <command-CLIP_NEW>` populated and feeding it to
 another tool.
 
 Common forms::
@@ -781,28 +781,28 @@ ROUTE
   (see :ref:`Cursor Routing <routing>`), by simulating arrow-key
   presses.
 
-.. _command-CUTBEGIN:
+.. _command-CLIP_NEW:
 
-CUTBEGIN
+CLIP_NEW
   Anchor the start of a cut block at the routing key, replacing the
   clipboard (see :ref:`Cut and Paste <cut>`).
 
-.. _command-CUTAPPEND:
+.. _command-CLIP_ADD:
 
-CUTAPPEND
-  Like :ref:`CUTBEGIN <command-CUTBEGIN>`, but keep the existing
+CLIP_ADD
+  Like :ref:`CLIP_NEW <command-CLIP_NEW>`, but keep the existing
   clipboard contents.
 
-.. _command-CUTRECT:
+.. _command-COPY_RECT:
 
-CUTRECT
+COPY_RECT
   Anchor the end of the cut block at the routing key and append the
   rectangular region to the clipboard.
 
-.. _command-CUTLINE:
+.. _command-COPY_LINE:
 
-CUTLINE
-  As :ref:`CUTRECT <command-CUTRECT>`, but a linear (line-wrapping)
+COPY_LINE
+  As :ref:`COPY_RECT <command-COPY_RECT>`, but a linear (line-wrapping)
   region.
 
 .. _command-COPYCHARS:
@@ -1184,13 +1184,13 @@ re-type. The basic workflow has three steps:
 
 #. **Mark the start of the region.** Move the braille window so the
    first character is in view, then press
-   :ref:`CUTBEGIN <command-CUTBEGIN>` (start a fresh clipboard) or
-   :ref:`CUTAPPEND <command-CUTAPPEND>` (append to the existing
+   :ref:`CLIP_NEW <command-CLIP_NEW>` (start a fresh clipboard) or
+   :ref:`CLIP_ADD <command-CLIP_ADD>` (append to the existing
    clipboard) and tap the routing key over that character.
 
 #. **Mark the end of the region.** Move so the last character is
-   in view, then press :ref:`CUTLINE <command-CUTLINE>` (linear,
-   line-wrapping) or :ref:`CUTRECT <command-CUTRECT>` (rectangular)
+   in view, then press :ref:`COPY_LINE <command-COPY_LINE>` (linear,
+   line-wrapping) or :ref:`COPY_RECT <command-COPY_RECT>` (rectangular)
    and tap the routing key over that character. Trailing white-space
    is trimmed from each line; control characters become blanks.
 
