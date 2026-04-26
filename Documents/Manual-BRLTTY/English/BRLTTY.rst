@@ -2049,20 +2049,17 @@ Supported Screen Drivers
 
 BRLTTY supports the following screen drivers:
 
-as
-  AT-SPI
+.. csv-table::
+   :header-rows: 1
+   :file: ../../screen-driver.csv
 
-hd
-  This driver provides direct access to the Hurd console screen. It's only selectable, and is the default, on Hurd systems.
-
-lx
-  This driver provides direct access to the Linux console screen. It's only selectable, and is the default, on Linux systems.
-
-sc
-  This driver provides access to the ``screen`` program. It's selectable on all systems, and is the default if no native screen driver is available. The patch for ``screen`` which we provide (see the ``Patches`` subdirectory) must be applied. Use of this driver, due to the fact that ``screen`` must be concurrently running, makes BRLTTY effectively useful only after the user has logged in.
-
-wn
-  This driver provides direct access to the Windows console screen. It's only selectable, and is the default, on Windows/Cygwin systems.
+The native driver for your operating system (``lx`` on Linux,
+``hd`` on Hurd, ``wn`` on Windows, ``an`` on Android) is selected
+automatically. The ``sc`` driver provides access to ``screen``
+sessions and is the default fallback on systems without a native
+driver — ``screen`` must be patched (see the ``Patches``
+subdirectory) and running. The ``tx`` driver, used by
+:ref:`brltty-tmux <utility-brltty-tmux>`, watches a tmux session.
 
 
 Operand Syntax
