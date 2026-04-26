@@ -147,23 +147,95 @@ display starts BRLTTY automatically.
 
 
 
+.. _utilities:
+
+Helper Utilities
+================
+
+A handful of small commands ship alongside ``brltty`` itself for
+shell and script use. Each one supports ``--help`` for a full
+option listing.
+
+
 .. _utility-brltty-config:
 
-The brltty-config Utility
-=========================
+brltty-config
+-------------
 
-A shell script that exposes BRLTTY's installation-time directory layout to
-other scripts. Source it (don't execute it) from a Bourne-compatible
-shell::
+A shell script that exposes BRLTTY's installation-time directory
+layout to other scripts. Source it (don't execute it) from a
+Bourne-compatible shell::
 
   . brltty-config
 
-The script sets environment variables reflecting the runtime layout chosen
-at build time: ``BRLTTY_VERSION``, ``BRLTTY_EXECUTE_ROOT``,
+The script sets environment variables reflecting the runtime layout
+chosen at build time: ``BRLTTY_VERSION``, ``BRLTTY_EXECUTE_ROOT``,
 ``BRLTTY_PROGRAM_DIRECTORY``, ``BRLTTY_LIBRARY_DIRECTORY``,
 ``BRLTTY_WRITABLE_DIRECTORY``, ``BRLTTY_DATA_DIRECTORY``,
-``BRLTTY_MANPAGE_DIRECTORY``, ``BRLAPI_VERSION``, and others. Run it once
-and inspect the environment for the full list.
+``BRLTTY_MANPAGE_DIRECTORY``, ``BRLAPI_VERSION``, and others. Run
+it once and inspect the environment for the full list.
+
+
+.. _utility-brltty-tmux:
+
+brltty-tmux
+-----------
+
+Inside a ``tmux`` session your shell, editor, and other applications
+draw to a virtual screen that ``tmux`` keeps in user-space — so the
+text isn't directly visible to BRLTTY's normal Linux-console screen
+driver. ``brltty-tmux`` bridges the gap.
+
+Run it from any window of the tmux session you want to follow::
+
+  brltty-tmux
+
+It starts a *second* BRLTTY instance whose screen driver is the
+Tmux driver (``tx``) and whose braille driver is BrlAPI (``ba``).
+The second instance reads the tmux session's screen state via tmux
+itself and forwards braille output through BrlAPI to the main
+BRLTTY, which is the one actually driving the display. The main
+instance keeps doing its job for the system console; while you're
+reading inside tmux it just relays.
+
+Console switching only works correctly when ``brltty-tmux`` runs as
+root, since determining the foreground virtual console requires
+root privileges. Pass ``-s`` to escalate via ``sudo`` automatically,
+or ``-c`` to continue as the current user (you'll get a warning that
+console switching may misbehave). Arguments after ``--`` are passed
+through to the inner ``brltty`` — useful for, e.g., overriding the
+braille-display address::
+
+  brltty-tmux -s -- -d bg:address=01:23:45:67:89:AB
+
+BrlAPI must be enabled in the main BRLTTY for the bridge to work.
+
+
+.. _utility-brltty-clip:
+
+brltty-clip
+-----------
+
+Reads or writes BRLTTY's clipboard from the command line via
+BrlAPI. Useful for piping the system clipboard (or any text) into
+BRLTTY's clipboard for braille pasting via the
+:ref:`PASTE <command-PASTE>` command, or for capturing a clip that
+:ref:`COPY_SMART_NEW <command-COPY_SMART_NEW>` or
+:ref:`CUTBEGIN <command-CUTBEGIN>` populated and feeding it to
+another tool.
+
+Common forms::
+
+  echo 'text to send' | brltty-clip            # set clipboard
+  brltty-clip -s 'text to send'                # set clipboard
+  brltty-clip -g                               # print clipboard
+  brltty-clip -g -r                            # print, drop trailing newline
+
+The ``-g`` (``--get-content``) and ``-s`` (``--set-content``) flags
+are mutually exclusive with positional file arguments. With no
+flags and one or more file arguments, the files (or standard input
+when the argument is ``-``) are concatenated and stored as the new
+clipboard content.
 
 
 Using BRLTTY
@@ -1105,33 +1177,43 @@ wherein horizontal cursor motion must never be attempted.
 Cut and Paste
 -------------
 
-This feature enables you to grab some text which is already on the screen
-and re-enter it at the current cursor position.
-Using it saves time and avoids errors
-when a long and/or complicated piece of text needs to be copied,
-and even when the same short and simple piece of text needs to be copied many times.
-It's particularly useful for things like
-long file names,
-complicated command lines,
-E-mail addresses,
-and URLs. Cutting and pasting text involves three simple steps:
-#. Mark either the top-left corner of the rectangular area or the beginning of the linear area on the screen which is to be grabbed (cut). If your display has routing keys, then move the braille window so that the first character to be cut appears anywhere within it, and then:
+BRLTTY has its own clipboard for grabbing text from the screen and
+re-entering it at the cursor — handy for long file names, command
+lines, e-mail addresses, URLs, and anything else that's tedious to
+re-type. The basic workflow has three steps:
 
-   - invoke the :ref:`CUTBEGIN <command-CUTBEGIN>` command to start a new cut buffer
-   - invoke the :ref:`CUTAPPEND <command-CUTAPPEND>` command to append to the existing cut buffer
+#. **Mark the start of the region.** Move the braille window so the
+   first character is in view, then press
+   :ref:`CUTBEGIN <command-CUTBEGIN>` (start a fresh clipboard) or
+   :ref:`CUTAPPEND <command-CUTAPPEND>` (append to the existing
+   clipboard) and tap the routing key over that character.
 
-#. by pressing the key(s) associated with it and then pressing the routing key associated with the character.
-#. Mark either the bottom-right corner of the rectangular area or the end of the linear area on the screen which is to be grabbed (cut). If your display has routing keys, then move the braille window so that the last character to be cut appears anywhere within it, and then
+#. **Mark the end of the region.** Move so the last character is
+   in view, then press :ref:`CUTLINE <command-CUTLINE>` (linear,
+   line-wrapping) or :ref:`CUTRECT <command-CUTRECT>` (rectangular)
+   and tap the routing key over that character. Trailing white-space
+   is trimmed from each line; control characters become blanks.
 
-   - invoke the :ref:`CUTRECT <command-CUTRECT>` command to cut a rectangular area
-   - invoke the :ref:`CUTLINE <command-CUTLINE>` command to cut a linear area
+#. **Paste.** Move the cursor to where the text should go and press
+   :ref:`PASTE <command-PASTE>`. The clipboard isn't consumed — you
+   can paste the same content as many times as you need.
 
-#. by pressing the key(s) associated with it and then pressing the routing key associated with the character. Marking the end of the cut area appends the selected screen content to the cut buffer. Excess white-space is removed from the end of each line in the cut buffer so that unwanted trailing spaces won't be pasted back in. Control characters are replaced with blanks.
-#. Insert (paste) the text where it's needed. Place the cursor over the character where the text is to be pasted, and invoke the :ref:`PASTE <command-PASTE>` command. You can paste the same text any number of times without recutting it. This description assumes that you're already in some sort of input mode. If you paste when you're in some other kind of mode (like ``vi``'s command mode), then you'd better be aware of what the characters in the cut buffer will do.
+For URLs, e-mail addresses, and hostnames specifically, the
+:ref:`COPY_SMART_NEW <command-COPY_SMART_NEW>` and
+:ref:`COPY_SMART_ADD <command-COPY_SMART_ADD>` commands skip the
+two-mark dance: tap the routing key once on any character of the
+URL/address and BRLTTY's pattern detector grabs the whole thing.
 
+Two utility commands help with managing the clipboard itself:
+:ref:`CLIP_SHOW <command-CLIP_SHOW>` displays the current contents on
+the braille line, and :ref:`CLIP_CLEAR <command-CLIP_CLEAR>` empties
+it. The clipboard is also the search-string buffer for the
+:ref:`PRSEARCH/NXSEARCH <command-PRSEARCH-NXSEARCH>` commands.
 
-The cut buffer is also used by
-the :ref:`PRSEARCH/NXSEARCH <command-PRSEARCH-NXSEARCH>` commands.
+To move text in or out of the clipboard from a shell, use the
+:ref:`brltty-clip <utility-brltty-clip>` host command — it talks to
+the running BRLTTY over BrlAPI and reads or writes the same
+clipboard the keyboard commands operate on.
 
 
 .. _gpm:
