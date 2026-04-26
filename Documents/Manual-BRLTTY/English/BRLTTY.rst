@@ -7,142 +7,40 @@ Access to the Console Screen for Blind Persons using Refreshable Braille Display
 :Authors: Nikhil Nair `<nn201@cus.cam.ac.uk> <mailto:nn201@cus.cam.ac.uk>`__; Nicolas Pitre `<nico@fluxnic.net> <mailto:nico@fluxnic.net>`__; Stéphane Doyon `<s.doyon@videotron.ca> <mailto:s.doyon@videotron.ca>`__; Dave Mielke `<dave@mielke.cc> <mailto:dave@mielke.cc>`__
 :Date: Version 6.9.1, April 2026
 
-Copyright (c) 1995-2026 by The BRLTTY Developers. BRLTTY is free software, and comes with ABSOLUTELY NO WARRANTY. It is placed under the terms of version 2 or later of **The GNU General Public License** as published by **The Free Software Foundation**.
-
-
-Formalities
-===========
-
-
-License
--------
-
-This program is free software.
-You may redistribute it and/or modify it under the terms of
-`The GNU Lesser General Public License <http://www.gnu.org/licenses/licenses.html#LGPL>`_
-as published by `The Free Software Foundation <http://www.gnu.org/fsf/fsf.html>`_.
-Version 2.1 (or any later version) of the license may be used.
-
-You should have received a copy of the license along with this program.
-It should be in the file ``LICENSE-LGPL`` in the top-level directory.
-If not, write to the Free Software Foundation Inc.,
-675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-Disclaimer
-----------
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY - not even
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the **GNU General Public License** for more details.
-
-
-.. _contact:
-
-Contact Information
--------------------
-
-BRLTTY represents the work of a team.
-For up-to-date information, see BRLTTY's web page at
-[`http://brltty.app/ <http://brltty.app/>`_].
-As of this writing, the team includes:
-
-- Dave Mielke (maintainer, active)
-
-  Web
-    `http://mielke.cc/ <http://mielke.cc/>`_
-
-  E-Mail
-    `<dave@mielke.cc> <mailto:dave@mielke.cc>`_
-
-- Samuel Thibault (active)
-
-  Web
-    `http://dept-info.labri.fr/~thibault/ <http://dept-info.labri.fr/~thibault/>`_
-
-  E-Mail
-    `<samuel.thibault@ens-lyon.org> <mailto:samuel.thibault@ens-lyon.org>`_
-
-- Mario Lang (active)
-
-  Web
-    `http://delysid.org/ <http://delysid.org/>`_
-
-  E-Mail
-    `<mlang@tugraz.at> <mailto:mlang@tugraz.at>`_
-
-- Nicolas Pitre
-
-  Web
-    `http://www.fluxnic.net/ <http://www.fluxnic.net/>`_
-
-  E-Mail
-    `<nico@fluxnic.net> <mailto:nico@fluxnic.net>`_
-
-- Stéphane Doyon
-
-  Web
-    `http://pages.infinit.net/sdoyon/ <http://pages.infinit.net/sdoyon/>`_
-
-  E-Mail
-    `<s.doyon@videotron.ca> <mailto:s.doyon@videotron.ca>`_
-
-- Nikhil Nair  (author)
-
-  E-Mail
-    `<nn201@cus.cam.ac.uk> <mailto:nn201@cus.cam.ac.uk>`_
-
-Questions, comments, suggestions, criticisms, and contributions are
-all welcome. The best way to reach the project is via the mailing
-list and the issue tracker — see :ref:`Getting Help <getting-help>`.
+Copyright (c) 1995-2026 by The BRLTTY Developers. BRLTTY is free software, and comes with ABSOLUTELY NO WARRANTY. It is placed under the terms of version 2.1 or later of **The GNU Lesser General Public License** as published by **The Free Software Foundation**.
 
 
 Introduction
 ============
 
-BRLTTY gives a braille user access to the text consoles of a Linux/Unix system.
-It runs as a background process (daemon)
-which operates a refreshable braille display,
-and can be started very early in the system boot sequence.
-It enables a braille user, therefore, to easily independently handle
-aspects of system administration such as
-single user mode entry,
-file system recovery,
-and boot problem analysis.
-It even greatly eases such routine tasks as logging in.
+BRLTTY gives a braille user access to text consoles on Linux and
+similar systems. It runs as a background daemon, drives a
+refreshable braille display, and reflects what would normally
+appear on the screen as braille so the user can read it. It can
+be started very early in the boot sequence, which keeps the system
+usable in single-user mode and during boot-time recovery as well
+as for ordinary day-to-day work.
 
-BRLTTY reproduces a rectangular portion of the screen
-(referred to within this document as 'the window')
-as braille text on the display.
-Controls on the display can be used to
-move the window around on the screen,
-to enable and disable various viewing options,
-and to perform special functions.
+BRLTTY shows a rectangular portion of the screen — referred to in
+this manual as *the window* — as braille text on the display.
+Buttons on the display move the window around the screen, toggle
+viewing options on and off, and trigger BRLTTY's various commands.
 
+Headline features include cursor tracking and routing, contracted
+braille (English and French ship in the box; many more languages
+are covered by add-on tables), screen freezing for leisurely
+review, attribute review, cut-and-paste, configurable cursor and
+blink styles, an interactive preferences menu, an on-line learn
+mode for discovering commands, optional speech output, and a
+programmable API for client applications. See :ref:`Getting
+Started <getting-started>` for installation and first steps, and
+:ref:`Getting Help <getting-help>` for the mailing list and issue
+tracker.
 
-Feature Summary
----------------
-
-BRLTTY provides the following capabilities:
-
-- Full implementation of the usual screen review facilities.
-- Choice between ``block``, ``underline``, or ``no`` cursor.
-- Optional ``underline`` to indicate specially highlighted text.
-- Optional use of ``blinking`` (rates individually settable) for cursor, special highlighting underline, and/or capital letters.
-- Screen freezing for leisurely review.
-- Intelligent cursor routing, allowing easy fetching of cursor within text editors, web browsers, etc., without moving ones hands from the braille display.
-- A cut-and-paste function (linear or rectangular) which is particularly useful for copying long file names, copying text between virtual terminals, entering complicated commands, etc.
-- Table driven in-line contracted braille (English and French provided).
-- Support for multiple braille codes.
-- Ability to identify an unknown character.
-- Ability to inspect character highlighting.
-- An on-line help facility for braille display commands.
-- A preferences menu.
-- Basic speech support.
-- Modular design allowing relatively easy addition of drivers for other braille displays and speech synthesizers.
-- An Application Programming Interface.
-
+Linux is the primary platform. Other platforms are supported with
+varying degrees of completeness — see ``Documents/README.Android``,
+``Documents/README.Windows``, and the platform-specific READMEs in
+``Documents/`` for details.
 
 
 .. _getting-started:
@@ -2260,3 +2158,29 @@ Alert tunes played through a sound card's MIDI synthesizer use the
 standard General MIDI instrument numbering, where program number 0 is
 ``Acoustic Grand Piano`` and program number 127 is ``Gunshot``. See
 the General MIDI Level 1 specification for the full list.
+
+
+Formalities
+===========
+
+
+License
+-------
+
+BRLTTY is free software, distributed under the terms of
+`The GNU Lesser General Public License
+<http://www.gnu.org/licenses/licenses.html#LGPL>`_, version 2.1 or
+later. It comes with **absolutely no warranty** — not even the
+implied warranty of merchantability or fitness for a particular
+purpose. The full license text ships in ``LICENSE-LGPL`` at the top
+of the source tree.
+
+
+Authors
+-------
+
+BRLTTY started in the early 1990s as the work of Nikhil Nair,
+Nicolas Pitre, and Stéphane Doyon, and is currently maintained by
+Dave Mielke. The active team list, contributor history, and project
+news live on the project's home page at
+`brltty.app <http://brltty.app/>`_.
