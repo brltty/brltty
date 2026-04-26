@@ -170,8 +170,6 @@ Sous-régions sur l'écran
     Ignorer le déplacement du curseur hors de la région, et rendre fluide les
     limites de navigation aux bords de la région.
 
-Voir le fichier ``TODO`` pour une liste plus complète.
-
 Bogues connus
 -------------
 

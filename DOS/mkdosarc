@@ -175,7 +175,7 @@ do
    installFile "README.${file}" "${documentSubdirectory}/${file}.txt"
 done
 
-for file in BUGS CONTRIBUTORS HISTORY TODO
+for file in BUGS CONTRIBUTORS HISTORY
 do
    installFile "${file}" "${documentSubdirectory}/${file}.txt"
 done
