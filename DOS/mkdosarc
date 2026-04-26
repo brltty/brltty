@@ -165,7 +165,7 @@ done
 
 cd "${sourceDirectory}"
 installFile "LICENSE-LGPL" "LIC-LGPL.txt"
-installFile "README" "README.txt"
+installFile "README.md" "README.txt"
 
 cd "${documentsSubdirectory}"
 installFile "ChangeLog" "${documentSubdirectory}/CHG-LOG.txt"

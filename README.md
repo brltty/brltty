@@ -1,3 +1,5 @@
+# BRLTTY
+
 BRLTTY is a background process (daemon) providing access to the Linux/Unix
 console (when in text mode) for a blind person using a refreshable braille
 display.
@@ -6,33 +8,32 @@ Version 6.9.1, Apr 2026
 
 Copyright (C) 1995-2026 by The BRLTTY Developers.
 
-Web Page: http://brltty.app/
+Web Page: <http://brltty.app/>
 
 BRLTTY is free software. It comes with ABSOLUTELY NO WARRANTY.
 
 BRLTTY is placed under the terms of the GNU Lesser General Public License
 [LGPL] as published by the Free Software Foundation; see the file LICENSE-LGPL
-for details. Version 2.1 (or any later version) of the LGPL may be used when 
-redistributing and/or modifying this software. This statement applies to all 
+for details. Version 2.1 (or any later version) of the LGPL may be used when
+redistributing and/or modifying this software. This statement applies to all
 the files contained within this directory structure.
 
 This software is maintained by: Dave Mielke <dave@mielke.cc>
 
 The members of The BRLTTY Team are:
 
-   Dave Mielke <dave@mielke.cc>
-   Mario Lang <mlang@tugraz.at>
-   Nicolas Pitre <nico@fluxnic.net>
-   Stéphane Doyon <s.doyon@videotron.ca>
+```
+Dave Mielke <dave@mielke.cc>
+Mario Lang <mlang@tugraz.at>
+Nicolas Pitre <nico@fluxnic.net>
+Stéphane Doyon <s.doyon@videotron.ca>
+```
 
--------------------------------------------------------------------------------
-
-Contacting Us
-=============
+## Contacting Us
 
 We recommend that you contact us via BRLTTY's mailing list. You can post to the
 list by sending an e-mail to <BRLTTY@brltty.app>. To subscribe, go to the list's
-Information Page at [http://brltty.app/mailman/listinfo/brltty].
+Information Page at <http://brltty.app/mailman/listinfo/brltty>.
 
 If you have any interest in BRLTTY, please drop us a note. We're interested in
 knowing who BRLTTY's users are. Even if all goes well and you have no problems
@@ -48,12 +49,9 @@ regarding the communication protocol(s) of your braille display(s). If you
 prefer to contact us privately for this sort of thing then we invite you to
 send e-mail to any member(s) of The BRLTTY Team (see above).
 
--------------------------------------------------------------------------------
+## Introduction for Those New to Refreshable Braille
 
-Introduction for Those New to Refreshable Braille
-=================================================
-
-There are two common ways in which blind people access computers. 
+There are two common ways in which blind people access computers.
 
 The first, and more widely known, is synthesized speech. While having many
 advantages, e.g. speed for reading plain text, speech does have its drawbacks.
@@ -80,10 +78,7 @@ for a blind user to appreciate the format of information on the screen, as well
 as to read and edit on-line Braille documents (a concept not widely enough
 utilized).
 
--------------------------------------------------------------------------------
-
-Introduction to BRLTTY
-======================
+## Introduction to BRLTTY
 
 While soft Braille displays have been used for many years under MS-DOS, and are
 now being used under Windows, it seems that they haven't been used on Unix
@@ -97,18 +92,15 @@ applications directly from a Unix console. Since BRLTTY runs as a background
 process, it gives the user complete freedom of choice regarding applications
 and development tools.
 
--------------------------------------------------------------------------------
-
-Features
-========
+## Features
 
 *  Full implementation of the usual screen review facilities.
-*  Choice between `block', `underline', or `no' cursor.
-*  Optional `underline' to indicate specially highlighted text.
-*  Optional use of `blinking' (rates individually settable) for cursor, special highlighting underline,
+*  Choice between `block`, `underline`, or `no` cursor.
+*  Optional `underline` to indicate specially highlighted text.
+*  Optional use of `blinking` (rates individually settable) for cursor, special highlighting underline,
    and/or capital letters.
 *  Screen freezing for leisurely review.
-*  `Intelligent' cursor routing, allowing easy fetching of cursor within text
+*  `Intelligent` cursor routing, allowing easy fetching of cursor within text
    editors, web browsers, etc., without moving ones hands from the Braille
    display.
 *  A cut & paste function which is particularly useful for copying long file
@@ -125,14 +117,11 @@ Features
    Braille displays, or even (hopefully) porting to other Unix-like platforms.
 *  An application programming interface.
 
--------------------------------------------------------------------------------
-
-Currently Supported Hardware
-============================
+## Currently Supported Hardware
 
 BRLTTY has been tested on:
 
-*  a variety of Intel-based PCs (desktops, servers, laptops, PDAs) 
+*  a variety of Intel-based PCs (desktops, servers, laptops, PDAs)
 *  an Alpha workstation
 *  a StrongARM based Netwinder
 *  several Linux kernels (1.2.13 and beyond)
@@ -228,17 +217,16 @@ The following speech synthesizers are supported:
 The ability to add a new Braille display depends on the level of cooperation
 from its manufacturer in providing programming information.
 
--------------------------------------------------------------------------------
-
-Layout of the Archive
-=====================
+## Layout of the Archive
 
 BRLTTY is distributed as a single GNU compressed tar file named
 
-   brltty-<release>.tar.gz
+```
+brltty-<release>.tar.gz
+```
 
-where `<release>' is the release number. When the archive is unpacked, there
-should be a subdirectory called `Documents' which contains all of the general BRLTTY
+where `<release>` is the release number. When the archive is unpacked, there
+should be a subdirectory called `Documents` which contains all of the general BRLTTY
 documentation including the manual in various formats, and the list of
 Frequently Asked Questions (FAQ).
 
@@ -247,77 +235,74 @@ top-level directory. There is one subdirectory for each Braille display type,
 containing display-specific source files and documentation.
 
 Finally, some Braille definition tables, along with tools to manipulate them,
-are available in the `Tables' subdirectory.
+are available in the `Tables` subdirectory.
 
--------------------------------------------------------------------------------
-
-Building the Package
-====================
+## Building the Package
 
 Building BRLTTY is a four step process. The first is to run `./autogen` to
 setup your build environment for the first time. You typically only need to do
-this once. The second is to run `./configure' to prepare the build environment
+this once. The second is to run `./configure` to prepare the build environment
 for your operating system, and to customize it for your particular requirement.
-The third is to run `make' to compile and link BRLTTY and its drivers. The
-fourth is to run `make install' to copy all the needed files into their proper
+The third is to run `make` to compile and link BRLTTY and its drivers. The
+fourth is to run `make install` to copy all the needed files into their proper
 locations.
 
-    ./autogen
-    ./configure
-    make
-    make install
+```
+./autogen
+./configure
+make
+make install
+```
 
 Before configuring BRLTTY, you may wish to check out what choices you have
-regarding its customization. Invoking `./configure --help' will show you what
+regarding its customization. Invoking `./configure --help` will show you what
 options are available. Although the defaults are adequate for most environments
 and requirements, and although many things can be specified at run-time, there
 are a couple of configuration options worth mentioning here. To build BRLTTY
 with a specific driver built-in (usually only necessary when preparing BRLTTY
-for use on a boot disk), use the `--with-braille-driver=' option. To set the
+for use on a boot disk), use the `--with-braille-driver=` option. To set the
 default device to the one which your display is usually connected to, use the
-`--with-braille-device=' option.
+`--with-braille-device=` option.
 
-For information specific to a particular driver, please see the `README' file
-in the corresponding subdirectory. Finally, see the `Documents' subdirectory
+For information specific to a particular driver, please see the `README` file
+in the corresponding subdirectory. Finally, see the `Documents` subdirectory
 for the manual as well as a few other interesting literary creations.
 
--------------------------------------------------------------------------------
+## RedHat Package Manager
 
-RedHat Package Manager
-======================
-
-BRLTTY is also distributed in the RPM (RedHat Package Manager) format. The 
+BRLTTY is also distributed in the RPM (RedHat Package Manager) format. The
 following files are available:
 
-    brltty-<release>-<version>.src.rpm
-    brltty-<release>-<version>.i386.rpm
+```
+brltty-<release>-<version>.src.rpm
+brltty-<release>-<version>.i386.rpm
+```
 
 To build and install BRLTTY from scratch:
 
-    Download the .src.rpm file.
-    Install the source with:   rpm -ivh brltty-<release>-<version>.src.rpm
-    Build and install it with: rpm -bi brltty-<release>-<version>
+```
+Download the .src.rpm file.
+Install the source with:   rpm -ivh brltty-<release>-<version>.src.rpm
+Build and install it with: rpm -bi brltty-<release>-<version>
+```
 
 If your system is an x86 then you don't need to be concerned with building
 BRLTTY since we provide prebuilt binaries for these platforms. Just do:
 
-    Download the .i386.rpm file.
-    Install or upgrade it with: rpm -Uvh brltty-<release>-<version>.i386.rpm
+```
+Download the .i386.rpm file.
+Install or upgrade it with: rpm -Uvh brltty-<release>-<version>.i386.rpm
+```
 
--------------------------------------------------------------------------------
+## Executing BRLTTY
 
-Executing BRLTTY
-================
-
-If you compiled BRLTTY with a braille driver built-in, simply invoking `brltty'
+If you compiled BRLTTY with a braille driver built-in, simply invoking `brltty`
 should start it with all defaults. Alternatively, you might need to specify a
-Braille driver with the `-b' option. `brltty -h' displays a brief summary of
+Braille driver with the `-b` option. `brltty -h` displays a brief summary of
 all available options.
 
 You may use a configuration file for most options as well. See the example
-configuration file `brltty.conf' in the `Documents' subdirectory.
+configuration file `brltty.conf` in the `Documents` subdirectory.
 
-And don't forget to review the notes for your Braille display. See the `README'
+And don't forget to review the notes for your Braille display. See the `README`
 file in its driver's subdirectory.
-
--------------------------------------------------------------------------------
