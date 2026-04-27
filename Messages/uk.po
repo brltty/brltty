@@ -1,0 +1,4523 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: brltty 6.8\n"
+"Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
+"POT-Creation-Date: 2026-02-10 21:36+0100\n"
+"PO-Revision-Date: 2026-04-26 12:23+0300\n"
+"Last-Translator: Volodymyr M. Lisivka <vlisivka@gmail.com>\n"
+"Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: Drivers/Braille/Baum/braille.c:1147
+msgid "driver request"
+msgstr "запит водія"
+
+#: Drivers/Braille/Baum/braille.c:1148
+msgid "power switch"
+msgstr "вимикач живлення"
+
+#: Drivers/Braille/Baum/braille.c:1149
+msgid "idle timeout"
+msgstr "тайм-аут бездіяльності"
+
+#: Drivers/Braille/Baum/braille.c:1150 Drivers/Braille/TSI/braille.c:869
+msgid "battery low"
+msgstr "низький заряд батареї"
+
+#: Drivers/Braille/Baum/braille.c:1159
+msgid "Powerdown"
+msgstr "Вимкнення живлення"
+
+#: Drivers/Braille/BrailleLite/braille.c:589
+msgid "keyboard emu on"
+msgstr "еміляція клавіатури увімкнена"
+
+#: Drivers/Braille/BrailleLite/braille.c:590
+#: Drivers/Braille/BrailleLite/braille.c:668
+msgid "keyboard emu off"
+msgstr "емулятор клавіатури вимкнено"
+
+#: Drivers/Braille/BrailleLite/braille.c:601
+#: Drivers/Braille/BrailleLite/braille.c:780
+#: Drivers/Braille/BrailleLite/braille.c:782
+#: Drivers/Braille/BrailleLite/braille.c:791
+msgid "repeat count"
+msgstr "кількість повторів"
+
+#. configuration menu
+#: Drivers/Braille/BrailleLite/braille.c:607
+msgid "config"
+msgstr "конфігурація"
+
+#: Drivers/Braille/Iris/braille.c:1497
+msgid "eurobraille"
+msgstr "євробрайл"
+
+#: Drivers/Braille/Iris/braille.c:1513
+msgid "native"
+msgstr "рідний"
+
+#: Drivers/Braille/Iris/braille.c:1548
+msgid "PC mode"
+msgstr "Режим ПК"
+
+#: Drivers/Screen/Android/screen.c:181
+msgid "Java exception occurred"
+msgstr "Виник виняток Java"
+
+#: Drivers/Screen/Android/screen.c:184
+msgid "screen locked"
+msgstr "екран заблоковано"
+
+#: Drivers/Screen/Android/screen.c:189
+msgid "braille released"
+msgstr "випущено шрифт Брайля"
+
+#: Drivers/Screen/Android/screen.c:194
+msgid "Java method not found"
+msgstr "Метод Java не знайдено"
+
+#: Drivers/Screen/Android/screen.c:197
+msgid "Java class not found"
+msgstr "Java-клас не знайдено"
+
+#: Drivers/Screen/FileViewer/screen.c:177
+msgid "file not specified"
+msgstr "файл не вказано"
+
+#: Drivers/Screen/Linux/screen.c:1925
+msgid "console not in use"
+msgstr "консоль не використовується"
+
+#: Drivers/Screen/Linux/screen.c:1928
+msgid "can't open console"
+msgstr "не вдається відкрити консоль"
+
+#: Drivers/Screen/Linux/screen.c:1938
+msgid "screen not in text mode"
+msgstr "екран не у текстовому режимі"
+
+#: Drivers/Screen/Linux/screen.c:1996
+msgid "no foreground console"
+msgstr "немає консолі на передньому плані"
+
+#: Drivers/Screen/Linux/screen.c:2001
+msgid "can't read screen content"
+msgstr "не вдається прочитати вміст екрана"
+
+#: Drivers/Screen/Linux/screen.c:2047
+msgid "can't get screen properties"
+msgstr "не вдається отримати властивості екрана"
+
+#: Drivers/Screen/TerminalEmulator/screen.c:137
+msgid "no screen cache"
+msgstr "немає кешу екрана"
+
+#: Drivers/Screen/TerminalEmulator/screen.c:141
+msgid "screen not accessible"
+msgstr "екран недоступний"
+
+#: Drivers/Screen/TerminalEmulator/screen.c:384
+msgid "screen not available"
+msgstr "екран недоступний"
+
+#: Drivers/Screen/TerminalEmulator/screen.c:395
+msgid "screen not attached"
+msgstr "екран не підключено"
+
+#: Drivers/Screen/TerminalEmulator/screen.c:398
+msgid "no screen emulator"
+msgstr "немає емулятора екрана"
+
+#: Headers/cmdline_types.h:72
+msgid "Show this usage summary, and then exit."
+msgstr "Показати цей підсумок використання, а потім вийти."
+
+#: Programs/alert.c:58
+msgid "Done"
+msgstr "Готово"
+
+#: Programs/alert.c:103
+msgid "Frozen"
+msgstr "Заморожений"
+
+#: Programs/alert.c:108
+msgid "Unfrozen"
+msgstr "Розморожений"
+
+#: Programs/alert.c:169
+msgid "Console Bell"
+msgstr "Дзвінок консолі"
+
+#: Programs/alert.c:174
+msgid "Autorelease"
+msgstr "Автореліз"
+
+#: Programs/apitest.c:137
+msgid "Test BrlAPI functions."
+msgstr "Тестування функцій BrlAPI."
+
+#: Programs/atb_translate.c:70
+msgid "cannot compile attributes table"
+msgstr "не вдається скомпілювати таблицю атрибутів"
+
+#: Programs/atb_translate.c:90
+msgid "cannot load attributes table"
+msgstr "не вдалося завантажити таблицю атрибутів"
+
+#: Programs/brltest.c:60 Programs/brltest.c:78 Programs/brltty-atb.c:31
+#: Programs/brltty-ctb.c:92 Programs/brltty-ktb.c:76 Programs/brltty-ktb.c:85
+#: Programs/brltty-trtxt.c:75 Programs/config.c:725 Programs/config.c:735
+#: Programs/config.c:745 Programs/config.c:755 Programs/config.c:765
+#: Programs/config.c:774
+msgid "directory"
+msgstr "каталог"
+
+#: Programs/brltest.c:64 Programs/brltty-atb.c:35 Programs/brltty-ctb.c:96
+#: Programs/brltty-ktb.c:80 Programs/config.c:729
+msgid "Path to directory containing tables."
+msgstr "Шлях до каталогу, що містить таблиці."
+
+#: Programs/brltest.c:82 Programs/config.c:769
+msgid "Path to directory which can be written to."
+msgstr "Шлях до директорії, доступної для запису."
+
+#: Programs/brltest.c:100
+msgid "Test a braille driver."
+msgstr "Перевірити драйвер шрифту Брайля."
+
+#: Programs/brltty-atb.c:53
+msgid "Check an attributes table."
+msgstr "Перевірити таблицю атрибутів."
+
+#: Programs/brltty.c:209
+#, c-format
+msgid "\"%s\" started as \"%s\"\n"
+msgstr "\"%s\" почалося як \"%s\"\n"
+
+#. failed
+#: Programs/brltty.c:214
+#, c-format
+msgid "fork of \"%s\" failed: %s\n"
+msgstr "не вдалося виконати fork \"%s\": %s\n"
+
+#. parent
+#: Programs/brltty.c:219
+#, c-format
+msgid "executing \"%s\" (from \"%s\")\n"
+msgstr "виконання \"%s\" (з \"%s\")\n"
+
+#. execv() shouldn't return
+#: Programs/brltty.c:226
+#, c-format
+msgid "execution of \"%s\" failed: %s\n"
+msgstr "виконання \"%s\" не вдалося: %s\n"
+
+#: Programs/brltty-cldr.c:37 Programs/brltty-hid.c:94 Programs/brltty-hid.c:101
+#: Programs/brltty-hid.c:108 Programs/brltty-hid.c:122
+msgid "string"
+msgstr "рядок"
+
+#: Programs/brltty-cldr.c:40
+msgid "The format of each output line."
+msgstr "Формат кожного рядка виводу."
+
+#: Programs/brltty-cldr.c:80
+msgid ""
+"List the characters defined within a CLDR (Common Locale Data Repository "
+"Project) annotations file."
+msgstr ""
+"Вивести список символів, визначених у файлі анотацій CLDR (Common Locale "
+"Data Repository Project)."
+
+#: Programs/brltty-clip.c:80
+msgid "Manage brltty's clipboard from the command line."
+msgstr "Керування буфером обміну brltty з командного рядка."
+
+#: Programs/brltty-cmdref.c:40
+msgid "Write a brltty command reference in reStructuredText."
+msgstr "Напишіть довідник команд brltty у форматі reStructuredText."
+
+#: Programs/brltty-ctb.c:53
+msgid "Maximum length of an output line."
+msgstr "Максимальна довжина рядка виводу."
+
+#: Programs/brltty-ctb.c:59
+msgid "Reformat input."
+msgstr "Переформатувати вхідні дані."
+
+#: Programs/brltty-ctb.c:65
+msgid "Force immediate output."
+msgstr "Примусовий негайний вивід."
+
+#: Programs/brltty-ctb.c:73
+msgid "Contraction table."
+msgstr "Таблиця скорочень."
+
+#: Programs/brltty-ctb.c:80
+msgid "Text table."
+msgstr "Текстова таблиця."
+
+#: Programs/brltty-ctb.c:87
+msgid "Contraction verification table."
+msgstr "Таблиця перевірки скорочень."
+
+#: Programs/brltty-ctb.c:124
+msgid ""
+"Check/validate a contraction (literary braille) table, or translate text "
+"into contracted braille."
+msgstr ""
+"Перевірити/валідувати таблицю скорочень (літературний шрифт Брайля) або "
+"перекласти текст скороченим шрифтом Брайля."
+
+#: Programs/brltty-hid.c:69
+msgid "Filter for a USB device (the default if not ambiguous)."
+msgstr ""
+"Фільтр для USB-пристрою (значення за замовчуванням, якщо немає "
+"неоднозначності)."
+
+#: Programs/brltty-hid.c:75
+msgid "Filter for a Bluetooth device."
+msgstr "Фільтр для Bluetooth-пристрою."
+
+#: Programs/brltty-hid.c:80 Programs/brltty-hid.c:87 Programs/brltty-hid.c:171
+#: Programs/brltty-hid.c:178
+msgid "identifier"
+msgstr "ідентифікатор"
+
+#: Programs/brltty-hid.c:82
+msgid "Match the vendor identifier (four hexadecimal digits)."
+msgstr "Зіставте ідентифікатор постачальника (чотири шістнадцяткові цифри)."
+
+#: Programs/brltty-hid.c:89
+msgid "Match the product identifier (four hexadecimal digits)."
+msgstr "Зіставте ідентифікатор продукту (чотири шістнадцяткові цифри)."
+
+#: Programs/brltty-hid.c:96
+msgid "Match the start of the manufacturer name (USB only)."
+msgstr "Збігається з початком назви виробника (тільки USB)."
+
+#: Programs/brltty-hid.c:103
+msgid "Match the start of the product description (USB only)."
+msgstr "Зіставте початок опису продукту (лише USB)."
+
+#: Programs/brltty-hid.c:110
+msgid "Match the start of the serial number (USB only)."
+msgstr "Зіставте початок серійного номера (тільки для USB)."
+
+#: Programs/brltty-hid.c:115
+msgid "octets"
+msgstr "октети"
+
+#: Programs/brltty-hid.c:117
+msgid ""
+"Match the full device address (Bluetooth only - all six two-digit, "
+"hexadecimal octets separated by a colon [:])."
+msgstr ""
+"Відповідність повній адресі пристрою (тільки Bluetooth — усі шість "
+"двозначних шістнадцяткових октетів, розділених двокрапкою [:])."
+
+#: Programs/brltty-hid.c:124
+msgid "Match the start of the device name (Bluetooth only)."
+msgstr "Збіг із початком назви пристрою (тільки Bluetooth)."
+
+#: Programs/brltty-hid.c:130
+msgid "Show the vendor and product identifiers."
+msgstr "Показувати ідентифікатори постачальника та продукту."
+
+#: Programs/brltty-hid.c:136
+msgid ""
+"Show the device address (USB serial number, Bluetooth device address, etc)."
+msgstr ""
+"Показати адресу пристрою (серійний номер USB, адреса Bluetooth-пристрою "
+"тощо)."
+
+#: Programs/brltty-hid.c:142
+msgid ""
+"Show the device name (USB manufacturer and/or product strings, Bluetooth "
+"device name, etc)."
+msgstr ""
+"Показувати назву пристрою (рядки виробника та/або продукту USB, назва "
+"Bluetooth-пристрою тощо)."
+
+#: Programs/brltty-hid.c:148
+msgid ""
+"Show the host path (USB topology, Bluetooth host controller address, etc)."
+msgstr ""
+"Показати шлях хоста (топологія USB, адреса хост-контролера Bluetooth тощо)."
+
+#: Programs/brltty-hid.c:154
+msgid "Show the host device (usually its absolute path)."
+msgstr "Показати пристрій хоста (зазвичай його абсолютний шлях)."
+
+#: Programs/brltty-hid.c:160
+msgid "List the HID report descriptor's items."
+msgstr "Вивести список елементів дескриптора звіту HID."
+
+#: Programs/brltty-hid.c:166
+msgid "List each report's identifier and sizes."
+msgstr "Перелічіть ідентифікатор та розміри кожного звіту."
+
+#: Programs/brltty-hid.c:173
+msgid "Read (get) an input report (two hexadecimal digits)."
+msgstr "Прочитати (отримати) вхідний звіт (дві шістнадцяткові цифри)."
+
+#: Programs/brltty-hid.c:180
+msgid "Read (get) a feature report (two hexadecimal digits)."
+msgstr "Зчитати (отримати) звіт про можливості (дві шістнадцяткові цифри)."
+
+#: Programs/brltty-hid.c:185 Programs/brltty-hid.c:192
+msgid "bytes"
+msgstr "байти"
+
+#: Programs/brltty-hid.c:187
+msgid "Write (set) an output report (see below)."
+msgstr "Записати (встановити) вихідний звіт (див. нижче)."
+
+#: Programs/brltty-hid.c:194
+msgid "Write (set) a feature report (see below)."
+msgstr "Напишіть (встановіть) звіт про функцію (див. нижче)."
+
+#: Programs/brltty-hid.c:200
+msgid "Echo (in hexadecimal) input received from the device."
+msgstr "Отримано вхідне ехо (у шістнадцятковому форматі) від пристрою."
+
+#: Programs/brltty-hid.c:205
+msgid "integer"
+msgstr "ціле число"
+
+#: Programs/brltty-hid.c:207
+msgid "The input timeout (in seconds)."
+msgstr "Тайм-аут введення (у секундах)."
+
+#: Programs/brltty-hid.c:223
+msgid ""
+"Find HID devices, list report descriptors, read/write reports/features, or "
+"monitor input from a HID device."
+msgstr ""
+"Знаходити HID-пристрої, перелічувати дескриптори звітів, читати/записувати "
+"звіти/функції або відстежувати вхідні дані від HID-пристрою."
+
+#: Programs/brltty-ktb.c:45
+msgid "driver"
+msgstr "водій"
+
+#: Programs/brltty-ktb.c:47
+msgid "Braille driver code."
+msgstr "Код драйвера Брайля."
+
+#: Programs/brltty-ktb.c:53
+msgid "Report problems with the key table."
+msgstr "Повідомити про проблеми з таблицею ключів."
+
+#: Programs/brltty-ktb.c:59
+msgid "List key names."
+msgstr "Вивести список назв ключів."
+
+#: Programs/brltty-ktb.c:65
+msgid "List key table in help screen format."
+msgstr "Вивести таблицю клавіш у форматі екрана допомоги."
+
+#: Programs/brltty-ktb.c:71
+msgid "List key table in reStructuredText format."
+msgstr "Вивести таблицю ключів у форматі reStructuredText."
+
+#: Programs/brltty-ktb.c:89
+msgid "Path to directory for loading drivers."
+msgstr "Шлях до директорії для завантаження драйверів."
+
+#: Programs/brltty-ktb.c:107
+msgid ""
+"check a key table, list the key naems it can use, or write the key bindings "
+"it defines in useful formats."
+msgstr ""
+"перевірити таблицю клавіш, вивести список імен клавіш, які вона може "
+"використовувати, або записати визначені нею привʼязки клавіш у зручних "
+"форматах."
+
+#: Programs/brltty-lsinc.c:47
+msgid "List the paths to a data file and those which it recursively includes."
+msgstr "Перелічіть шляхи до файлу даних та ті, які він включає рекурсивно."
+
+#: Programs/brltty-morse.c:126
+msgid "Translate text into Morse Code tones."
+msgstr "Перекласти текст у тони азбуки Морзе."
+
+#: Programs/brltty-pty.c:61
+msgid "write driver directives to standard error"
+msgstr "записувати директиви драйвера у стандартний потік помилок"
+
+#: Programs/brltty-pty.c:67
+msgid "show the absolute path to the pty slave"
+msgstr "показувати абсолютний шлях до підлеглого пристрою pty"
+
+#: Programs/brltty-pty.c:74
+msgid "the name or number of the user to run as"
+msgstr "імʼя або номер користувача, від імені якого потрібно запустити"
+
+#: Programs/brltty-pty.c:81
+msgid "the name or number of the group to run as"
+msgstr "імʼя або номер групи, від імені якої запускати"
+
+#: Programs/brltty-pty.c:88
+msgid "the directory to change to"
+msgstr "каталог, у який потрібно перейти"
+
+#: Programs/brltty-pty.c:95
+msgid "the home directory to use"
+msgstr "домашній каталог для використання"
+
+#: Programs/brltty-pty.c:101
+msgid "log input written to the pty slave"
+msgstr "вхідні дані логування записано в підлеглий pty"
+
+#: Programs/brltty-pty.c:107
+msgid ""
+"log output received from the pty slave that isn't an escape sequence or a "
+"special character"
+msgstr ""
+"вивід логу, отриманий від підлеглого pty, який не є escape-послідовністю або "
+"спеціальним символом"
+
+#: Programs/brltty-pty.c:113
+msgid "log escape sequences and special characters received from the pty slave"
+msgstr ""
+"логувати escape-послідовності та спеціальні символи, отримані від pty slave"
+
+#: Programs/brltty-pty.c:119
+msgid "log unexpected input/output"
+msgstr "логувати неочікуваний ввід/вивід"
+
+#: Programs/brltty-pty.c:131
+msgid ""
+"Run a shell or terminal manager within a pty (virtual terminal) and export "
+"its screen via a shared memory segment so that brltty can read it via its "
+"Terminal Emulator screen driver."
+msgstr ""
+"Запускайте оболонку або менеджер термінала в межах pty (віртуального "
+"термінала) та експортуйте його екран через сегмент спільної памʼяті, щоб "
+"brltty міг прочитати його за допомогою свого драйвера екрана Terminal "
+"Emulator."
+
+#: Programs/brltty-pty.c:280
+msgid "command not found"
+msgstr "команду не знайдено"
+
+#: Programs/brltty-pty.c:440
+msgid "standard input isn't a terminal"
+msgstr "стандартний ввід не є терміналом"
+
+#: Programs/brltty-pty.c:445
+msgid "standard output isn't a terminal"
+msgstr "стандартний вивід не є терміналом"
+
+#: Programs/brltty-trtxt.c:47 Programs/brltty-trtxt.c:55 Programs/config.c:412
+#: Programs/config.c:466 Programs/config.c:476 Programs/config.c:485
+#: Programs/config.c:520 Programs/config.c:556 Programs/config.c:580
+#: Programs/config.c:589 Programs/config.c:640 Programs/config.c:784
+#: Programs/xbrlapi.c:135 Programs/xbrlapi.c:142
+msgid "file"
+msgstr "файл"
+
+#: Programs/brltty-trtxt.c:50
+msgid "The name of (or path to) the input text table."
+msgstr "Назва (або шлях до) вхідної таблиці тексту."
+
+#: Programs/brltty-trtxt.c:58
+msgid "The name of (or path to) the output text table."
+msgstr "Назва (або шлях до) вихідної текстової таблиці."
+
+#: Programs/brltty-trtxt.c:64
+msgid "Remove dots seven and eight."
+msgstr "Видалити крапки сім та вісім."
+
+#: Programs/brltty-trtxt.c:70
+msgid "Don't fall back to the Unicode base character."
+msgstr "Не повертатися до базового символу Unicode."
+
+#: Programs/brltty-trtxt.c:79
+msgid "Path to directory for text tables."
+msgstr "Шлях до каталогу для текстових таблиць."
+
+#: Programs/brltty-trtxt.c:98
+msgid "Translate one binary braille representation to another."
+msgstr "Перекласти одне двійкове представлення шрифту Брайля в інше."
+
+#: Programs/brltty-ttb.c:148
+msgid "Edit table."
+msgstr "Редагувати таблицю."
+
+#: Programs/brltty-ttb.c:155
+msgid "Format of input file."
+msgstr "Формат вхідного файлу."
+
+#: Programs/brltty-ttb.c:162
+msgid "Format of output file."
+msgstr "Формат вихідного файлу."
+
+#: Programs/brltty-ttb.c:169
+msgid "8-bit character set to use."
+msgstr "8-бітний набір символів для використання."
+
+#: Programs/brltty-ttb.c:176
+msgid ""
+"Report the characters within the current screen font that aren't defined "
+"within the text table."
+msgstr ""
+"Повідомити про символи поточного шрифту екрана, які не визначені в таблиці "
+"тексту."
+
+#: Programs/brltty-ttb.c:186
+msgid "Path to directory containing text tables."
+msgstr "Шлях до каталогу, що містить текстові таблиці."
+
+#: Programs/brltty-ttb.c:211
+msgid ""
+"Check/edit a text (computer braille) table, or convert it from one format to "
+"another."
+msgstr ""
+"Перевірити/редагувати таблицю тексту (компʼютерний шрифт Брайля) або "
+"конвертувати її з одного формату в інший."
+
+#: Programs/brltty-tune.c:104
+msgid ""
+"Compose a tune with the tune builder and play it with the tone generator."
+msgstr ""
+"Створіть мелодію за допомогою конструктора мелодій і відтворіть її за "
+"допомогою генератора тонів."
+
+#: Programs/cmdbase.c:47
+#, c-format
+msgid "cannot determine program directory"
+msgstr "неможливо визначити каталог програми"
+
+#: Programs/cmd.c:199
+msgid "unknown command"
+msgstr "невідома команда"
+
+#: Programs/cmd.c:278 Programs/core.c:1075
+msgid "space"
+msgstr "простір"
+
+#: Programs/cmd.c:291
+msgid "at cursor"
+msgstr "у місці курсора"
+
+#: Programs/cmdline.c:120
+msgid "Syntax"
+msgstr "Синтаксис"
+
+#: Programs/cmdline.c:129
+msgid "option"
+msgstr "опція"
+
+#: Programs/cmdline.c:216
+msgid "Parameters"
+msgstr "Параметри"
+
+#: Programs/cmdline.c:283
+msgid "Options"
+msgstr "Опції"
+
+#: Programs/cmdline.c:463
+msgid "invalid counter setting"
+msgstr "неправильне налаштування лічильника"
+
+#: Programs/cmdline.c:472
+msgid "invalid flag setting"
+msgstr "недійсне налаштування прапорця"
+
+#: Programs/cmdline.c:754
+msgid "unknown option"
+msgstr "невідома опція"
+
+#: Programs/cmdline.c:759
+msgid "missing operand"
+msgstr "відсутній операнд"
+
+#: Programs/cmdline.c:764
+msgid "invalid operand"
+msgstr "неправильний операнд"
+
+#: Programs/cmdline.c:844
+msgid "missing parameter"
+msgstr "відсутній параметр"
+
+#: Programs/cmdline.c:868
+msgid "too many parameters"
+msgstr "занадто багато параметрів"
+
+#: Programs/cmdline.c:1065
+msgid "configuration directive specified more than once"
+msgstr "директива конфігурації вказана більше ніж один раз"
+
+#: Programs/cmdline.c:1081
+msgid "unknown configuration directive"
+msgstr "невідома директива конфігурації"
+
+#: Programs/cmdline.c:1251
+#, c-format
+msgid "file '%s' processing error."
+msgstr "помилка обробки файлу «%s»."
+
+#. xgettext: This is how to say when the time is exactly on (i.e. zero minutes after) an hour.
+#. xgettext: (%u represents the number of hours)
+#: Programs/cmd_miscellaneous.c:94
+#, c-format
+msgid "%u o'clock"
+msgid_plural "%u o'clock"
+msgstr[0] "%u година"
+msgstr[1] "%u години"
+msgstr[2] "%u годин"
+
+#. xgettext: This is the term used when the time is exactly on (i.e. zero seconds after) a minute.
+#: Programs/cmd_miscellaneous.c:107
+msgid "exactly"
+msgstr "точно"
+
+#: Programs/cmd_miscellaneous.c:109
+msgid "and"
+msgstr "і"
+
+#. xgettext: This is a number (%u) of seconds (time units).
+#: Programs/cmd_miscellaneous.c:112
+#, c-format
+msgid "%u second"
+msgid_plural "%u seconds"
+msgstr[0] "%u секунда"
+msgstr[1] "%u секунди"
+msgstr[2] "%u секунд"
+
+#: Programs/cmd_miscellaneous.c:230
+msgid "braille driver stopped"
+msgstr "драйвер Брайля зупинено"
+
+#: Programs/cmd_miscellaneous.c:238
+msgid "screen driver stopped"
+msgstr "драйвер екрана зупинено"
+
+#: Programs/cmd_miscellaneous.c:280
+msgid "help not available"
+msgstr "допомога недоступна"
+
+#: Programs/cmd_preferences.c:47
+msgid "not saved"
+msgstr "не збережено"
+
+#: Programs/cmd_preferences.c:94
+msgid "changes discarded"
+msgstr "зміни скасовано"
+
+#: Programs/cmd_queue.c:158
+msgid "unhandled command"
+msgstr "необроблена команда"
+
+#. xgettext: This is the description of the NOOP command.
+#: Programs/cmds.auto.h:5
+msgid "do nothing"
+msgstr "нічого не робити"
+
+#. xgettext: This is the description of the LNUP command.
+#: Programs/cmds.auto.h:14
+msgid "go up one line"
+msgstr "перейти на рядок вище"
+
+#. xgettext: This is the description of the LNDN command.
+#: Programs/cmds.auto.h:23
+msgid "go down one line"
+msgstr "перейти на один рядок вниз"
+
+#. xgettext: This is the description of the WINUP command.
+#: Programs/cmds.auto.h:32
+msgid "go up several lines"
+msgstr "піднятися на кілька рядків"
+
+#. xgettext: This is the description of the WINDN command.
+#: Programs/cmds.auto.h:41
+msgid "go down several lines"
+msgstr "опуститися на кілька рядків"
+
+#. xgettext: This is the description of the PRDIFLN command.
+#: Programs/cmds.auto.h:50
+msgid "go up to nearest line with different content"
+msgstr "піднятися до найближчого рядка з іншим вмістом"
+
+#. xgettext: This is the description of the NXDIFLN command.
+#: Programs/cmds.auto.h:59
+msgid "go down to nearest line with different content"
+msgstr "опуститися до найближчого рядка з іншим вмістом"
+
+#. xgettext: This is the description of the ATTRUP command.
+#: Programs/cmds.auto.h:68
+msgid "go up to nearest line with different highlighting"
+msgstr "піднятися до найближчого рядка з іншим підсвічуванням"
+
+#. xgettext: This is the description of the ATTRDN command.
+#: Programs/cmds.auto.h:77
+msgid "go down to nearest line with different highlighting"
+msgstr "опуститися до найближчого рядка з іншим підсвічуванням"
+
+#. xgettext: This is the description of the TOP command.
+#: Programs/cmds.auto.h:86
+msgid "go to top line"
+msgstr "піднятися до першого рядка"
+
+#. xgettext: This is the description of the BOT command.
+#: Programs/cmds.auto.h:95
+msgid "go to bottom line"
+msgstr "опуститися до останнього рядка"
+
+#. xgettext: This is the description of the TOP_LEFT command.
+#: Programs/cmds.auto.h:105
+msgid "go to beginning of top line"
+msgstr "перейти до початку першого рядка"
+
+#. xgettext: This is the description of the BOT_LEFT command.
+#: Programs/cmds.auto.h:115
+msgid "go to beginning of bottom line"
+msgstr "перейти на початок останнього рядка"
+
+#. xgettext: This is the description of the PRPGRPH command.
+#: Programs/cmds.auto.h:124
+msgid "go up to first line of paragraph"
+msgstr "піднятися до першого рядка абзацу"
+
+#. xgettext: This is the description of the NXPGRPH command.
+#: Programs/cmds.auto.h:133
+msgid "go down to first line of next paragraph"
+msgstr "опуститис першого рядка наступного абзацу"
+
+#. xgettext: This is the description of the PRPROMPT command.
+#: Programs/cmds.auto.h:142
+msgid "go up to previous command prompt"
+msgstr "піднятися попереднього командного рядка"
+
+#. xgettext: This is the description of the NXPROMPT command.
+#: Programs/cmds.auto.h:151
+msgid "go down to next command prompt"
+msgstr "опуститися наступного запрошення команди"
+
+#. xgettext: This is the description of the PRSEARCH command.
+#: Programs/cmds.auto.h:158
+msgid "search backward for clipboard text"
+msgstr "шукати назад текст із буфера обміну"
+
+#. xgettext: This is the description of the NXSEARCH command.
+#: Programs/cmds.auto.h:165
+msgid "search forward for clipboard text"
+msgstr "шукати вперед текст із буфера обміну"
+
+#. xgettext: This is the description of the CHRLT command.
+#: Programs/cmds.auto.h:174
+msgid "go left one character"
+msgstr "перейти ліворуч на один символ"
+
+#. xgettext: This is the description of the CHRRT command.
+#: Programs/cmds.auto.h:183
+msgid "go right one character"
+msgstr "перейти праворуч на один символ"
+
+#. xgettext: This is the description of the HWINLT command.
+#: Programs/cmds.auto.h:192
+msgid "go left half a braille window"
+msgstr "перейти ліворуч на пів вікна Брайля"
+
+#. xgettext: This is the description of the HWINRT command.
+#: Programs/cmds.auto.h:201
+msgid "go right half a braille window"
+msgstr "перейти праворуч на пів вікна Брайля"
+
+#. xgettext: This is the description of the FWINLT command.
+#: Programs/cmds.auto.h:210
+msgid "go backward one braille window"
+msgstr "повернутися на одне вікно Брайля"
+
+#. xgettext: This is the description of the FWINRT command.
+#: Programs/cmds.auto.h:219
+msgid "go forward one braille window"
+msgstr "просунутися на одне вікно Брайля"
+
+#. xgettext: This is the description of the FWINLTSKIP command.
+#: Programs/cmds.auto.h:228
+msgid "go backward skipping blank braille windows"
+msgstr "поверутися, пропускаючи порожні вікна Брайля"
+
+#. xgettext: This is the description of the FWINRTSKIP command.
+#: Programs/cmds.auto.h:237
+msgid "go forward skipping blank braille windows"
+msgstr "просунутися, пропускаючи порожні вікна Брайля"
+
+#. xgettext: This is the description of the LNBEG command.
+#: Programs/cmds.auto.h:246
+msgid "go to beginning of line"
+msgstr "перейти на початок рядка"
+
+#. xgettext: This is the description of the LNEND command.
+#: Programs/cmds.auto.h:255
+msgid "go to end of line"
+msgstr "перейти до кінця рядка"
+
+#. xgettext: This is the description of the HOME command.
+#: Programs/cmds.auto.h:263
+msgid "go to screen cursor"
+msgstr "перейти до курсора на екрані"
+
+#. xgettext: This is the description of the BACK command.
+#: Programs/cmds.auto.h:271
+msgid "go back after cursor tracking"
+msgstr "повернутися після відстеження курсору"
+
+#. xgettext: This is the description of the RETURN command.
+#: Programs/cmds.auto.h:279
+msgid "go to screen cursor or go back after cursor tracking"
+msgstr "перейти до курсора на екрані або повернутися після відстеження курсора"
+
+#. xgettext: This is the description of the FREEZE command.
+#: Programs/cmds.auto.h:287
+msgid "set screen image frozen/unfrozen"
+msgstr "встановити заморожене/розморожене зображення екрана"
+
+#. xgettext: This is the description of the DISPMD command.
+#: Programs/cmds.auto.h:295
+msgid "set display mode attributes/text"
+msgstr "встановити атрибути/текст режиму відображення"
+
+#. xgettext: This is the description of the SIXDOTS command.
+#: Programs/cmds.auto.h:303
+msgid "set text style 6-dot/8-dot"
+msgstr "встановити 6-крапковий/8-крапковий стиль тексту"
+
+#. xgettext: This is the description of the SLIDEWIN command.
+#: Programs/cmds.auto.h:311
+msgid "set sliding braille window on/off"
+msgstr "увімкнути/вимкнути ковзне вікно Брайля"
+
+#. xgettext: This is the description of the SKPIDLNS command.
+#: Programs/cmds.auto.h:319
+msgid "set skipping of lines with identical content on/off"
+msgstr "встановлювати пропуск рядків з однаковим вмістом (увімк/вимк)"
+
+#. xgettext: This is the description of the SKPBLNKWINS command.
+#: Programs/cmds.auto.h:327
+msgid "set skipping of blank braille windows on/off"
+msgstr "увімкнути/вимкнути пропуск порожніх вікон шрифту Брайля"
+
+#. xgettext: This is the description of the CSRVIS command.
+#: Programs/cmds.auto.h:335
+msgid "set screen cursor visibility on/off"
+msgstr "увімкнути/вимкнути видимість курсора екрана"
+
+#. xgettext: This is the description of the CSRHIDE command.
+#: Programs/cmds.auto.h:343
+msgid "set hidden screen cursor on/off"
+msgstr "увімкнути/вимкнути приховування курсора екрана"
+
+#. xgettext: This is the description of the CSRTRK command.
+#: Programs/cmds.auto.h:351
+msgid "set track screen cursor on/off"
+msgstr "увімкнути/вимкнути курсор відстеження екрана"
+
+#. xgettext: This is the description of the CSRSIZE command.
+#: Programs/cmds.auto.h:359
+msgid "set screen cursor style block/underline"
+msgstr "встановити стиль курсора екрана як блок/підкреслення"
+
+#. xgettext: This is the description of the CSRBLINK command.
+#: Programs/cmds.auto.h:367
+msgid "set screen cursor blinking on/off"
+msgstr "увімкнути/вимкнути блимання курсора екрана"
+
+#. xgettext: This is the description of the ATTRVIS command.
+#: Programs/cmds.auto.h:375
+msgid "set attribute underlining on/off"
+msgstr "увімкнути/вимкнути підкреслення атрибута"
+
+#. xgettext: This is the description of the ATTRBLINK command.
+#: Programs/cmds.auto.h:383
+msgid "set attribute blinking on/off"
+msgstr "увімкнути/вимкнути атрибут миготіння"
+
+#. xgettext: This is the description of the CAPBLINK command.
+#: Programs/cmds.auto.h:391
+msgid "set capital letter blinking on/off"
+msgstr "увімкнути/вимкнути блимання великих літер"
+
+#. xgettext: This is the description of the TUNES command.
+#: Programs/cmds.auto.h:399
+msgid "set alert tunes on/off"
+msgstr "увімкнути/вимкнути мелодії сповіщень"
+
+#. xgettext: This is the description of the AUTOREPEAT command.
+#: Programs/cmds.auto.h:407
+msgid "set autorepeat on/off"
+msgstr "увімкнути/вимкнути автоповтор"
+
+#. xgettext: This is the description of the AUTOSPEAK command.
+#: Programs/cmds.auto.h:415
+msgid "set autospeak on/off"
+msgstr "увімкнути/вимкнути автоозвучення"
+
+#. xgettext: This is the description of the HELP command.
+#: Programs/cmds.auto.h:422
+msgid "enter/leave help display"
+msgstr "увійти/вийти з відображення допомоги"
+
+#. xgettext: This is the description of the INFO command.
+#: Programs/cmds.auto.h:429
+msgid "enter/leave status display"
+msgstr "увійти/вийти з відображення статусу"
+
+#. xgettext: This is the description of the LEARN command.
+#: Programs/cmds.auto.h:436
+msgid "enter/leave command learn mode"
+msgstr "увійти/вийти з режиму вивчення команд"
+
+#. xgettext: This is the description of the PREFMENU command.
+#: Programs/cmds.auto.h:443
+msgid "enter/leave preferences menu"
+msgstr "увійти/вийти з меню налаштувань"
+
+#. xgettext: This is the description of the PREFSAVE command.
+#: Programs/cmds.auto.h:450
+msgid "save preferences to disk"
+msgstr "зберегти налаштування на диск"
+
+#. xgettext: This is the description of the PREFLOAD command.
+#: Programs/cmds.auto.h:457
+msgid "restore preferences from disk"
+msgstr "відновити налаштування з диска"
+
+#. xgettext: This is the description of the MENU_FIRST_ITEM command.
+#: Programs/cmds.auto.h:466
+msgid "go up to first item"
+msgstr "піднятися до першого елемента"
+
+#. xgettext: This is the description of the MENU_LAST_ITEM command.
+#: Programs/cmds.auto.h:475
+msgid "go down to last item"
+msgstr "опуститися до останнього елемента"
+
+#. xgettext: This is the description of the MENU_PREV_ITEM command.
+#: Programs/cmds.auto.h:484
+msgid "go up to previous item"
+msgstr "піднятися до попереднього елемента"
+
+#. xgettext: This is the description of the MENU_NEXT_ITEM command.
+#: Programs/cmds.auto.h:493
+msgid "go down to next item"
+msgstr "опустистися до наступного елемента"
+
+#. xgettext: This is the description of the MENU_PREV_SETTING command.
+#: Programs/cmds.auto.h:500
+msgid "select previous choice"
+msgstr "вибрати попередній варіант"
+
+#. xgettext: This is the description of the MENU_NEXT_SETTING command.
+#: Programs/cmds.auto.h:507
+msgid "select next choice"
+msgstr "виберіть наступний варіант"
+
+#. xgettext: This is the description of the MUTE command.
+#: Programs/cmds.auto.h:514
+msgid "stop speaking"
+msgstr "припинити говорити"
+
+#. xgettext: This is the description of the SPKHOME command.
+#: Programs/cmds.auto.h:522
+msgid "go to current speaking position"
+msgstr "перейти до поточної позиції виступу"
+
+#. xgettext: This is the description of the SAY_LINE command.
+#. xgettext: This is the description of the SPEAK_CURR_LINE command.
+#: Programs/cmds.auto.h:529 Programs/cmds.auto.h:765
+msgid "speak current line"
+msgstr "озвучити поточний рядок"
+
+#. xgettext: This is the description of the SAY_ABOVE command.
+#: Programs/cmds.auto.h:536
+msgid "speak from top of screen through current line"
+msgstr "озвучувати від верху екрана до поточного рядка"
+
+#. xgettext: This is the description of the SAY_BELOW command.
+#: Programs/cmds.auto.h:543
+msgid "speak from current line through bottom of screen"
+msgstr "озвучувати від поточного рядка до нижньої межі екрана"
+
+#. xgettext: This is the description of the SAY_SLOWER command.
+#: Programs/cmds.auto.h:550
+msgid "decrease speaking rate"
+msgstr "зменшити швидкість мовлення"
+
+#. xgettext: This is the description of the SAY_FASTER command.
+#: Programs/cmds.auto.h:557
+msgid "increase speaking rate"
+msgstr "збільшити швидкість мовлення"
+
+#. xgettext: This is the description of the SAY_SOFTER command.
+#: Programs/cmds.auto.h:564
+msgid "decrease speaking volume"
+msgstr "зменшити гучність голосу"
+
+#. xgettext: This is the description of the SAY_LOUDER command.
+#: Programs/cmds.auto.h:571
+msgid "increase speaking volume"
+msgstr "збільшити гучність мовлення"
+
+#. xgettext: This is the description of the SWITCHVT_PREV command.
+#: Programs/cmds.auto.h:578
+msgid "switch to the previous virtual terminal"
+msgstr "переключитися на попередній віртуальний термінал"
+
+#. xgettext: This is the description of the SWITCHVT_NEXT command.
+#: Programs/cmds.auto.h:585
+msgid "switch to the next virtual terminal"
+msgstr "переключитися на наступний віртуальний термінал"
+
+#. xgettext: This is the description of the CSRJMP_VERT command.
+#: Programs/cmds.auto.h:593
+msgid "bring screen cursor to current line"
+msgstr "перемістити курсор екрана до поточного рядка"
+
+#. xgettext: This is the description of the PASTE command.
+#: Programs/cmds.auto.h:600
+msgid "insert the clipboard content before the screen cursor"
+msgstr "вставити вміст буфера обміну перед курсором на екрані"
+
+#. xgettext: This is the description of the RESTARTBRL command.
+#: Programs/cmds.auto.h:607
+msgid "restart braille driver"
+msgstr "перезапустити драйвер Брайля"
+
+#. xgettext: This is the description of the RESTARTSPEECH command.
+#: Programs/cmds.auto.h:614
+msgid "restart speech driver"
+msgstr "перезапустити драйвер мовлення"
+
+#. xgettext: This is the description of the OFFLINE command.
+#: Programs/cmds.auto.h:621
+msgid "braille display temporarily unavailable"
+msgstr "дисплей Брайля тимчасово недоступний"
+
+#. xgettext: This is the description of the SHIFT command.
+#: Programs/cmds.auto.h:628
+msgid "cycle the Shift sticky input modifier (next, on, off)"
+msgstr ""
+"перемикати залипаючий модифікатор введення Shift (наступний, увімк., вимк.)"
+
+#. xgettext: This is the description of the UPPER command.
+#: Programs/cmds.auto.h:635
+msgid "cycle the Upper sticky input modifier (next, on, off)"
+msgstr ""
+"перемикати верхній липкий модифікатор введення (наступний, увімк., вимк.)"
+
+#. xgettext: This is the description of the CONTROL command.
+#: Programs/cmds.auto.h:642
+msgid "cycle the Control sticky input modifier (next, on, off)"
+msgstr ""
+"перемикати липкий модифікатор введення Control (наступний, увімк., вимк.)"
+
+#. xgettext: This is the description of the META command.
+#: Programs/cmds.auto.h:649
+msgid "cycle the Meta (Left Alt) sticky input modifier (next, on, off)"
+msgstr ""
+"перемикати липкий модифікатор введення Meta (Alt зліва) (наступний, увімк., "
+"вимк.)"
+
+#. xgettext: This is the description of the TIME command.
+#: Programs/cmds.auto.h:656
+msgid "show current date and time"
+msgstr "показати поточну дату і час"
+
+#. xgettext: This is the description of the MENU_PREV_LEVEL command.
+#: Programs/cmds.auto.h:664
+msgid "go to previous menu level"
+msgstr "перейти до попереднього рівня меню"
+
+#. xgettext: This is the description of the ASPK_SEL_LINE command.
+#: Programs/cmds.auto.h:672
+msgid "set autospeak selected line on/off"
+msgstr "увімкнути/вимкнути автоозвучення вибраного рядка"
+
+#. xgettext: This is the description of the ASPK_SEL_CHAR command.
+#: Programs/cmds.auto.h:680
+msgid "set autospeak selected character on/off"
+msgstr "увімкнути/вимкнути автоозвучення вибраного символу"
+
+#. xgettext: This is the description of the ASPK_INS_CHARS command.
+#: Programs/cmds.auto.h:688
+msgid "set autospeak inserted characters on/off"
+msgstr "увімкнути/вимкнути автоозвучення вставлених символів"
+
+#. xgettext: This is the description of the ASPK_DEL_CHARS command.
+#: Programs/cmds.auto.h:696
+msgid "set autospeak deleted characters on/off"
+msgstr "увімкнути/вимкнути автоозвучення видалених символів"
+
+#. xgettext: This is the description of the ASPK_REP_CHARS command.
+#: Programs/cmds.auto.h:704
+msgid "set autospeak replaced characters on/off"
+msgstr "увімкнути/вимкнути автоозвучення замінених символів"
+
+#. xgettext: This is the description of the ASPK_CMP_WORDS command.
+#: Programs/cmds.auto.h:712
+msgid "set autospeak completed words on/off"
+msgstr "увімкнути/вимкнути автоозвучення завершених слів"
+
+#. xgettext: This is the description of the SPEAK_CURR_CHAR command.
+#: Programs/cmds.auto.h:719
+msgid "speak current character"
+msgstr "сказати поточний символ"
+
+#. xgettext: This is the description of the SPEAK_PREV_CHAR command.
+#: Programs/cmds.auto.h:727
+msgid "go to and speak previous character"
+msgstr "перейти до попереднього симовла та озвучити його"
+
+#. xgettext: This is the description of the SPEAK_NEXT_CHAR command.
+#: Programs/cmds.auto.h:735
+msgid "go to and speak next character"
+msgstr "перейти до наступного символа та озвучити його"
+
+#. xgettext: This is the description of the SPEAK_CURR_WORD command.
+#: Programs/cmds.auto.h:742
+msgid "speak current word"
+msgstr "озвучити поточне слово"
+
+#. xgettext: This is the description of the SPEAK_PREV_WORD command.
+#: Programs/cmds.auto.h:750
+msgid "go to and speak previous word"
+msgstr "перейти до попереднього слова та озвучити його"
+
+#. xgettext: This is the description of the SPEAK_NEXT_WORD command.
+#: Programs/cmds.auto.h:758
+msgid "go to and speak next word"
+msgstr "перейти до та озвучити наступне слово"
+
+#. xgettext: This is the description of the SPEAK_PREV_LINE command.
+#: Programs/cmds.auto.h:773
+msgid "go to and speak previous line"
+msgstr "перейти до попереднього рядка та озвучити його"
+
+#. xgettext: This is the description of the SPEAK_NEXT_LINE command.
+#: Programs/cmds.auto.h:781
+msgid "go to and speak next line"
+msgstr "перейти до наступного рядка та озвучити його"
+
+#. xgettext: This is the description of the SPEAK_FRST_CHAR command.
+#: Programs/cmds.auto.h:789
+msgid "go to and speak first non-blank character on line"
+msgstr "перейти до та озвучити перший непустий символ у рядку"
+
+#. xgettext: This is the description of the SPEAK_LAST_CHAR command.
+#: Programs/cmds.auto.h:797
+msgid "go to and speak last non-blank character on line"
+msgstr "перейти до останнього непустого символу в рядку та озвучити його"
+
+#. xgettext: This is the description of the SPEAK_FRST_LINE command.
+#: Programs/cmds.auto.h:805
+msgid "go to and speak first non-blank line on screen"
+msgstr "перейти до першого непустиго рядка на екрані та озвучити його"
+
+#. xgettext: This is the description of the SPEAK_LAST_LINE command.
+#: Programs/cmds.auto.h:813
+msgid "go to and speak last non-blank line on screen"
+msgstr "перейти до та озвучити останній непустий рядок на екрані"
+
+#. xgettext: This is the description of the DESC_CURR_CHAR command.
+#: Programs/cmds.auto.h:820
+msgid "describe current character"
+msgstr "описати поточний символ"
+
+#. xgettext: This is the description of the SPELL_CURR_WORD command.
+#: Programs/cmds.auto.h:827
+msgid "spell current word"
+msgstr "вимовити поточне слово по буквах"
+
+#. xgettext: This is the description of the ROUTE_CURR_LOCN command.
+#: Programs/cmds.auto.h:835
+msgid "bring screen cursor to speech cursor"
+msgstr "перемістити екранний курсор до курсору мовлення"
+
+#. xgettext: This is the description of the SPEAK_CURR_LOCN command.
+#: Programs/cmds.auto.h:842
+msgid "speak speech cursor location"
+msgstr "озвучувати позицію курсора мовлення"
+
+#. xgettext: This is the description of the SHOW_CURR_LOCN command.
+#: Programs/cmds.auto.h:850
+msgid "set speech cursor visibility on/off"
+msgstr "встановити видимість курсору мовлення (увімк./вимк.)"
+
+#. xgettext: This is the description of the CLIP_SAVE command.
+#: Programs/cmds.auto.h:857
+msgid "save clipboard to disk"
+msgstr "зберегти буфер обміну на диск"
+
+#. xgettext: This is the description of the CLIP_RESTORE command.
+#: Programs/cmds.auto.h:864
+msgid "restore clipboard from disk"
+msgstr "відновити буфер обміну з диска"
+
+#. xgettext: This is the description of the BRLUCDOTS command.
+#: Programs/cmds.auto.h:872
+msgid "set braille typing mode dots/text"
+msgstr "встановити режим набору шрифтом Брайля: крапки/текст"
+
+#. xgettext: This is the description of the BRLKBD command.
+#: Programs/cmds.auto.h:880
+msgid "set braille keyboard enabled/disabled"
+msgstr "увімкнути/вимкнути клавіатуру Брайля"
+
+#. xgettext: This is the description of the UNSTICK command.
+#: Programs/cmds.auto.h:887
+msgid "clear all sticky input modifiers"
+msgstr "очистити всі липкі модифікатори введення"
+
+#. xgettext: This is the description of the ALTGR command.
+#: Programs/cmds.auto.h:894
+msgid "cycle the AltGr (Right Alt) sticky input modifier (next, on, off)"
+msgstr ""
+"перемикати залипаючий модифікатор введення AltGr (Правий Alt) (наступний, "
+"увімк., вимк.)"
+
+#. xgettext: This is the description of the GUI command.
+#: Programs/cmds.auto.h:901
+msgid "cycle the GUI (Windows) sticky input modifier (next, on, off)"
+msgstr ""
+"перемикати залишаючий модифікатор введення GUI (Windows) (наступний, увімк., "
+"вим.)"
+
+#. xgettext: This is the description of the BRL_STOP command.
+#: Programs/cmds.auto.h:908
+msgid "stop the braille driver"
+msgstr "зупинити драйвер Брайля"
+
+#. xgettext: This is the description of the BRL_START command.
+#: Programs/cmds.auto.h:915
+msgid "start the braille driver"
+msgstr "запустити драйвер Брайля"
+
+#. xgettext: This is the description of the SPK_STOP command.
+#: Programs/cmds.auto.h:922
+msgid "stop the speech driver"
+msgstr "зупинити драйвер мовлення"
+
+#. xgettext: This is the description of the SPK_START command.
+#: Programs/cmds.auto.h:929
+msgid "start the speech driver"
+msgstr "запустити драйвер мовлення"
+
+#. xgettext: This is the description of the SCR_STOP command.
+#: Programs/cmds.auto.h:936
+msgid "stop the screen driver"
+msgstr "зупинити драйвер екрана"
+
+#. xgettext: This is the description of the SCR_START command.
+#: Programs/cmds.auto.h:943
+msgid "start the screen driver"
+msgstr "запустити драйвер екрана"
+
+#. xgettext: This is the description of the SELECTVT_PREV command.
+#: Programs/cmds.auto.h:950
+msgid "bind to the previous virtual terminal"
+msgstr "приєднатися до попереднього віртуального терміналу"
+
+#. xgettext: This is the description of the SELECTVT_NEXT command.
+#: Programs/cmds.auto.h:957
+msgid "bind to the next virtual terminal"
+msgstr "привʼязати до наступного віртуального терміналу"
+
+#. xgettext: This is the description of the PRNBWIN command.
+#: Programs/cmds.auto.h:966
+msgid "go backward to nearest non-blank braille window"
+msgstr "переміститися назад до найближчого непорожнього вікна Брайля"
+
+#. xgettext: This is the description of the NXNBWIN command.
+#: Programs/cmds.auto.h:975
+msgid "go forward to nearest non-blank braille window"
+msgstr "перейти до найближчого непорожнього вікна шрифту Брайля"
+
+#. xgettext: This is the description of the TOUCH_NAV command.
+#: Programs/cmds.auto.h:983
+msgid "set touch navigation on/off"
+msgstr "увімкнути/вимкнути сенсорну навігацію"
+
+#. xgettext: This is the description of the SPEAK_INDENT command.
+#: Programs/cmds.auto.h:990
+msgid "speak indent of current line"
+msgstr "озвучити відступ поточного рядка"
+
+#. xgettext: This is the description of the ASPK_INDENT command.
+#: Programs/cmds.auto.h:998
+msgid "set autospeak indent of current line on/off"
+msgstr "увімкнути/вимкнути автовідступ autospeak поточного рядка"
+
+#. xgettext: This is the description of the REFRESH command.
+#: Programs/cmds.auto.h:1005
+msgid "refresh braille display"
+msgstr "оновити дисплей Брайля"
+
+#. xgettext: This is the description of the INDICATORS command.
+#: Programs/cmds.auto.h:1012
+msgid "show various device status indicators"
+msgstr "показувати різні індикатори стану пристрою"
+
+#. xgettext: This is the description of the TXTSEL_CLEAR command.
+#: Programs/cmds.auto.h:1019
+msgid "clear the text selection"
+msgstr "зняти виділення тексту"
+
+#. xgettext: This is the description of the TXTSEL_ALL command.
+#: Programs/cmds.auto.h:1026
+msgid "select all of the text"
+msgstr "виділити весь текст"
+
+#. xgettext: This is the description of the HOST_COPY command.
+#: Programs/cmds.auto.h:1033
+msgid "copy selected text to host clipboard"
+msgstr "скопіювати виділений текст у буфер обміну хоста"
+
+#. xgettext: This is the description of the HOST_CUT command.
+#: Programs/cmds.auto.h:1040
+msgid "cut selected text to host clipboard"
+msgstr "вирізати виділений текст у буфер обміну хоста"
+
+#. xgettext: This is the description of the HOST_PASTE command.
+#: Programs/cmds.auto.h:1047
+msgid "insert the host clipboard text before the screen cursor"
+msgstr "вставити текст із буфера обміну хоста перед курсором на екрані"
+
+#. xgettext: This is the description of the GUI_TITLE command.
+#: Programs/cmds.auto.h:1054
+msgid "show the window title"
+msgstr "показувати заголовок вікна"
+
+#. xgettext: This is the description of the GUI_BRL_ACTIONS command.
+#: Programs/cmds.auto.h:1061
+msgid "open the braille actions window"
+msgstr "відкрити вікно дій шрифту Брайля"
+
+#. xgettext: This is the description of the GUI_HOME command.
+#: Programs/cmds.auto.h:1069
+msgid "go to the home screen"
+msgstr "перейти на головний екран"
+
+#. xgettext: This is the description of the GUI_BACK command.
+#: Programs/cmds.auto.h:1077
+msgid "go back to the previous screen"
+msgstr "повернутися до попереднього екрана"
+
+#. xgettext: This is the description of the GUI_DEV_SETTINGS command.
+#: Programs/cmds.auto.h:1084
+msgid "open the device settings window"
+msgstr "відкрити вікно налаштувань пристрою"
+
+#. xgettext: This is the description of the GUI_DEV_OPTIONS command.
+#: Programs/cmds.auto.h:1091
+msgid "open the device options window"
+msgstr "відкрити вікно параметрів пристрою"
+
+#. xgettext: This is the description of the GUI_APP_LIST command.
+#: Programs/cmds.auto.h:1098
+msgid "open the application list window"
+msgstr "відкрити вікно списку застосунків"
+
+#. xgettext: This is the description of the GUI_APP_MENU command.
+#: Programs/cmds.auto.h:1105
+msgid "open the application-specific menu"
+msgstr "відкрити меню, специфічне для програми"
+
+#. xgettext: This is the description of the GUI_APP_ALERTS command.
+#: Programs/cmds.auto.h:1112
+msgid "open the application alerts window"
+msgstr "відкрити вікно сповіщень програми"
+
+#. xgettext: This is the description of the GUI_AREA_ACTV command.
+#: Programs/cmds.auto.h:1119
+msgid "return to the active screen area"
+msgstr "повернутися до активної області екрана"
+
+#. xgettext: This is the description of the GUI_AREA_PREV command.
+#: Programs/cmds.auto.h:1126
+msgid "switch to the previous screen area"
+msgstr "перемкнути на попередню область екрана"
+
+#. xgettext: This is the description of the GUI_AREA_NEXT command.
+#: Programs/cmds.auto.h:1133
+msgid "switch to the next screen area"
+msgstr "перемкнути на наступну область екрана"
+
+#. xgettext: This is the description of the GUI_ITEM_FRST command.
+#: Programs/cmds.auto.h:1140
+msgid "move to the first item in the screen area"
+msgstr "перемістити до першого елемента в області екрана"
+
+#. xgettext: This is the description of the GUI_ITEM_PREV command.
+#: Programs/cmds.auto.h:1147
+msgid "move to the previous item in the screen area"
+msgstr "перемістити до попереднього елемента в області екрана"
+
+#. xgettext: This is the description of the GUI_ITEM_NEXT command.
+#: Programs/cmds.auto.h:1154
+msgid "move to the next item in the screen area"
+msgstr "перемістити до наступного елемента в області екрана"
+
+#. xgettext: This is the description of the GUI_ITEM_LAST command.
+#: Programs/cmds.auto.h:1161
+msgid "move to the last item in the screen area"
+msgstr "перемістити до останнього елемента в області екрана"
+
+#. xgettext: This is the description of the SAY_LOWER command.
+#: Programs/cmds.auto.h:1168
+msgid "decrease speaking pitch"
+msgstr "знизити висоту голосу"
+
+#. xgettext: This is the description of the SAY_HIGHER command.
+#: Programs/cmds.auto.h:1175
+msgid "increase speaking pitch"
+msgstr "підвищити висоту голосу"
+
+#. xgettext: This is the description of the SAY_ALL command.
+#: Programs/cmds.auto.h:1182
+msgid "speak from top of screen through bottom of screen"
+msgstr "говорити від верхньої частини екрана до нижньої частини екрана"
+
+#. xgettext: This is the description of the CONTRACTED command.
+#: Programs/cmds.auto.h:1190
+msgid "set contracted/computer braille"
+msgstr "встановити скорочений/компʼютерний шрифт Брайля"
+
+#. xgettext: This is the description of the COMPBRL6 command.
+#: Programs/cmds.auto.h:1198
+msgid "set six/eight dot computer braille"
+msgstr "встановити шести/восьмикрапковий компʼютерний шрифт Брайля"
+
+#. xgettext: This is the description of the PREFRESET command.
+#: Programs/cmds.auto.h:1205
+msgid "reset preferences to defaults"
+msgstr "скинути налаштування до стандартних"
+
+#. xgettext: This is the description of the ASPK_EMP_LINE command.
+#: Programs/cmds.auto.h:1213
+msgid "set autospeak empty line on/off"
+msgstr "увімкнути/вимкнути автоматичне озвучування порожнього рядка"
+
+#. xgettext: This is the description of the SPK_PUNCT_LEVEL command.
+#: Programs/cmds.auto.h:1220
+msgid "cycle speech punctuation level"
+msgstr "перемикати рівень пунктуації мовлення"
+
+#. xgettext: This is the description of the PASTE_ALTMODE command.
+#: Programs/cmds.auto.h:1227
+msgid ""
+"insert the clipboard content before the screen cursor using the alternate "
+"paste mode"
+msgstr ""
+"вставити вміст буфера обміну перед курсором на екрані, використовуючи "
+"альтернативний режим вставки"
+
+#. xgettext: This is the description of the ROUTE command.
+#: Programs/cmds.auto.h:1236
+msgid "bring screen cursor to character"
+msgstr "перемістити курсор екрана до символу"
+
+#. xgettext: This is the description of the CLIP_NEW command.
+#: Programs/cmds.auto.h:1244
+msgid "start new clipboard at character"
+msgstr "починати новий буфер обміну з символу"
+
+#. xgettext: This is the description of the CLIP_ADD command.
+#: Programs/cmds.auto.h:1252
+msgid "append to clipboard from character"
+msgstr "додати до буфера обміну від символу"
+
+#. xgettext: This is the description of the COPY_RECT command.
+#: Programs/cmds.auto.h:1260
+msgid "rectangular copy to character"
+msgstr "прямокутне копіювання до символу"
+
+#. xgettext: This is the description of the COPY_LINE command.
+#: Programs/cmds.auto.h:1268
+msgid "linear copy to character"
+msgstr "лінійне копіювання до символу"
+
+#. xgettext: This is the description of the SWITCHVT command.
+#: Programs/cmds.auto.h:1276
+msgid "switch to specific virtual terminal"
+msgstr "переключитися на конкретний віртуальний термінал"
+
+#. xgettext: This is the description of the PRINDENT command.
+#: Programs/cmds.auto.h:1286
+msgid "go up to nearest line with less indent than character"
+msgstr "перейти до найближчого рядка з меншим відступом, ніж у символу"
+
+#. xgettext: This is the description of the NXINDENT command.
+#: Programs/cmds.auto.h:1296
+msgid "go down to nearest line with less indent than character"
+msgstr "перейти вниз до найближчого рядка з меншим відступом, ніж у символу"
+
+#. xgettext: This is the description of the DESCCHAR command.
+#: Programs/cmds.auto.h:1304
+msgid "describe character"
+msgstr "описати символ"
+
+#. xgettext: This is the description of the SETLEFT command.
+#: Programs/cmds.auto.h:1312
+msgid "place left end of braille window at character"
+msgstr "розмістіть лівий край вікна Брайля біля символу"
+
+#. xgettext: This is the description of the SETMARK command.
+#: Programs/cmds.auto.h:1320
+msgid "remember current braille window position"
+msgstr "запамʼятовувати поточне положення вікна Брайля"
+
+#. xgettext: This is the description of the GOTOMARK command.
+#: Programs/cmds.auto.h:1329
+msgid "go to remembered braille window position"
+msgstr "перейти до збереженої позиції вікна Брайля"
+
+#. xgettext: This is the description of the GOTOLINE command.
+#: Programs/cmds.auto.h:1339
+msgid "go to selected line"
+msgstr "перейти до вибраного рядка"
+
+#. xgettext: This is the description of the PRDIFCHAR command.
+#: Programs/cmds.auto.h:1349
+msgid "go up to nearest line with different character"
+msgstr "перейти вгору до найближчого рядка з іншим символом"
+
+#. xgettext: This is the description of the NXDIFCHAR command.
+#: Programs/cmds.auto.h:1359
+msgid "go down to nearest line with different character"
+msgstr "перейти до найближчого рядка з іншим символом"
+
+#. xgettext: This is the description of the CLIP_COPY command.
+#: Programs/cmds.auto.h:1367
+msgid "copy characters to clipboard"
+msgstr "копіювати символи в буфер обміну"
+
+#. xgettext: This is the description of the CLIP_APPEND command.
+#: Programs/cmds.auto.h:1375
+msgid "append characters to clipboard"
+msgstr "додавати символи до буфера обміну"
+
+#. xgettext: This is the description of the PASTE_HISTORY command.
+#: Programs/cmds.auto.h:1383
+msgid "insert a clipboard history entry before the screen cursor"
+msgstr "вставити запис історії буфера обміну перед курсором на екрані"
+
+#. xgettext: This is the description of the SET_TEXT_TABLE command.
+#: Programs/cmds.auto.h:1391
+msgid "set text table"
+msgstr "встановити текстову таблицю"
+
+#. xgettext: This is the description of the SET_ATTRIBUTES_TABLE command.
+#: Programs/cmds.auto.h:1399
+msgid "set attributes table"
+msgstr "встановити таблицю атрибутів"
+
+#. xgettext: This is the description of the SET_CONTRACTION_TABLE command.
+#: Programs/cmds.auto.h:1407
+msgid "set contraction table"
+msgstr "встановити таблицю скорочень"
+
+#. xgettext: This is the description of the SET_KEYBOARD_TABLE command.
+#: Programs/cmds.auto.h:1415
+msgid "set keyboard table"
+msgstr "встановити таблицю клавіатури"
+
+#. xgettext: This is the description of the SET_LANGUAGE_PROFILE command.
+#: Programs/cmds.auto.h:1423
+msgid "set language profile"
+msgstr "встановити мовний профіль"
+
+#. xgettext: This is the description of the ROUTE_LINE command.
+#: Programs/cmds.auto.h:1433
+msgid "bring screen cursor to line"
+msgstr "перемістити екранний курсор до рядка"
+
+#. xgettext: This is the description of the REFRESH_LINE command.
+#: Programs/cmds.auto.h:1442
+msgid "refresh braille line"
+msgstr "оновити рядок шрифту Брайля"
+
+#. xgettext: This is the description of the TXTSEL_START command.
+#: Programs/cmds.auto.h:1450
+msgid "start text selection"
+msgstr "початок виділення тексту"
+
+#. xgettext: This is the description of the TXTSEL_SET command.
+#: Programs/cmds.auto.h:1458
+msgid "set text selection"
+msgstr "встановити виділення тексту"
+
+#. xgettext: This is the description of the ROUTE_SPEECH command.
+#: Programs/cmds.auto.h:1467
+msgid "bring speech cursor to character"
+msgstr "перемістити мовленнєвий курсор до символу"
+
+#. xgettext: This is the description of the PASTE_HISTORY_ALTMODE command.
+#: Programs/cmds.auto.h:1475
+msgid ""
+"insert a clipboard history entry before the screen cursor using the "
+"alternate paste mode"
+msgstr ""
+"вставити запис історії буфера обміну перед курсором на екрані за допомогою "
+"альтернативного режиму вставки"
+
+#. xgettext: This is the description of the SELECTVT command.
+#: Programs/cmds.auto.h:1483
+msgid "bind to specific virtual terminal"
+msgstr "привʼязати до конкретного віртуального терміналу"
+
+#. xgettext: This is the description of the ALERT command.
+#: Programs/cmds.auto.h:1491
+msgid "render an alert"
+msgstr "відобразити сповіщення"
+
+#. xgettext: This is the description of the PASSCHAR command.
+#: Programs/cmds.auto.h:1500
+msgid "type unicode character"
+msgstr "введіть символ Юнікоду"
+
+#. xgettext: This is the description of the PASSDOTS command.
+#: Programs/cmds.auto.h:1509
+msgid "type braille dots"
+msgstr "вводити точки Брайля"
+
+#. xgettext: This is the description of the PASSAT command.
+#: Programs/cmds.auto.h:1517
+msgid "AT (set 2) keyboard scan code"
+msgstr "скан-код клавіатури AT (set 2)"
+
+#. xgettext: This is the description of the PASSXT command.
+#: Programs/cmds.auto.h:1525
+msgid "XT (set 1) keyboard scan code"
+msgstr "скан-код клавіатури XT (set 1)"
+
+#. xgettext: This is the description of the PASSPS2 command.
+#: Programs/cmds.auto.h:1533
+msgid "PS/2 (set 3) keyboard scan code"
+msgstr "скан-код клавіатури PS/2 (set 3)"
+
+#. xgettext: This is the description of the CONTEXT command.
+#: Programs/cmds.auto.h:1541
+msgid "switch to command context"
+msgstr "перейти до контексту команди"
+
+#. xgettext: This is the description of the TOUCH_AT command.
+#: Programs/cmds.auto.h:1549
+msgid "current reading location"
+msgstr "поточне місце читання"
+
+#. xgettext: This is the description of the MACRO command.
+#: Programs/cmds.auto.h:1557
+msgid "execute command macro"
+msgstr "виконати макрос команди"
+
+#. xgettext: This is the description of the HOSTCMD command.
+#: Programs/cmds.auto.h:1565
+msgid "run host command"
+msgstr "виконати команду хоста"
+
+#. xgettext: This is the description of the COLOR command.
+#: Programs/cmds.auto.h:1573
+msgid "describe color of character"
+msgstr "описати колір символа"
+
+#. xgettext: This is the description of the KEY_ENTER command.
+#: Programs/cmds.auto.h:1581
+msgid "enter key"
+msgstr "клавіша Enter"
+
+#. xgettext: This is the description of the KEY_TAB command.
+#: Programs/cmds.auto.h:1589
+msgid "tab key"
+msgstr "клавіша Tab"
+
+#. xgettext: This is the description of the KEY_BACKSPACE command.
+#: Programs/cmds.auto.h:1597
+msgid "backspace key"
+msgstr "клавіша Backspace"
+
+#. xgettext: This is the description of the KEY_ESCAPE command.
+#: Programs/cmds.auto.h:1605
+msgid "escape key"
+msgstr "клавіша escape"
+
+#. xgettext: This is the description of the KEY_CURSOR_LEFT command.
+#: Programs/cmds.auto.h:1613
+msgid "cursor-left key"
+msgstr "клавіша стрілки вліво"
+
+#. xgettext: This is the description of the KEY_CURSOR_RIGHT command.
+#: Programs/cmds.auto.h:1621
+msgid "cursor-right key"
+msgstr "клавіша стрілки вправо"
+
+#. xgettext: This is the description of the KEY_CURSOR_UP command.
+#: Programs/cmds.auto.h:1629
+msgid "cursor-up key"
+msgstr "клавіша курсору вгору"
+
+#. xgettext: This is the description of the KEY_CURSOR_DOWN command.
+#: Programs/cmds.auto.h:1637
+msgid "cursor-down key"
+msgstr "клавіша стрілки вниз"
+
+#. xgettext: This is the description of the KEY_PAGE_UP command.
+#: Programs/cmds.auto.h:1645
+msgid "page-up key"
+msgstr "клавіша Page Up"
+
+#. xgettext: This is the description of the KEY_PAGE_DOWN command.
+#: Programs/cmds.auto.h:1653
+msgid "page-down key"
+msgstr "клавіша Page Down"
+
+#. xgettext: This is the description of the KEY_HOME command.
+#: Programs/cmds.auto.h:1661
+msgid "home key"
+msgstr "клавіша Home"
+
+#. xgettext: This is the description of the KEY_END command.
+#: Programs/cmds.auto.h:1669
+msgid "end key"
+msgstr "клавіша End"
+
+#. xgettext: This is the description of the KEY_INSERT command.
+#: Programs/cmds.auto.h:1677
+msgid "insert key"
+msgstr "вставте ключ"
+
+#. xgettext: This is the description of the KEY_DELETE command.
+#: Programs/cmds.auto.h:1685
+msgid "delete key"
+msgstr "клавіша видалення"
+
+#. xgettext: This is the description of the KEY_FUNCTION command.
+#: Programs/cmds.auto.h:1694
+msgid "function key"
+msgstr "функціональна клавіша"
+
+#: Programs/cmd_speech.c:314
+msgid "speech driver stopped"
+msgstr "драйвер мовлення зупинено"
+
+#: Programs/cmd_speech.c:753
+msgid "line"
+msgstr "рядок"
+
+#: Programs/cmd_speech.c:754
+msgid "column"
+msgstr "стовпець"
+
+#: Programs/config.c:348
+msgid "unknown screen content quality"
+msgstr "невідома якість вмісту екрана"
+
+#: Programs/config.c:400
+msgid "Log the versions of the core, API, and built-in drivers, and then exit."
+msgstr ""
+"Записати версії ядра, API та вбудованих драйверів у журнал, а потім вийти."
+
+#: Programs/config.c:406
+msgid "Recognize environment variables."
+msgstr "Розпізнавати змінні оточення."
+
+#: Programs/config.c:416
+msgid "Path to default settings file."
+msgstr "Шлях до файлу налаштувань за замовчуванням."
+
+#: Programs/config.c:423 Programs/config.c:494 Programs/config.c:537
+msgid "driver,..."
+msgstr "драйвер,..."
+
+#: Programs/config.c:426
+#, c-format
+msgid "Braille driver code (%s, %s, or one of {%s})."
+msgstr "Код драйвера Брайля (%s, %s або один із {%s})."
+
+#: Programs/config.c:434 Programs/config.c:504 Programs/config.c:547
+#: Programs/config.c:565 Programs/config.c:598 Programs/config.c:614
+#: Programs/config.c:667
+msgid "name=value,..."
+msgstr "імʼя=значення,..."
+
+#: Programs/config.c:437
+msgid "Parameters for the braille driver."
+msgstr "Параметри драйвера шрифту Брайля."
+
+#: Programs/config.c:444
+msgid "identifier,..."
+msgstr "ідентифікатор,..."
+
+#: Programs/config.c:447
+msgid "Device for accessing braille display."
+msgstr "Пристрій для доступу до дисплея Брайля."
+
+#: Programs/config.c:459
+msgid "Release braille device when screen or window is unreadable."
+msgstr "Відпустіть брайлевський пристрій, коли екран або вікно нечитабельні."
+
+#: Programs/config.c:469
+#, c-format
+msgid "Name of or path to text table (or %s)."
+msgstr "Назва або шлях до текстової таблиці (або %s)."
+
+#: Programs/config.c:479
+msgid "Name of or path to contraction table."
+msgstr "Назва або шлях до таблиці скорочень."
+
+#: Programs/config.c:487
+msgid "Name of or path to attributes table."
+msgstr "Назва або шлях до таблиці атрибутів."
+
+#: Programs/config.c:497
+#, c-format
+msgid "Speech driver code (%s, %s, or one of {%s})."
+msgstr "Код драйвера мовлення (%s, %s або один із {%s})."
+
+#: Programs/config.c:507
+msgid "Parameters for the speech driver."
+msgstr "Параметри голосового драйвера."
+
+#: Programs/config.c:514
+msgid "Do not autospeak when braille is not being used."
+msgstr ""
+"Не використовуйте автоматичне озвучування, коли шрифт Брайля не "
+"використовується."
+
+#: Programs/config.c:522
+msgid "Name of or path to speech input object."
+msgstr "Назва або шлях до обʼєкта голосового введення."
+
+#: Programs/config.c:527
+msgid "quality"
+msgstr "якість"
+
+#: Programs/config.c:529
+#, c-format
+msgid "Minimum screen content quality to autospeak (one of {%s})."
+msgstr ""
+"Мінімальна якість вмісту екрана для автоматичного озвучування (один із {%s})."
+
+#: Programs/config.c:540
+#, c-format
+msgid "Screen driver code (%s, %s, or one of {%s})."
+msgstr "Код драйвера екрана (%s, %s або один із {%s})."
+
+#: Programs/config.c:550
+msgid "Parameters for the screen driver."
+msgstr "Параметри драйвера екрана."
+
+#: Programs/config.c:559
+msgid "Name of or path to keyboard table."
+msgstr "Назва або шлях до таблиці клавіатури."
+
+#: Programs/config.c:567
+msgid "Properties of eligible keyboards."
+msgstr "Властивості відповідних клавіатур."
+
+#: Programs/config.c:574
+msgid "Handle keyboard key events when using a Linux tty in graphics mode."
+msgstr ""
+"Обробляти події клавіш клавіатури під час використання Linux tty у "
+"графічному режимі."
+
+#: Programs/config.c:583
+msgid "Name of or path to GUI keyboard table."
+msgstr "Назва або шлях до таблиці клавіатури GUI."
+
+#: Programs/config.c:592
+msgid "Name of or path to default preferences file."
+msgstr "Назва або шлях до файлу налаштувань за замовчуванням."
+
+#: Programs/config.c:600
+msgid "Explicit preference settings."
+msgstr "Явні налаштування переваг."
+
+#: Programs/config.c:608
+msgid "Disable the application programming interface."
+msgstr "Вимкнути інтерфейс програмування застосунків."
+
+#: Programs/config.c:617
+msgid "Parameters for the application programming interface."
+msgstr "Параметри для інтерфейсу програмування застосунків."
+
+#: Programs/config.c:625
+msgid "Suppress start-up messages."
+msgstr "Пригнічувати повідомлення під час запуску."
+
+#: Programs/config.c:631
+msgid "lvl|cat,..."
+msgstr "рів|кат,..."
+
+#: Programs/config.c:633
+#, c-format
+msgid ""
+"Logging level (%s or one of {%s}) and/or log categories to enable (any "
+"combination of {%s}, each optionally prefixed by %s to disable)."
+msgstr ""
+"Рівень логування (%s або один із {%s}) та/або категорії логів для увімкнення "
+"(будь-яка комбінація {%s}, кожну з яких можна за бажанням доповнити "
+"префіксом %s для вимкнення)."
+
+#: Programs/config.c:642
+msgid "Path to log file."
+msgstr "Шлях до файлу журналу."
+
+#: Programs/config.c:648
+msgid "Log to standard error rather than to the system log."
+msgstr "Записувати в стандартний потік помилок замість системного журналу."
+
+#: Programs/config.c:654
+msgid "Remain a foreground process."
+msgstr "Залишатися процесом у передньому плані."
+
+#: Programs/config.c:661
+msgid ""
+"Don't switch to an unprivileged user or relinquish any privileges (group "
+"memberships, capabilities, etc)."
+msgstr ""
+"Не перемикатися на непривілейованого користувача та не відмовлятися від будь-"
+"яких привілеїв (членства в групах, можливостей тощо)."
+
+#: Programs/config.c:670
+msgid "Parameters for the privilege establishment stage."
+msgstr "Параметри для етапу встановлення привілеїв."
+
+#: Programs/config.c:676
+msgid "csecs"
+msgstr ""
+
+#: Programs/config.c:678
+msgid "Message hold timeout (in 10ms units)."
+msgstr "Тайм-аут утримання повідомлення (в одиницях по 10 мс)."
+
+#: Programs/config.c:683 Programs/config.c:690
+msgid "text"
+msgstr "текст"
+
+#: Programs/config.c:685
+msgid ""
+"The text to be shown when the braille driver starts and to be spoken when "
+"the speech driver starts."
+msgstr ""
+"Текст, що відображатиметься під час запуску драйвера шрифту Брайля та "
+"озвучуватиметься під час запуску голосового драйвера."
+
+#: Programs/config.c:692
+msgid "The text to be shown when the braille driver stops."
+msgstr "Текст, що відображатиметься, коли драйвер шрифту Брайля зупиняється."
+
+#: Programs/config.c:697
+msgid "regexp,..."
+msgstr "рег.вираз,..."
+
+#: Programs/config.c:699
+msgid "Patterns that match command prompts."
+msgstr "Шаблони, що відповідають командним рядкам."
+
+#: Programs/config.c:706 Programs/config.c:716
+msgid "device"
+msgstr "пристрій"
+
+#: Programs/config.c:708
+msgid "PCM (soundcard digital audio) device specifier."
+msgstr "Специфікатор пристрою PCM (цифровий звук звукової карти)."
+
+#: Programs/config.c:718
+msgid "MIDI (Musical Instrument Digital Interface) device specifier."
+msgstr "Специфікатор пристрою MIDI (Musical Instrument Digital Interface)."
+
+#: Programs/config.c:739
+msgid "Path to directory containing drivers."
+msgstr "Шлях до каталогу, що містить драйвери."
+
+#: Programs/config.c:749
+msgid "Path to directory containing helper commands."
+msgstr "Шлях до каталогу, що містить допоміжні команди."
+
+#: Programs/config.c:759
+msgid "Path to directory which contains files that can be updated."
+msgstr "Шлях до каталогу, що містить файли, які можна оновити."
+
+#: Programs/config.c:778
+msgid "Path to directory which contains message localizations."
+msgstr "Шлях до каталогу, який містить локалізації повідомлень."
+
+#: Programs/config.c:787
+msgid "Path to process identifier file."
+msgstr "Шлях до файлу ідентифікатора процесу."
+
+#: Programs/config.c:793
+#, c-format
+msgid "Stop an existing instance of %s, and then exit."
+msgstr "Зупиніть існуючий екземпляр %s, а потім вийдіть."
+
+#: Programs/config.c:800
+#, c-format
+msgid "Install the %s service, and then exit."
+msgstr "Встановіть службу %s, а потім вийдіть."
+
+#: Programs/config.c:807
+#, c-format
+msgid "Remove the %s service, and then exit."
+msgstr "Видаліть службу %s, а потім вийдіть."
+
+#: Programs/config.c:814
+msgid "Write the start-up logs, and then exit."
+msgstr "Записати журнали запуску, а потім вийти."
+
+#: Programs/config.c:826
+msgid "Screen reader for those who use a braille device."
+msgstr "Програма читання з екрана для тих, хто використовує пристрій Брайля."
+
+#: Programs/config.c:851
+msgid "unknown log level or category"
+msgstr "невідомий рівень логування або категорія"
+
+#: Programs/config.c:1302
+msgid "Key Help"
+msgstr "Довідка щодо клавіш"
+
+#: Programs/config.c:1304
+msgid "cannot open key help"
+msgstr "не вдається відкрити довідку щодо ключів"
+
+#: Programs/config.c:1313
+msgid "no key bindings"
+msgstr "немає привʼязок клавіш"
+
+#: Programs/config.c:1863
+msgid "Key Bindings"
+msgstr "Гарячі клавіші"
+
+#: Programs/config.c:1868 Programs/ktb_list.c:737
+msgid "Key Table"
+msgstr "Таблиця ключів"
+
+#: Programs/config.c:1874
+msgid "cannot compile key table"
+msgstr "не вдається скомпілювати таблицю ключів"
+
+#: Programs/config.c:1937 Programs/menu_prefs.c:1690
+msgid "Braille Device"
+msgstr "Пристрій Брайля"
+
+#: Programs/config.c:1956
+msgid "Old Preferences File"
+msgstr "Старий файл налаштувань"
+
+#: Programs/config.c:1972
+msgid "braille driver not loadable"
+msgstr "неможливо завантажити драйвер Брайля"
+
+#: Programs/config.c:2168
+msgid "BRLTTY stopped"
+msgstr "BRLTTY зупинено"
+
+#: Programs/config.c:2233
+msgid "braille driver restarting"
+msgstr "драйвер Брайля перезапускається"
+
+#: Programs/config.c:2237
+#, c-format
+msgid "reinitializing braille driver"
+msgstr "переініціалізація драйвера шрифту Брайля"
+
+#: Programs/config.c:2400
+msgid "speech driver not loadable"
+msgstr "не вдається завантажити драйвер мовлення"
+
+#: Programs/config.c:2549
+msgid "speech driver restarting"
+msgstr "перезапуск драйвера мовлення"
+
+#: Programs/config.c:2552
+#, c-format
+msgid "reinitializing speech driver"
+msgstr "переініціалізація драйвера мовлення"
+
+#: Programs/config.c:2631
+msgid "screen driver not loadable"
+msgstr "драйвер екрана неможливо завантажити"
+
+#: Programs/config.c:2752
+msgid "screen driver restarting"
+msgstr "перезапуск драйвера екрана"
+
+#: Programs/config.c:2755
+#, c-format
+msgid "reinitializing screen driver"
+msgstr "переініціалізація драйвера екрана"
+
+#: Programs/config.c:2983
+msgid "pid file not specified"
+msgstr "PID-файл не вказано"
+
+#: Programs/config.c:3010
+msgid "invalid message hold timeout"
+msgstr "таймаут утримання недійсного повідомлення"
+
+#: Programs/config.c:3092 Programs/menu.c:601
+msgid "cannot determine working directory"
+msgstr "неможливо визначити робочий каталог"
+
+#: Programs/config.c:3135
+#, c-format
+msgid "braille device not specified"
+msgstr "брайлівський пристрій не вказано"
+
+#: Programs/config.c:3254
+msgid "Language"
+msgstr "Мова"
+
+#. "cap" here, used during speech output, is short for "capital".
+#. It is spoken just before an uppercase letter, e.g. "cap A".
+#: Programs/core.c:1095
+msgid "cap"
+msgstr "велика"
+
+#: Programs/core.c:1167
+msgid "blank line"
+msgstr "порожній рядок"
+
+#: Programs/core.c:1170
+msgid "indent"
+msgstr "відступ"
+
+#: Programs/crctest.c:115
+msgid "Test supported CRC (Cyclic Redundancy Check) checksum algorithms."
+msgstr ""
+"Тестування підтримуваних алгоритмів контрольних сум CRC (циклічний "
+"надлишковий код)."
+
+#: Programs/ctb_translate.c:432
+msgid "cannot compile contraction table"
+msgstr "неможливо скомпілювати таблицю скорочень"
+
+#: Programs/ctb_translate.c:438
+msgid "cannot access internal contraction table"
+msgstr "неможливо отримати доступ до внутрішньої таблиці скорочень"
+
+#: Programs/ctb_translate.c:452
+msgid "cannot load contraction table"
+msgstr "неможливо завантажити таблицю скорочень"
+
+#: Programs/datafile.c:318
+msgid "invalid escape sequence"
+msgstr "неправильна послідовність екранування"
+
+#: Programs/file.c:440
+msgid "cannot make world writable"
+msgstr "неможливо зробити доступним для запису всім"
+
+#: Programs/file.c:451
+msgid "cannot create directory"
+msgstr "неможливо створити каталог"
+
+#: Programs/file.c:601
+msgid "cannot get working directory"
+msgstr "не вдалося отримати робочий каталог"
+
+#: Programs/file.c:615 Programs/menu.c:588
+msgid "cannot set working directory"
+msgstr "неможливо встановити робочий каталог"
+
+#: Programs/learn.c:164
+msgid "Learn Mode"
+msgstr "Режим навчання"
+
+#: Programs/learn.c:184
+msgid "done"
+msgstr "готово"
+
+#: Programs/log.c:65
+msgid "Input Packets"
+msgstr "Вхідні пакети"
+
+#: Programs/log.c:71
+msgid "Output Packets"
+msgstr "Вихідні пакети"
+
+#: Programs/log.c:77
+msgid "Braille Key Events"
+msgstr "Події клавіш Брайля"
+
+#: Programs/log.c:83
+msgid "Keyboard Key Events"
+msgstr "Події клавіш клавіатури"
+
+#: Programs/log.c:89
+msgid "Cursor Tracking"
+msgstr "Відстеження курсору"
+
+#: Programs/log.c:95
+msgid "Cursor Routing"
+msgstr "Маршрутизація курсору"
+
+#: Programs/log.c:101
+msgid "Update Events"
+msgstr "Оновити події"
+
+#: Programs/log.c:107
+msgid "Speech Events"
+msgstr "Мовленнєві події"
+
+#: Programs/log.c:113
+msgid "Async Events"
+msgstr "Асинхронні події"
+
+#: Programs/log.c:119
+msgid "Server Events"
+msgstr "Події сервера"
+
+#: Programs/log.c:125
+msgid "generic I/O"
+msgstr "загальний ввід/вивід"
+
+#: Programs/log.c:131
+msgid "Serial I/O"
+msgstr "Послідовний ввід/вивід"
+
+#: Programs/log.c:137
+msgid "USB I/O"
+msgstr "Ввід/вивід USB"
+
+#: Programs/log.c:143
+msgid "Bluetooth I/O"
+msgstr "Ввід/Вивід Bluetooth"
+
+#: Programs/log.c:149
+msgid "Human Interface I/O"
+msgstr "Ввід/вивід людського інтерфейсу"
+
+#: Programs/log.c:155
+msgid "Braille Driver Events"
+msgstr "Події драйвера Брайля"
+
+#: Programs/log.c:161
+msgid "Speech Driver Events"
+msgstr "Події драйвера мовлення"
+
+#: Programs/log.c:167
+msgid "Screen Driver Events"
+msgstr "Події драйвера екрана"
+
+#: Programs/menu.c:452
+msgid "seconds"
+msgstr "секунди"
+
+#: Programs/menu.c:504
+msgid "No"
+msgstr "Ні"
+
+#: Programs/menu.c:505
+msgid "Yes"
+msgstr "Так"
+
+#: Programs/menu.c:599
+msgid "cannot open working directory"
+msgstr "не вдалося відкрити робочий каталог"
+
+#: Programs/menu.c:816
+msgid "not set"
+msgstr "не встановлено"
+
+#: Programs/menu.c:943
+msgid "Close"
+msgstr "Закрити"
+
+#: Programs/menu_prefs.c:544
+msgid "End"
+msgstr "Кінець"
+
+#: Programs/menu_prefs.c:545 Programs/menu_prefs.c:561
+msgid "Window Coordinates"
+msgstr "Координати вікна"
+
+#: Programs/menu_prefs.c:545 Programs/menu_prefs.c:548
+#: Programs/menu_prefs.c:551 Programs/menu_prefs.c:552
+#: Programs/menu_prefs.c:556
+msgid "2 cells"
+msgstr "2 клітини"
+
+#: Programs/menu_prefs.c:546
+msgid "Window Column"
+msgstr "Стовпець вікна"
+
+#: Programs/menu_prefs.c:546 Programs/menu_prefs.c:547
+#: Programs/menu_prefs.c:549 Programs/menu_prefs.c:550
+#: Programs/menu_prefs.c:553 Programs/menu_prefs.c:554
+#: Programs/menu_prefs.c:555 Programs/menu_prefs.c:557
+#: Programs/menu_prefs.c:558 Programs/menu_prefs.c:564
+msgid "1 cell"
+msgstr "1 комірка"
+
+#: Programs/menu_prefs.c:547
+msgid "Window Row"
+msgstr "Рядок вікна"
+
+#: Programs/menu_prefs.c:548 Programs/menu_prefs.c:560
+msgid "Cursor Coordinates"
+msgstr "Координати курсора"
+
+#: Programs/menu_prefs.c:549
+msgid "Cursor Column"
+msgstr "Стовпець курсора"
+
+#: Programs/menu_prefs.c:550
+msgid "Cursor Row"
+msgstr "Рядок курсора"
+
+#: Programs/menu_prefs.c:551 Programs/menu_prefs.c:562
+msgid "Cursor and Window Column"
+msgstr "Курсор і стовпець вікна"
+
+#: Programs/menu_prefs.c:552 Programs/menu_prefs.c:563
+msgid "Cursor and Window Row"
+msgstr "Рядок курсора та вікна"
+
+#: Programs/menu_prefs.c:553
+msgid "Screen Number"
+msgstr "Номер екрана"
+
+#: Programs/menu_prefs.c:554
+msgid "State Dots"
+msgstr "Точки стану"
+
+#: Programs/menu_prefs.c:555
+msgid "State Letter"
+msgstr "Лист стану"
+
+#: Programs/menu_prefs.c:556
+msgid "Time"
+msgstr "Час"
+
+#: Programs/menu_prefs.c:557
+msgid "Alphabetic Window Coordinates"
+msgstr "Алфавітні координати вікна"
+
+#: Programs/menu_prefs.c:558
+msgid "Alphabetic Cursor Coordinates"
+msgstr "Алфавітні координати курсора"
+
+#: Programs/menu_prefs.c:559
+msgid "Generic"
+msgstr "Загальний"
+
+#: Programs/menu_prefs.c:560 Programs/menu_prefs.c:561
+#: Programs/menu_prefs.c:562 Programs/menu_prefs.c:563
+msgid "3 cells"
+msgstr "3 клітинки"
+
+#: Programs/menu_prefs.c:564 Programs/menu_prefs.c:1417
+msgid "Space"
+msgstr "Пробіл"
+
+#: Programs/menu_prefs.c:568
+msgid "Status Field"
+msgstr "Поле статусу"
+
+#: Programs/menu_prefs.c:672
+msgid "Underline"
+msgstr "Підкреслити"
+
+#: Programs/menu_prefs.c:672
+msgid "dots 7 and 8"
+msgstr "крапки 7 і 8"
+
+#: Programs/menu_prefs.c:673 Programs/menu_prefs.c:1418
+msgid "Block"
+msgstr "Заблокувати"
+
+#: Programs/menu_prefs.c:673
+msgid "all dots"
+msgstr "усі крапки"
+
+#: Programs/menu_prefs.c:674
+msgid "Lower Left Dot"
+msgstr "Нижня ліва крапка"
+
+#: Programs/menu_prefs.c:674
+msgid "dot 7"
+msgstr "крапка 7"
+
+#: Programs/menu_prefs.c:675
+msgid "Lower Right Dot"
+msgstr "Нижня права крапка"
+
+#: Programs/menu_prefs.c:675
+msgid "dot 8"
+msgstr "крапка 8"
+
+#: Programs/menu_prefs.c:676
+msgid "Hide"
+msgstr "Приховати"
+
+#: Programs/menu_prefs.c:676
+msgid "no dots"
+msgstr "без крапок"
+
+#: Programs/menu_prefs.c:683
+msgid "Save on Exit"
+msgstr "Зберегти при виході"
+
+#: Programs/menu_prefs.c:688
+msgid "Menu Options"
+msgstr "Параметри меню"
+
+#: Programs/menu_prefs.c:691
+msgid "Show Submenu Sizes"
+msgstr "Показувати розміри підменю"
+
+#: Programs/menu_prefs.c:696
+msgid "Show Advanced Submenus"
+msgstr "Показати розширені підменю"
+
+#: Programs/menu_prefs.c:701
+msgid "Show All Items"
+msgstr "Показати всі елементи"
+
+#: Programs/menu_prefs.c:707
+msgid "Braille Presentation"
+msgstr "Представлення шрифтом Брайля"
+
+#: Programs/menu_prefs.c:711
+msgid "Computer Braille"
+msgstr "Компʼютерний Брайль"
+
+#: Programs/menu_prefs.c:712
+msgid "Contracted Braille"
+msgstr "Скорочений шрифт Брайля"
+
+#: Programs/menu_prefs.c:715
+msgid "Braille Variant"
+msgstr "Варіант Брайля"
+
+#: Programs/menu_prefs.c:722
+msgid "Expand Current Word"
+msgstr "Розгорнути поточне слово"
+
+#: Programs/menu_prefs.c:729
+msgid "No Capitalization"
+msgstr "Без великих літер"
+
+#: Programs/menu_prefs.c:730
+msgid "Use Capital Sign"
+msgstr "Використовуйте знак великої літери"
+
+#: Programs/menu_prefs.c:731
+msgid "Superimpose Dot 7"
+msgstr "Накласти крапку 7"
+
+#: Programs/menu_prefs.c:734
+msgid "Capitalization Mode"
+msgstr "Режим регістру"
+
+#: Programs/menu_prefs.c:741
+msgid "8-dot"
+msgstr "8-крапковий"
+
+#: Programs/menu_prefs.c:742
+msgid "6-dot"
+msgstr "6-крапковий"
+
+#: Programs/menu_prefs.c:745
+msgid "Computer Braille Cell Type"
+msgstr "Тип компʼютерної клітинки шрифту Брайля"
+
+#: Programs/menu_prefs.c:754 Programs/menu_prefs.c:1030
+msgid "Minimum"
+msgstr "Мінімум"
+
+#: Programs/menu_prefs.c:755 Programs/menu_prefs.c:1031
+msgid "Low"
+msgstr "Низький"
+
+#: Programs/menu_prefs.c:756 Programs/menu_prefs.c:1032
+msgid "Medium"
+msgstr "Середній"
+
+#: Programs/menu_prefs.c:757 Programs/menu_prefs.c:1033
+msgid "High"
+msgstr "Високий"
+
+#: Programs/menu_prefs.c:758 Programs/menu_prefs.c:1034
+msgid "Maximum"
+msgstr "Максимум"
+
+#: Programs/menu_prefs.c:761
+msgid "Braille Firmness"
+msgstr "Твердість шрифту Брайля"
+
+#: Programs/menu_prefs.c:769
+msgid "Text Indicators"
+msgstr "Текстові індикатори"
+
+#: Programs/menu_prefs.c:772
+msgid "Show Screen Cursor"
+msgstr "Показувати курсор екрана"
+
+#: Programs/menu_prefs.c:777
+msgid "Screen Cursor Style"
+msgstr "Стиль курсора екрана"
+
+#: Programs/menu_prefs.c:783
+msgid "Blinking Screen Cursor"
+msgstr "Миготливий курсор екрана"
+
+#: Programs/menu_prefs.c:789
+msgid "Screen Cursor Blink Period"
+msgstr "Період миготіння курсора екрана"
+
+#: Programs/menu_prefs.c:797
+msgid "Screen Cursor Percent Visible"
+msgstr "Відсоток видимості курсора екрана"
+
+#: Programs/menu_prefs.c:805
+msgid "Show Attributes"
+msgstr "Показати атрибути"
+
+#: Programs/menu_prefs.c:810
+msgid "Blinking Attributes"
+msgstr "Миготливі атрибути"
+
+#: Programs/menu_prefs.c:816
+msgid "Attributes Blink Period"
+msgstr "Період миготіння атрибутів"
+
+#: Programs/menu_prefs.c:824
+msgid "Attributes Percent Visible"
+msgstr "Відсоток видимих атрибутів"
+
+#: Programs/menu_prefs.c:832
+msgid "Blinking Capitals"
+msgstr "Миготливі великі літери"
+
+#: Programs/menu_prefs.c:837
+msgid "Capitals Blink Period"
+msgstr "Період блимання великих літер"
+
+#: Programs/menu_prefs.c:845
+msgid "Capitals Percent Visible"
+msgstr "Відсоток видимих столиць"
+
+#: Programs/menu_prefs.c:854
+msgid "Navigation Options"
+msgstr "Параметри навігації"
+
+#: Programs/menu_prefs.c:857
+msgid "Word Wrap"
+msgstr "Перенос слів"
+
+#: Programs/menu_prefs.c:862
+msgid "Skip Identical Lines"
+msgstr "Пропустити однакові рядки"
+
+#: Programs/menu_prefs.c:868
+msgid "Skip Blank Braille Windows"
+msgstr "Пропускати порожні вікна шрифту Брайля"
+
+#: Programs/menu_prefs.c:874 Programs/spk.c:281
+msgid "All"
+msgstr "Усі"
+
+#: Programs/menu_prefs.c:875
+msgid "End of Line"
+msgstr "Кінець рядка"
+
+#: Programs/menu_prefs.c:876
+msgid "Rest of Line"
+msgstr "Решта рядка"
+
+#: Programs/menu_prefs.c:879
+msgid "Skip Which Blank Braille Windows"
+msgstr "Пропустити, які порожні вікна Брайля"
+
+#: Programs/menu_prefs.c:884
+msgid "Sliding Braille Window"
+msgstr "Ковзне вікно шрифту Брайля"
+
+#: Programs/menu_prefs.c:889
+msgid "Eager Sliding Braille Window"
+msgstr "Енергійне ковзне вікно Брайля"
+
+#: Programs/menu_prefs.c:895
+msgid "Braille Window Overlap"
+msgstr "Перекриття вікон Брайля"
+
+#: Programs/menu_prefs.c:896 Programs/menu_prefs.c:1409
+msgid "cells"
+msgstr "клітини"
+
+#: Programs/menu_prefs.c:901
+msgid "Scroll-aware Cursor Navigation"
+msgstr "Навігація курсором з урахуванням прокручування"
+
+#: Programs/menu_prefs.c:907 Programs/menu_prefs.c:1243
+#: Programs/menu_prefs.c:1256 Programs/menu_prefs.c:1357
+#: Programs/menu_prefs.c:1396 Programs/menu_prefs.c:1416 Programs/spk.c:278
+msgid "None"
+msgstr "Немає"
+
+#: Programs/menu_prefs.c:908
+msgid "250 milliseconds"
+msgstr "250 мілісекунд"
+
+#: Programs/menu_prefs.c:909
+msgid "500 milliseconds"
+msgstr "500 мілісекунд"
+
+#: Programs/menu_prefs.c:910
+msgid "1 second"
+msgstr "1 секунда"
+
+#: Programs/menu_prefs.c:911
+msgid "2 seconds"
+msgstr "2 секунди"
+
+#: Programs/menu_prefs.c:914
+msgid "Cursor Tracking Delay"
+msgstr "Затримка відстеження курсору"
+
+#: Programs/menu_prefs.c:919
+msgid "Track Screen Scroll"
+msgstr "Відстежувати прокрутку екрана"
+
+#: Programs/menu_prefs.c:924
+msgid "Soft Cursor Detection"
+msgstr "Виявлення мʼякого курсора"
+
+#: Programs/menu_prefs.c:930
+msgid "Track Screen Pointer"
+msgstr "Відстежувати покажчик на екрані"
+
+#: Programs/menu_prefs.c:936
+msgid "Highlight Braille Window Location"
+msgstr "Виділити розташування вікна шрифту Брайля"
+
+#: Programs/menu_prefs.c:941
+msgid "Start Selection with Routing Key"
+msgstr "Почати виділення за ключем маршрутизації"
+
+#: Programs/menu_prefs.c:947
+msgid "Braille Typing"
+msgstr "Набір шрифтом Брайля"
+
+#: Programs/menu_prefs.c:950
+msgid "Keyboard Enabled"
+msgstr "Клавіатуру увімкнено"
+
+#: Programs/menu_prefs.c:956
+msgid "Translated via Text Table"
+msgstr "Перекладено за допомогою текстової таблиці"
+
+#: Programs/menu_prefs.c:957
+msgid "Dots via Unicode Braille"
+msgstr "Крапки через Unicode Braille"
+
+#: Programs/menu_prefs.c:960
+msgid "Typing Mode"
+msgstr "Режим набору"
+
+#: Programs/menu_prefs.c:965
+msgid "Quick Space"
+msgstr "Швидкий простір"
+
+#: Programs/menu_prefs.c:971
+msgid "Input Options"
+msgstr "Параметри введення"
+
+#: Programs/menu_prefs.c:975
+msgid "Off"
+msgstr "Вимкнено"
+
+#: Programs/menu_prefs.c:976
+msgid "5 seconds"
+msgstr "5 секунд"
+
+#: Programs/menu_prefs.c:977
+msgid "10 seconds"
+msgstr "10 секунд"
+
+#: Programs/menu_prefs.c:978
+msgid "20 seconds"
+msgstr "20 секунд"
+
+#: Programs/menu_prefs.c:979
+msgid "40 seconds"
+msgstr "40 секунд"
+
+#: Programs/menu_prefs.c:982
+msgid "Autorelease Time"
+msgstr "Час автоматичного випуску"
+
+#: Programs/menu_prefs.c:988
+msgid "On First Release"
+msgstr "Під час першого релізу"
+
+#: Programs/menu_prefs.c:993
+msgid "Long Press Time"
+msgstr "Час довгого натискання"
+
+#: Programs/menu_prefs.c:999
+msgid "Autorepeat Enabled"
+msgstr "Автоповтор увімкнено"
+
+#: Programs/menu_prefs.c:1005
+msgid "Autorepeat Interval"
+msgstr "Інтервал автоповтору"
+
+#: Programs/menu_prefs.c:1012
+msgid "Autorepeat Panning"
+msgstr "Автоповторне панорамування"
+
+#: Programs/menu_prefs.c:1018
+msgid "Alternate Paste Mode Enabled"
+msgstr "Альтернативний режим вставки увімкнено"
+
+#: Programs/menu_prefs.c:1023
+msgid "Touch Navigation"
+msgstr "Сенсорна навігація"
+
+#: Programs/menu_prefs.c:1037
+msgid "Touch Sensitivity"
+msgstr "Чутливість до дотику"
+
+#: Programs/menu_prefs.c:1044 Programs/menu_prefs.c:1660
+msgid "Keyboard Table"
+msgstr "Таблиця клавіатури"
+
+#: Programs/menu_prefs.c:1052
+msgid "Event Alerts"
+msgstr "Сповіщення про події"
+
+#: Programs/menu_prefs.c:1055
+msgid "Console Bell Alert"
+msgstr "Сповіщення про дзвінок консолі"
+
+#: Programs/menu_prefs.c:1062
+msgid "Keyboard LED Alerts"
+msgstr "Світлодіодні сповіщення клавіатури"
+
+#: Programs/menu_prefs.c:1069
+msgid "Alert Tunes"
+msgstr "Мелодії сповіщень"
+
+#: Programs/menu_prefs.c:1076
+msgid "Beeper"
+msgstr "Піщалка"
+
+#: Programs/menu_prefs.c:1076
+msgid "console tone generator"
+msgstr "консольний генератор тону"
+
+#: Programs/menu_prefs.c:1077
+msgid "PCM"
+msgstr "PCM"
+
+#: Programs/menu_prefs.c:1077
+msgid "soundcard digital audio"
+msgstr "цифровий звук звукової карти"
+
+#: Programs/menu_prefs.c:1078
+msgid "MIDI"
+msgstr "MIDI"
+
+#: Programs/menu_prefs.c:1078
+msgid "Musical Instrument Digital Interface"
+msgstr "Цифровий інтерфейс музичних інструментів"
+
+#: Programs/menu_prefs.c:1079
+msgid "FM"
+msgstr "FM"
+
+#: Programs/menu_prefs.c:1079
+msgid "soundcard synthesizer"
+msgstr "синтезатор звукової карти"
+
+#: Programs/menu_prefs.c:1082
+msgid "Tune Device"
+msgstr "Налаштувати пристрій"
+
+#: Programs/menu_prefs.c:1090
+msgid "PCM Volume"
+msgstr "Гучність PCM"
+
+#: Programs/menu_prefs.c:1098
+msgid "MIDI Volume"
+msgstr "Гучність MIDI"
+
+#: Programs/menu_prefs.c:1108
+msgid "MIDI Instrument"
+msgstr "MIDI-інструмент"
+
+#: Programs/menu_prefs.c:1117
+msgid "FM Volume"
+msgstr "Гучність FM"
+
+#: Programs/menu_prefs.c:1124
+msgid "Alert Dots"
+msgstr "Точки сповіщення"
+
+#: Programs/menu_prefs.c:1129
+msgid "Alert Messages"
+msgstr "Повідомлення про попередження"
+
+#: Programs/menu_prefs.c:1135
+msgid "Speak Key Context"
+msgstr "Озвучити контекст ключа"
+
+#: Programs/menu_prefs.c:1140
+msgid "Speak Modifier Key"
+msgstr "Озвучувати клавішу-модифікатор"
+
+#: Programs/menu_prefs.c:1148
+msgid "Autospeak Options"
+msgstr "Параметри автоозвучування"
+
+#: Programs/menu_prefs.c:1151
+msgid "Autospeak"
+msgstr "Автоматичне мовлення"
+
+#: Programs/menu_prefs.c:1156
+msgid "Speak Selected Line"
+msgstr "Озвучити вибраний рядок"
+
+#: Programs/menu_prefs.c:1162
+msgid "Speak Empty Line"
+msgstr "Промовити порожній рядок"
+
+#: Programs/menu_prefs.c:1168
+msgid "Speak Selected Character"
+msgstr "Озвучити обраного персонажа"
+
+#: Programs/menu_prefs.c:1174
+msgid "Speak Inserted Characters"
+msgstr "Озвучувати вставлені символи"
+
+#: Programs/menu_prefs.c:1180
+msgid "Speak Deleted Characters"
+msgstr "Озвучувати видалені символи"
+
+#: Programs/menu_prefs.c:1186
+msgid "Speak Replaced Characters"
+msgstr "Озвучувати замінені символи"
+
+#: Programs/menu_prefs.c:1192
+msgid "Speak Completed Words"
+msgstr "Проговорювати завершені слова"
+
+#: Programs/menu_prefs.c:1198
+msgid "Speak Line Indent"
+msgstr "Озвучувати відступ рядка"
+
+#: Programs/menu_prefs.c:1205
+msgid "Speech Options"
+msgstr "Параметри мовлення"
+
+#: Programs/menu_prefs.c:1208 Programs/spk.c:210
+msgid "Volume"
+msgstr "Гучність"
+
+#: Programs/menu_prefs.c:1215 Programs/spk.c:236
+msgid "Rate"
+msgstr "Оцінити"
+
+#: Programs/menu_prefs.c:1222 Programs/spk.c:262
+msgid "Pitch"
+msgstr "Тон"
+
+#: Programs/menu_prefs.c:1235
+msgid "Punctuation Level"
+msgstr "Рівень пунктуації"
+
+#. "cap" here, used during speech output, is short for "capital".
+#. It is spoken just before an uppercase letter, e.g. "cap A".
+#: Programs/menu_prefs.c:1246
+msgid "Say Cap"
+msgstr "Скажи велику"
+
+#: Programs/menu_prefs.c:1247
+msgid "Raise Pitch"
+msgstr "Підвищити висоту"
+
+#: Programs/menu_prefs.c:1250
+msgid "Uppercase Indicator"
+msgstr "Індикатор верхнього регістру"
+
+#: Programs/menu_prefs.c:1257
+msgid "Say Space"
+msgstr "Скажіи Пробіл"
+
+#: Programs/menu_prefs.c:1260
+msgid "Whitespace Indicator"
+msgstr "Індикатор пробілів"
+
+#: Programs/menu_prefs.c:1265
+msgid "Character Autorepeat Interval"
+msgstr "Інтервал автоповтору символу"
+
+#: Programs/menu_prefs.c:1271
+msgid "Word Autorepeat Interval"
+msgstr "Інтервал автоповтору слова"
+
+#: Programs/menu_prefs.c:1277
+msgid "Line Autorepeat Interval"
+msgstr "Інтервал автоповтору лінії"
+
+#: Programs/menu_prefs.c:1284
+msgid "Immediate"
+msgstr "Негайний"
+
+#: Programs/menu_prefs.c:1285
+msgid "Enqueue"
+msgstr "Додати в чергу"
+
+#: Programs/menu_prefs.c:1288
+msgid "Say Line Mode"
+msgstr "Режим озвучування рядка"
+
+#: Programs/menu_prefs.c:1293
+msgid "Show Speech Cursor"
+msgstr "Показати курсор мовлення"
+
+#: Programs/menu_prefs.c:1298
+msgid "Speech Cursor Style"
+msgstr "Стиль курсора мовлення"
+
+#: Programs/menu_prefs.c:1304
+msgid "Blinking Speech Cursor"
+msgstr "Миготливий курсор мовлення"
+
+#: Programs/menu_prefs.c:1310
+msgid "Speech Cursor Blink Period"
+msgstr "Період миготіння курсора мовлення"
+
+#: Programs/menu_prefs.c:1318
+msgid "Speech Cursor Percent Visible"
+msgstr "Відсоток видимості курсора мовлення"
+
+#: Programs/menu_prefs.c:1328
+msgid "Time Presentation"
+msgstr "Представлення часу"
+
+#: Programs/menu_prefs.c:1332
+msgid "24 Hour"
+msgstr "24 години"
+
+#: Programs/menu_prefs.c:1333
+msgid "12 Hour"
+msgstr "12 годин"
+
+#: Programs/menu_prefs.c:1336
+msgid "Time Format"
+msgstr "Формат часу"
+
+#: Programs/menu_prefs.c:1342
+msgid "Colon"
+msgstr "Двокрапка"
+
+#: Programs/menu_prefs.c:1343 Programs/menu_prefs.c:1382
+msgid "Dot"
+msgstr "Крапка"
+
+#: Programs/menu_prefs.c:1346
+msgid "Time Separator"
+msgstr "Роздільник часу"
+
+#: Programs/menu_prefs.c:1351
+msgid "Show Seconds"
+msgstr "Показувати секунди"
+
+#: Programs/menu_prefs.c:1358
+msgid "Before Time"
+msgstr "До Часу"
+
+#: Programs/menu_prefs.c:1359
+msgid "After Time"
+msgstr "Після часу"
+
+#: Programs/menu_prefs.c:1362
+msgid "Date Position"
+msgstr "Позиція дати"
+
+#: Programs/menu_prefs.c:1368
+msgid "Year Month Day"
+msgstr "Рік Місяць День"
+
+#: Programs/menu_prefs.c:1369
+msgid "Month Day Year"
+msgstr "Місяць День Рік"
+
+#: Programs/menu_prefs.c:1370
+msgid "Day Month Year"
+msgstr "День місяць рік"
+
+#: Programs/menu_prefs.c:1373
+msgid "Date Format"
+msgstr "Формат дати"
+
+#: Programs/menu_prefs.c:1380
+msgid "Dash"
+msgstr "Тире"
+
+#: Programs/menu_prefs.c:1381
+msgid "Slash"
+msgstr "Слеш"
+
+#: Programs/menu_prefs.c:1385
+msgid "Date Separator"
+msgstr "Роздільник дати"
+
+#: Programs/menu_prefs.c:1392
+msgid "Status Cells"
+msgstr "Комірки статусу"
+
+#: Programs/menu_prefs.c:1397
+msgid "Left"
+msgstr "Ліворуч"
+
+#: Programs/menu_prefs.c:1398
+msgid "Right"
+msgstr "Правильно"
+
+#: Programs/menu_prefs.c:1401
+msgid "Status Position"
+msgstr "Статус позиції"
+
+#: Programs/menu_prefs.c:1408
+msgid "Status Count"
+msgstr "Кількість статусів"
+
+#: Programs/menu_prefs.c:1419
+msgid "Status Side"
+msgstr "Сторона статусу"
+
+#: Programs/menu_prefs.c:1420
+msgid "Text Side"
+msgstr "Сторона тексту"
+
+#: Programs/menu_prefs.c:1423
+msgid "Status Separator"
+msgstr "Розділювач статусу"
+
+#: Programs/menu_prefs.c:1445
+msgid "Braille Tables"
+msgstr "Таблиці Брайля"
+
+#: Programs/menu_prefs.c:1448 Programs/menu_prefs.c:1645
+msgid "Text Table"
+msgstr "Текстова таблиця"
+
+#: Programs/menu_prefs.c:1455 Programs/menu_prefs.c:1650
+msgid "Contraction Table"
+msgstr "Таблиця скорочень"
+
+#: Programs/menu_prefs.c:1462 Programs/menu_prefs.c:1655
+msgid "Attributes Table"
+msgstr "Таблиця атрибутів"
+
+#: Programs/menu_prefs.c:1470
+msgid "Profiles"
+msgstr "Профілі"
+
+#: Programs/menu_prefs.c:1480
+msgid "Tools"
+msgstr "Інструменти"
+
+#: Programs/menu_prefs.c:1484
+msgid "Restart Braille Driver"
+msgstr "Перезапустити драйвер Брайля"
+
+#: Programs/menu_prefs.c:1490
+msgid "Restart Speech Driver"
+msgstr "Перезапустити драйвер мовлення"
+
+#: Programs/menu_prefs.c:1496
+msgid "Restart Screen Driver"
+msgstr "Перезапустити драйвер дисплея"
+
+#: Programs/menu_prefs.c:1502
+msgid "Build Information"
+msgstr "Інформація про збірку"
+
+#: Programs/menu_prefs.c:1506
+msgid "Package Version"
+msgstr "Версія пакета"
+
+#: Programs/menu_prefs.c:1511
+msgid "Package Revision"
+msgstr "Ревізія пакета"
+
+#: Programs/menu_prefs.c:1516
+msgid "Web Site"
+msgstr "Веб-сайт"
+
+#: Programs/menu_prefs.c:1521
+msgid "Mailing List"
+msgstr "Список розсилки"
+
+#: Programs/menu_prefs.c:1526 Programs/menu_prefs.c:1576
+msgid "Configuration File"
+msgstr "Конфігураційний файл"
+
+#: Programs/menu_prefs.c:1531 Programs/menu_prefs.c:1591
+msgid "Preferences File"
+msgstr "Файл налаштувань"
+
+#: Programs/menu_prefs.c:1536
+msgid "Configuration Directory"
+msgstr "Каталог конфігурації"
+
+#: Programs/menu_prefs.c:1541 Programs/menu_prefs.c:1601
+msgid "Tables Directory"
+msgstr "Каталог таблиць"
+
+#: Programs/menu_prefs.c:1546 Programs/menu_prefs.c:1606
+msgid "Drivers Directory"
+msgstr "Каталог драйверів"
+
+#: Programs/menu_prefs.c:1551 Programs/menu_prefs.c:1611
+msgid "Helpers Directory"
+msgstr "Каталог помічників"
+
+#: Programs/menu_prefs.c:1556 Programs/menu_prefs.c:1616
+msgid "Updatable Directory"
+msgstr "Оновлюваний каталог"
+
+#: Programs/menu_prefs.c:1561 Programs/menu_prefs.c:1621
+msgid "Writable Directory"
+msgstr "Каталог доступний для запису"
+
+#: Programs/menu_prefs.c:1566 Programs/menu_prefs.c:1626
+msgid "Locale Directory"
+msgstr "Каталог локалей"
+
+#: Programs/menu_prefs.c:1572
+msgid "Command Options"
+msgstr "Параметри команди"
+
+#: Programs/menu_prefs.c:1581
+msgid "Environment Variables"
+msgstr "Змінні середовища"
+
+#: Programs/menu_prefs.c:1586
+msgid "Boot Parameters"
+msgstr "Параметри завантаження"
+
+#: Programs/menu_prefs.c:1596
+msgid "Override Preferences"
+msgstr "Перевизначити налаштування"
+
+#: Programs/menu_prefs.c:1635
+msgid "Override Directory"
+msgstr "Перевизначити каталог"
+
+#: Programs/menu_prefs.c:1665
+msgid "Keyboard Properties"
+msgstr "Властивості клавіатури"
+
+#: Programs/menu_prefs.c:1670
+msgid "GUI Keyboard Enabled"
+msgstr "Графічну клавіатуру увімкнено"
+
+#: Programs/menu_prefs.c:1675
+msgid "GUI Keyboard Table"
+msgstr "Таблиця клавіатури GUI"
+
+#: Programs/menu_prefs.c:1680
+msgid "Braille Driver"
+msgstr "Драйвер Брайля"
+
+#: Programs/menu_prefs.c:1685
+msgid "Braille Parameters"
+msgstr "Параметри Брайля"
+
+#: Programs/menu_prefs.c:1695
+msgid "Release Device"
+msgstr "Відпустити пристрій"
+
+#: Programs/menu_prefs.c:1701
+msgid "Speech Driver"
+msgstr "Драйвер мовлення"
+
+#: Programs/menu_prefs.c:1706
+msgid "Speech Parameters"
+msgstr "Параметри мовлення"
+
+#: Programs/menu_prefs.c:1711
+msgid "Quiet If No Braille"
+msgstr "Без звуку, якщо немає Брайля"
+
+#: Programs/menu_prefs.c:1716
+msgid "Speech Input"
+msgstr "Голосове введення"
+
+#: Programs/menu_prefs.c:1722
+msgid "Screen Driver"
+msgstr "Драйвер екрана"
+
+#: Programs/menu_prefs.c:1727
+msgid "Screen Parameters"
+msgstr "Параметри екрана"
+
+#: Programs/menu_prefs.c:1733
+msgid "PCM Device"
+msgstr "PCM-пристрій"
+
+#: Programs/menu_prefs.c:1740
+msgid "MIDI Device"
+msgstr "MIDI-пристрій"
+
+#: Programs/menu_prefs.c:1746
+msgid "Log File"
+msgstr "Файл журналу"
+
+#: Programs/menu_prefs.c:1751
+msgid "Log to Standard Error"
+msgstr "Записувати у стандартний потік помилок"
+
+#: Programs/menu_prefs.c:1756
+msgid "PID File"
+msgstr "PID-файл"
+
+#: Programs/menu_prefs.c:1761
+msgid "No Daemon"
+msgstr "Немає демона"
+
+#: Programs/menu_prefs.c:1766
+msgid "Privilege Parameters"
+msgstr "Параметри привілеїв"
+
+#: Programs/menu_prefs.c:1771
+msgid "Stay Privileged"
+msgstr "Залишитися привілейованими"
+
+#: Programs/menu_prefs.c:1776
+msgid "Start Message"
+msgstr "Початкове повідомлення"
+
+#: Programs/menu_prefs.c:1781
+msgid "Stop Message"
+msgstr "Повідомлення про зупинку"
+
+#: Programs/menu_prefs.c:1786
+msgid "Prompt Patterns"
+msgstr "Шаблони промптів"
+
+#: Programs/menu_prefs.c:1792
+msgid "No API"
+msgstr "Немає API"
+
+#: Programs/menu_prefs.c:1797
+msgid "API Parameters"
+msgstr "Параметри API"
+
+#: Programs/menu_prefs.c:1804
+msgid "Log Settings"
+msgstr "Налаштування журналу"
+
+#: Programs/menu_prefs.c:1808
+msgid "Emergency"
+msgstr "Надзвичайна ситуація"
+
+#: Programs/menu_prefs.c:1809
+msgid "Alert"
+msgstr "Попередження"
+
+#: Programs/menu_prefs.c:1810
+msgid "Critical"
+msgstr "Критичний"
+
+#: Programs/menu_prefs.c:1811
+msgid "Error"
+msgstr "Помилка"
+
+#: Programs/menu_prefs.c:1812
+msgid "Warning"
+msgstr "Попередження"
+
+#: Programs/menu_prefs.c:1813
+msgid "Notice"
+msgstr "Повідомлення"
+
+#: Programs/menu_prefs.c:1814
+msgid "Information"
+msgstr "Інформація"
+
+#: Programs/menu_prefs.c:1815
+msgid "Debug"
+msgstr "Відладка"
+
+#: Programs/menu_prefs.c:1819
+msgid "System Log Level"
+msgstr "Рівень системного журналу"
+
+#: Programs/menu_prefs.c:1824
+msgid "Standard Error Log Level"
+msgstr "Стандартний рівень логування помилок"
+
+#: Programs/menu_prefs.c:1829
+msgid "Category Log Level"
+msgstr "Рівень логування категорії"
+
+#: Programs/menu_prefs.c:1834
+msgid "Log Categories"
+msgstr "Категорії журналів"
+
+#: Programs/menu_prefs.c:1873
+msgid "Log Messages"
+msgstr "Повідомлення журналу"
+
+#. xgettext: This is the name of MIDI musical instrument group #1.
+#: Programs/midi.c:25
+msgid "Piano"
+msgstr "Піаніно"
+
+#. xgettext: This is the name of MIDI musical instrument group #2.
+#: Programs/midi.c:28
+msgid "Chromatic Percussion"
+msgstr "Хроматична перкусія"
+
+#. xgettext: This is the name of MIDI musical instrument group #3.
+#: Programs/midi.c:31
+msgid "Organ"
+msgstr "Орган"
+
+#. xgettext: This is the name of MIDI musical instrument group #4.
+#: Programs/midi.c:34
+msgid "Guitar"
+msgstr "Гітара"
+
+#. xgettext: This is the name of MIDI musical instrument group #5.
+#: Programs/midi.c:37
+msgid "Bass"
+msgstr "Бас"
+
+#. xgettext: This is the name of MIDI musical instrument group #6.
+#: Programs/midi.c:40
+msgid "Strings"
+msgstr "Струнні"
+
+#. xgettext: This is the name of MIDI musical instrument group #7.
+#: Programs/midi.c:43
+msgid "Ensemble"
+msgstr "Ансамбль"
+
+#. xgettext: This is the name of MIDI musical instrument group #8.
+#: Programs/midi.c:46
+msgid "Brass"
+msgstr "Духові"
+
+#. xgettext: This is the name of MIDI musical instrument group #9.
+#: Programs/midi.c:49
+msgid "Reed"
+msgstr "Язичкові"
+
+#. xgettext: This is the name of MIDI musical instrument group #10.
+#: Programs/midi.c:52
+msgid "Pipe"
+msgstr "Труба"
+
+#. xgettext: This is the name of MIDI musical instrument group #11.
+#. xgettext: (synth is a common short form for synthesizer)
+#: Programs/midi.c:56
+msgid "Synth Lead"
+msgstr "Синтезаторна хвиля"
+
+#. xgettext: This is the name of MIDI musical instrument group #12.
+#. xgettext: (synth is a common short form for synthesizer)
+#: Programs/midi.c:60
+msgid "Synth Pad"
+msgstr "Синтезаторний пад"
+
+#. xgettext: This is the name of MIDI musical instrument group #13.
+#. xgettext: (synth is a common short form for synthesizer)
+#. xgettext: (FM is the acronym for Frequency Modulation)
+#: Programs/midi.c:65
+msgid "Synth FM"
+msgstr "FM-синтезатор"
+
+#. xgettext: This is the name of MIDI musical instrument group #14.
+#: Programs/midi.c:68
+msgid "Ethnic Instruments"
+msgstr "Народні інструменти"
+
+#. xgettext: This is the name of MIDI musical instrument group #15.
+#: Programs/midi.c:71
+msgid "Percussive Instruments"
+msgstr "Ударні інструменти"
+
+#. xgettext: This is the name of MIDI musical instrument group #16.
+#: Programs/midi.c:74
+msgid "Sound Effects"
+msgstr "Звукові ефекти"
+
+#. Piano
+#. xgettext: This is the name of MIDI musical instrument #1 (in the Piano group).
+#: Programs/midi.c:80
+msgid "Acoustic Grand Piano"
+msgstr "Акустичний рояль"
+
+#. xgettext: This is the name of MIDI musical instrument #2 (in the Piano group).
+#: Programs/midi.c:83
+msgid "Bright Acoustic Piano"
+msgstr "Яскраве акустичне піаніно"
+
+#. xgettext: This is the name of MIDI musical instrument #3 (in the Piano group).
+#: Programs/midi.c:86
+msgid "Electric Grand Piano"
+msgstr "Електричний рояль"
+
+#. xgettext: This is the name of MIDI musical instrument #4 (in the Piano group).
+#: Programs/midi.c:89
+msgid "Honkytonk Piano"
+msgstr "Хонки-тонк піаніно"
+
+#. xgettext: This is the name of MIDI musical instrument #5 (in the Piano group).
+#: Programs/midi.c:92
+msgid "Electric Piano 1"
+msgstr "Електропіаніно 1"
+
+#. xgettext: This is the name of MIDI musical instrument #6 (in the Piano group).
+#: Programs/midi.c:95
+msgid "Electric Piano 2"
+msgstr "Електропіаніно 2"
+
+#. xgettext: This is the name of MIDI musical instrument #7 (in the Piano group).
+#: Programs/midi.c:98
+msgid "Harpsichord"
+msgstr "Клавесин"
+
+#. xgettext: This is the name of MIDI musical instrument #8 (in the Piano group).
+#: Programs/midi.c:101
+msgid "Clavinet"
+msgstr "Клавінет"
+
+#. Chromatic Percussion
+#. xgettext: This is the name of MIDI musical instrument #9 (in the Chromatic Percussion group).
+#: Programs/midi.c:105
+msgid "Celesta"
+msgstr "Целеста"
+
+#. xgettext: This is the name of MIDI musical instrument #10 (in the Chromatic Percussion group).
+#: Programs/midi.c:108
+msgid "Glockenspiel"
+msgstr "Глокеншпіль"
+
+#. xgettext: This is the name of MIDI musical instrument #11 (in the Chromatic Percussion group).
+#: Programs/midi.c:111
+msgid "Music Box"
+msgstr "Музична шкатулка"
+
+#. xgettext: This is the name of MIDI musical instrument #12 (in the Chromatic Percussion group).
+#: Programs/midi.c:114
+msgid "Vibraphone"
+msgstr "Вібрафон"
+
+#. xgettext: This is the name of MIDI musical instrument #13 (in the Chromatic Percussion group).
+#: Programs/midi.c:117
+msgid "Marimba"
+msgstr "Маримба"
+
+#. xgettext: This is the name of MIDI musical instrument #14 (in the Chromatic Percussion group).
+#: Programs/midi.c:120
+msgid "Xylophone"
+msgstr "Ксилофон"
+
+#. xgettext: This is the name of MIDI musical instrument #15 (in the Chromatic Percussion group).
+#: Programs/midi.c:123
+msgid "Tubular Bells"
+msgstr "Трубчасті дзвони"
+
+#. xgettext: This is the name of MIDI musical instrument #16 (in the Chromatic Percussion group).
+#: Programs/midi.c:126
+msgid "Dulcimer"
+msgstr "Дульцимер"
+
+#. Organ
+#. xgettext: This is the name of MIDI musical instrument #17 (in the Organ group).
+#: Programs/midi.c:130
+msgid "Drawbar Organ"
+msgstr "Ричажний орган"
+
+#. xgettext: This is the name of MIDI musical instrument #18 (in the Organ group).
+#: Programs/midi.c:133
+msgid "Percussive Organ"
+msgstr "Перкусійний орган"
+
+#. xgettext: This is the name of MIDI musical instrument #19 (in the Organ group).
+#: Programs/midi.c:136
+msgid "Rock Organ"
+msgstr "Рок-орган"
+
+#. xgettext: This is the name of MIDI musical instrument #20 (in the Organ group).
+#: Programs/midi.c:139
+msgid "Church Organ"
+msgstr "Церковний орган"
+
+#. xgettext: This is the name of MIDI musical instrument #21 (in the Organ group).
+#: Programs/midi.c:142
+msgid "Reed Organ"
+msgstr "Реєстровий орган"
+
+#. xgettext: This is the name of MIDI musical instrument #22 (in the Organ group).
+#: Programs/midi.c:145
+msgid "Accordion"
+msgstr "Акордеон"
+
+#. xgettext: This is the name of MIDI musical instrument #23 (in the Organ group).
+#: Programs/midi.c:148
+msgid "Harmonica"
+msgstr "Гармоніка"
+
+#. xgettext: This is the name of MIDI musical instrument #24 (in the Organ group).
+#: Programs/midi.c:151
+msgid "Tango Accordion"
+msgstr "Танго Акордеон"
+
+#. Guitar
+#. xgettext: This is the name of MIDI musical instrument #25 (in the Guitar group).
+#: Programs/midi.c:155
+msgid "Acoustic Guitar (nylon)"
+msgstr "Акустична гітара (нейлон)"
+
+#. xgettext: This is the name of MIDI musical instrument #26 (in the Guitar group).
+#: Programs/midi.c:158
+msgid "Acoustic Guitar (steel)"
+msgstr "Акустична гітара (сталеві струни)"
+
+#. xgettext: This is the name of MIDI musical instrument #27 (in the Guitar group).
+#: Programs/midi.c:161
+msgid "Electric Guitar (jazz)"
+msgstr "Електрогітара (джаз)"
+
+#. xgettext: This is the name of MIDI musical instrument #28 (in the Guitar group).
+#: Programs/midi.c:164
+msgid "Electric Guitar (clean)"
+msgstr "Електрогітара (чистий)"
+
+#. xgettext: This is the name of MIDI musical instrument #29 (in the Guitar group).
+#: Programs/midi.c:167
+msgid "Electric Guitar (muted)"
+msgstr "Електрогітара (приглушена)"
+
+#. xgettext: This is the name of MIDI musical instrument #30 (in the Guitar group).
+#: Programs/midi.c:170
+msgid "Overdriven Guitar"
+msgstr "Гітара з овердрайвом"
+
+#. xgettext: This is the name of MIDI musical instrument #31 (in the Guitar group).
+#: Programs/midi.c:173
+msgid "Distortion Guitar"
+msgstr "Дисторшн-гітара"
+
+#. xgettext: This is the name of MIDI musical instrument #32 (in the Guitar group).
+#: Programs/midi.c:176
+msgid "Guitar Harmonics"
+msgstr "Гітарні гармоніки"
+
+#. Bass
+#. xgettext: This is the name of MIDI musical instrument #33 (in the Bass group).
+#: Programs/midi.c:180
+msgid "Acoustic Bass"
+msgstr "Акустичний бас"
+
+#. xgettext: This is the name of MIDI musical instrument #34 (in the Bass group).
+#: Programs/midi.c:183
+msgid "Electric Bass (finger)"
+msgstr "Електробас (пальцями)"
+
+#. xgettext: This is the name of MIDI musical instrument #35 (in the Bass group).
+#: Programs/midi.c:186
+msgid "Electric Bass (pick)"
+msgstr "Електробас (медіатор)"
+
+#. xgettext: This is the name of MIDI musical instrument #36 (in the Bass group).
+#: Programs/midi.c:189
+msgid "Fretless Bass"
+msgstr "Безладовий бас"
+
+#. xgettext: This is the name of MIDI musical instrument #37 (in the Bass group).
+#: Programs/midi.c:192
+msgid "Slap Bass 1"
+msgstr "Слэп-бас 1"
+
+#. xgettext: This is the name of MIDI musical instrument #38 (in the Bass group).
+#: Programs/midi.c:195
+msgid "Slap Bass 2"
+msgstr "Слэп-бас 2"
+
+#. xgettext: This is the name of MIDI musical instrument #39 (in the Bass group).
+#: Programs/midi.c:198
+msgid "Synth Bass 1"
+msgstr "Синтезаторний бас 1"
+
+#. xgettext: This is the name of MIDI musical instrument #40 (in the Bass group).
+#: Programs/midi.c:201
+msgid "Synth Bass 2"
+msgstr "Синтезаторний бас 2"
+
+#. Strings
+#. xgettext: This is the name of MIDI musical instrument #41 (in the Strings group).
+#: Programs/midi.c:205
+msgid "Violin"
+msgstr "Скрипка"
+
+#. xgettext: This is the name of MIDI musical instrument #42 (in the Strings group).
+#: Programs/midi.c:208
+msgid "Viola"
+msgstr "Віола"
+
+#. xgettext: This is the name of MIDI musical instrument #43 (in the Strings group).
+#: Programs/midi.c:211
+msgid "Cello"
+msgstr "Віолончель"
+
+#. xgettext: This is the name of MIDI musical instrument #44 (in the Strings group).
+#: Programs/midi.c:214
+msgid "Contrabass"
+msgstr "Контрабас"
+
+#. xgettext: This is the name of MIDI musical instrument #45 (in the Strings group).
+#: Programs/midi.c:217
+msgid "Tremolo Strings"
+msgstr "Струнні тремоло"
+
+#. xgettext: This is the name of MIDI musical instrument #46 (in the Strings group).
+#: Programs/midi.c:220
+msgid "Pizzicato Strings"
+msgstr "Струнні піццикато"
+
+#. xgettext: This is the name of MIDI musical instrument #47 (in the Strings group).
+#: Programs/midi.c:223
+msgid "Orchestral Harp"
+msgstr "Оркестрова арфа"
+
+#. xgettext: This is the name of MIDI musical instrument #48 (in the Strings group).
+#: Programs/midi.c:226
+msgid "Timpani"
+msgstr "Тимпани"
+
+#. Ensemble
+#. xgettext: This is the name of MIDI musical instrument #49 (in the Ensemble group).
+#: Programs/midi.c:230
+msgid "String Ensemble 1"
+msgstr "Струнний ансамбль 1"
+
+#. xgettext: This is the name of MIDI musical instrument #50 (in the Ensemble group).
+#: Programs/midi.c:233
+msgid "String Ensemble 2"
+msgstr "Струнний ансамбль 2"
+
+#. xgettext: This is the name of MIDI musical instrument #51 (in the Ensemble group).
+#: Programs/midi.c:236
+msgid "SynthStrings 1"
+msgstr "Синтезаторні струнні 1"
+
+#. xgettext: This is the name of MIDI musical instrument #52 (in the Ensemble group).
+#: Programs/midi.c:239
+msgid "SynthStrings 2"
+msgstr "Синтезаторні струнні 2"
+
+#. xgettext: This is the name of MIDI musical instrument #53 (in the Ensemble group).
+#: Programs/midi.c:242
+msgid "Choir Aahs"
+msgstr "Хорове «ааа»"
+
+#. xgettext: This is the name of MIDI musical instrument #54 (in the Ensemble group).
+#: Programs/midi.c:245
+msgid "Voice Oohs"
+msgstr "Голосові 'ооо'"
+
+#. xgettext: This is the name of MIDI musical instrument #55 (in the Ensemble group).
+#: Programs/midi.c:248
+msgid "Synth Voice"
+msgstr "Синтезований голос"
+
+#. xgettext: This is the name of MIDI musical instrument #56 (in the Ensemble group).
+#: Programs/midi.c:251
+msgid "Orchestra Hit"
+msgstr "Оркестровий удар"
+
+#. Brass
+#. xgettext: This is the name of MIDI musical instrument #57 (in the Brass group).
+#: Programs/midi.c:255
+msgid "Trumpet"
+msgstr "Труба"
+
+#. xgettext: This is the name of MIDI musical instrument #58 (in the Brass group).
+#: Programs/midi.c:258
+msgid "Trombone"
+msgstr "Тромбон"
+
+#. xgettext: This is the name of MIDI musical instrument #59 (in the Brass group).
+#: Programs/midi.c:261
+msgid "Tuba"
+msgstr "Туба"
+
+#. xgettext: This is the name of MIDI musical instrument #60 (in the Brass group).
+#: Programs/midi.c:264
+msgid "Muted Trumpet"
+msgstr "Труба з сурдиною"
+
+#. xgettext: This is the name of MIDI musical instrument #61 (in the Brass group).
+#: Programs/midi.c:267
+msgid "French Horn"
+msgstr "Валторна"
+
+#. xgettext: This is the name of MIDI musical instrument #62 (in the Brass group).
+#: Programs/midi.c:270
+msgid "Brass Section"
+msgstr "Духова секція"
+
+#. xgettext: This is the name of MIDI musical instrument #63 (in the Brass group).
+#: Programs/midi.c:273
+msgid "SynthBrass 1"
+msgstr "Синтезаторні духові 1"
+
+#. xgettext: This is the name of MIDI musical instrument #64 (in the Brass group).
+#: Programs/midi.c:276
+msgid "SynthBrass 2"
+msgstr "Синтезаторні духові 2"
+
+#. Reed
+#. xgettext: This is the name of MIDI musical instrument #65 (in the Reed group).
+#: Programs/midi.c:280
+msgid "Soprano Saxophone"
+msgstr "Сопрано-саксофон"
+
+#. xgettext: This is the name of MIDI musical instrument #66 (in the Reed group).
+#: Programs/midi.c:283
+msgid "Alto Saxophone"
+msgstr "Альто-саксофон"
+
+#. xgettext: This is the name of MIDI musical instrument #67 (in the Reed group).
+#: Programs/midi.c:286
+msgid "Tenor Saxophone"
+msgstr "Тенор-саксофон"
+
+#. xgettext: This is the name of MIDI musical instrument #68 (in the Reed group).
+#: Programs/midi.c:289
+msgid "Baritone Saxophone"
+msgstr "Баритон-саксофон"
+
+#. xgettext: This is the name of MIDI musical instrument #69 (in the Reed group).
+#: Programs/midi.c:292
+msgid "Oboe"
+msgstr "Обой"
+
+#. xgettext: This is the name of MIDI musical instrument #70 (in the Reed group).
+#: Programs/midi.c:295
+msgid "English Horn"
+msgstr "Англійський ріжок"
+
+#. xgettext: This is the name of MIDI musical instrument #71 (in the Reed group).
+#: Programs/midi.c:298
+msgid "Bassoon"
+msgstr "Фагот"
+
+#. xgettext: This is the name of MIDI musical instrument #72 (in the Reed group).
+#: Programs/midi.c:301
+msgid "Clarinet"
+msgstr "Кларнет"
+
+#. Pipe
+#. xgettext: This is the name of MIDI musical instrument #73 (in the Pipe group).
+#: Programs/midi.c:305
+msgid "Piccolo"
+msgstr "Пікколо"
+
+#. xgettext: This is the name of MIDI musical instrument #74 (in the Pipe group).
+#: Programs/midi.c:308
+msgid "Flute"
+msgstr "Флейта"
+
+#. xgettext: This is the name of MIDI musical instrument #75 (in the Pipe group).
+#: Programs/midi.c:311
+msgid "Recorder"
+msgstr "Рекордер"
+
+#. xgettext: This is the name of MIDI musical instrument #76 (in the Pipe group).
+#: Programs/midi.c:314
+msgid "Pan Flute"
+msgstr "Флейта Пана"
+
+#. xgettext: This is the name of MIDI musical instrument #77 (in the Pipe group).
+#: Programs/midi.c:317
+msgid "Blown Bottle"
+msgstr "Дмухання у пляшку"
+
+#. xgettext: This is the name of MIDI musical instrument #78 (in the Pipe group).
+#: Programs/midi.c:320
+msgid "Shakuhachi"
+msgstr "Сякухаті"
+
+#. xgettext: This is the name of MIDI musical instrument #79 (in the Pipe group).
+#: Programs/midi.c:323
+msgid "Whistle"
+msgstr "Свисток"
+
+#. xgettext: This is the name of MIDI musical instrument #80 (in the Pipe group).
+#: Programs/midi.c:326
+msgid "Ocarina"
+msgstr "Окарина"
+
+#. Synth Lead
+#. xgettext: This is the name of MIDI musical instrument #81 (in the Synth Lead group).
+#: Programs/midi.c:330
+msgid "Lead 1 (square)"
+msgstr "Хвиля 1 (квадратна)"
+
+#. xgettext: This is the name of MIDI musical instrument #82 (in the Synth Lead group).
+#: Programs/midi.c:333
+msgid "Lead 2 (sawtooth)"
+msgstr "Хвиля 2 (пилоподібна)"
+
+#. xgettext: This is the name of MIDI musical instrument #83 (in the Synth Lead group).
+#: Programs/midi.c:336
+msgid "Lead 3 (calliope)"
+msgstr "Хвиля 3 (калліопа)"
+
+#. xgettext: This is the name of MIDI musical instrument #84 (in the Synth Lead group).
+#: Programs/midi.c:339
+msgid "Lead 4 (chiff)"
+msgstr "Хвиля 4 (chiff)"
+
+#. xgettext: This is the name of MIDI musical instrument #85 (in the Synth Lead group).
+#: Programs/midi.c:342
+msgid "Lead 5 (charang)"
+msgstr "Хвиля 5 (чаранг)"
+
+#. xgettext: This is the name of MIDI musical instrument #86 (in the Synth Lead group).
+#: Programs/midi.c:345
+msgid "Lead 6 (voice)"
+msgstr "Хвиля 6 (голос)"
+
+#. xgettext: This is the name of MIDI musical instrument #87 (in the Synth Lead group).
+#: Programs/midi.c:348
+msgid "Lead 7 (fifths)"
+msgstr "Хвиля 7 (квінти)"
+
+#. xgettext: This is the name of MIDI musical instrument #88 (in the Synth Lead group).
+#: Programs/midi.c:351
+msgid "Lead 8 (bass + lead)"
+msgstr "Хвиля 8 (бас + Хвиля)"
+
+#. Synth Pad
+#. xgettext: This is the name of MIDI musical instrument #89 (in the Synth Pad group).
+#: Programs/midi.c:355
+msgid "Pad 1 (new age)"
+msgstr "Пад 1 (нью-ейдж)"
+
+#. xgettext: This is the name of MIDI musical instrument #90 (in the Synth Pad group).
+#: Programs/midi.c:358
+msgid "Pad 2 (warm)"
+msgstr "Пад 2 (теплий)"
+
+#. xgettext: This is the name of MIDI musical instrument #91 (in the Synth Pad group).
+#: Programs/midi.c:361
+msgid "Pad 3 (polysynth)"
+msgstr "Пад 3 (полісинтезатор)"
+
+#. xgettext: This is the name of MIDI musical instrument #92 (in the Synth Pad group).
+#: Programs/midi.c:364
+msgid "Pad 4 (choir)"
+msgstr "Пад 4 (хор)"
+
+#. xgettext: This is the name of MIDI musical instrument #93 (in the Synth Pad group).
+#: Programs/midi.c:367
+msgid "Pad 5 (bowed)"
+msgstr "Пад 5 (смичковий)"
+
+#. xgettext: This is the name of MIDI musical instrument #94 (in the Synth Pad group).
+#: Programs/midi.c:370
+msgid "Pad 6 (metallic)"
+msgstr "Пад 6 (металевий)"
+
+#. xgettext: This is the name of MIDI musical instrument #95 (in the Synth Pad group).
+#: Programs/midi.c:373
+msgid "Pad 7 (halo)"
+msgstr "Пад 7 (гало)"
+
+#. xgettext: This is the name of MIDI musical instrument #96 (in the Synth Pad group).
+#: Programs/midi.c:376
+msgid "Pad 8 (sweep)"
+msgstr "Пад 8 (свіп)"
+
+#. Synth FM
+#. xgettext: This is the name of MIDI musical instrument #97 (in the Synth FM group).
+#: Programs/midi.c:380
+msgid "FX 1 (rain)"
+msgstr "FX 1 (дощ)"
+
+#. xgettext: This is the name of MIDI musical instrument #98 (in the Synth FM group).
+#: Programs/midi.c:383
+msgid "FX 2 (soundtrack)"
+msgstr "FX 2 (саундтрек)"
+
+#. xgettext: This is the name of MIDI musical instrument #99 (in the Synth FM group).
+#: Programs/midi.c:386
+msgid "FX 3 (crystal)"
+msgstr "FX 3 (кришталь)"
+
+#. xgettext: This is the name of MIDI musical instrument #100 (in the Synth FM group).
+#: Programs/midi.c:389
+msgid "FX 4 (atmosphere)"
+msgstr "FX 4 (атмосфера)"
+
+#. xgettext: This is the name of MIDI musical instrument #101 (in the Synth FM group).
+#: Programs/midi.c:392
+msgid "FX 5 (brightness)"
+msgstr "FX 5 (яскравість)"
+
+#. xgettext: This is the name of MIDI musical instrument #102 (in the Synth FM group).
+#: Programs/midi.c:395
+msgid "FX 6 (goblins)"
+msgstr "FX 6 (гобліни)"
+
+#. xgettext: This is the name of MIDI musical instrument #103 (in the Synth FM group).
+#: Programs/midi.c:398
+msgid "FX 7 (echoes)"
+msgstr "FX 7 (ехо)"
+
+#. xgettext: This is the name of MIDI musical instrument #104 (in the Synth FM group).
+#. xgettext: (sci-fi is a common short form for science fiction)
+#: Programs/midi.c:402
+msgid "FX 8 (sci-fi)"
+msgstr "FX 8 (наукова фантастика)"
+
+#. Ethnic Instruments
+#. xgettext: This is the name of MIDI musical instrument #105 (in the Ethnic group).
+#: Programs/midi.c:406
+msgid "Sitar"
+msgstr "Сітар"
+
+#. xgettext: This is the name of MIDI musical instrument #106 (in the Ethnic group).
+#: Programs/midi.c:409
+msgid "Banjo"
+msgstr "Банджо"
+
+#. xgettext: This is the name of MIDI musical instrument #107 (in the Ethnic group).
+#: Programs/midi.c:412
+msgid "Shamisen"
+msgstr "Сямісен"
+
+#. xgettext: This is the name of MIDI musical instrument #108 (in the Ethnic group).
+#: Programs/midi.c:415
+msgid "Koto"
+msgstr "Кото"
+
+#. xgettext: This is the name of MIDI musical instrument #109 (in the Ethnic group).
+#: Programs/midi.c:418
+msgid "Kalimba"
+msgstr "Калімба"
+
+#. xgettext: This is the name of MIDI musical instrument #110 (in the Ethnic group).
+#: Programs/midi.c:421
+msgid "Bag Pipe"
+msgstr "Волинка"
+
+#. xgettext: This is the name of MIDI musical instrument #111 (in the Ethnic group).
+#: Programs/midi.c:424
+msgid "Fiddle"
+msgstr "Скрипка"
+
+#. xgettext: This is the name of MIDI musical instrument #112 (in the Ethnic group).
+#: Programs/midi.c:427
+msgid "Shanai"
+msgstr "Шанай"
+
+#. Percussive Instruments
+#. xgettext: This is the name of MIDI musical instrument #113 (in the Percussive group).
+#: Programs/midi.c:431
+msgid "Tinkle Bell"
+msgstr "Тінкл Бел"
+
+#. xgettext: This is the name of MIDI musical instrument #114 (in the Percussive group).
+#: Programs/midi.c:434
+msgid "Agogo"
+msgstr "Агого"
+
+#. xgettext: This is the name of MIDI musical instrument #115 (in the Percussive group).
+#: Programs/midi.c:437
+msgid "Steel Drums"
+msgstr "Сталеві барабани"
+
+#. xgettext: This is the name of MIDI musical instrument #116 (in the Percussive group).
+#: Programs/midi.c:440
+msgid "Woodblock"
+msgstr "Деревʼяна дошка"
+
+#. xgettext: This is the name of MIDI musical instrument #117 (in the Percussive group).
+#: Programs/midi.c:443
+msgid "Taiko Drum"
+msgstr "Барабан тайко"
+
+#. xgettext: This is the name of MIDI musical instrument #118 (in the Percussive group).
+#: Programs/midi.c:446
+msgid "Melodic Tom"
+msgstr "Мелодійний Том"
+
+#. xgettext: This is the name of MIDI musical instrument #119 (in the Percussive group).
+#: Programs/midi.c:449
+msgid "Synth Drum"
+msgstr "Синтезаторний барабан"
+
+#. xgettext: This is the name of MIDI musical instrument #120 (in the Percussive group).
+#: Programs/midi.c:452
+msgid "Reverse Cymbal"
+msgstr "Реверс тарілки"
+
+#. Sound Effects
+#. xgettext: This is the name of MIDI musical instrument #121 (in the Sound Effects group).
+#: Programs/midi.c:456
+msgid "Guitar Fret Noise"
+msgstr "Шум ладів гітари"
+
+#. xgettext: This is the name of MIDI musical instrument #122 (in the Sound Effects group).
+#: Programs/midi.c:459
+msgid "Breath Noise"
+msgstr "Шум дихання"
+
+#. xgettext: This is the name of MIDI musical instrument #123 (in the Sound Effects group).
+#: Programs/midi.c:462
+msgid "Seashore"
+msgstr "Берег моря"
+
+#. xgettext: This is the name of MIDI musical instrument #124 (in the Sound Effects group).
+#: Programs/midi.c:465
+msgid "Bird Tweet"
+msgstr "Щебетання пташки"
+
+#. xgettext: This is the name of MIDI musical instrument #125 (in the Sound Effects group).
+#: Programs/midi.c:468
+msgid "Telephone Ring"
+msgstr "Дзвінок телефону"
+
+#. xgettext: This is the name of MIDI musical instrument #126 (in the Sound Effects group).
+#: Programs/midi.c:471
+msgid "Helicopter"
+msgstr "Гелікоптер"
+
+#. xgettext: This is the name of MIDI musical instrument #127 (in the Sound Effects group).
+#: Programs/midi.c:474
+msgid "Applause"
+msgstr "Аплодисменти"
+
+#. xgettext: This is the name of MIDI musical instrument #128 (in the Sound Effects group).
+#: Programs/midi.c:477
+msgid "Gunshot"
+msgstr "Постріл"
+
+#: Programs/msgtest.c:39
+msgid "path"
+msgstr "шлях"
+
+#: Programs/msgtest.c:42
+msgid "the locale directory containing the translations"
+msgstr "каталог локалі, що містить переклади"
+
+#: Programs/msgtest.c:47
+msgid "specifier"
+msgstr "специфікатор"
+
+#: Programs/msgtest.c:49
+msgid "the locale in which to look up a translation"
+msgstr "локаль, у якій слід шукати переклад"
+
+#: Programs/msgtest.c:54
+msgid "name"
+msgstr "імʼя"
+
+#: Programs/msgtest.c:56
+msgid "the name of the domain containing the translations"
+msgstr "назва домену, що містить переклади"
+
+#: Programs/msgtest.c:62
+msgid "write the translations using UTF-8"
+msgstr "пишіть переклади, використовуючи UTF-8"
+
+#: Programs/msgtest.c:87
+msgid "Test message localization using the message catalog reader."
+msgstr ""
+"Тестування локалізації повідомлення за допомогою зчитувача каталогів "
+"повідомлень."
+
+#: Programs/parse.c:495
+msgid "missing parameter value"
+msgstr "відсутнє значення параметра"
+
+#: Programs/parse.c:519
+msgid "missing parameter qualifier"
+msgstr "відсутній кваліфікатор параметра"
+
+#: Programs/parse.c:533
+msgid "missing parameter name"
+msgstr "відсутня назва параметра"
+
+#: Programs/parse.c:562
+msgid "unsupported parameter"
+msgstr "непідтримуваний параметр"
+
+#: Programs/pgmprivs_linux.c:1909
+msgid "working directory changed"
+msgstr "робочий каталог змінено"
+
+#: Programs/pgmprivs_linux.c:1981
+msgid "XDG runtime directory exists"
+msgstr "Каталог середовища виконання XDG існує"
+
+#: Programs/pgmprivs_linux.c:1986
+msgid "XDG runtime directory created"
+msgstr "Створено каталог середовища виконання XDG"
+
+#: Programs/pgmprivs_linux.c:2004
+msgid "XDG runtime directory access problem"
+msgstr "Проблема доступу до каталогу середовища виконання XDG"
+
+#: Programs/pgmprivs_linux.c:2049
+msgid "switched to unprivileged user"
+msgstr "переключено на непривілейованого користувача"
+
+#: Programs/pgmprivs_linux.c:2073
+msgid "not switching to an unprivileged user"
+msgstr "не перемикатися на непривілейованого користувача"
+
+#: Programs/pgmprivs_linux.c:2100
+msgid "executing as the invoking user"
+msgstr "виконання від імені користувача, що викликає"
+
+#: Programs/pgmprivs_linux.c:2207
+msgid "ownership claimed"
+msgstr "право власності заявлено"
+
+#: Programs/pgmprivs_linux.c:2222
+msgid "group permissions added"
+msgstr "додано права групи"
+
+#: Programs/prefs.c:363
+msgid "cannot read preferences file"
+msgstr "не вдається прочитати файл налаштувань"
+
+#: Programs/prefs.c:578
+msgid "cannot write to preferences file"
+msgstr "неможливо записати у файл налаштувань"
+
+#: Programs/program.c:219
+msgid "cannot open process identifier file"
+msgstr "не вдається відкрити файл ідентифікатора процесу"
+
+#: Programs/program.c:265
+msgid "pid file open error"
+msgstr "помилка відкриття PID-файлу"
+
+#: Programs/scr_driver.c:39
+msgid "no screen"
+msgstr "немає екрана"
+
+#: Programs/scr_help.c:215
+msgid "Help Screen"
+msgstr "Екран допомоги"
+
+#: Programs/scr_help.c:229
+msgid "help screen not readable"
+msgstr "екран допомоги нечитабельний"
+
+#: Programs/scr_menu.c:104
+msgid "<off>"
+msgstr "<вимкнено>"
+
+#: Programs/scr_menu.c:271
+msgid "Preferences Menu"
+msgstr "Меню налаштувань"
+
+#: Programs/scrtest.c:94
+msgid "Test a screen driver."
+msgstr "Перевірити драйвер екрана."
+
+#: Programs/spk.c:279
+msgid "Some"
+msgstr "Деякі"
+
+#: Programs/spk.c:280
+msgid "Most"
+msgstr "Більшість"
+
+#: Programs/spk.c:298
+msgid "Punctuation"
+msgstr "Пунктуація"
+
+#: Programs/spktest.c:96
+msgid "Test a speech driver."
+msgstr "Тестувати драйвер мовлення."
+
+#: Programs/system_windows.c:54
+msgid "cannot load library"
+msgstr "неможливо завантажити бібліотеку"
+
+#: Programs/system_windows.c:61
+msgid "cannot find procedure"
+msgstr "не вдалося знайти процедуру"
+
+#: Programs/tbl2hex.c:54
+msgid "Write the hexadecimal array representation of a compiled table."
+msgstr ""
+"Запишіть представлення скомпільованої таблиці у вигляді шістнадцяткового "
+"масиву."
+
+#: Programs/ttb_translate.c:275
+msgid "cannot compile text table"
+msgstr "неможливо скомпілювати текстову таблицю"
+
+#: Programs/ttb_translate.c:295
+msgid "cannot load text table"
+msgstr "не вдалося завантажити текстову таблицю"
+
+#: Programs/update.c:1026
+msgid "blank"
+msgstr "порожній"
+
+#: Programs/xbrlapi.c:96
+msgid "[host][:port]"
+msgstr "[хост][:порт]"
+
+#: Programs/xbrlapi.c:98
+msgid "BrlAPI host and/or port to connect to"
+msgstr "Хост та/або порт BrlAPI для підключення"
+
+#: Programs/xbrlapi.c:103
+msgid "scheme+..."
+msgstr "схема+..."
+
+#: Programs/xbrlapi.c:105
+msgid "BrlAPI authorization/authentication schemes"
+msgstr "Схеми авторизації/автентифікації BrlAPI"
+
+#: Programs/xbrlapi.c:110
+msgid "display"
+msgstr "відображення"
+
+#: Programs/xbrlapi.c:112
+msgid "X display to connect to"
+msgstr "X-дисплей для підключення"
+
+#: Programs/xbrlapi.c:118
+msgid "Do not write any text to the braille device"
+msgstr "Не записуйте жодного тексту на пристрій Брайля"
+
+#: Programs/xbrlapi.c:124
+msgid "Write debugging output to stdout"
+msgstr "Виводити налагоджувальний вивід у stdout"
+
+#: Programs/xbrlapi.c:130
+msgid "Remain a foreground process"
+msgstr "Залишатися процесом на передньому плані"
+
+#: Programs/xbrlapi.c:137
+msgid "file to write the name of the focused command to"
+msgstr "файл для запису назви фокусованої команди"
+
+#: Programs/xbrlapi.c:144
+msgid "file to write the name of the focused window to"
+msgstr "файл для запису назви фокусованого вікна"
+
+#: Programs/xbrlapi.c:156
+msgid ""
+"Augment an X session by supporting input typed on the braille device, "
+"showing the title of the focused window on the braille display, and "
+"switching braille focus to it."
+msgstr ""
+"Розширити X-сесію, забезпечивши підтримку введення з пристрою Брайля, "
+"відображення заголовка фокусованого вікна на дисплеї Брайля та перемикання "
+"фокусу Брайля на нього."
+
+#. This is the first attempt to connect to BRLTTY, and it failed.
+#. * Return the error immediately to the user, to provide feedback to users
+#. * running xbrlapi by hand, but not fill logs, eat battery, spam
+#. * 127.0.0.1 with reconnection attempts.
+#.
+#: Programs/xbrlapi.c:245
+#, c-format
+msgid "cannot connect to braille devices daemon brltty at %s\n"
+msgstr "не вдається підключитися до демона пристроїв Брайля brltty за %s\n"
+
+#: Programs/xbrlapi.c:300
+msgid "cannot get tty\n"
+msgstr "не вдалося отримати tty\n"
+
+#: Programs/xbrlapi.c:306
+#, c-format
+msgid "cannot get tty %d\n"
+msgstr "не вдалося отримати tty %d\n"
+
+#: Programs/xbrlapi.c:313
+msgid "cannot ignore keys\n"
+msgstr "неможливо ігнорувати ключі\n"
+
+#: Programs/xbrlapi.c:357
+#, c-format
+msgid "xbrlapi: cannot write window name %s\n"
+msgstr "xbrlapi: не вдалося записати імʼя вікна %s\n"
+
+#: Programs/xbrlapi.c:378
+#, c-format
+msgid "cannot set focus to %#010x\n"
+msgstr "неможливо встановити фокус на %#010x\n"
+
+#. Server refused our Xkb remapping request, probably the buggy version 21, ignore error
+#: Programs/xbrlapi.c:613
+#, c-format
+msgid "xbrlapi: server refused our mapping request, could not synthesize key\n"
+msgstr ""
+"xbrlapi: сервер відхилив наш запит на зіставлення, не вдалося синтезувати "
+"ключ\n"
+
+#: Programs/xbrlapi.c:619
+#, c-format
+msgid "xbrlapi: X Error %d, %s on display %s\n"
+msgstr "xbrlapi: X-помилка %d, %s на дисплеї %s\n"
+
+#: Programs/xbrlapi.c:620
+#, c-format
+msgid "xbrlapi: resource %#010lx, req %u:%u\n"
+msgstr "xbrlapi: ресурс %#010lx, запит %u:%u\n"
+
+#: Programs/xbrlapi.c:637
+#, c-format
+msgid "xbrlapi: no XFree86_VT atom\n"
+msgstr "xbrlapi: немає атома XFree86_VT\n"
+
+#: Programs/xbrlapi.c:643
+#, c-format
+msgid "xbrlapi: cannot get root window XFree86_VT property\n"
+msgstr ""
+"xbrlapi: не вдається отримати властивість кореневого вікна XFree86_VT\n"
+
+#: Programs/xbrlapi.c:648
+#, c-format
+msgid "xbrlapi: no items for VT number\n"
+msgstr "xbrlapi: немає елементів для номера VT\n"
+
+#: Programs/xbrlapi.c:652
+#, c-format
+msgid "xbrlapi: more than one item for VT number\n"
+msgstr "xbrlapi: більше одного елемента для номера VT\n"
+
+#: Programs/xbrlapi.c:661
+#, c-format
+msgid "xbrlapi: bad format for VT number\n"
+msgstr "xbrlapi: неправильний формат номера VT\n"
+
+#: Programs/xbrlapi.c:664
+#, c-format
+msgid "xbrlapi: bad type for VT number\n"
+msgstr "xbrlapi: неправильний тип для числа VT\n"
+
+#: Programs/xbrlapi.c:735
+#, c-format
+msgid "xbrlapi: didn't grab window %#010lx but got focus\n"
+msgstr "xbrlapi: не вдалося захопити вікно %#010lx, але фокус було отримано\n"
+
+#: Programs/xbrlapi.c:817
+#, c-format
+msgid "cannot connect to display %s\n"
+msgstr "не вдається підключитися до дисплея %s\n"
+
+#: Programs/xbrlapi.c:819
+msgid "strange old error handler\n"
+msgstr "дивний старий обробник помилок\n"
+
+#: Programs/xbrlapi.c:828
+msgid "Incompatible XKB library\n"
+msgstr "Несумісна бібліотека XKB\n"
+
+#: Programs/xbrlapi.c:830
+msgid "Incompatible XKB server support\n"
+msgstr "Несумісна підтримка сервера XKB\n"
+
+#: Programs/xbrlapi.c:832
+msgid "Could not get XKB major opcode\n"
+msgstr "Не вдалося отримати основний код операції XKB\n"
+
+#: Programs/xbrlapi.c:868
+#, c-format
+msgid "cannot grab windows on screen %d\n"
+msgstr "неможливо захопити вікна на екрані %d\n"
+
+#: Programs/xbrlapi.c:875
+msgid "failed to get first focus\n"
+msgstr "не вдалося отримати перший фокус\n"
+
+#: Programs/xbrlapi.c:931
+#, c-format
+msgid "xbrlapi: didn't grab parent of %#010lx\n"
+msgstr "xbrlapi: не вдалося отримати батьківський елемент для %#010lx\n"
+
+#: Programs/xbrlapi.c:952 Programs/xbrlapi.c:971
+#, c-format
+msgid "xbrlapi: didn't grab window %#010lx\n"
+msgstr "xbrlapi: не вдалося захопити вікно %#010lx\n"
+
+#: Programs/xbrlapi.c:956
+msgid "XFree(wm_name) for change"
+msgstr "XFree(wm_name) для зміни"
+
+#: Programs/xbrlapi.c:964
+#, c-format
+msgid "xbrlapi: window %#010lx changed to NULL name\n"
+msgstr "xbrlapi: імʼя вікна %#010lx змінено на NULL\n"
+
+#: Programs/xbrlapi.c:975
+msgid "XFree(wm_command) for change"
+msgstr "XFree(wm_command) для зміни"
+
+#: Programs/xbrlapi.c:980
+#, c-format
+msgid "xbrlapi: window %#010lx changed to NULL command\n"
+msgstr "xbrlapi: вікно %#010lx змінено на команду NULL\n"
+
+#. "shouldn't happen" events
+#: Programs/xbrlapi.c:1005
+#, c-format
+msgid "xbrlapi: unhandled event type: %d\n"
+msgstr "xbrlapi: необроблений тип події: %d\n"
+
+#: Programs/xbrlapi.c:1058
+msgid "unexpected cmd"
+msgstr "неочікувана команда"
+
+#: Programs/xbrlapi.c:1068
+#, c-format
+msgid "xbrlapi: Couldn't translate keysym %08X to keycode.\n"
+msgstr "xbrlapi: Не вдалося перекласти keysym %08X у keycode.\n"
+
+#: Programs/xbrlapi.c:1092
+#, c-format
+msgid ""
+"xbrlapi: Couldn't find modifiers to apply to %d for getting keysym %08X\n"
+msgstr ""
+"xbrlapi: Не вдалося знайти модифікатори для застосування до %d для отримання "
+"keysym %08X\n"
+
+#: Programs/xbrlapi.c:1105
+#, c-format
+msgid ""
+"xbrlapi: Couldn't find a keycode to remap for simulating unbound keysym "
+"%08X\n"
+msgstr ""
+"xbrlapi: Не вдалося знайти код клавіші для перепризначення для симуляції "
+"неповʼязаного символу клавіші %08X\n"
+
+#: Programs/xbrlapi.c:1168
+msgid "unexpected block type"
+msgstr "неочікуваний тип блоку"
