@@ -56,6 +56,14 @@ Space + b (dots 12)
   Toggle the skipping of blank braille windows on/off.
   This feature is especially useful for skipping over the blank ends of short lines when panning.
 
+Space + x (dots 1346)
+  Paste the clipboard content before the screen cursor;
+  long-pressing uses an alternate paste mode.
+  Adding the Dot8 key saves the clipboard to disk;
+  long-pressing instead shows the current content on the braille display.
+  Adding the Dot7 key restores the saved clipboard from disk;
+  long-pressing instead clears the clipboard.
+
 The Preferences Menu
 ====================
 
