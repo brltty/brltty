@@ -133,3 +133,5 @@ distclean:: clean
 	-rm -f config.mk config.h brltty-config.sh brltty.pc
 	-rm -f forbuild.log forbuild.cache forbuild.status
 	-rm -f forbuild.mk forbuild.h
+
+.PHONY: all install uninstall install-documents install-extras install-appstream install-messages install-polkit install-systemd install-udev install-dracut uninstall-dracut uninstall-messages uninstall-polkit uninstall-systemd uninstall-udev clean clean-archives distclean
