@@ -2262,6 +2262,14 @@ probeHidDevice (BrailleDisplay *brl) {
           logHidSerialNumber(&packet);
           break;
 
+        case BAUM_RSP_RoutingKey:
+        case BAUM_RSP_RoutingKeys:
+        case BAUM_RSP_DisplayKeys:
+        case BAUM_RSP_EntryKeys:
+        case BAUM_RSP_Joystick:
+          /* ignore input packets received during probing */
+          break;
+
         default:
           logUnexpectedPacket(packet.bytes, size);
           break;
