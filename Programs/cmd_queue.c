@@ -167,7 +167,7 @@ ASYNC_ALARM_CALLBACK(handleCommandAlarm) {
 
 static void
 setCommandAlarm (void *data) {
-  if (!commandAlarm && !commandQueueSuspendCount) {
+  if (!commandAlarm) {
     const CommandEnvironment *env = commandEnvironmentStack;
 
     if (env && !env->handlingCommand) {
