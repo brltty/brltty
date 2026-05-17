@@ -1896,29 +1896,46 @@ in
    elf*)
       BRLTTY_SCREEN_DRIVER([gb], [Grub])
       ;;
+   darwin*)
+      BRLTTY_SCREEN_DRIVER([mo], [MacOSAccessibility], [-framework AppKit -framework ApplicationServices -framework Carbon -framework Foundation -lobjc])
+      ;;
    *)
       AC_MSG_WARN([no native screen driver for ${host_os}])
       ;;
 esac
 
-BRLTTY_SCREEN_DRIVER([fv], [FileViewer], [-ltinfo])
-BRLTTY_SCREEN_DRIVER([tx], [Tmux])
-
 all_brltty_pty=""
 install_brltty_pty=""
-AC_CHECK_HEADER([sys/shm.h], [dnl
-   BRLTTY_SCREEN_DRIVER([sc], [Screen])
 
-   AC_CHECK_HEADER([sys/msg.h], [dnl
-      BRLTTY_SCREEN_DRIVER([em], [TerminalEmulator])
+case "${host_os}"
+in
+   darwin*)
+      dnl macOS: the MacOSAccessibility driver is the only sensible default.
+      dnl FileViewer needs libtinfo (not present on macOS — system curses is
+      dnl libncurses); Screen / Tmux / TerminalEmulator target Linux-style
+      dnl text-mode consoles that don't exist here. None of them are
+      dnl registered, so brltty doesn't try to build them.
+      :
+      ;;
+   *)
+      BRLTTY_SCREEN_DRIVER([fv], [FileViewer], [-ltinfo])
+      BRLTTY_SCREEN_DRIVER([tx], [Tmux])
 
-      if test -n "${curses_package}"
-      then
-         all_brltty_pty="all-brltty-pty"
-         install_brltty_pty="install-brltty-pty"
-      fi
-   ])
-])
+      AC_CHECK_HEADER([sys/shm.h], [dnl
+         BRLTTY_SCREEN_DRIVER([sc], [Screen])
+
+         AC_CHECK_HEADER([sys/msg.h], [dnl
+            BRLTTY_SCREEN_DRIVER([em], [TerminalEmulator])
+
+            if test -n "${curses_package}"
+            then
+               all_brltty_pty="all-brltty-pty"
+               install_brltty_pty="install-brltty-pty"
+            fi
+         ])
+      ])
+      ;;
+esac
 AC_SUBST([all_brltty_pty])
 AC_SUBST([install_brltty_pty])
 
