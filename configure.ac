@@ -1910,12 +1910,29 @@ install_brltty_pty=""
 case "${host_os}"
 in
    darwin*)
-      dnl macOS: the MacOSAccessibility driver is the only sensible default.
-      dnl FileViewer needs libtinfo (not present on macOS — system curses is
-      dnl libncurses); Screen / Tmux / TerminalEmulator target Linux-style
-      dnl text-mode consoles that don't exist here. None of them are
-      dnl registered, so brltty doesn't try to build them.
-      :
+      dnl macOS: register FileViewer + Tmux + Screen + TerminalEmulator
+      dnl alongside the Accessibility driver. FileViewer is required by
+      dnl brltty's built-in help / learn-mode UI; we link it against
+      dnl -lncurses (which on macOS provides the terminfo entry points
+      dnl that live in libtinfo on Linux). brltty-pty (paired with the
+      dnl `em` driver) is a faster path than AX for terminal-only
+      dnl sessions: brltty-pty owns the PTY, parses the escape stream
+      dnl itself, and publishes the screen state via SysV shared memory
+      dnl — read by brltty in microseconds instead of the 30–100 ms AX
+      dnl path.
+      BRLTTY_SCREEN_DRIVER([fv], [FileViewer], [-lncurses])
+      BRLTTY_SCREEN_DRIVER([tx], [Tmux])
+      AC_CHECK_HEADER([sys/shm.h], [dnl
+         BRLTTY_SCREEN_DRIVER([sc], [Screen])
+         AC_CHECK_HEADER([sys/msg.h], [dnl
+            BRLTTY_SCREEN_DRIVER([em], [TerminalEmulator])
+            if test -n "${curses_package}"
+            then
+               all_brltty_pty="all-brltty-pty"
+               install_brltty_pty="install-brltty-pty"
+            fi
+         ])
+      ])
       ;;
    *)
       BRLTTY_SCREEN_DRIVER([fv], [FileViewer], [-ltinfo])
