@@ -19,16 +19,26 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
 #include <mach/mach.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOCFPlugIn.h>
 #include <IOKit/usb/IOUSBLib.h>
+#include <IOKit/usb/USB.h>
+
+#include <mach/mach_time.h>
+#include <fcntl.h>
+#include <pthread.h>
 
 #include "log.h"
 #include "io_usb.h"
 #include "usb_internal.h"
 #include "system_darwin.h"
+#include "async_wait.h"
+#include "async_io.h"
+#include "async_handle.h"
 
 typedef struct {
   UsbEndpoint *endpoint;
@@ -41,15 +51,36 @@ typedef struct {
 } UsbAsynchronousRequest;
 
 struct UsbDeviceExtensionStruct {
-  IOUSBDeviceInterface182 **device;
+  IOUSBDeviceInterface500 **device;
   unsigned deviceOpened:1;
+  unsigned captured:1;
+  UInt32 locationID;
 
   IOUSBInterfaceInterface190 **interface;
   unsigned interfaceOpened:1;
   UInt8 pipeCount;
 
   CFRunLoopSourceRef runloopSource;
+
+  /* Dedicated thread that runs CFRunLoopRun() so IOKit async callbacks
+   * fire immediately on packet arrival. Without it, callbacks only fire
+   * when brltty's main thread explicitly pumps via executeRunLoop, which
+   * is polling-based and adds latency. */
+  pthread_t asyncThread;
+  CFRunLoopRef asyncRunloop;       /* captured by asyncThread, read by main */
+  CFRunLoopSourceRef wakeSource;   /* dummy source so CFRunLoopRun stays alive */
+  pthread_mutex_t queueLock;       /* protects all eptx->completedRequests */
+  pthread_cond_t completionCond;   /* signalled on each callback (for OUT waits) */
+  unsigned asyncThreadActive:1;
+  unsigned asyncShutdown:1;
 };
+
+#ifndef kUSBReEnumerateCaptureDeviceMask
+#define kUSBReEnumerateCaptureDeviceMask (1U << 30)
+#endif
+#ifndef kUSBReEnumerateReleaseDeviceMask
+#define kUSBReEnumerateReleaseDeviceMask (1U << 29)
+#endif
 
 struct UsbEndpointExtensionStruct {
   UsbEndpoint *endpoint;
@@ -61,7 +92,145 @@ struct UsbEndpointExtensionStruct {
   UInt8 transferMode;
   UInt8 pollInterval;
   UInt16 packetSize;
+
+  uint64_t lastWriteCompletedAbs;
+
+  /* Self-pipe for IN endpoints: the IOKit completion callback writes one
+   * byte here; brltty's main thread monitors the read fd via
+   * asyncMonitorFileInput and wakes immediately to drain via usbReapResponse. */
+  int wakeReadFd;
+  int wakeWriteFd;
+  AsyncHandle inputMonitor;
 };
+
+/* Tracks when *any* interrupt IN response was last delivered on the
+ * device. Some HID-class devices (Baum VarioUltra) stall the interrupt
+ * OUT pipe if a write lands too soon after an input packet arrived. */
+static uint64_t lastInputResponseAbs = 0;
+
+static uint64_t
+machAbsToMs (uint64_t abs) {
+  static mach_timebase_info_data_t timebase = {0};
+  if (timebase.denom == 0) mach_timebase_info(&timebase);
+  return (abs * timebase.numer) / (timebase.denom * 1000000ULL);
+}
+
+/* ------------------------------------------------------------------
+ * Dedicated CFRunLoop thread for IOKit USB async callbacks.
+ *
+ * Background: brltty's main loop is poll/select-based and doesn't run
+ * CFRunLoop. With the source attached to CFRunLoopGetMain(), IOKit
+ * callbacks only fire when main explicitly pumps via executeRunLoop()
+ * inside usbReapResponse. That made input polling-driven (40 ms ticks).
+ *
+ * Here we spawn a thread that runs CFRunLoop forever. Sources attached
+ * to its runloop deliver callbacks in that thread. Each callback then
+ * wakes the main thread via either a self-pipe (IN endpoints, monitored
+ * by asyncMonitorFileInput) or a condition variable (OUT endpoints,
+ * awaited synchronously by usbWriteInterruptAsync).
+ * ------------------------------------------------------------------ */
+
+typedef struct {
+  UsbDeviceExtension *devx;
+  pthread_mutex_t lock;
+  pthread_cond_t cond;
+  unsigned ready:1;
+} UsbAsyncThreadStartup;
+
+static void
+usbAsyncWakeSourcePerform (void *info) {
+  /* No-op: the source exists only to prevent CFRunLoopRunInMode from
+   * returning kCFRunLoopRunFinished when there are no sources yet. */
+}
+
+static void *
+usbDarwinAsyncIoThread (void *arg) {
+  UsbAsyncThreadStartup *startup = arg;
+  UsbDeviceExtension *devx = startup->devx;
+
+  CFRunLoopRef rl = CFRunLoopGetCurrent();
+
+  CFRunLoopSourceContext ctx = {0};
+  ctx.perform = usbAsyncWakeSourcePerform;
+  CFRunLoopSourceRef wake = CFRunLoopSourceCreate(NULL, 0, &ctx);
+  if (wake) {
+    CFRunLoopAddSource(rl, wake, kCFRunLoopDefaultMode);
+  }
+
+  pthread_mutex_lock(&startup->lock);
+  devx->asyncRunloop = rl;
+  devx->wakeSource = wake;
+  startup->ready = 1;
+  pthread_cond_signal(&startup->cond);
+  pthread_mutex_unlock(&startup->lock);
+
+  while (!devx->asyncShutdown) {
+    SInt32 r = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1.0e9, false);
+    if (r == kCFRunLoopRunStopped) break;
+  }
+
+  if (wake) {
+    CFRunLoopRemoveSource(rl, wake, kCFRunLoopDefaultMode);
+    CFRelease(wake);
+  }
+  return NULL;
+}
+
+static int
+usbStartAsyncIoThread (UsbDeviceExtension *devx) {
+  if (devx->asyncThreadActive) return 1;
+
+  if (pthread_mutex_init(&devx->queueLock, NULL) != 0) {
+    logSystemError("USB queueLock init");
+    return 0;
+  }
+  if (pthread_cond_init(&devx->completionCond, NULL) != 0) {
+    logSystemError("USB completionCond init");
+    pthread_mutex_destroy(&devx->queueLock);
+    return 0;
+  }
+
+  UsbAsyncThreadStartup startup = { .devx = devx, .ready = 0 };
+  if (pthread_mutex_init(&startup.lock, NULL) != 0
+      || pthread_cond_init(&startup.cond, NULL) != 0) {
+    logSystemError("USB async startup sync init");
+    pthread_cond_destroy(&devx->completionCond);
+    pthread_mutex_destroy(&devx->queueLock);
+    return 0;
+  }
+
+  if (pthread_create(&devx->asyncThread, NULL, usbDarwinAsyncIoThread, &startup) != 0) {
+    logSystemError("USB async thread create");
+    pthread_cond_destroy(&startup.cond);
+    pthread_mutex_destroy(&startup.lock);
+    pthread_cond_destroy(&devx->completionCond);
+    pthread_mutex_destroy(&devx->queueLock);
+    return 0;
+  }
+
+  pthread_mutex_lock(&startup.lock);
+  while (!startup.ready) pthread_cond_wait(&startup.cond, &startup.lock);
+  pthread_mutex_unlock(&startup.lock);
+  pthread_cond_destroy(&startup.cond);
+  pthread_mutex_destroy(&startup.lock);
+
+  devx->asyncThreadActive = 1;
+  logMessage(LOG_CATEGORY(USB_IO), "USB async I/O thread started");
+  return 1;
+}
+
+static void
+usbStopAsyncIoThread (UsbDeviceExtension *devx) {
+  if (!devx->asyncThreadActive) return;
+  devx->asyncShutdown = 1;
+  if (devx->asyncRunloop) {
+    CFRunLoopStop(devx->asyncRunloop);
+  }
+  pthread_join(devx->asyncThread, NULL);
+  pthread_cond_destroy(&devx->completionCond);
+  pthread_mutex_destroy(&devx->queueLock);
+  devx->asyncThreadActive = 0;
+}
 
 static void
 setUsbError (long int result, const char *action) {
@@ -102,6 +271,137 @@ setUsbError (long int result, const char *action) {
   }
 }
 
+static IOUSBDeviceInterface500 **
+acquireDeviceInterfaceMatching (uint16_t vendor, uint16_t product, UInt32 locationID) {
+  CFMutableDictionaryRef match = IOServiceMatching(kIOUSBDeviceClassName);
+  if (!match) return NULL;
+
+  CFNumberRef vidNum = CFNumberCreate(NULL, kCFNumberSInt16Type, &vendor);
+  CFNumberRef pidNum = CFNumberCreate(NULL, kCFNumberSInt16Type, &product);
+  CFDictionarySetValue(match, CFSTR(kUSBVendorID), vidNum);
+  CFDictionarySetValue(match, CFSTR(kUSBProductID), pidNum);
+  CFRelease(vidNum);
+  CFRelease(pidNum);
+
+  io_iterator_t iterator = IO_OBJECT_NULL;
+  kern_return_t kr = IOServiceGetMatchingServices(kIOMasterPortDefault, match, &iterator);
+  if (kr != KERN_SUCCESS) return NULL;
+
+  IOUSBDeviceInterface500 **result = NULL;
+  io_service_t service;
+  while ((service = IOIteratorNext(iterator))) {
+    IOCFPlugInInterface **plugin = NULL;
+    SInt32 score = 0;
+    IOReturn pluginResult = IOCreatePlugInInterfaceForService(
+      service, kIOUSBDeviceUserClientTypeID, kIOCFPlugInInterfaceID,
+      &plugin, &score
+    );
+    IOObjectRelease(service);
+
+    if (pluginResult == kIOReturnSuccess && plugin) {
+      IOUSBDeviceInterface500 **candidate = NULL;
+      (*plugin)->QueryInterface(
+        plugin,
+        CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID500),
+        (LPVOID)&candidate
+      );
+      (*plugin)->Release(plugin);
+
+      if (candidate) {
+        // If a locationID is provided, prefer that exact physical port so we
+        // don't pick the wrong unit when several identical displays are
+        // attached. A mismatch is non-fatal: we still try the first device.
+        if (locationID != 0) {
+          UInt32 loc = 0;
+          if ((*candidate)->GetLocationID(candidate, &loc) == kIOReturnSuccess
+              && loc == locationID) {
+            result = candidate;
+            break;
+          }
+          if (!result) {
+            result = candidate;
+            continue;
+          }
+          (*candidate)->Release(candidate);
+        } else {
+          result = candidate;
+          break;
+        }
+      }
+    }
+  }
+  IOObjectRelease(iterator);
+  return result;
+}
+
+// Take exclusive ownership of a USB device that is currently bound to another
+// driver (typically AppleUserUSBHostHIDDevice on macOS, which prevents libusb
+// from opening the interface). The technique mirrors what VirtualBox / VMware
+// Fusion use: USBDeviceReEnumerate with the capture flag tears down existing
+// bindings, then we re-acquire a fresh IOUSBDeviceInterface for the same
+// physical port (matched by locationID) before any other driver attaches.
+static int
+captureDevice (UsbDeviceExtension *devx) {
+  if (devx->captured) return 1;
+
+  UInt32 locationID = 0;
+  uint16_t vendor = 0, product = 0;
+  (*devx->device)->GetLocationID(devx->device, &locationID);
+  (*devx->device)->GetDeviceVendor(devx->device, &vendor);
+  (*devx->device)->GetDeviceProduct(devx->device, &product);
+
+  IOReturn result = (*devx->device)->USBDeviceReEnumerate(
+    devx->device, kUSBReEnumerateCaptureDeviceMask
+  );
+  if (result != kIOReturnSuccess) {
+    setUsbError(result, "USB device capture (re-enumerate)");
+    return 0;
+  }
+
+  // The kernel terminates the old IOService; our handle is now stale.
+  (*devx->device)->Release(devx->device);
+  devx->device = NULL;
+
+  // Poll for the re-enumerated device by VID/PID, preferring the same
+  // physical port when locationID is known. macOS typically completes
+  // re-enumeration in well under a second; we wait up to ~5 seconds.
+  IOUSBDeviceInterface500 **fresh = NULL;
+  for (int attempt = 0; attempt < 100; attempt += 1) {
+    fresh = acquireDeviceInterfaceMatching(vendor, product, locationID);
+    if (fresh) break;
+    usleep(50000);
+  }
+
+  if (!fresh) {
+    logMessage(LOG_WARNING,
+      "USB device did not reappear after capture (vendor=%04X product=%04X locationID=0x%08X)",
+      vendor, product, locationID);
+    return 0;
+  }
+
+  devx->device = fresh;
+  devx->locationID = locationID;
+  devx->captured = 1;
+  logMessage(LOG_NOTICE,
+    "USB device captured: vendor=%04X product=%04X locationID=0x%08X",
+    vendor, product, locationID);
+  return 1;
+}
+
+static void
+releaseCapturedDevice (UsbDeviceExtension *devx) {
+  if (!devx->captured) return;
+  if (!devx->device) return;
+
+  IOReturn result = (*devx->device)->USBDeviceReEnumerate(
+    devx->device, kUSBReEnumerateReleaseDeviceMask
+  );
+  if (result != kIOReturnSuccess) {
+    setUsbError(result, "USB device release (re-enumerate)");
+  }
+  devx->captured = 0;
+}
+
 static int
 openDevice (UsbDevice *device, int seize) {
   UsbDeviceExtension *devx = device->extension;
@@ -110,6 +410,15 @@ openDevice (UsbDevice *device, int seize) {
   if (!devx->deviceOpened) {
     const char *action = "opened";
     int level = LOG_INFO;
+
+    // On macOS, refreshable braille displays present as USB-HID and the kernel
+    // automatically binds them to AppleUserUSBHostHIDDevice, which then refuses
+    // exclusive access. Capture the device away from that driver first.
+    if (!captureDevice(devx)) {
+      // Capture failed; the open attempt below will likely also fail with
+      // kIOReturnExclusiveAccess, but we let it proceed so the error is
+      // reported in the usual code path.
+    }
 
     result = (*devx->device)->USBDeviceOpen(devx->device);
     if (result != kIOReturnSuccess) {
@@ -263,13 +572,38 @@ usbAsynchronousRequestCallback (void *context, IOReturn result, void *arg) {
   UsbAsynchronousRequest *request = context;
   UsbEndpoint *endpoint = request->endpoint;
   UsbEndpointExtension *eptx = endpoint->extension;
+  UsbDeviceExtension *devx = endpoint->device->extension;
 
   request->result = result;
   request->count = (intptr_t)arg;
 
-  if (!enqueueItem(eptx->completedRequests, request)) {
+  if (eptx->transferDirection == kUSBIn && result == kIOReturnSuccess
+      && (intptr_t)arg > 0) {
+    lastInputResponseAbs = mach_absolute_time();
+  }
+
+  pthread_mutex_lock(&devx->queueLock);
+  int enqueued = enqueueItem(eptx->completedRequests, request)? 1: 0;
+  if (!enqueued) {
     logSystemError("USB completed request enqueue");
+  }
+  /* Signal any thread blocked in usbWriteInterruptAsync waiting on this
+   * device's completion cond — they'll re-check their own queue. */
+  pthread_cond_broadcast(&devx->completionCond);
+  pthread_mutex_unlock(&devx->queueLock);
+
+  if (!enqueued) {
     free(request);
+    return;
+  }
+
+  /* Wake the main thread via per-endpoint self-pipe (IN endpoints only).
+   * The byte is consumed by usbDarwinInputMonitorCallback before invoking
+   * the user callback (gioInputMonitor → handleBrailleInput). */
+  if (eptx->transferDirection == kUSBIn && eptx->wakeWriteFd >= 0) {
+    uint8_t b = 0;
+    ssize_t w = write(eptx->wakeWriteFd, &b, 1);
+    (void)w;  /* EAGAIN means the pipe already has a pending byte — fine */
   }
 }
 
@@ -302,6 +636,15 @@ usbClaimInterface (UsbDevice *device, unsigned char interface) {
     if (devx->interfaceOpened) return 1;
 
     result = (*devx->interface)->USBInterfaceOpen(devx->interface);
+    if (result == kIOReturnExclusiveAccess) {
+      setUsbError(result, "USB interface open");
+      result = (*devx->interface)->USBInterfaceOpenSeize(devx->interface);
+      if (result != kIOReturnSuccess) {
+        setUsbError(result, "USB interface seize");
+      } else {
+        logMessage(LOG_NOTICE, "USB interface seized: %u", interface);
+      }
+    }
     if (result == kIOReturnSuccess) {
       result = (*devx->interface)->GetNumEndpoints(devx->interface, &devx->pipeCount);
       if (result == kIOReturnSuccess) {
@@ -312,7 +655,7 @@ usbClaimInterface (UsbDevice *device, unsigned char interface) {
       }
 
       (*devx->interface)->USBInterfaceClose(devx->interface);
-    } else {
+    } else if (result != kIOReturnExclusiveAccess) {
       setUsbError(result, "USB interface open");
     }
   }
@@ -427,6 +770,12 @@ usbSubmitRequest (
     UsbAsynchronousRequest *request;
 
     if (!devx->runloopSource) {
+      /* Ensure the async I/O thread is up before attaching the IOKit
+       * event source to its runloop. */
+      if (!usbStartAsyncIoThread(devx)) {
+        return NULL;
+      }
+
       result = (*devx->interface)->CreateInterfaceAsyncEventSource(devx->interface,
                                                                    &devx->runloopSource);
       if (result != kIOReturnSuccess) {
@@ -434,7 +783,10 @@ usbSubmitRequest (
         return NULL;
       }
 
-      addRunLoopSource(devx->runloopSource);
+      /* Attach to the async thread's runloop (not main) so callbacks fire
+       * immediately on packet arrival without waiting for main to pump. */
+      CFRunLoopAddSource(devx->asyncRunloop, devx->runloopSource, kCFRunLoopDefaultMode);
+      CFRunLoopWakeUp(devx->asyncRunloop);
     }
 
     if ((request = malloc(sizeof(*request) + length))) {
@@ -492,22 +844,25 @@ usbReapResponse (
   UsbEndpoint *endpoint;
 
   if ((endpoint = usbGetEndpoint(device, endpointAddress))) {
+    UsbDeviceExtension *devx = device->extension;
     UsbEndpointExtension *eptx = endpoint->extension;
-    UsbAsynchronousRequest *request;
+    UsbAsynchronousRequest *request = NULL;
 
-    while (!(request = dequeueItem(eptx->completedRequests))) {
-      switch (executeRunLoop((wait? 60: 0))) {
-        case kCFRunLoopRunTimedOut:
-          if (wait) continue;
-        case kCFRunLoopRunFinished:
-          errno = EAGAIN;
-          goto none;
-
-        case kCFRunLoopRunStopped:
-        case kCFRunLoopRunHandledSource:
-        default:
-          continue;
+    pthread_mutex_lock(&devx->queueLock);
+    request = dequeueItem(eptx->completedRequests);
+    if (!request && wait) {
+      /* Wait on the device-wide completion cond. Spurious wakes are fine
+       * because we re-check the queue each loop. */
+      while (!request) {
+        pthread_cond_wait(&devx->completionCond, &devx->queueLock);
+        request = dequeueItem(eptx->completedRequests);
       }
+    }
+    pthread_mutex_unlock(&devx->queueLock);
+
+    if (!request) {
+      errno = EAGAIN;
+      return NULL;
     }
 
     response->context = request->context;
@@ -531,8 +886,31 @@ usbReapResponse (
     return request;
   }
 
-none:
   return NULL;
+}
+
+typedef struct {
+  UsbEndpointExtension *eptx;
+  AsyncMonitorCallback *userCallback;
+  void *userData;
+} UsbDarwinMonitorContext;
+
+ASYNC_MONITOR_CALLBACK(usbDarwinInputMonitorCallback) {
+  UsbDarwinMonitorContext *ctx = parameters->data;
+  UsbEndpointExtension *eptx = ctx->eptx;
+
+  /* Drain the wake pipe — the async I/O thread may have written several
+   * bytes if multiple responses arrived before we returned to the loop. */
+  if (eptx->wakeReadFd >= 0) {
+    uint8_t buf[64];
+    while (read(eptx->wakeReadFd, buf, sizeof(buf)) > 0) ;
+  }
+
+  AsyncMonitorCallbackParameters userParams = {
+    .error = parameters->error,
+    .data = ctx->userData
+  };
+  return ctx->userCallback(&userParams);
 }
 
 int
@@ -540,7 +918,48 @@ usbMonitorInputEndpoint (
   UsbDevice *device, unsigned char endpointNumber,
   AsyncMonitorCallback *callback, void *data
 ) {
-  return 0;
+  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
+  if (!endpoint) return 0;
+
+  UsbEndpointExtension *eptx = endpoint->extension;
+  if (!eptx) return 0;
+
+  /* Tear down any prior monitor. */
+  if (eptx->inputMonitor) {
+    asyncCancelRequest(eptx->inputMonitor);
+    eptx->inputMonitor = NULL;
+  }
+  if (!callback) return 1;
+
+  /* Lazy-create the self-pipe on first attach. */
+  if (eptx->wakeReadFd < 0) {
+    int fds[2];
+    if (pipe(fds) == -1) {
+      logSystemError("USB wake pipe");
+      return 0;
+    }
+    fcntl(fds[0], F_SETFL, O_NONBLOCK);
+    fcntl(fds[1], F_SETFL, O_NONBLOCK);
+    eptx->wakeReadFd = fds[0];
+    eptx->wakeWriteFd = fds[1];
+  }
+
+  UsbDarwinMonitorContext *ctx = malloc(sizeof(*ctx));
+  if (!ctx) {
+    logMallocError();
+    return 0;
+  }
+  ctx->eptx = eptx;
+  ctx->userCallback = callback;
+  ctx->userData = data;
+
+  if (!asyncMonitorFileInput(&eptx->inputMonitor, eptx->wakeReadFd,
+                             usbDarwinInputMonitorCallback, ctx)) {
+    free(ctx);
+    return 0;
+  }
+
+  return 1;
 }
 
 ssize_t
@@ -562,9 +981,17 @@ usbReadEndpoint (
 
   read:
     count = length;
-    result = (*devx->interface)->ReadPipeTO(devx->interface, eptx->pipeNumber,
-                                            buffer, &count,
-                                            timeout, timeout);
+    if (eptx->transferMode == kUSBInterrupt) {
+      // ReadPipeTO only supports bulk pipes on macOS; interrupt pipes must use
+      // ReadPipe. Interrupt reads complete on the next polling interval (or
+      // when data is available), so a timeout argument is unnecessary.
+      result = (*devx->interface)->ReadPipe(devx->interface, eptx->pipeNumber,
+                                            buffer, &count);
+    } else {
+      result = (*devx->interface)->ReadPipeTO(devx->interface, eptx->pipeNumber,
+                                              buffer, &count,
+                                              timeout, timeout);
+    }
 
     switch (result) {
       case kIOReturnSuccess:
@@ -602,6 +1029,130 @@ usbReadEndpoint (
   return -1;
 }
 
+/* How long to wait for an async interrupt write to complete before
+ * giving up. IOKit's synchronous WritePipe waits indefinitely if the
+ * device NAKs (busy sending IN reports), so we drive WritePipeAsync
+ * ourselves with a bounded timeout and recovery. */
+#define USB_DARWIN_INTERRUPT_WRITE_TIMEOUT_MS 250
+
+static ssize_t
+usbWriteInterruptAsync (
+  UsbDevice *device, UsbEndpoint *endpoint,
+  unsigned char endpointAddress,
+  const void *buffer, size_t length
+) {
+  UsbDeviceExtension *devx = device->extension;
+  UsbEndpointExtension *eptx = endpoint->extension;
+
+  /* Drain any stale completions left over from a previous timeout/abort. */
+  pthread_mutex_lock(&devx->queueLock);
+  {
+    UsbAsynchronousRequest *stale;
+    while ((stale = dequeueItem(eptx->completedRequests))) {
+      free(stale);
+    }
+  }
+  pthread_mutex_unlock(&devx->queueLock);
+
+  logMessage(LOG_DEBUG, "WritePipe enter: ep=%02X len=%zu", endpointAddress, length);
+
+  void *handle = usbSubmitRequest(device, endpointAddress,
+                                  (void *)buffer, length, NULL);
+  if (!handle) {
+    logMessage(LOG_DEBUG, "WritePipe exit:  ep=%02X submit failed", endpointAddress);
+    return -1;
+  }
+
+  /* Wait on the device-wide completion cond until our request shows up in
+   * our endpoint's queue or the deadline passes. The callback fires on the
+   * async-I/O thread, enqueues the completion, and broadcasts the cond. */
+  uint64_t deadlineMs = machAbsToMs(mach_absolute_time())
+                       + USB_DARWIN_INTERRUPT_WRITE_TIMEOUT_MS;
+  UsbAsynchronousRequest *request = NULL;
+
+  pthread_mutex_lock(&devx->queueLock);
+  for (;;) {
+    request = dequeueItem(eptx->completedRequests);
+    if (request) break;
+
+    uint64_t nowMs = machAbsToMs(mach_absolute_time());
+    if (nowMs >= deadlineMs) break;
+
+    struct timespec abs;
+    uint64_t targetNs = (uint64_t)deadlineMs * 1000000ULL;
+    abs.tv_sec  = targetNs / 1000000000ULL;
+    abs.tv_nsec = targetNs % 1000000000ULL;
+    /* CLOCK_REALTIME for pthread_cond_timedwait on macOS (default). We
+     * convert our monotonic deadline to wall-clock once at entry: a brief
+     * wall-clock jump just terminates the wait early, which is harmless. */
+    struct timespec now_ts;
+    clock_gettime(CLOCK_REALTIME, &now_ts);
+    uint64_t monoNowMs = machAbsToMs(mach_absolute_time());
+    long deltaMs = (long)deadlineMs - (long)monoNowMs;
+    if (deltaMs <= 0) break;
+    abs.tv_sec  = now_ts.tv_sec  + deltaMs / 1000;
+    abs.tv_nsec = now_ts.tv_nsec + (deltaMs % 1000) * 1000000L;
+    if (abs.tv_nsec >= 1000000000L) { abs.tv_sec++; abs.tv_nsec -= 1000000000L; }
+
+    int rc = pthread_cond_timedwait(&devx->completionCond, &devx->queueLock, &abs);
+    if (rc == ETIMEDOUT) {
+      request = dequeueItem(eptx->completedRequests);
+      break;
+    }
+  }
+  pthread_mutex_unlock(&devx->queueLock);
+
+  if (!request) {
+    /* Timed out. Cancel the pipe so the request unblocks, clear any stall
+     * state on both ends, then drain the completion that AbortPipe leaves
+     * behind so subsequent writes start clean. */
+    logMessage(LOG_WARNING, "WritePipe timed out: ep=%02X len=%zu — aborting pipe",
+               endpointAddress, length);
+    IOReturn ar = (*devx->interface)->AbortPipe(devx->interface, eptx->pipeNumber);
+    if (ar != kIOReturnSuccess) {
+      logMessage(LOG_WARNING, "AbortPipe failed: 0X%X", ar);
+    }
+    IOReturn cr = (*devx->interface)->ClearPipeStallBothEnds(devx->interface, eptx->pipeNumber);
+    if (cr != kIOReturnSuccess) {
+      logMessage(LOG_WARNING, "ClearPipeStallBothEnds failed: 0X%X", cr);
+    }
+
+    /* Reap the abort-completion from the async-I/O thread. Bounded wait. */
+    uint64_t reapDeadlineMs = machAbsToMs(mach_absolute_time()) + 100;
+    pthread_mutex_lock(&devx->queueLock);
+    for (;;) {
+      request = dequeueItem(eptx->completedRequests);
+      if (request) { free(request); request = NULL; break; }
+      uint64_t nowMs = machAbsToMs(mach_absolute_time());
+      if (nowMs >= reapDeadlineMs) break;
+      struct timespec ts; clock_gettime(CLOCK_REALTIME, &ts);
+      long dMs = (long)(reapDeadlineMs - nowMs);
+      ts.tv_sec += dMs / 1000;
+      ts.tv_nsec += (dMs % 1000) * 1000000L;
+      if (ts.tv_nsec >= 1000000000L) { ts.tv_sec++; ts.tv_nsec -= 1000000000L; }
+      pthread_cond_timedwait(&devx->completionCond, &devx->queueLock, &ts);
+    }
+    pthread_mutex_unlock(&devx->queueLock);
+
+    errno = ETIMEDOUT;
+    return -1;
+  }
+
+  IOReturn result = request->result;
+  ssize_t count = (result == kIOReturnSuccess)? (ssize_t)length: -1;
+  free(request);
+
+  logMessage(LOG_DEBUG, "WritePipe exit:  ep=%02X result=0X%X", endpointAddress, result);
+
+  if (result != kIOReturnSuccess) {
+    setUsbError(result, "USB endpoint async write");
+    return -1;
+  }
+
+  eptx->lastWriteCompletedAbs = mach_absolute_time();
+  return count;
+}
+
 ssize_t
 usbWriteEndpoint (
   UsbDevice *device,
@@ -617,9 +1168,18 @@ usbWriteEndpoint (
     UsbEndpointExtension *eptx = endpoint->extension;
     IOReturn result;
 
-    result = (*devx->interface)->WritePipeTO(devx->interface, eptx->pipeNumber,
-                                             (void *)buffer, length,
-                                             timeout, timeout);
+    // WritePipeTO only supports bulk pipes on macOS; interrupt pipes go
+    // through WritePipeAsync (via usbSubmitRequest) with our own timeout
+    // and recovery, because the sync WritePipe blocks indefinitely on NAK.
+    if (eptx->transferMode == kUSBInterrupt) {
+      return usbWriteInterruptAsync(device, endpoint,
+                                    endpoint->descriptor->bEndpointAddress,
+                                    buffer, length);
+    } else {
+      result = (*devx->interface)->WritePipeTO(devx->interface, eptx->pipeNumber,
+                                               (void *)buffer, length,
+                                               timeout, timeout);
+    }
     if (result == kIOReturnSuccess) return length;
     setUsbError(result, "USB endpoint write");
   }
@@ -673,6 +1233,9 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx;
 
   if ((eptx = malloc(sizeof(*eptx)))) {
+    memset(eptx, 0, sizeof(*eptx));
+    eptx->wakeReadFd = -1;
+    eptx->wakeWriteFd = -1;
     if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       IOReturn result;
       unsigned char number = USB_ENDPOINT_NUMBER(endpoint->descriptor);
@@ -719,6 +1282,12 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 
 void
 usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
+  if (eptx->inputMonitor) {
+    asyncCancelRequest(eptx->inputMonitor);
+    eptx->inputMonitor = NULL;
+  }
+  if (eptx->wakeReadFd >= 0) { close(eptx->wakeReadFd); eptx->wakeReadFd = -1; }
+  if (eptx->wakeWriteFd >= 0) { close(eptx->wakeWriteFd); eptx->wakeWriteFd = -1; }
   if (eptx->completedRequests) {
     destroyQueue(eptx->completedRequests);
     eptx->completedRequests = NULL;
@@ -731,6 +1300,17 @@ void
 usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
   IOReturn result;
 
+  /* If the async-thread is up, remove the IOKit event source from its
+   * runloop, then stop and join the thread before releasing the interface. */
+  if (devx->runloopSource && devx->asyncRunloop) {
+    CFRunLoopRemoveSource(devx->asyncRunloop, devx->runloopSource, kCFRunLoopDefaultMode);
+  }
+  if (devx->runloopSource) {
+    CFRelease(devx->runloopSource);
+    devx->runloopSource = NULL;
+  }
+  usbStopAsyncIoThread(devx);
+
   unsetInterface(devx);
 
   if (devx->deviceOpened) {
@@ -739,8 +1319,14 @@ usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
     devx->deviceOpened = 0;
   }
 
-  (*devx->device)->Release(devx->device);
-  devx->device = NULL;
+  // Hand the device back to the kernel before releasing the interface so
+  // VoiceOver (or any other userland HID client) can pick it up again.
+  releaseCapturedDevice(devx);
+
+  if (devx->device) {
+    (*devx->device)->Release(devx->device);
+    devx->device = NULL;
+  }
 
   free(devx);
 }
@@ -777,10 +1363,10 @@ usbFindDevice (UsbDeviceChooser *chooser, UsbChooseChannelData *data) {
           service = 0;
 
           if ((ioResult == kIOReturnSuccess) && plugin) {
-            IOUSBDeviceInterface182 **interface = NULL;
+            IOUSBDeviceInterface500 **interface = NULL;
 
             ioResult = (*plugin)->QueryInterface(plugin,
-                                                 CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID182),
+                                                 CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID500),
                                                  (LPVOID)&interface);
             (*plugin)->Release(plugin);
             plugin = NULL;
@@ -791,6 +1377,8 @@ usbFindDevice (UsbDeviceChooser *chooser, UsbChooseChannelData *data) {
               if ((devx = malloc(sizeof(*devx)))) {
                 devx->device = interface;
                 devx->deviceOpened = 0;
+                devx->captured = 0;
+                devx->locationID = 0;
 
                 devx->interface = NULL;
                 devx->interfaceOpened = 0;
