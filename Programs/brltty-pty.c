@@ -436,14 +436,21 @@ main (int argc, char *argv[]) {
   ptySetLogTerminalSequences(opt_logSequences);
   ptySetLogUnexpectedTerminalIO(opt_logUnexpected);
 
-  if (!isatty(STDIN_FILENO)) {
-    logMessage(LOG_ERR, "%s", gettext("standard input isn't a terminal"));
-    return PROG_EXIT_SEMANTIC;
-  }
+  /* When invoked by the TerminalEmulator screen driver (which spawns us
+   * with --driver-directives so it can read the PTY path back on stderr),
+   * stdin/stdout are pipes — not TTYs — and that's fine: input arrives
+   * via the message queue instead of stdin. Only require TTYs in the
+   * standalone interactive invocation. */
+  if (!opt_driverDirectives) {
+    if (!isatty(STDIN_FILENO)) {
+      logMessage(LOG_ERR, "%s", gettext("standard input isn't a terminal"));
+      return PROG_EXIT_SEMANTIC;
+    }
 
-  if (!isatty(STDOUT_FILENO)) {
-    logMessage(LOG_ERR, "%s", gettext("standard output isn't a terminal"));
-    return PROG_EXIT_SEMANTIC;
+    if (!isatty(STDOUT_FILENO)) {
+      logMessage(LOG_ERR, "%s", gettext("standard output isn't a terminal"));
+      return PROG_EXIT_SEMANTIC;
+    }
   }
 
   {
