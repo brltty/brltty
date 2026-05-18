@@ -1269,15 +1269,13 @@ usbAwaitInput (
   }
 
   retryInterval = usbGetPollInterval(endpoint);
-  retryInterval = MAX(USB_INPUT_AWAIT_RETRY_INTERVAL_MINIMUM, retryInterval);
+  retryInterval = MAX(retryInterval, USB_INPUT_AWAIT_RETRY_INTERVAL_MINIMUM);
   /* Cap the per-iteration sleep. For USB 2.0 high-speed interrupt endpoints
    * the formula above can yield 64+ ms (e.g. bInterval=10 → 64 ms), which
    * adds that delay to every read attempt — visible as a latency floor
    * during input bursts on HID-class braille displays.
    */
-  if (retryInterval > USB_INPUT_AWAIT_RETRY_INTERVAL_MINIMUM) {
-    retryInterval = USB_INPUT_AWAIT_RETRY_INTERVAL_MINIMUM;
-  }
+  retryInterval = MIN(retryInterval, USB_INPUT_AWAIT_RETRY_INTERVAL_MINIMUM);
 
   if (!(endpoint->direction.input.pending.requests && getQueueSize(endpoint->direction.input.pending.requests))) {
     int size = getLittleEndian16(endpoint->descriptor->wMaxPacketSize);
