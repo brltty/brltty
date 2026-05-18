@@ -244,6 +244,16 @@ static AXObserverRef observedObserver = NULL;
 static AXUIElementRef observedAppElement = NULL;
 static AXUIElementRef observedFocusedElement = NULL;
 
+// Cached frontmost app bundle identifier. Updated by the observer thread
+// from reattachIfNeeded() (on app-switch or the 100ms backup tick) and
+// read by brltty's main thread via ax_frontmost_bundle_id() — the screen
+// driver hashes it into `currentVirtualTerminal()` so brlapi clients can
+// scope their tty routing per macOS application. Apple bundle ids fit
+// well under 256 bytes (longest in Apple's own ecosystem is ~80).
+#define BUNDLE_ID_MAX 256
+static pthread_mutex_t bundleIdLock = PTHREAD_MUTEX_INITIALIZER;
+static char frontmostBundleId[BUNDLE_ID_MAX] = {0};
+
 static const CFStringRef kAppNotifications[] = {
     CFSTR("AXFocusedUIElementChanged"),
     CFSTR("AXFocusedWindowChanged"),
@@ -377,6 +387,20 @@ reattachIfNeeded(void) {
         NSRunningApplication *app = [[NSWorkspace sharedWorkspace] frontmostApplication];
         if (!app) return;
         pid_t pid = app.processIdentifier;
+
+        // Refresh the cached bundle id for ax_frontmost_bundle_id().
+        // Some launch-style apps (e.g. Finder during a Dock click) can
+        // have a nil bundleIdentifier; we clear the cache rather than
+        // leak the previous value in that case.
+        const char *bid = app.bundleIdentifier.UTF8String;
+        pthread_mutex_lock(&bundleIdLock);
+        if (bid) {
+            strncpy(frontmostBundleId, bid, BUNDLE_ID_MAX - 1);
+            frontmostBundleId[BUNDLE_ID_MAX - 1] = '\0';
+        } else {
+            frontmostBundleId[0] = '\0';
+        }
+        pthread_mutex_unlock(&bundleIdLock);
 
         AXUIElementRef appEl = AXUIElementCreateApplication(pid);
         AXUIElementRef focused = copyElementAttribute(appEl, kAXFocusedUIElementAttribute);
@@ -942,6 +966,18 @@ ax_request_trust(void) {
         (__bridge NSString *)kAXTrustedCheckOptionPrompt: @YES
     };
     return AXIsProcessTrustedWithOptions((CFDictionaryRef)opts) ? 1 : 0;
+}
+
+size_t
+ax_frontmost_bundle_id(char *out_buf, size_t out_len) {
+    if (!out_buf || out_len == 0) return 0;
+    pthread_mutex_lock(&bundleIdLock);
+    size_t n = strnlen(frontmostBundleId, BUNDLE_ID_MAX);
+    if (n >= out_len) n = out_len - 1;
+    memcpy(out_buf, frontmostBundleId, n);
+    out_buf[n] = '\0';
+    pthread_mutex_unlock(&bundleIdLock);
+    return n;
 }
 
 size_t

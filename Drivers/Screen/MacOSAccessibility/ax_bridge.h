@@ -55,6 +55,13 @@ int ax_post_shortcut_tab_next(void);
 int ax_post_shortcut_tab_prev(void);
 int ax_post_shortcut_tab_index(int n);  // n in 1..9
 
+// Copy the frontmost application's bundle identifier (e.g.
+// "com.apple.Terminal") into out_buf, NUL-terminated. Returns the
+// strlen written, 0 if no frontmost app is known yet. Cached and
+// updated by the AX observer thread on app-activation events, so the
+// call itself is cheap (just a mutex lock + strncpy). Thread-safe.
+size_t ax_frontmost_bundle_id(char *out_buf, size_t out_len);
+
 // Compute a cheap fingerprint of the frontmost window's accessibility state.
 // Written into out_buf (length out_len). Returns the byte count written or
 // 0 on error. The fingerprint is opaque; callers only compare equality.

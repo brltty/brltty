@@ -362,9 +362,49 @@ readCharacters_MacOSAccessibilityScreen(const ScreenBox *box, ScreenCharacter *b
  * / Ctrl+Shift+Tab, indexed motion (1..9) to Cmd+N. */
 static int virtualTerminal = 1;
 
+// djb2 over an arbitrary buffer. We use it to fold the frontmost
+// application's bundle identifier together with our tab-counter into
+// the single int that BrlAPI uses as the "tty" key. Defined inline
+// (and named explicitly) so the hash function is identical wherever a
+// brlapi client wants to compute the same id from the client side —
+// any future Swift/Python/Java binding can mirror these eight lines.
+static uint32_t
+mo_scope_hash(const char *data, size_t len) {
+  uint32_t h = 5381;
+  for (size_t i = 0; i < len; i++) {
+    h = (h * 33u) ^ (uint32_t)(unsigned char)data[i];
+  }
+  return h;
+}
+
+// Returns a 32-bit identifier representing the currently-focused
+// (application, tab) pair. brlapi clients that want to scope their
+// braille routing to a specific Mac app call enterTtyMode(<this int>);
+// the brlapi server polls us every cycle and dispatches keystrokes
+// to whichever client claimed the matching id.
+//
+// We can't observe Terminal.app's real tab indices through AX without
+// app-specific code, so the tab side is brltty's own counter — the
+// same one driven by switchVirtualTerminal_MacOSAccessibilityScreen.
+// Switching tabs through a brltty braille command therefore updates
+// the routing scope; switching them by clicking the tab strip does
+// not (the counter stays put). For v1 this matches the typical
+// braille-only workflow; finer per-tab tracking via AX is a follow-up.
 static int
 currentVirtualTerminal_MacOSAccessibilityScreen(void) {
-  return virtualTerminal;
+  char bundle[256];
+  size_t bn = ax_frontmost_bundle_id(bundle, sizeof bundle);
+  if (bn == 0) {
+    // No frontmost app yet — let brlapi broadcast to every client.
+    return SCR_NO_VT;
+  }
+  char composite[sizeof bundle + 16];
+  int cn = snprintf(composite, sizeof composite, "%s:%d", bundle, virtualTerminal);
+  if (cn <= 0) return SCR_NO_VT;
+  uint32_t h = mo_scope_hash(composite, (size_t)cn);
+  // SCR_NO_VT is the brltty sentinel — avoid colliding with it.
+  if (h == (uint32_t)SCR_NO_VT) h ^= 1u;
+  return (int)h;
 }
 
 static int
