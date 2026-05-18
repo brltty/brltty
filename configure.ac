@@ -1910,49 +1910,35 @@ install_brltty_pty=""
 case "${host_os}"
 in
    darwin*)
-      dnl macOS: register FileViewer + Tmux + Screen + TerminalEmulator
-      dnl alongside the Accessibility driver. FileViewer is required by
-      dnl brltty's built-in help / learn-mode UI; we link it against
-      dnl -lncurses (which on macOS provides the terminfo entry points
-      dnl that live in libtinfo on Linux). brltty-pty (paired with the
-      dnl `em` driver) is a faster path than AX for terminal-only
+      dnl We link the `fv` drier against -lncurses (which on MacOS provides
+      dnl the terminfo entry points that live in -ltinfo on Linux).
+      dnl The `em` driver) is a faster path than AX for terminal-only
       dnl sessions: brltty-pty owns the PTY, parses the escape stream
       dnl itself, and publishes the screen state via SysV shared memory
       dnl — read by brltty in microseconds instead of the 30–100 ms AX
       dnl path.
       BRLTTY_SCREEN_DRIVER([fv], [FileViewer], [-lncurses])
-      BRLTTY_SCREEN_DRIVER([tx], [Tmux])
-      AC_CHECK_HEADER([sys/shm.h], [dnl
-         BRLTTY_SCREEN_DRIVER([sc], [Screen])
-         AC_CHECK_HEADER([sys/msg.h], [dnl
-            BRLTTY_SCREEN_DRIVER([em], [TerminalEmulator])
-            if test -n "${curses_package}"
-            then
-               all_brltty_pty="all-brltty-pty"
-               install_brltty_pty="install-brltty-pty"
-            fi
-         ])
-      ])
       ;;
    *)
       BRLTTY_SCREEN_DRIVER([fv], [FileViewer], [-ltinfo])
-      BRLTTY_SCREEN_DRIVER([tx], [Tmux])
-
-      AC_CHECK_HEADER([sys/shm.h], [dnl
-         BRLTTY_SCREEN_DRIVER([sc], [Screen])
-
-         AC_CHECK_HEADER([sys/msg.h], [dnl
-            BRLTTY_SCREEN_DRIVER([em], [TerminalEmulator])
-
-            if test -n "${curses_package}"
-            then
-               all_brltty_pty="all-brltty-pty"
-               install_brltty_pty="install-brltty-pty"
-            fi
-         ])
-      ])
       ;;
 esac
+
+BRLTTY_SCREEN_DRIVER([tx], [Tmux])
+
+AC_CHECK_HEADER([sys/shm.h], [dnl
+   BRLTTY_SCREEN_DRIVER([sc], [Screen])
+
+   AC_CHECK_HEADER([sys/msg.h], [dnl
+      BRLTTY_SCREEN_DRIVER([em], [TerminalEmulator])
+
+      if test -n "${curses_package}"
+      then
+         all_brltty_pty="all-brltty-pty"
+         install_brltty_pty="install-brltty-pty"
+      fi
+   ])
+])
 AC_SUBST([all_brltty_pty])
 AC_SUBST([install_brltty_pty])
 
