@@ -429,12 +429,12 @@ readCharacters_MacOSAccessibilityScreen(const ScreenBox *box, ScreenCharacter *b
  * / Ctrl+Shift+Tab, indexed motion (1..9) to Cmd+N. */
 static int virtualTerminal = 1;
 
-// djb2 over an arbitrary buffer. We use it to fold the frontmost
-// application's bundle identifier together with our tab-counter into
-// the single int that BrlAPI uses as the "tty" key. Defined inline
-// (and named explicitly) so the hash function is identical wherever a
-// brlapi client wants to compute the same id from the client side —
-// any future Swift/Python/Java binding can mirror these eight lines.
+// djb2 over an arbitrary buffer. We fold the frontmost application's
+// bundle identifier through this and keep the low 16 bits as the
+// "bundle slot" half of the BrlAPI tty key. The hash algorithm is
+// part of the cross-language contract — any binding (Swift, Python,
+// Java) that wants per-app scoping has to mirror these eight lines
+// and the same final masking.
 static uint32_t
 mo_scope_hash(const char *data, size_t len) {
   uint32_t h = 5381;
@@ -445,18 +445,25 @@ mo_scope_hash(const char *data, size_t len) {
 }
 
 // Returns a 32-bit identifier representing the currently-focused
-// (application, tab) pair. brlapi clients that want to scope their
-// braille routing to a specific Mac app call enterTtyMode(<this int>);
-// the brlapi server polls us every cycle and dispatches keystrokes
-// to whichever client claimed the matching id.
+// (application, tab) pair. The encoding is:
+//
+//     bits 31..16 : bundleHash16  = djb2(bundleID) & 0xFFFF
+//     bits 15.. 0 : tab counter   = virtualTerminal (1..N)
+//
+// Splitting bundle and tab into separate halves matters for brltty's
+// "go to next/previous vt" semantics: those commands call us via
+// scr_base.c with `currentVirtualTerminal() + 1`. With the previous
+// flat djb2(bundleID + ":" + tab) encoding that arithmetic would yield
+// garbage; with the 16+16 layout, +1 just bumps the tab counter and
+// switchVirtualTerminal() reaches the same Cmd+Tab logic it had
+// before. brlapi routing still gets a stable per-(app, tab) slot.
 //
 // We can't observe Terminal.app's real tab indices through AX without
-// app-specific code, so the tab side is brltty's own counter — the
-// same one driven by switchVirtualTerminal_MacOSAccessibilityScreen.
-// Switching tabs through a brltty braille command therefore updates
-// the routing scope; switching them by clicking the tab strip does
-// not (the counter stays put). For v1 this matches the typical
-// braille-only workflow; finer per-tab tracking via AX is a follow-up.
+// app-specific code, so the tab side stays brltty's own counter —
+// driven by switchVirtualTerminal_MacOSAccessibilityScreen. Switching
+// tabs through a brltty braille command updates the scope; switching
+// them by clicking the tab strip does not. Finer AX-based tab
+// tracking is a follow-up.
 static int
 currentVirtualTerminal_MacOSAccessibilityScreen(void) {
   char bundle[256];
@@ -465,32 +472,38 @@ currentVirtualTerminal_MacOSAccessibilityScreen(void) {
     // No frontmost app yet — let brlapi broadcast to every client.
     return SCR_NO_VT;
   }
-  char composite[sizeof bundle + 16];
-  int cn = snprintf(composite, sizeof composite, "%s:%d", bundle, virtualTerminal);
-  if (cn <= 0) return SCR_NO_VT;
-  uint32_t h = mo_scope_hash(composite, (size_t)cn);
-  // SCR_NO_VT is the brltty sentinel — avoid colliding with it.
-  if (h == (uint32_t)SCR_NO_VT) h ^= 1u;
-  return (int)h;
+  uint32_t bundleHash16 = mo_scope_hash(bundle, bn) & 0xFFFFu;
+  uint32_t tab = (uint32_t)virtualTerminal & 0xFFFFu;
+  uint32_t combined = (bundleHash16 << 16) | tab;
+  // SCR_NO_VT is the brltty sentinel — avoid colliding with it. Only
+  // possible when bundleHash16 == 0xFFFF and tab == 0xFFFF.
+  if (combined == (uint32_t)SCR_NO_VT) combined ^= 1u;
+  return (int)combined;
 }
 
 static int
 switchVirtualTerminal_MacOSAccessibilityScreen(int vt) {
-  if (vt < 1) return 0;
+  // brltty's core calls us with `currentVirtualTerminal() + 1` (or -1)
+  // for next/previous, and a small positive int for direct index.
+  // currentVirtualTerminal() puts the tab counter in the low 16 bits;
+  // strip the bundle hash in the high half so the tab-switching logic
+  // below stays agnostic to which app is frontmost.
+  int tab = vt & 0xFFFF;
+  if (tab < 1) return 0;
 
-  if (vt == virtualTerminal + 1) {
+  if (tab == virtualTerminal + 1) {
     if (!ax_post_shortcut_tab_next()) return 0;
-    virtualTerminal = vt;
+    virtualTerminal = tab;
     return 1;
   }
-  if (vt == virtualTerminal - 1 && virtualTerminal > 1) {
+  if (tab == virtualTerminal - 1 && virtualTerminal > 1) {
     if (!ax_post_shortcut_tab_prev()) return 0;
-    virtualTerminal = vt;
+    virtualTerminal = tab;
     return 1;
   }
-  if (vt >= 1 && vt <= 9) {
-    if (!ax_post_shortcut_tab_index(vt)) return 0;
-    virtualTerminal = vt;
+  if (tab >= 1 && tab <= 9) {
+    if (!ax_post_shortcut_tab_index(tab)) return 0;
+    virtualTerminal = tab;
     return 1;
   }
   /* Out of range — no equivalent macOS shortcut for tab >= 10. */
