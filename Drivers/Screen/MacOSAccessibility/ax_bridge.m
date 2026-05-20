@@ -46,21 +46,6 @@ copyElementAttribute(AXUIElementRef element, CFStringRef attribute) {
 }
 
 static int
-copyIntAttribute(AXUIElementRef element, CFStringRef attribute, int *out) {
-    if (!element) return 0;
-    CFTypeRef value = NULL;
-    AXError err = AXUIElementCopyAttributeValue(element, attribute, &value);
-    if (err != kAXErrorSuccess || !value) return 0;
-    if (CFGetTypeID(value) != CFNumberGetTypeID()) { CFRelease(value); return 0; }
-    int v = 0;
-    Boolean ok = CFNumberGetValue((CFNumberRef)value, kCFNumberIntType, &v);
-    CFRelease(value);
-    if (!ok) return 0;
-    *out = v;
-    return 1;
-}
-
-static int
 copyRangeAttribute(AXUIElementRef element, CFStringRef attribute, CFRange *out) {
     if (!element) return 0;
     CFTypeRef value = NULL;
@@ -938,6 +923,210 @@ int ax_post_shortcut_tab_index(int n) {
     int ok = postShortcut(digitKeys[n - 1], kCGEventFlagMaskCommand);
     if (ok) focusFrontmostTextAreaAfterDelay(0.12);
     return ok;
+}
+
+/* Bounded DFS for the first AXTabGroup in a subtree. Caller owns +1 ref.
+ * Most apps put the tab strip near the top of the window hierarchy, so
+ * depth 6 with a 64-child cap covers Terminal, Safari, Chrome, iTerm,
+ * VS Code without dragging through deep view trees. */
+static AXUIElementRef
+findTabGroup(AXUIElementRef root, int maxDepth) {
+    if (!root || maxDepth < 0) return NULL;
+
+    NSString *role = copyStringAttribute(root, kAXRoleAttribute);
+    if ([role isEqualToString:(NSString *)kAXTabGroupRole]) {
+        CFRetain(root);
+        return root;
+    }
+
+    CFTypeRef childrenCF = NULL;
+    if (AXUIElementCopyAttributeValue(root, kAXChildrenAttribute, &childrenCF) != kAXErrorSuccess
+        || !childrenCF) return NULL;
+    if (CFGetTypeID(childrenCF) != CFArrayGetTypeID()) {
+        CFRelease(childrenCF);
+        return NULL;
+    }
+
+    CFArrayRef children = (CFArrayRef)childrenCF;
+    CFIndex n = CFArrayGetCount(children);
+    if (n > 64) n = 64;
+    AXUIElementRef found = NULL;
+    for (CFIndex i = 0; i < n && !found; i += 1) {
+        AXUIElementRef child = (AXUIElementRef)CFArrayGetValueAtIndex(children, i);
+        found = findTabGroup(child, maxDepth - 1);
+    }
+    CFRelease(childrenCF);
+    return found;
+}
+
+/* Look at an AXTabGroup's children, find the one that reports itself as
+ * selected. Two shapes appear in practice:
+ *
+ *   - kAXValueAttribute = NSNumber(1)   (NSTabView-backed tabs, the most
+ *                                       common case — Terminal.app,
+ *                                       Safari, Chrome, iTerm all match)
+ *   - kAXSelectedAttribute = true       (rarer, but seen in some custom
+ *                                       AX bridges)
+ *
+ * Returns the 1-based selected index, or 0 if none. Also writes the total
+ * tab count into *out_count regardless of whether a selected tab was
+ * identified (callers may want the count even on failure to bound). */
+static int
+findSelectedTabIndex(AXUIElementRef tabGroup, int *out_count) {
+    *out_count = 0;
+    if (!tabGroup) return 0;
+
+    CFTypeRef childrenCF = NULL;
+    if (AXUIElementCopyAttributeValue(tabGroup, kAXChildrenAttribute, &childrenCF) != kAXErrorSuccess
+        || !childrenCF) return 0;
+    if (CFGetTypeID(childrenCF) != CFArrayGetTypeID()) {
+        CFRelease(childrenCF);
+        return 0;
+    }
+
+    CFArrayRef children = (CFArrayRef)childrenCF;
+    CFIndex n = CFArrayGetCount(children);
+    *out_count = (int)n;
+
+    int selected = 0;
+    for (CFIndex i = 0; i < n && !selected; i += 1) {
+        AXUIElementRef tab = (AXUIElementRef)CFArrayGetValueAtIndex(children, i);
+
+        CFTypeRef valCF = NULL;
+        if (AXUIElementCopyAttributeValue(tab, kAXValueAttribute, &valCF) == kAXErrorSuccess
+            && valCF) {
+            if (CFGetTypeID(valCF) == CFNumberGetTypeID()) {
+                int v = 0;
+                if (CFNumberGetValue((CFNumberRef)valCF, kCFNumberIntType, &v) && v != 0) {
+                    selected = (int)i + 1;
+                }
+            } else if (CFGetTypeID(valCF) == CFBooleanGetTypeID()) {
+                if (CFBooleanGetValue((CFBooleanRef)valCF)) selected = (int)i + 1;
+            }
+            CFRelease(valCF);
+        }
+
+        if (!selected) {
+            CFTypeRef selCF = NULL;
+            if (AXUIElementCopyAttributeValue(tab, kAXSelectedAttribute, &selCF) == kAXErrorSuccess
+                && selCF) {
+                if (CFGetTypeID(selCF) == CFBooleanGetTypeID()
+                    && CFBooleanGetValue((CFBooleanRef)selCF)) {
+                    selected = (int)i + 1;
+                }
+                CFRelease(selCF);
+            }
+        }
+    }
+
+    CFRelease(childrenCF);
+    return selected;
+}
+
+/* CGWindowID of the topmost on-screen window owned by `pid`, or 0 if no
+ * such window is currently rendered. CGWindowList returns windows in
+ * front-to-back order, so the first match is the frontmost. */
+static CGWindowID
+frontmostCgWindowIdForPid(pid_t pid) {
+    CFArrayRef windows = CGWindowListCopyWindowInfo(
+        kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements,
+        kCGNullWindowID);
+    if (!windows) return 0;
+
+    CGWindowID result = 0;
+    CFIndex n = CFArrayGetCount(windows);
+    for (CFIndex i = 0; i < n; i += 1) {
+        CFDictionaryRef w = (CFDictionaryRef)CFArrayGetValueAtIndex(windows, i);
+        CFNumberRef ownerPidCF = (CFNumberRef)CFDictionaryGetValue(w, kCGWindowOwnerPID);
+        if (!ownerPidCF) continue;
+        pid_t ownerPid = 0;
+        if (!CFNumberGetValue(ownerPidCF, kCFNumberSInt32Type, &ownerPid)) continue;
+        if (ownerPid != pid) continue;
+
+        CFNumberRef numCF = (CFNumberRef)CFDictionaryGetValue(w, kCGWindowNumber);
+        if (numCF && CFNumberGetValue(numCF, kCFNumberSInt32Type, &result) && result != 0) {
+            break;
+        }
+    }
+    CFRelease(windows);
+    return result;
+}
+
+/* djb2 over a NUL-terminated string, masked to 16 bits. Folded into the
+ * BrlAPI scope ID alongside the 15-bit windowSlot — see ax_bridge.h for
+ * the bit layout and the client-side reproducibility contract. */
+static uint32_t
+scopeBundleHash(const char *s) {
+    uint32_t h = 5381u;
+    if (s) {
+        for (const unsigned char *p = (const unsigned char *)s; *p; p += 1) {
+            h = (h * 33u) ^ (uint32_t)*p;
+        }
+    }
+    return h & 0xFFFFu;
+}
+
+/* Knuth multiplicative hash on the 32-bit CGWindowID, kept to 15 bits
+ * (32 768 buckets). Deterministic from public input (CGWindowList) so
+ * BrlAPI clients can reproduce; collision probability stays below 5 %
+ * even at ~50 simultaneously-open windows of the same app. */
+static uint16_t
+scopeWindowSlot(uint32_t cgWindowId) {
+    return (uint16_t)(((uint32_t)cgWindowId * 2654435769u) >> 17) & 0x7FFFu;
+}
+
+int
+ax_get_frontmost_scope(uint32_t *out_scope) {
+    if (!out_scope) return 0;
+    int success = 0;
+    @autoreleasepool {
+        NSRunningApplication *app = [[NSWorkspace sharedWorkspace] frontmostApplication];
+        if (!app) return 0;
+        const char *bid = app.bundleIdentifier.UTF8String;
+        if (!bid || !*bid) return 0;
+
+        CGWindowID winId = frontmostCgWindowIdForPid(app.processIdentifier);
+        if (winId == 0) return 0;
+
+        uint32_t bundleHash16 = scopeBundleHash(bid);
+        uint32_t windowSlot15 = scopeWindowSlot((uint32_t)winId);
+        *out_scope = (bundleHash16 << 15) | windowSlot15;
+        success = 1;
+    }
+    return success;
+}
+
+int
+ax_get_active_tab(int *out_index, int *out_count) {
+    if (!out_index || !out_count) return 0;
+    int success = 0;
+    @autoreleasepool {
+        NSRunningApplication *app = [[NSWorkspace sharedWorkspace] frontmostApplication];
+        if (!app) return 0;
+        pid_t pid = app.processIdentifier;
+        AXUIElementRef appEl = AXUIElementCreateApplication(pid);
+        AXUIElementRef window = copyElementAttribute(appEl, kAXFocusedWindowAttribute);
+        if (!window) {
+            CFRelease(appEl);
+            return 0;
+        }
+
+        AXUIElementRef tabGroup = findTabGroup(window, 6);
+        if (tabGroup) {
+            int count = 0;
+            int idx = findSelectedTabIndex(tabGroup, &count);
+            if (idx > 0 && count > 0) {
+                *out_index = idx;
+                *out_count = count;
+                success = 1;
+            }
+            CFRelease(tabGroup);
+        }
+
+        CFRelease(window);
+        CFRelease(appEl);
+    }
+    return success;
 }
 
 int

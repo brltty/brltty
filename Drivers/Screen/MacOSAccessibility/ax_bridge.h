@@ -55,6 +55,42 @@ int ax_post_shortcut_tab_next(void);
 int ax_post_shortcut_tab_prev(void);
 int ax_post_shortcut_tab_index(int n);  // n in 1..9
 
+// Query the frontmost window's active tab via AX. On success writes the
+// 1-based index of the selected tab and the total tab count into the
+// out-pointers and returns 1. Returns 0 if no tab group is reachable
+// (single-window apps, or apps that don't expose tabs through AX). The
+// out values are only written on success. Cheap enough to call once per
+// describe() — bounded DFS over the frontmost window's AX subtree.
+int ax_get_active_tab(int *out_index, int *out_count);
+
+// Compute a 32-bit BrlAPI scope identifier for the (frontmost app,
+// frontmost window) pair. The encoding is documented as part of the
+// cross-language contract so that BrlAPI clients (Swift binding, etc.)
+// can independently reproduce it from public information (bundleID +
+// CGWindowID via CGWindowListCopyWindowInfo):
+//
+//     bits 30..15 = bundleHash16 = djb2(bundleID) & 0xFFFF
+//     bits 14.. 0 = windowSlot15 = (cgWindowID * 2654435769u) >> 17
+//     bit  31     = always 0     (keeps the scope in the positive range,
+//                                 avoids collision with SCR_NO_VT = -1)
+//
+// The window slot is generous (32 768 buckets, Knuth-multiplicative
+// hash of the CGWindowID) so collisions among simultaneously-open
+// windows of the same app stay below 5 % up to ~50 windows. The
+// bundle hash trades some app-vs-app uniqueness for that window
+// headroom — at ~500 installed apps the pairwise collision rate is
+// around 0.2 %, in practice indistinguishable from zero for a single
+// user's daily set.
+//
+// Tab index is intentionally NOT folded in: scoping is per-(app, window),
+// independent of which tab is in front. Tab navigation is handled by
+// switchVirtualTerminal in the screen driver, which queries AX directly.
+//
+// Returns 1 on success and writes the scope; returns 0 if no frontmost
+// app or its main window can't be identified (caller should treat as
+// SCR_NO_VT — broadcast to all BrlAPI clients).
+int ax_get_frontmost_scope(uint32_t *out_scope);
+
 // Copy the frontmost application's bundle identifier (e.g.
 // "com.apple.Terminal") into out_buf, NUL-terminated. Returns the
 // strlen written, 0 if no frontmost app is known yet. Cached and

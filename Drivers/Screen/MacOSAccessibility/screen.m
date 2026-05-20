@@ -369,7 +369,13 @@ describe_MacOSAccessibilityScreen(ScreenDescription *desc) {
   char bundle[256];
   size_t bn = ax_frontmost_bundle_id(bundle, sizeof bundle);
 
-  desc->number = currentVirtualTerminal_MacOSAccessibilityScreen();
+  // Keep currentVirtualTerminal in sync (it also memoises lastReportedScope
+  // for switchVirtualTerminal's prev/next detection) even though we
+  // expose the tab index to brltty as desc->number for human display.
+  (void)currentVirtualTerminal_MacOSAccessibilityScreen();
+
+  int axIndex = 0, axCount = 0;
+  desc->number = ax_get_active_tab(&axIndex, &axCount) ? axIndex : 1;
   desc->hasSelection = 0;
 
   if (bn == 0 || !isSupportedBundle(bundle)) {
@@ -423,90 +429,81 @@ readCharacters_MacOSAccessibilityScreen(const ScreenBox *box, ScreenCharacter *b
   return 1;
 }
 
-/* macOS has no real virtual terminals; we surface frontmost-app tabs as
- * the brltty VT abstraction. We track our notion of "current tab" as an
- * opaque counter — relative motion (prev/next) translates to Ctrl+Tab
- * / Ctrl+Shift+Tab, indexed motion (1..9) to Cmd+N. */
-static int virtualTerminal = 1;
+/* macOS has no real virtual terminals; brltty's VT concept is split
+ * into two distinct roles here:
+ *
+ *   currentVirtualTerminal() -> a per-(app, window) BrlAPI scope, with
+ *                               *no* tab index folded in. Stable as long
+ *                               as the user stays in the same window;
+ *                               changes only when the frontmost app or
+ *                               window changes. Computed by ax_bridge
+ *                               from public information so BrlAPI
+ *                               clients can independently reproduce it.
+ *
+ *   switchVirtualTerminal(vt) -> drives tab navigation. The driver
+ *                               recognises three intents from the input:
+ *                                 vt == lastReportedScope + 1 -> NEXT tab
+ *                                 vt == lastReportedScope - 1 -> PREV tab
+ *                                 1..9                        -> tab N
+ *                               AX is the source of truth for the
+ *                               current tab and the total count, so
+ *                               next/prev correctly clamp at the edges
+ *                               and absolute jumps reject out-of-range.
+ *
+ *   desc->number -> the human-meaningful tab index (1..N from AX), set
+ *                  in describe(). Decoupled from the BrlAPI scope so
+ *                  brltty's "current vt" announcements show "tab 3"
+ *                  rather than a 31-bit hash.
+ */
 
-// djb2 over an arbitrary buffer. We fold the frontmost application's
-// bundle identifier through this and keep the low 16 bits as the
-// "bundle slot" half of the BrlAPI tty key. The hash algorithm is
-// part of the cross-language contract — any binding (Swift, Python,
-// Java) that wants per-app scoping has to mirror these eight lines
-// and the same final masking.
-static uint32_t
-mo_scope_hash(const char *data, size_t len) {
-  uint32_t h = 5381;
-  for (size_t i = 0; i < len; i++) {
-    h = (h * 33u) ^ (uint32_t)(unsigned char)data[i];
-  }
-  return h;
-}
+/* Last scope value handed to brltty's core. brltty's relative-motion
+ * dispatch computes `currentVirtualTerminal() + 1` (and -1) and feeds
+ * the result back to switchVirtualTerminal — we compare against this
+ * to recognise NEXT/PREV intent without needing the scope int to
+ * encode the tab number. */
+static int lastReportedScope = 0;
 
-// Returns a 32-bit identifier representing the currently-focused
-// (application, tab) pair. The encoding is:
-//
-//     bits 31..16 : bundleHash16  = djb2(bundleID) & 0xFFFF
-//     bits 15.. 0 : tab counter   = virtualTerminal (1..N)
-//
-// Splitting bundle and tab into separate halves matters for brltty's
-// "go to next/previous vt" semantics: those commands call us via
-// scr_base.c with `currentVirtualTerminal() + 1`. With the previous
-// flat djb2(bundleID + ":" + tab) encoding that arithmetic would yield
-// garbage; with the 16+16 layout, +1 just bumps the tab counter and
-// switchVirtualTerminal() reaches the same Cmd+Tab logic it had
-// before. brlapi routing still gets a stable per-(app, tab) slot.
-//
-// We can't observe Terminal.app's real tab indices through AX without
-// app-specific code, so the tab side stays brltty's own counter —
-// driven by switchVirtualTerminal_MacOSAccessibilityScreen. Switching
-// tabs through a brltty braille command updates the scope; switching
-// them by clicking the tab strip does not. Finer AX-based tab
-// tracking is a follow-up.
 static int
 currentVirtualTerminal_MacOSAccessibilityScreen(void) {
-  char bundle[256];
-  size_t bn = ax_frontmost_bundle_id(bundle, sizeof bundle);
-  if (bn == 0) {
-    // No frontmost app yet — let brlapi broadcast to every client.
+  uint32_t scope = 0;
+  if (!ax_get_frontmost_scope(&scope)) {
+    // No frontmost app / window — let brlapi broadcast to every client.
+    lastReportedScope = SCR_NO_VT;
     return SCR_NO_VT;
   }
-  uint32_t bundleHash16 = mo_scope_hash(bundle, bn) & 0xFFFFu;
-  uint32_t tab = (uint32_t)virtualTerminal & 0xFFFFu;
-  uint32_t combined = (bundleHash16 << 16) | tab;
-  // SCR_NO_VT is the brltty sentinel — avoid colliding with it. Only
-  // possible when bundleHash16 == 0xFFFF and tab == 0xFFFF.
-  if (combined == (uint32_t)SCR_NO_VT) combined ^= 1u;
-  return (int)combined;
+  // High bit is guaranteed 0 by the encoding (see ax_bridge.h), so the
+  // int cast can't collide with SCR_NO_VT = -1.
+  lastReportedScope = (int)scope;
+  return lastReportedScope;
 }
 
 static int
 switchVirtualTerminal_MacOSAccessibilityScreen(int vt) {
-  // brltty's core calls us with `currentVirtualTerminal() + 1` (or -1)
-  // for next/previous, and a small positive int for direct index.
-  // currentVirtualTerminal() puts the tab counter in the low 16 bits;
-  // strip the bundle hash in the high half so the tab-switching logic
-  // below stays agnostic to which app is frontmost.
-  int tab = vt & 0xFFFF;
-  if (tab < 1) return 0;
+  int axCurrent = 0, axCount = 0;
+  int haveAx = ax_get_active_tab(&axCurrent, &axCount);
 
-  if (tab == virtualTerminal + 1) {
-    if (!ax_post_shortcut_tab_next()) return 0;
-    virtualTerminal = tab;
-    return 1;
+  // SWITCHVT N (absolute, small positive int): the user explicitly
+  // asked for a numbered tab. Checked first because it's the most
+  // specific intent — VTPREV/VTNEXT will never produce a value in
+  // 1..9 under normal scope encoding (scopes are 31-bit hashes,
+  // collision with this range is ~5e-9).
+  if (vt >= 1 && vt <= 9) {
+    if (haveAx && vt > axCount) return 0;
+    return ax_post_shortcut_tab_index(vt);
   }
-  if (tab == virtualTerminal - 1 && virtualTerminal > 1) {
-    if (!ax_post_shortcut_tab_prev()) return 0;
-    virtualTerminal = tab;
-    return 1;
+
+  // VTNEXT: brltty asked for one past whatever we last reported.
+  if (vt == lastReportedScope + 1) {
+    if (haveAx && axCurrent >= axCount) return 0;  // already on last tab
+    return ax_post_shortcut_tab_next();
   }
-  if (tab >= 1 && tab <= 9) {
-    if (!ax_post_shortcut_tab_index(tab)) return 0;
-    virtualTerminal = tab;
-    return 1;
+
+  // VTPREV: brltty asked for one before whatever we last reported.
+  if (vt == lastReportedScope - 1) {
+    if (haveAx && axCurrent <= 1) return 0;        // already on first tab
+    return ax_post_shortcut_tab_prev();
   }
-  /* Out of range — no equivalent macOS shortcut for tab >= 10. */
+
   return 0;
 }
 
