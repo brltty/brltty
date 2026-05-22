@@ -721,6 +721,7 @@
 #screen-driver	fv	# File Viewer
 #screen-driver	hd	# Hurd
 #screen-driver	lx	# Linux
+#screen-driver	mo	# MacOSAccessibility
 #screen-driver	pb	# PcBios
 #screen-driver	sc	# Screen
 #screen-driver	tx	# Tmux
