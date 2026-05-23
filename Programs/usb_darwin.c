@@ -101,6 +101,15 @@ struct UsbEndpointExtensionStruct {
   int wakeReadFd;
   int wakeWriteFd;
   AsyncHandle inputMonitor;
+
+  /* Auto-pump state for bulk IN endpoints. macOS's ReadPipeTO only posts a
+   * read for the duration of the call; between calls the host NAKs the
+   * device, so devices that stop retrying (Focus 40) silently drop their
+   * responses. We keep exactly one ReadPipeAsync pending at all times: the
+   * prepare hook posts the first one, and usbReadBulkAsync re-arms after
+   * each dequeue. Linux's usbfs effectively does the same via the kernel.
+   * Flag is set once by prepare() — single-threaded init, no lock. */
+  unsigned autoPumpArmed:1;
 };
 
 /* Tracks when *any* interrupt IN response was last delivered on the
@@ -567,6 +576,14 @@ setInterface (UsbDeviceExtension *devx, UInt8 number) {
   return found;
 }
 
+/* Deallocator for completedRequests queue: frees the malloc'd request
+ * struct (which has its data buffer appended as a flexible-array tail,
+ * so a single free suffices). */
+static void
+usbDeallocateAsyncRequest (void *item, void *data) {
+  free(item);
+}
+
 static void
 usbAsynchronousRequestCallback (void *context, IOReturn result, void *arg) {
   UsbAsynchronousRequest *request = context;
@@ -753,6 +770,85 @@ usbControlTransfer (
   return -1;
 }
 
+/* Lazily start the async I/O thread and attach the IOKit event source to
+ * its runloop, so async callbacks fire immediately on packet arrival
+ * instead of waiting for the main thread to pump. Idempotent. */
+static int
+usbEnsureAsyncIoActive (UsbDevice *device) {
+  UsbDeviceExtension *devx = device->extension;
+  if (devx->runloopSource) return 1;
+
+  if (!usbStartAsyncIoThread(devx)) return 0;
+
+  IOReturn result = (*devx->interface)->CreateInterfaceAsyncEventSource(devx->interface,
+                                                                        &devx->runloopSource);
+  if (result != kIOReturnSuccess) {
+    setUsbError(result, "USB interface event source create");
+    return 0;
+  }
+
+  CFRunLoopAddSource(devx->asyncRunloop, devx->runloopSource, kCFRunLoopDefaultMode);
+  CFRunLoopWakeUp(devx->asyncRunloop);
+  return 1;
+}
+
+/* Post a fresh ReadPipeAsync for a bulk IN endpoint's auto-pump. The
+ * completion is enqueued onto eptx->completedRequests by the standard
+ * callback; usbReadBulkAsync drains and re-arms. Always one request
+ * pending in IOKit between calls, so the device's responses never NAK
+ * for lack of a posted read. */
+static int
+usbDarwinPostBulkInRead (UsbDevice *device, UsbEndpoint *endpoint) {
+  UsbDeviceExtension *devx = device->extension;
+  UsbEndpointExtension *eptx = endpoint->extension;
+  size_t length = eptx->packetSize;
+
+  UsbAsynchronousRequest *request = malloc(sizeof(*request) + length);
+  if (!request) {
+    logSystemError("USB bulk-in auto-pump request allocate");
+    return 0;
+  }
+
+  request->endpoint = endpoint;
+  request->context = NULL;
+  request->length = length;
+  request->buffer = length ? (request + 1) : NULL;
+
+  IOReturn result = (*devx->interface)->ReadPipeAsync(devx->interface, eptx->pipeNumber,
+                                                       request->buffer, request->length,
+                                                       usbAsynchronousRequestCallback, request);
+  if (result != kIOReturnSuccess) {
+    setUsbError(result, "USB bulk-in auto-pump ReadPipeAsync");
+    free(request);
+    return 0;
+  }
+
+  return 1;
+}
+
+/* endpoint->prepare hook for IN endpoints. For bulk IN, arms a permanent
+ * auto-pump so polling-style readers (gioReadByte with short timeouts)
+ * never miss device responses between sync ReadPipeTO calls. Interrupt IN
+ * keeps the existing ReadPipe path — its polling-interval semantics give
+ * IOKit enough buffering on its own. */
+static int
+usbDarwinPrepareInputEndpoint (UsbEndpoint *endpoint) {
+  UsbDevice *device = endpoint->device;
+  UsbEndpointExtension *eptx = endpoint->extension;
+
+  if (eptx->transferMode != kUSBBulk) return 1;
+  if (eptx->autoPumpArmed) return 1;
+
+  if (!usbEnsureAsyncIoActive(device)) return 0;
+  if (!usbDarwinPostBulkInRead(device, endpoint)) return 0;
+
+  eptx->autoPumpArmed = 1;
+  logMessage(LOG_CATEGORY(USB_IO),
+             "bulk IN auto-pump armed: ept=%02X pkt=%u",
+             endpoint->descriptor->bEndpointAddress, eptx->packetSize);
+  return 1;
+}
+
 void *
 usbSubmitRequest (
   UsbDevice *device,
@@ -769,25 +865,7 @@ usbSubmitRequest (
     IOReturn result;
     UsbAsynchronousRequest *request;
 
-    if (!devx->runloopSource) {
-      /* Ensure the async I/O thread is up before attaching the IOKit
-       * event source to its runloop. */
-      if (!usbStartAsyncIoThread(devx)) {
-        return NULL;
-      }
-
-      result = (*devx->interface)->CreateInterfaceAsyncEventSource(devx->interface,
-                                                                   &devx->runloopSource);
-      if (result != kIOReturnSuccess) {
-        setUsbError(result, "USB interface event source create");
-        return NULL;
-      }
-
-      /* Attach to the async thread's runloop (not main) so callbacks fire
-       * immediately on packet arrival without waiting for main to pump. */
-      CFRunLoopAddSource(devx->asyncRunloop, devx->runloopSource, kCFRunLoopDefaultMode);
-      CFRunLoopWakeUp(devx->asyncRunloop);
-    }
+    if (!usbEnsureAsyncIoActive(device)) return NULL;
 
     if ((request = malloc(sizeof(*request) + length))) {
       request->endpoint = endpoint;
@@ -962,6 +1040,100 @@ usbMonitorInputEndpoint (
   return 1;
 }
 
+/* Bulk IN read backed by the always-armed ReadPipeAsync auto-pump. Replaces
+ * the previous synchronous ReadPipeTO path: between sync calls no host
+ * read was pending and bulk IN packets sent by the device were NAK'd,
+ * which the Focus 40 firmware treated as "host gone" — no retransmission.
+ * Now exactly one ReadPipeAsync is always pending; this function dequeues
+ * its completion (waiting up to timeout ms via the device-wide cond) and
+ * re-arms a fresh one before returning. */
+static ssize_t
+usbReadBulkAsync (
+  UsbDevice *device, UsbEndpoint *endpoint,
+  void *buffer, size_t length, int timeout
+) {
+  UsbDeviceExtension *devx = device->extension;
+  UsbEndpointExtension *eptx = endpoint->extension;
+
+  /* Belt-and-braces: if prepare() never armed (e.g. brl driver opened a
+   * bulk IN endpoint via a path that skips endpoint->prepare), arm now. */
+  if (!eptx->autoPumpArmed) {
+    if (!usbEnsureAsyncIoActive(device)) return -1;
+    if (!usbDarwinPostBulkInRead(device, endpoint)) return -1;
+    eptx->autoPumpArmed = 1;
+  }
+
+  uint64_t deadlineMs = machAbsToMs(mach_absolute_time())
+                       + (uint64_t)(timeout > 0 ? timeout : 0);
+  UsbAsynchronousRequest *request = NULL;
+
+  pthread_mutex_lock(&devx->queueLock);
+  for (;;) {
+    request = dequeueItem(eptx->completedRequests);
+    if (request) break;
+
+    uint64_t nowMs = machAbsToMs(mach_absolute_time());
+    if (nowMs >= deadlineMs) break;
+
+    long deltaMs = (long)(deadlineMs - nowMs);
+    struct timespec abs_ts;
+    clock_gettime(CLOCK_REALTIME, &abs_ts);
+    abs_ts.tv_sec  += deltaMs / 1000;
+    abs_ts.tv_nsec += (deltaMs % 1000) * 1000000L;
+    if (abs_ts.tv_nsec >= 1000000000L) { abs_ts.tv_sec++; abs_ts.tv_nsec -= 1000000000L; }
+
+    int rc = pthread_cond_timedwait(&devx->completionCond, &devx->queueLock, &abs_ts);
+    if (rc == ETIMEDOUT) {
+      request = dequeueItem(eptx->completedRequests);
+      break;
+    }
+  }
+  pthread_mutex_unlock(&devx->queueLock);
+
+  if (!request) {
+    errno = EAGAIN;
+    return -1;
+  }
+
+  IOReturn result = request->result;
+  ssize_t actual = -1;
+  if (result == kIOReturnSuccess) {
+    size_t toCopy = ((size_t)request->count < length) ? (size_t)request->count : length;
+    if (toCopy && buffer) memcpy(buffer, request->buffer, toCopy);
+    actual = (ssize_t)toCopy;
+  }
+  free(request);
+
+  /* Re-arm immediately so the next bulk IN packet has somewhere to land.
+   * If this fails (e.g. device went away mid-call), subsequent reads will
+   * time out and brltty's higher layer will reset the driver. */
+  usbDarwinPostBulkInRead(device, endpoint);
+
+  switch (result) {
+    case kIOReturnSuccess:
+      if (usbApplyInputFilters(endpoint, buffer, length, &actual)) return actual;
+      errno = EIO;
+      return -1;
+
+    case kIOUSBTransactionTimeout:
+      errno = EAGAIN;
+      return -1;
+
+    case kIOUSBPipeStalled:
+      (*devx->interface)->ClearPipeStallBothEnds(devx->interface, eptx->pipeNumber);
+      errno = EAGAIN;
+      return -1;
+
+    case kIOReturnAborted:
+      errno = EAGAIN;
+      return -1;
+
+    default:
+      setUsbError(result, "USB bulk endpoint async read");
+      return -1;
+  }
+}
+
 ssize_t
 usbReadEndpoint (
   UsbDevice *device,
@@ -979,19 +1151,16 @@ usbReadEndpoint (
     UInt32 count;
     int stalled = 0;
 
+    if (eptx->transferMode == kUSBBulk) {
+      return usbReadBulkAsync(device, endpoint, buffer, length, timeout);
+    }
+
   read:
     count = length;
-    if (eptx->transferMode == kUSBInterrupt) {
-      // ReadPipeTO only supports bulk pipes on macOS; interrupt pipes must use
-      // ReadPipe. Interrupt reads complete on the next polling interval (or
-      // when data is available), so a timeout argument is unnecessary.
-      result = (*devx->interface)->ReadPipe(devx->interface, eptx->pipeNumber,
-                                            buffer, &count);
-    } else {
-      result = (*devx->interface)->ReadPipeTO(devx->interface, eptx->pipeNumber,
-                                              buffer, &count,
-                                              timeout, timeout);
-    }
+    // Interrupt pipes use ReadPipe (no timeout argument — they complete on
+    // the next polling interval or when data is available).
+    result = (*devx->interface)->ReadPipe(devx->interface, eptx->pipeNumber,
+                                          buffer, &count);
 
     switch (result) {
       case kIOReturnSuccess:
@@ -1236,7 +1405,11 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
     memset(eptx, 0, sizeof(*eptx));
     eptx->wakeReadFd = -1;
     eptx->wakeWriteFd = -1;
-    if ((eptx->completedRequests = newQueue(NULL, NULL))) {
+    /* Free any unreaped completions on queue destroy (e.g. arrival after
+     * device tear-down, or our own bulk-IN auto-pump request still in
+     * flight at endpoint deallocation). Existing consumers free their
+     * own dequeued request, so the deallocator only runs on leftovers. */
+    if ((eptx->completedRequests = newQueue(usbDeallocateAsyncRequest, NULL))) {
       IOReturn result;
       unsigned char number = USB_ENDPOINT_NUMBER(endpoint->descriptor);
       unsigned char direction = USB_ENDPOINT_DIRECTION(endpoint->descriptor);
@@ -1256,6 +1429,15 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 
             eptx->endpoint = endpoint;
             endpoint->extension = eptx;
+
+            /* For bulk IN endpoints, install a prepare hook that arms a
+             * permanent ReadPipeAsync auto-pump (see comment at
+             * usbDarwinPrepareInputEndpoint). Interrupt IN endpoints work
+             * fine with the existing ReadPipe path. */
+            if (eptx->transferDirection == kUSBIn && eptx->transferMode == kUSBBulk) {
+              endpoint->prepare = usbDarwinPrepareInputEndpoint;
+            }
+
             return 1;
           }
         } else {
