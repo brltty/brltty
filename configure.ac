@@ -1869,6 +1869,9 @@ BRLTTY_ARG_DISABLE(
       *android*)
          BRLTTY_SPEECH_DRIVER([an], [Android])
          ;;
+      darwin*)
+         BRLTTY_SPEECH_DRIVER([mo], [MacOSSpeech], [-framework Foundation -framework AVFoundation -lobjc])
+         ;;
       *) ;;
    esac
 ])
