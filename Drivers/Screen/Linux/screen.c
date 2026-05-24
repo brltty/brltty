@@ -812,7 +812,12 @@ refreshUnicodeCache (unsigned int characters) {
   unicodeCacheUsed = readUnicodeDevice(0, unicodeCacheBuffer, unicodeCacheSize);
   if (unicodeCacheUsed == expectedSize) return 1;
 
-  logUnexpectedSize(expectedSize, unicodeCacheUsed, unicodeDeviceType);
+  if (unicodeCacheUsed > 0) {
+    logUnexpectedSize(expectedSize, unicodeCacheUsed, unicodeDeviceType);
+  } else if (errno == ENODATA) {
+    return 1;
+  }
+
   return 0;
 }
 
