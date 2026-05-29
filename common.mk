@@ -32,6 +32,11 @@ API_ARC = $(ARC_PFX)$(API_NAME).$(ARC_EXT)
 API_LIB = $(LIB_PFX)$(API_NAME).$(LIB_EXT)
 API_LIB_VERSIONED = $(API_LIB).$(API_VERSION)
 
+# Install name embedded in libbrlapi by MKLIB.  On macOS, dyld does not search
+# the install directory for a bare leaf install name, so embed the absolute
+# path; on other platforms keep the SONAME a leaf name as usual.
+API_LIB_SONAME = $(if $(findstring darwin,$(HOST_OS)),$(libdir)/$(API_LIB_VERSIONED),$(API_LIB_VERSIONED))
+
 API_DLL = $(LIB_PFX)$(API_NAME)-$(API_VERSION).$(LIB_EXT)
 API_IMPLIB = $(ARC_PFX)$(API_NAME).$(LIB_EXT).$(ARC_EXT)
 API_IMPLIB_VERSIONED = $(ARC_PFX)$(API_NAME)-$(API_RELEASE).$(LIB_EXT).$(ARC_EXT)
