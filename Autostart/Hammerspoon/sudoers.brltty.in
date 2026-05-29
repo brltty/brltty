@@ -25,4 +25,4 @@
 # The SETENV flag is required because brltty-term passes the user environment
 # to brltty via sudo --preserve-env.
 
-username ALL=(root) NOPASSWD,SETENV: @prefix@/bin/brltty
+username ALL=(root) NOPASSWD: SETENV: @prefix@/bin/brltty
