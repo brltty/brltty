@@ -268,8 +268,12 @@ proc withChannel {variable channel body} {
    }
 }
 
-proc readFile {file} {
+proc readFile {file {binary 0}} {
    withChannel channel [open $file {RDONLY}] {
+      if {$binary} {
+         fconfigure $channel -translation binary
+      }
+
       return [read $channel]
    }
 }
