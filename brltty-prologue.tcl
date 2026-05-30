@@ -293,6 +293,45 @@ proc readFile {file {binary 0}} {
    }
 }
 
+proc compareFiles {file1 file2} {
+   return [string equal [readFile $file1 1] [readFile $file2 1]]
+}
+
+proc refreshFile {newFile oldFile {executable ""}} {
+   if {[string length $executable] == 0} {
+      set preferredPermissions ""
+      set actualPermissions $preferredPermissions
+   } elseif {$executable} {
+      set preferredPermissions 0o755
+   } else {
+      set preferredPermissions 0o644
+   }
+
+   if {[file exists $oldFile]} {
+      if {[string length $preferredPermissions] > 0} {
+         set actualPermissions [file attributes $oldFile -permissions]
+
+         if {$actualPermissions != $preferredPermissions} {
+            logWarning "unexpected file permissions: $actualPermissions != $preferredPermissions: $oldFile"
+         }
+      }
+
+      if {[compareFiles $newFile $oldFile]} {
+         logDetail "file not changed: $oldFile"
+         file delete $newFile
+         return 0
+      }
+   }
+
+   if {[string length $actualPermissions] > 0} {
+      file attributes $newFile -permissions $actualPermissions
+   }
+
+   logNote "refreshing file: $oldFile"
+   file rename -force $newFile $oldFile
+   return 1
+}
+
 proc writeFile {file data} {
    withChannel channel [open $file {WRONLY CREAT TRUNC}] {
       puts -nonewline $channel $data
