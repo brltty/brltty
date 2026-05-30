@@ -661,8 +661,9 @@ proc showCommandUsage {name optionsDescriptor argumentsUsage getArgumentsUsageSu
 
    if {[string length $getArgumentsUsageSummary] > 0} {
       if {[string length [set lines [formatLines [$getArgumentsUsageSummary]]]] > 0} {
-         append usage \n
+         append usage "\n\n"
          append usage $lines
+         append usage "\n"
       }
    }
 
@@ -711,5 +712,33 @@ proc processProgramArguments {
    } else {
       noMorePositionalArguments $argumentValues
    }
+}
+
+proc addKeywordOption {definitionsVariable name usage keywords} {
+   upvar 1 $definitionsVariable definitions
+   lappend definitions [list $name untyped.$name "$usage ([join $keywords ", "])"]
+}
+
+proc verifyKeywordOption {valueVariable description keywordList} {
+   upvar 1 $valueVariable value
+
+   if {![info exists value]} {
+      set value [lindex $keywordList 0]
+      return 0
+   }
+
+   set valueLength [string length $value]
+
+   loop index 0 [llength $keywordList] {
+      set keyword [lindex $keywordList $index]
+
+      if {[string equal -nocase -length $valueLength $value $keyword]} {
+         set value $keyword
+         return $index
+      }
+   }
+
+   syntaxError "unrecognized $description value: $value"
+   return -1
 }
 
