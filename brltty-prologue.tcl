@@ -757,3 +757,50 @@ proc verifyKeywordOption {valueVariable description keywordList} {
    return -1
 }
 
+proc addIntegerOption {definitionsVariable name usage {minimum ""} {maximum ""}} {
+   upvar 1 $definitionsVariable definitions
+   lappend definitions [list $name integer "$usage ($minimum-$maximum)"]
+}
+
+proc testInteger {value {minimum ""} {maximum ""}} {
+   if {![string is integer -strict $value]} {
+      return 0
+   }
+
+   if {([string length $value] > 1) && [string equal [string index $value 0] 0]} {
+      return 0
+   }
+
+   if {[string length $minimum] > 0} {
+      if {$value < $minimum} {
+         return 0
+      }
+   }
+
+   if {[string length $maximum] > 0} {
+      if {$value > $maximum} {
+         return 0
+      }
+   }
+
+   return 1
+}
+
+proc verifyIntegerOption {value description {minimum ""} {maximum ""}} {
+   if {![testInteger $value]} {
+      syntaxError "invalid $description value: not an integer"
+   }
+
+   if {[string length $minimum] > 0} {
+      if {$value < $minimum} {
+         syntaxError "invalid $description value: $value < $minimum"
+      }
+   }
+
+   if {[string length $maximum] > 0} {
+      if {$value > $maximum} {
+         syntaxError "invalid $description value: $value > $maximum"
+      }
+   }
+}
+
