@@ -300,12 +300,13 @@ proc compareFiles {file1 file2} {
 proc refreshFile {newFile oldFile {executable ""}} {
    if {[string length $executable] == 0} {
       set preferredPermissions ""
-      set actualPermissions $preferredPermissions
    } elseif {$executable} {
       set preferredPermissions 0o755
    } else {
       set preferredPermissions 0o644
    }
+
+   set actualPermissions $preferredPermissions
 
    if {[file exists $oldFile]} {
       if {[string length $preferredPermissions] > 0} {
