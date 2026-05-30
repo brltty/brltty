@@ -103,6 +103,21 @@ try {
       return ""
    }
 
+   proc loop {indexVariable from to command} {
+      upvar 1 $indexVariable index
+      set index $from
+
+      while {$index < $to} {
+         try {
+            uplevel 1 $command
+         } on return {result} {
+            return -code return $result
+         }
+
+         incr index
+      }
+   }
+
    if {[package vcompare $tcl_version 8.4] < 0} {
       proc readdir {directory} {
          set workingDirectory [pwd]
