@@ -185,6 +185,11 @@ proc semanticError {{message ""}} {
    exit 3
 }
 
+proc internalError {{message ""}} {
+   logError $message
+   exit 4
+}
+
 proc toRelativePath {to {from .}} {
    set variables {from to}
 
