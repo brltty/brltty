@@ -270,6 +270,7 @@ sufword bistum = shouldn't use the st-contraction
 sufword bistüm = shouldn't use the st-contraction
 
 always blues =
+always bluescreen =
 
 always bomben 12-135-134-12-14
 always bomber 12-135-134-12-12456
@@ -1157,6 +1158,10 @@ always stilgung 234-2345-24-123-1245-136
 prfword stod =
 prfword stode =
 always stoleranz 234-2345-135-123-12456-235-1356
+prfword stour =
+prfword stouren 234-2345-135-136-1235-14
+prfword stournee 234-2345-135-136-1235-1345-15-15
+prfword stourneen 234-2345-135-136-1235-1345-15-15-1345
 always stourismus 234-2345-135-136-1235-5-24
 always stourist 234-2345-135-136-1235-24-23456
 always strainer 234-2345-1235-1-24-1345-12456
@@ -1405,6 +1410,8 @@ always halloween 125-1-12345-135-2456-15-15-1345
 
 always hawaii =
 always ascii =
+always screen =
+always green =
 
 always boom =
 always voodoo =
@@ -1800,6 +1807,7 @@ prfword geleien 1245-13456-146-14
 always evangel 15-1236-235-1245-13456
 always kegel 13-15-1245-13456
 always kugel 13-136-1245-13456
+sufword orgel 26-1245-13456
 always segel 234-15-1245-13456
 
 before konsonant always gen 1245-14
@@ -2012,12 +2020,30 @@ always atemtest 1-2345-12356-236-23456
 always atemzentrum 1-2345-12356-1356-14-2345-1235-136-134
 before g always atemzu 1-2345-12356-1356-136
 before g always atemzü 1-2345-12356-1356-1256
+prfword teffekt 2345-15-124-124-15-13-2345
+prfword teffekte 2345-15-124-124-15-13-236
+prfword teffekten 2345-15-124-124-15-13-2345-14
+prfword teffekts 2345-15-124-124-15-13-2345-234
+always telektrisch 2345-13456-15-13-2345-1235-24-156
 always tempfang 2345-12356-1234-124-235-1245
 always tempfehl 2345-12356-1234-124-2356-123
 always tempfind 2345-12356-1234-124-35-145
 always teuerung 2345-126-12456-136
 before t always textrak =
 before t always stextrak =
+prfword texperte 2345-15-6-1346-1234-12456-236
+prfword texperten 2345-15-6-1346-1234-12456-2345-14
+prfword texpertin 2345-15-6-1346-1234-12456-2345-35
+prfword texpertinnen 2345-15-6-1346-1234-12456-2345-35-1345-14
+prfword texpertise 2345-15-6-1346-1234-12456-2345-24-234-15
+prfword texpertisen 2345-15-6-1346-1234-12456-2345-24-234-14
+prfword texperiment 2345-15-6-1346-1234-12456-24-134-14-2345
+prfword texperimente 2345-15-6-1346-1234-12456-24-134-14-236
+prfword texperimenten 2345-15-6-1346-1234-12456-24-134-14-2345-14
+prfword texperimentes 2345-15-6-1346-1234-12456-24-134-14-2345-123456
+prfword texperiments 2345-15-6-1346-1234-12456-24-134-14-2345-234
+prfword texplosion 2345-15-6-1346-1234-123-135-234-24-135-1345
+prfword texplosionen 2345-15-6-1346-1234-123-135-234-24-135-1345-14
 
 always un 256
 
@@ -2881,6 +2907,9 @@ always feldemission 124-13456-145-12356-24-2346-24-135-1345
 always ödem 246-145-12356
 always remmidemmi 1235-15-1346-24-145-15-1346-24
 always sendemast 234-14-145-15-134-1-23456
+before konsonant sufword modem 134-135-145-12356
+prfword modem 134-135-145-12356
+prfword modems 134-135-145-12356-234
 
 
 word durch 1456
@@ -2970,6 +2999,8 @@ before i always masoch 134-1-234-135-1456
 word sofia =
 word sofias =
 word sofie 234-135-124-346
+prfword soda =
+prfword sodas =
 prfword sog =
 prfword sogen 234-135-1245-14
 prfword sogene 234-135-1245-14-15
@@ -2986,6 +3017,8 @@ before i always solips =
 always solist 234-135-123-24-23456
 always solistisch 234-135-123-5-156
 always solitär =
+prfword sono =
+prfword sonos =
 always soper 234-135-1234-12456
 always sopfer 234-135-1234-124-12456
 always sophist 234-135-1234-125-24-23456
@@ -2993,7 +3026,8 @@ always sophistisch 234-135-1234-125-5-156
 endword son =
 endword sor =
 endword sos =
-always cursor = shouldn't use the so-contraction
+prfword cursor = shouldn't use the so-contraction
+always cursor 6-14-136-1235-234-26 shouldn't use the so-contraction
 prfword korso 13-26-234-135 shouldn't use the so-contraction
 begword		absol		=
 always		absolu		=
@@ -3143,6 +3177,7 @@ prfword hunderte 125-256-145-12456-236 shouldn't use the und-contraction
 always kund 13-256-145 shouldn't use the und-contraction
 always mund 134-256-145 shouldn't use the und-contraction
 class tz tz
+before tz begword abundan 1-12-256-145-235
 before tz always redundan 1235-15-145-256-145-235
 always rundbau 1235-256-145-12-16
 always rundenspiel 1235-256-145-14-2-346
@@ -3522,10 +3557,10 @@ always snobistisch 234-1345-135-12-5-156
 
 always bleib 12-12
 contraction bb
-always bleiballast 12-123-346-12-1-12345-1-23456
-always bleibarren 12-123-346-12-356-1235-14
-always bleibehält 12-123-346-23-125-345-123-2345
-always bleibeschwer 12-123-346-23-156-2456-12456
+always bleiballast 12-123-146-12-1-12345-1-23456
+always bleibarren 12-123-146-12-356-1235-14
+always bleibehält 12-123-146-23-125-345-123-2345
+always bleibeschwer 12-123-146-23-156-2456-12456
 
 always brauch 2-34
 sufword abrauch 1-12-1235-16-1456
@@ -3899,11 +3934,15 @@ always beiklang 2-12-13-123-235-1245
 always bildklang 12-24-123-145-13-123-235-1245
 always chorklang 1456-26-13-123-235-1245
 always donnerklang 145-135-1345-1345-12456-13-123-235-1245
+always durchklang 2-1456-13-123-235-1245
+always eigenklang 146-1245-14-13-123-235-1245
+always einklang 1246-13-123-235-1245
 always flötenklang 124-123-246-2345-14-13-123-235-1245
 before g always flötenklän 124-123-246-2345-14-13-123-345-1345
 always gegenklang 2-1245-13-123-235-1245
 always gleichklang 1245-1456-13-123-235-1245
 always mehrklang 2-2356-13-123-235-1245
+always nachklang 1345-56-13-123-235-1245
 always nebenklang 1345-12-13-123-235-1245
 always vielklang 1236-123-13-123-235-1245
 always wohlklang 2456-123-13-123-235-1245
@@ -4123,6 +4162,15 @@ always nahm 1345-134 Annahme
 contraction nm
 always nähm 5-1345-134
 always enahm 15-1345-134
+before hilmnrsu always nahme 1345-134-15
+prfword nahmen 1345-134-14
+prfword nahmend 1345-134-14-145
+prfword nahmende 1345-134-14-145-15
+prfword nahmendem 1345-134-14-145-12356
+prfword nahmenden 1345-134-14-145-14
+prfword nahmender 1345-134-14-145-12456
+prfword nahmendes 1345-134-14-145-123456
+always maßnahmen 134-1-6-2346-1345-134-14
 
 always natur 1345-2345
 contraction nt
@@ -4775,6 +4823,7 @@ always werkhall 2456-12456-13-125-1-12345
 always zeithall 1356-2345-125-1-12345
 
 always hauf 125-16-124 shouldn't use the auf-contraction
+always nahauf 1345-1-125-2-16
 always hotel 125-135-2345-13456 shouldn't use the te-contraction
 always installer 35-23456-1-12345-12456 shouldn't use the aller-contraction
 always internet 35-2345-12456-1345-15-2345 shouldn't use the te-contraction
