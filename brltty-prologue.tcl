@@ -322,13 +322,17 @@ proc refreshFile {newFile oldFile {executable ""}} {
          file delete $newFile
          return 0
       }
+
+      set action "refreshing"
+   } else {
+      set action "adding"
    }
 
    if {[string length $actualPermissions] > 0} {
       file attributes $newFile -permissions $actualPermissions
    }
 
-   logNote "refreshing file: $oldFile"
+   logNote "$action file: $oldFile"
    file rename -force $newFile $oldFile
    return 1
 }
@@ -732,7 +736,7 @@ proc showCommandUsage {name optionsDescriptor argumentsUsage getArgumentsUsageSu
 
 proc noMorePositionalArguments {arguments} {
    if {[nextElement arguments]} {
-      syntaxError "excess positional arguments: [join $arguments " "]"
+      syntaxError "too many positional arguments: [join $arguments " "]"
    }
 }
 
@@ -779,12 +783,12 @@ proc addKeywordOption {definitionsVariable name usage keywords} {
    lappend definitions [list $name untyped.$name $usage]
 }
 
-proc verifyKeywordOption {valueVariable description keywordList} {
+proc testKeyword {valueVariable keywordList} {
    upvar 1 $valueVariable value
 
    if {![info exists value]} {
-      set value [lindex $keywordList 0]
-      return 0
+      set value [lindex $keywordList [set index 0]]
+      return $index
    }
 
    set valueLength [string length $value]
@@ -798,8 +802,15 @@ proc verifyKeywordOption {valueVariable description keywordList} {
       }
    }
 
-   syntaxError "unrecognized $description value: $value"
    return -1
+}
+
+proc verifyKeyword {valueVariable description keywordList} {
+   upvar 1 $valueVariable value
+
+   if {[testKeyword value $keywordList] < 0} {
+      syntaxError "unrecognized $description: $value"
+   }
 }
 
 proc addIntegerOption {definitionsVariable name usage {minimum ""} {maximum ""}} {
@@ -845,20 +856,20 @@ proc testInteger {value {minimum ""} {maximum ""}} {
    return 1
 }
 
-proc verifyIntegerOption {value description {minimum ""} {maximum ""}} {
+proc verifyInteger {value description {minimum ""} {maximum ""}} {
    if {![testInteger $value]} {
-      syntaxError "invalid $description value: not an integer"
+      syntaxError "invalid $description: not an integer"
    }
 
    if {[string length $minimum] > 0} {
       if {$value < $minimum} {
-         syntaxError "invalid $description value: $value < $minimum"
+         syntaxError "invalid $description: $value < $minimum"
       }
    }
 
    if {[string length $maximum] > 0} {
       if {$value > $maximum} {
-         syntaxError "invalid $description value: $value > $maximum"
+         syntaxError "invalid $description: $value > $maximum"
       }
    }
 }
