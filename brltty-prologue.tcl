@@ -777,7 +777,8 @@ proc addKeywordOption {definitionsVariable option operand usage keywords} {
    upvar 1 $definitionsVariable definitions
 
    if {![lempty $keywords]} {
-      append usage " - [formatChoicesPhrase $keywords]"
+      set choices [lmap choice $keywords {set choice "\"$choice\""}]
+      append usage " - [formatChoicesPhrase $choices]"
    }
 
    lappend definitions [list $option untyped.$operand $usage]
