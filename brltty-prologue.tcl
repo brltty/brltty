@@ -773,14 +773,14 @@ proc processProgramArguments {
    }
 }
 
-proc addKeywordOption {definitionsVariable name usage keywords} {
+proc addKeywordOption {definitionsVariable option operand usage keywords} {
    upvar 1 $definitionsVariable definitions
 
    if {![lempty $keywords]} {
-      append usage " - [formatChoicesPhrase $keywords] - may be abbreviated"
+      append usage " - [formatChoicesPhrase $keywords]"
    }
 
-   lappend definitions [list $name untyped.$name $usage]
+   lappend definitions [list $option untyped.$operand $usage]
 }
 
 proc testKeyword {valueVariable keywordList} {
@@ -813,7 +813,7 @@ proc verifyKeyword {valueVariable description keywordList} {
    }
 }
 
-proc addIntegerOption {definitionsVariable name usage {minimum ""} {maximum ""}} {
+proc addIntegerOption {definitionsVariable option operand usage {minimum ""} {maximum ""}} {
    upvar 1 $definitionsVariable definitions
    set bounds [list]
 
@@ -829,7 +829,7 @@ proc addIntegerOption {definitionsVariable name usage {minimum ""} {maximum ""}}
       append usage " - must be [join $bounds " and "]"
    }
 
-   lappend definitions [list $name integer $usage]
+   lappend definitions [list $option integer.$operand $usage]
 }
 
 proc testInteger {value {minimum ""} {maximum ""}} {
