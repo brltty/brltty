@@ -14,7 +14,7 @@
  * Web Page: http://brltty.app/
  */
 
-/* MacOSSpeech/speech.m - macOS speech driver, backed by AVSpeechSynthesizer. */
+/* MacOS/speech.m - macOS speech driver, backed by AVSpeechSynthesizer. */
 
 #include "prologue.h"
 
@@ -59,7 +59,7 @@ resolveVoice (const char *spec) {
     }
   }
 
-  logMessage(LOG_WARNING, "MacOSSpeech: voice not found: %s", spec);
+  logMessage(LOG_WARNING, "MacOS: voice not found: %s", spec);
   return nil;
 }
 
@@ -141,7 +141,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
     currentRate = AVSpeechUtteranceDefaultSpeechRate;
     synthesizer = [[AVSpeechSynthesizer alloc] init];
     if (!synthesizer) {
-      logMessage(LOG_ERR, "MacOSSpeech: could not create AVSpeechSynthesizer");
+      logMessage(LOG_ERR, "MacOS: could not create AVSpeechSynthesizer");
       return 0;
     }
 
@@ -160,7 +160,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
     spk->setPitch  = spk_setPitch;
 
     const char *voiceId = currentVoice ? [[currentVoice identifier] UTF8String] : NULL;
-    logMessage(LOG_INFO, "MacOSSpeech: AVSpeechSynthesizer ready (voice: %s)",
+    logMessage(LOG_INFO, "MacOS: AVSpeechSynthesizer ready (voice: %s)",
                voiceId ? voiceId : "default");
   }
 

@@ -12,21 +12,15 @@
 # later version. Please see the file LICENSE-LGPL for details.
 #
 # Web Page: http://brltty.app/
-#
-# This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
 DRIVER_CODE = mo
-DRIVER_NAME = MacOSAccessibility
-DRIVER_USAGE = macOS frontmost window via Accessibility API
+DRIVER_NAME = MacOS
+DRIVER_USAGE = macOS speech via AVSpeechSynthesizer
 DRIVER_VERSION =
 DRIVER_DEVELOPERS = Yannick Plassiard <plassiardyannick@gmail.com>
-DRIVER_DEPENDENCIES = @screen_libraries_mo@
-DRIVER_OBJECTS = screen.$O ax_bridge.$O
-include $(SRC_TOP)screen.mk
+DRIVER_DEPENDENCIES = @speech_libraries_mo@
+include $(SRC_TOP)speech.mk
 
-screen.$O:
-	$(CC) $(DRIVER_CFLAGS) -x objective-c -c $(SRC_DIR)/screen.m
-
-ax_bridge.$O:
-	$(CC) $(DRIVER_CFLAGS) -x objective-c -c $(SRC_DIR)/ax_bridge.m
+speech.$O:
+	$(CC) $(DRIVER_CFLAGS) -x objective-c -c $(SRC_DIR)/speech.m

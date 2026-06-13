@@ -1870,7 +1870,7 @@ BRLTTY_ARG_DISABLE(
          BRLTTY_SPEECH_DRIVER([an], [Android])
          ;;
       darwin*)
-         BRLTTY_SPEECH_DRIVER([mo], [MacOSSpeech], [-framework Foundation -framework AVFoundation -lobjc])
+         BRLTTY_SPEECH_DRIVER([mo], [MacOS], [-framework Foundation -framework AVFoundation -lobjc])
          ;;
       *) ;;
    esac
@@ -1900,7 +1900,7 @@ in
       BRLTTY_SCREEN_DRIVER([gb], [Grub])
       ;;
    darwin*)
-      BRLTTY_SCREEN_DRIVER([mo], [MacOSAccessibility], [-framework AppKit -framework ApplicationServices -framework Carbon -framework Foundation -lobjc])
+      BRLTTY_SCREEN_DRIVER([mo], [MacOS], [-framework AppKit -framework ApplicationServices -framework Carbon -framework Foundation -lobjc])
       ;;
    *)
       AC_MSG_WARN([no native screen driver for ${host_os}])

@@ -364,6 +364,7 @@
 #speech-driver	fl	# FestivalLite
 #speech-driver	fv	# Festival
 #speech-driver	gs	# GenericSay
+#speech-driver	mo	# MacOS
 #speech-driver	mp	# Mikropuhe
 #speech-driver	sd	# SpeechDispatcher
 #speech-driver	sw	# Swift
@@ -721,7 +722,7 @@
 #screen-driver	fv	# File Viewer
 #screen-driver	hd	# Hurd
 #screen-driver	lx	# Linux
-#screen-driver	mo	# MacOSAccessibility
+#screen-driver	mo	# MacOS
 #screen-driver	pb	# PcBios
 #screen-driver	sc	# Screen
 #screen-driver	tx	# Tmux

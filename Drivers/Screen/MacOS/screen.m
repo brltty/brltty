@@ -186,7 +186,7 @@ renderTextIntoGrid(const char *text) {
 }
 
 static int
-construct_MacOSAccessibilityScreen(void) {
+construct_MacOSScreen(void) {
   logMessage(LOG_DEBUG, "mo: construct: entered");
   int trusted = ax_request_trust();
   logMessage(LOG_DEBUG, "mo: construct: ax_request_trust=%d", trusted);
@@ -225,7 +225,7 @@ construct_MacOSAccessibilityScreen(void) {
 }
 
 static void
-destruct_MacOSAccessibilityScreen(void) {
+destruct_MacOSScreen(void) {
   if (wakeMonitor) {
     asyncCancelRequest(wakeMonitor);
     wakeMonitor = NULL;
@@ -262,7 +262,7 @@ isCursorOnEmptyRow(void) {
 }
 
 static int
-poll_MacOSAccessibilityScreen(void) {
+poll_MacOSScreen(void) {
   // The AXObserver thread sets a dirty flag whenever macOS pushes us a
   // notification. We trust that signal first because brltty's own update
   // cadence is too slow for typing.
@@ -292,7 +292,7 @@ poll_MacOSAccessibilityScreen(void) {
 }
 
 static int
-refresh_MacOSAccessibilityScreen(void) {
+refresh_MacOSScreen(void) {
   static char buf[131072];  // 128 KB; AX visible ranges fit here easily.
   int row = 0;
   int col = 0;
@@ -362,17 +362,17 @@ isSupportedBundle(const char *bundleId) {
 // Forward decl so describe() can call into the brlapi scope hash
 // without reordering the whole file. The definition stays alongside
 // switchVirtualTerminal further down.
-static int currentVirtualTerminal_MacOSAccessibilityScreen(void);
+static int currentVirtualTerminal_MacOSScreen(void);
 
 static void
-describe_MacOSAccessibilityScreen(ScreenDescription *desc) {
+describe_MacOSScreen(ScreenDescription *desc) {
   char bundle[256];
   size_t bn = ax_frontmost_bundle_id(bundle, sizeof bundle);
 
   // Keep currentVirtualTerminal in sync (it also memoises lastReportedScope
   // for switchVirtualTerminal's prev/next detection) even though we
   // expose the tab index to brltty as desc->number for human display.
-  (void)currentVirtualTerminal_MacOSAccessibilityScreen();
+  (void)currentVirtualTerminal_MacOSScreen();
 
   int axIndex = 0, axCount = 0;
   desc->number = ax_get_active_tab(&axIndex, &axCount) ? axIndex : 1;
@@ -403,7 +403,7 @@ describe_MacOSAccessibilityScreen(ScreenDescription *desc) {
 }
 
 static int
-readCharacters_MacOSAccessibilityScreen(const ScreenBox *box, ScreenCharacter *buffer) {
+readCharacters_MacOSScreen(const ScreenBox *box, ScreenCharacter *buffer) {
   // When the frontmost app isn't terminal-like, describe() flipped
   // us into single-line "unreadable" mode. Mirror that here so
   // brltty actually sees the message glyphs on the braille line
@@ -464,7 +464,7 @@ readCharacters_MacOSAccessibilityScreen(const ScreenBox *box, ScreenCharacter *b
 static int lastReportedScope = 0;
 
 static int
-currentVirtualTerminal_MacOSAccessibilityScreen(void) {
+currentVirtualTerminal_MacOSScreen(void) {
   uint32_t scope = 0;
   if (!ax_get_frontmost_scope(&scope)) {
     // No frontmost app / window — let brlapi broadcast to every client.
@@ -478,7 +478,7 @@ currentVirtualTerminal_MacOSAccessibilityScreen(void) {
 }
 
 static int
-switchVirtualTerminal_MacOSAccessibilityScreen(int vt) {
+switchVirtualTerminal_MacOSScreen(int vt) {
   int axCurrent = 0, axCount = 0;
   int haveAx = ax_get_active_tab(&axCurrent, &axCount);
 
@@ -508,7 +508,7 @@ switchVirtualTerminal_MacOSAccessibilityScreen(int vt) {
 }
 
 static int
-insertKey_MacOSAccessibilityScreen(ScreenKey key) {
+insertKey_MacOSScreen(ScreenKey key) {
   // brltty's ScreenKey is a uint32 the bridge already knows how to decode.
   if (!ax_post_key((uint32_t)key)) {
     logMessage(LOG_WARNING, "mo: failed to inject key 0x%08X", (unsigned)key);
@@ -520,13 +520,13 @@ insertKey_MacOSAccessibilityScreen(ScreenKey key) {
 static void
 scr_initialize(MainScreen *main) {
   initializeRealScreen(main);
-  main->base.poll = poll_MacOSAccessibilityScreen;
-  main->base.refresh = refresh_MacOSAccessibilityScreen;
-  main->base.describe = describe_MacOSAccessibilityScreen;
-  main->base.readCharacters = readCharacters_MacOSAccessibilityScreen;
-  main->base.insertKey = insertKey_MacOSAccessibilityScreen;
-  main->base.currentVirtualTerminal = currentVirtualTerminal_MacOSAccessibilityScreen;
-  main->base.switchVirtualTerminal = switchVirtualTerminal_MacOSAccessibilityScreen;
-  main->construct = construct_MacOSAccessibilityScreen;
-  main->destruct = destruct_MacOSAccessibilityScreen;
+  main->base.poll = poll_MacOSScreen;
+  main->base.refresh = refresh_MacOSScreen;
+  main->base.describe = describe_MacOSScreen;
+  main->base.readCharacters = readCharacters_MacOSScreen;
+  main->base.insertKey = insertKey_MacOSScreen;
+  main->base.currentVirtualTerminal = currentVirtualTerminal_MacOSScreen;
+  main->base.switchVirtualTerminal = switchVirtualTerminal_MacOSScreen;
+  main->construct = construct_MacOSScreen;
+  main->destruct = destruct_MacOSScreen;
 }
