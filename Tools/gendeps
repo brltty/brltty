@@ -152,7 +152,7 @@ set optionDefinitions {
 
 processProgramArguments optionValues $optionDefinitions
 
-set sourceExtensions {c cc y}
+set sourceExtensions {c cc m y}
 set sourceExtensionsGlob "{[join $sourceExtensions ,]}"
 
 foreach buildDirectory [set buildDirectories [getBuildDirectories]] {
