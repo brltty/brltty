@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-DRIVER_CODE = hd
+DRIVER_CODE = hu
 DRIVER_NAME = Hurd
 DRIVER_USAGE = The Hurd operating system
 DRIVER_VERSION = 

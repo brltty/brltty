@@ -1887,7 +1887,7 @@ in
       BRLTTY_SCREEN_DRIVER([lx], [Linux])
       ;;
    gnu*)
-      BRLTTY_SCREEN_DRIVER([hd], [Hurd])
+      BRLTTY_SCREEN_DRIVER([hu], [Hurd])
       ;;
    cygwin*|mingw*)
       BRLTTY_SCREEN_DRIVER([wn], [Windows])

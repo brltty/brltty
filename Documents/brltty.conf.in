@@ -720,7 +720,7 @@
 #screen-driver	a2	# AtSpi2
 #screen-driver	em	# Terminal Emulator
 #screen-driver	fv	# File Viewer
-#screen-driver	hd	# Hurd
+#screen-driver	hu	# Hurd
 #screen-driver	lx	# Linux
 #screen-driver	mo	# MacOS
 #screen-driver	pb	# PcBios
