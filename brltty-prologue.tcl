@@ -306,8 +306,6 @@ proc refreshFile {newFile oldFile {executable ""}} {
       set preferredPermissions 0o644
    }
 
-   set actualPermissions $preferredPermissions
-
    if {[file exists $oldFile]} {
       set actualPermissions [file attributes $oldFile -permissions]
 
@@ -325,6 +323,7 @@ proc refreshFile {newFile oldFile {executable ""}} {
 
       set action "refreshing"
    } else {
+      set actualPermissions $preferredPermissions
       set action "adding"
    }
 
