@@ -158,7 +158,7 @@ foreach propertyName $propertyNames {
    set resourcePath [file join $applicationDirectory res values $resourceFile]
    logNote "writing resource file: $resourcePath"
 
-   if {[updateFile $resourcePath "[join [makeResourceLines $properties $propertyName] \n]\n"]} {
+   if {[replaceFile $resourcePath "[join [makeResourceLines $properties $propertyName] \n]\n"]} {
       set updated 1
    }
 }

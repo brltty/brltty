@@ -21,7 +21,6 @@ source [file join [file dirname [info script]] .. prologue.tcl]
 source [file join $scriptDirectory csv.tcl]
 
 set optionDefinitions {
-   {test      flag "don't update the files"}
 }
 
 processProgramArguments optionValues $optionDefinitions
@@ -80,7 +79,7 @@ proc updateTable {lists name} {
          }]
       }
 
-      if {[updateFile "$name.csv" [csvMakeTable $rows] $::optionValues(test)]} {
+      if {[replaceFile "$name.csv" [csvMakeTable $rows]]} {
          return 1
       }
    } else {
@@ -110,7 +109,7 @@ proc updateDriverCodes {lists} {
    }
 
    set rows [linsert [lsort -index 0 $dataRows] 0 $headers]
-   return [updateFile "driver-code.csv" [csvMakeTable $rows] $::optionValues(test)]
+   return [replaceFile "driver-code.csv" [csvMakeTable $rows]]
 }
 
 proc updateTables {lists} {

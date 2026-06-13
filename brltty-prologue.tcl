@@ -309,9 +309,9 @@ proc refreshFile {newFile oldFile {executable ""}} {
    set actualPermissions $preferredPermissions
 
    if {[file exists $oldFile]} {
-      if {[string length $preferredPermissions] > 0} {
-         set actualPermissions [file attributes $oldFile -permissions]
+      set actualPermissions [file attributes $oldFile -permissions]
 
+      if {[string length $preferredPermissions] > 0} {
          if {$actualPermissions != $preferredPermissions} {
             logWarning "unexpected file permissions: $actualPermissions != $preferredPermissions: $oldFile"
          }
@@ -346,29 +346,7 @@ proc writeFile {file data} {
 proc replaceFile {file data} {
    set newFile "$file.new"
    writeFile $newFile $data
-   refreshFile $newFile $file
-}
-
-proc updateFile {file data {inTestMode 0}} {
-   if {![file exists $file]} {
-      if {$inTestMode} {
-         logMessage notice "test mode - file not created: $file"
-      } else {
-         logMessage notice "creating file: $file"
-         writeFile $file $data
-      }
-   } elseif {![string equal $data [readFile $file]]} {
-      if {$inTestMode} {
-         logMessage notice "test mode - file not updated: $file"
-      } else {
-         logMessage notice "updating file: $file"
-         replaceFile $file $data
-      }
-   } else {
-      return 0
-   }
-
-   return 1
+   return [refreshFile $newFile $file]
 }
 
 proc forEachLine {lineVariable file body} {
