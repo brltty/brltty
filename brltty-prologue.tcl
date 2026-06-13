@@ -344,28 +344,9 @@ proc writeFile {file data} {
 }
 
 proc replaceFile {file data} {
-   set components [file split $file]
-
-   if {[llength $components] == 0} {
-      return -code error "file argument is empty"
-   }
-
-   set name ".[lindex $components end]"
-   set path "[eval file join [lreplace $components end end] $name]"
-
-   set oldFile "$path.old"
-   set newFile "$path.new"
-
-   file delete $newFile
+   set newFile "$file.new"
    writeFile $newFile $data
-
-   if {[file exists $file]} {
-      file delete $oldFile
-      file rename $file $oldFile
-   }
-
-   file rename $newFile $file
-   file delete $oldFile
+   refreshFile $newFile $file
 }
 
 proc updateFile {file data {inTestMode 0}} {
