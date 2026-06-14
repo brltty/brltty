@@ -18,7 +18,6 @@
 
 /* not done yet:
  * parent: terminal type list
- * screen: resize
  */
 
 #include "prologue.h"
@@ -41,6 +40,7 @@
 #include "async_wait.h"
 #include "async_io.h"
 #include "async_signal.h"
+#include "async_alarm.h"
 
 static int opt_driverDirectives;
 static int opt_showPath;
@@ -296,8 +296,60 @@ static unsigned char parentIsQuitting;
 static unsigned char childHasTerminated;
 static unsigned char slaveHasBeenClosed;
 
+/* Dragging a window emits a storm of SIGWINCH signals; recreating the screen
+ * segment for each one would be wasteful. Coalesce them: each signal just sets
+ * this flag (the only thing a signal handler may safely do), and the async loop
+ * (re)arms a short settle alarm so the resize happens once, after it settles. */
+static volatile sig_atomic_t windowSizeChanged = 0;
+#define WINDOW_RESIZE_SETTLE_TIME 150
+
+static AsyncHandle windowResizeAlarm = NULL;
+
+static void
+applyWindowSize (void) {
+  size_t width, height;
+
+  if (getConsoleSize(&width, &height)) {
+    setWindowSize(ptyGetMaster(ptyObject), width, height);
+    ptyResizeTerminal(height, width);
+  }
+}
+
+ASYNC_ALARM_CALLBACK(windowResizeAlarmCallback) {
+  asyncDiscardHandle(windowResizeAlarm);
+  windowResizeAlarm = NULL;
+  applyWindowSize();
+}
+
+/* Run in the async loop (NOT signal context): arm/reset the settle alarm if a
+ * SIGWINCH was seen. Arming the alarm allocates, so it must not run in the
+ * signal handler itself. */
+static void
+serviceWindowSizeChange (void) {
+  if (!windowSizeChanged) return;
+  windowSizeChanged = 0;
+
+  if (windowResizeAlarm) {
+    asyncResetAlarmIn(windowResizeAlarm, WINDOW_RESIZE_SETTLE_TIME);
+  } else {
+    asyncNewRelativeAlarm(&windowResizeAlarm, WINDOW_RESIZE_SETTLE_TIME,
+                          windowResizeAlarmCallback, NULL);
+  }
+}
+
+static void
+cancelWindowResizeAlarm (void) {
+  if (windowResizeAlarm) {
+    asyncCancelRequest(windowResizeAlarm);
+    windowResizeAlarm = NULL;
+  }
+}
+
 static
 ASYNC_CONDITION_TESTER(parentTerminationTester) {
+  /* The SIGWINCH that woke the async wait is serviced here, in safe context. */
+  serviceWindowSizeChange();
+
   if (parentIsQuitting) return 1;
 #ifdef __APPLE__
   /* On macOS the PTY slave is not closed by the kernel when the child exits,
@@ -314,12 +366,7 @@ parentQuitMonitor (int signalNumber) {
 
 static void
 windowSizeMonitor (int signalNumber) {
-  size_t width, height;
-
-  if (getConsoleSize(&width, &height)) {
-    setWindowSize(ptyGetMaster(ptyObject), width, height);
-    ptyResizeTerminal(height, width);
-  }
+  windowSizeChanged = 1;
 }
 
 static void
@@ -417,6 +464,7 @@ runParent (pid_t child) {
           asyncAwaitCondition(INT_MAX, parentTerminationTester, NULL);
           if (!parentIsQuitting) exitStatus = reapExitStatus(child);
 
+          cancelWindowResizeAlarm();
           ptyEndTerminal();
         }
       }

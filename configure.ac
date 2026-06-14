@@ -1165,7 +1165,7 @@ BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
    darwin*)
       system_package="darwin"
       system_includes="-x objective-c"
-      system_libs="-framework IOKit -framework Foundation -framework CoreFoundation -lobjc"
+      system_libs="-framework IOKit -framework Foundation -framework CoreFoundation -framework AppKit -lobjc"
       ;;
    hpux*)
       if test -d /opt/audio/include

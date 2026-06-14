@@ -18,13 +18,14 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
 
 #include "log.h"
 #include "pty_object.h"
 #include "scr_types.h"
-#include "get_term.h"
 
 struct PtyObjectStruct {
   char *path;
@@ -112,173 +113,133 @@ ptyWriteInputData (PtyObject *pty, const void *data, size_t length) {
   return 0;
 }
 
+/* All of the ScreenKey modifier flags, so the base key can be isolated without
+ * truncating astral-plane code points (which the SCR_KEY_CHAR_MASK would). */
+#define PTY_KEY_MODIFIER_MASK ( \
+  SCR_KEY_SHIFT | SCR_KEY_UPPER | SCR_KEY_CONTROL | \
+  SCR_KEY_ALT_LEFT | SCR_KEY_ALT_RIGHT | SCR_KEY_GUI | SCR_KEY_CAPSLOCK \
+)
+
+/* Encode a key for the child and write it to the pty.
+ *
+ * The byte sequences are taken from tmux's input-keys.c so that they match the
+ * terminfo we advertise to the child (the screen/tmux family). We deliberately
+ * do NOT consult the host's terminfo: that describes the *outer* terminal and
+ * may encode a key differently (famously Home as "ESC O H" rather than the
+ * "ESC [ 1 ~" a screen/tmux program expects), which would make the child
+ * mis-read the key - e.g. vim treating the "O" as "open line and insert".
+ *
+ * Modifiers carried in the ScreenKey (Shift/Alt/Control) are emitted using the
+ * standard xterm scheme: a parameter of 1 + (shift?1) + (alt?2) + (ctrl?4),
+ * which every screen/tmux-aware program understands. kxMode selects the
+ * application-cursor-keys form (DECCKM) for the arrow keys.
+ */
 int
 ptyWriteInputCharacter (PtyObject *pty, wchar_t character, int kxMode) {
-  if (!isSpecialKey(character)) {
-    char buffer[MB_CUR_MAX];
-    int count = wctomb(buffer, character);
+  unsigned int modifiers = 0;
+  if (character & SCR_KEY_SHIFT) modifiers |= 1;
+  if (character & (SCR_KEY_ALT_LEFT | SCR_KEY_ALT_RIGHT)) modifiers |= 2;
+  if (character & SCR_KEY_CONTROL) modifiers |= 4;
+
+  ScreenKey key = character & ~PTY_KEY_MODIFIER_MASK;
+  unsigned int modParam = modifiers? (modifiers + 1): 0;
+
+  if (!isSpecialKey(key)) {
+    wchar_t wc = key;
+
+    /* Control folds a typed character down to its C0 control code. */
+    if (modifiers & 4) {
+      if ((wc >= 'a') && (wc <= 'z')) wc = wc - 'a' + 1;
+      else if ((wc >= 'A') && (wc <= 'Z')) wc = wc - 'A' + 1;
+      else if ((wc >= '@') && (wc <= '_')) wc = wc - '@';
+      else if (wc == ' ') wc = 0;
+      else if (wc == '?') wc = 0X7F;
+    }
+
+    char bytes[1 + MB_CUR_MAX];
+    char *out = bytes;
+    if (modifiers & 2) *out++ = 0X1B;   /* Alt/Meta is an ESC prefix. */
+
+    int count = wctomb(out, wc);
     if (count == -1) return 0;
-    return ptyWriteInputData(pty, buffer, count);
+    return ptyWriteInputData(pty, bytes, (out - bytes) + count);
   }
 
-  const char *capability = NULL;
-  const char *sequence = NULL;
   char buffer[0X20];
+  const char *seq = NULL;
 
-  #define KEY(key, cap) case SCR_KEY_##key: capability = #cap; break;
-  switch (character) {
-      KEY(ENTER       , kent)
-      KEY(BACKSPACE   , kbs)
+  char final = 0;       /* letter-form keys: arrows, Home, End, F1-F4 */
+  int isCursor = 0;     /* arrows additionally honor kxMode (DECCKM)   */
+  int tilde = 0;        /* "ESC [ <n> ~" form keys                     */
 
-      KEY(CURSOR_LEFT , kcub1)
-      KEY(CURSOR_RIGHT, kcuf1)
-      KEY(CURSOR_UP   , kcuu1)
-      KEY(CURSOR_DOWN , kcud1)
+  switch (key) {
+    case SCR_KEY_ENTER:     seq = "\r";   break;
+    case SCR_KEY_TAB:       seq = "\t";   break;
+    case SCR_KEY_BACKSPACE: seq = "\x7F"; break;
+    case SCR_KEY_ESCAPE:    seq = "\x1B"; break;
 
-      KEY(PAGE_UP     , kpp)
-      KEY(PAGE_DOWN   , knp)
-      KEY(HOME        , khome)
-      KEY(END         , kend)
-      KEY(INSERT      , kich1)
-      KEY(DELETE      , kdch1)
+    case SCR_KEY_CURSOR_UP:    final = 'A'; isCursor = 1; break;
+    case SCR_KEY_CURSOR_DOWN:  final = 'B'; isCursor = 1; break;
+    case SCR_KEY_CURSOR_RIGHT: final = 'C'; isCursor = 1; break;
+    case SCR_KEY_CURSOR_LEFT:  final = 'D'; isCursor = 1; break;
 
-      KEY(F1          , kf1)
-      KEY(F2          , kf2)
-      KEY(F3          , kf3)
-      KEY(F4          , kf4)
-      KEY(F5          , kf5)
-      KEY(F6          , kf6)
-      KEY(F7          , kf7)
-      KEY(F8          , kf8)
-      KEY(F9          , kf9)
-      KEY(F10         , kf10)
-      KEY(F11         , kf11)
-      KEY(F12         , kf12)
-      KEY(F13         , kf13)
-      KEY(F14         , kf14)
-      KEY(F15         , kf15)
-      KEY(F16         , kf16)
-      KEY(F17         , kf17)
-      KEY(F18         , kf18)
-      KEY(F19         , kf19)
-      KEY(F20         , kf20)
-      KEY(F21         , kf21)
-      KEY(F22         , kf22)
-      KEY(F23         , kf23)
-      KEY(F24         , kf24)
-      KEY(F25         , kf25)
-      KEY(F26         , kf26)
-      KEY(F27         , kf27)
-      KEY(F28         , kf28)
-      KEY(F29         , kf29)
-      KEY(F30         , kf30)
-      KEY(F31         , kf31)
-      KEY(F32         , kf32)
-      KEY(F33         , kf33)
-      KEY(F34         , kf34)
-      KEY(F35         , kf35)
-      KEY(F36         , kf36)
-      KEY(F37         , kf37)
-      KEY(F38         , kf38)
-      KEY(F39         , kf39)
-      KEY(F40         , kf40)
-      KEY(F41         , kf41)
-      KEY(F42         , kf42)
-      KEY(F43         , kf43)
-      KEY(F44         , kf44)
-      KEY(F45         , kf45)
-      KEY(F46         , kf46)
-      KEY(F47         , kf47)
-      KEY(F48         , kf48)
-      KEY(F49         , kf49)
-      KEY(F50         , kf50)
-      KEY(F51         , kf51)
-      KEY(F52         , kf52)
-      KEY(F53         , kf53)
-      KEY(F54         , kf54)
-      KEY(F55         , kf55)
-      KEY(F56         , kf56)
-      KEY(F57         , kf57)
-      KEY(F58         , kf58)
-      KEY(F59         , kf59)
-      KEY(F60         , kf60)
-      KEY(F61         , kf61)
-      KEY(F62         , kf62)
-      KEY(F63         , kf63)
-  }
-  #undef KEY
+    case SCR_KEY_HOME: final = 'H'; tilde = 1; break;  /* unmodified -> ESC[1~ */
+    case SCR_KEY_END:  final = 'F'; tilde = 4; break;  /* unmodified -> ESC[4~ */
 
-  if (capability) {
-    sequence = tigetstr(capability);
-    intptr_t result = (intptr_t)sequence;
+    case SCR_KEY_INSERT:    tilde = 2; break;
+    case SCR_KEY_DELETE:    tilde = 3; break;
+    case SCR_KEY_PAGE_UP:   tilde = 5; break;
+    case SCR_KEY_PAGE_DOWN: tilde = 6; break;
 
-    switch (result) {
-      case -1:
-        logMessage(LOG_WARNING, "not a terminfo string capability: %s", capability);
-        goto NO_SEQUENCE;
+    case SCR_KEY_F1: final = 'P'; break;
+    case SCR_KEY_F2: final = 'Q'; break;
+    case SCR_KEY_F3: final = 'R'; break;
+    case SCR_KEY_F4: final = 'S'; break;
 
-      case 0:
-        logMessage(LOG_WARNING, "unrecognized terminfo capability: %s", capability);
-        goto NO_SEQUENCE;
+    default: {
+      /* F5..F20 use the numbered "ESC [ <n> ~" form. */
+      static const unsigned char fnTilde[] = {
+        15, 17, 18, 19, 20, 21, 23, 24, 25, 26, 28, 29, 31, 32, 33, 34
+      };
 
-      NO_SEQUENCE:
-        sequence = NULL;
-      default:
-        break;
+      if ((key >= SCR_KEY_F5) && (key <= SCR_KEY_F20)) {
+        tilde = fnTilde[key - SCR_KEY_F5];
+      }
+
+      break;
     }
   }
 
-  if (!sequence) {
-    #define KEY(key, seq) case SCR_KEY_##key: sequence = seq; break;
-    switch (character) {
-      KEY(ENTER       , "\r")
-      KEY(TAB         , "\t")
-      KEY(BACKSPACE   , "\x7F")
-      KEY(ESCAPE      , "\x1B")
+  if (!seq) {
+    if (final && !tilde) {
+      /* arrows and F1-F4 */
+      if (modParam) {
+        snprintf(buffer, sizeof(buffer), "\x1B[1;%u%c", modParam, final);
+      } else if (isCursor) {
+        snprintf(buffer, sizeof(buffer), "\x1B%c%c", (kxMode? 'O': '['), final);
+      } else {
+        snprintf(buffer, sizeof(buffer), "\x1BO%c", final);
+      }
 
-      KEY(CURSOR_UP   , "\x1BOA")
-      KEY(CURSOR_DOWN , "\x1BOB")
-      KEY(CURSOR_RIGHT, "\x1BOC")
-      KEY(CURSOR_LEFT , "\x1BOD")
+      seq = buffer;
+    } else if (tilde) {
+      if (modParam && final) {
+        /* Home/End, when modified, use the letter form (ESC[1;modH|F). */
+        snprintf(buffer, sizeof(buffer), "\x1B[1;%u%c", modParam, final);
+      } else if (modParam) {
+        snprintf(buffer, sizeof(buffer), "\x1B[%d;%u~", tilde, modParam);
+      } else {
+        snprintf(buffer, sizeof(buffer), "\x1B[%d~", tilde);
+      }
 
-      KEY(HOME        , "\x1B[1~")
-      KEY(INSERT      , "\x1B[2~")
-      KEY(DELETE      , "\x1B[3~")
-      KEY(END         , "\x1B[4~")
-      KEY(PAGE_UP     , "\x1B[5~")
-      KEY(PAGE_DOWN   , "\x1B[6~")
-
-      KEY(F1          , "\x1BOP")
-      KEY(F2          , "\x1BOQ")
-      KEY(F3          , "\x1BOR")
-      KEY(F4          , "\x1BOS")
-      KEY(F5          , "\x1B[15~")
-      KEY(F6          , "\x1B[17~")
-      KEY(F7          , "\x1B[18~")
-      KEY(F8          , "\x1B[19~")
-      KEY(F9          , "\x1B[20~")
-      KEY(F10         , "\x1B[21~")
-      KEY(F11         , "\x1B[23~")
-      KEY(F12         , "\x1B[24~")
+      seq = buffer;
     }
-    #undef KEY
   }
 
-  if (sequence) {
-    switch (character) {
-      case SCR_KEY_CURSOR_LEFT:
-      case SCR_KEY_CURSOR_RIGHT:
-      case SCR_KEY_CURSOR_UP:
-      case SCR_KEY_CURSOR_DOWN:
-        strcpy(buffer, sequence);
-        buffer[1] = kxMode? 'O': '[';
-        sequence = buffer;
-        break;
-    }
-
-    if (!ptyWriteInputData(pty, sequence, strlen(sequence))) return 0;
+  if (seq) {
+    if (!ptyWriteInputData(pty, seq, strlen(seq))) return 0;
   } else {
-    logMessage(LOG_WARNING, "unsupported pty screen key: %04X", character);
+    logMessage(LOG_WARNING, "unsupported pty screen key: %04X", (unsigned int)key);
   }
 
   return 1;
