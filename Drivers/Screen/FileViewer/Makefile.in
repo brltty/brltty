@@ -16,12 +16,12 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-DRIVER_CODE = fv
+DRIVER_CODE = vw
 DRIVER_NAME = FileViewer
 DRIVER_USAGE = file viewer
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
-DRIVER_DEPENDENCIES = @screen_libraries_fv@
+DRIVER_DEPENDENCIES = @screen_libraries_vw@
 include $(SRC_TOP)screen.mk
 
 screen.$O:

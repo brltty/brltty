@@ -719,7 +719,7 @@
 #screen-driver	as	# AtSpi
 #screen-driver	a2	# AtSpi2
 #screen-driver	em	# TerminalEmulator
-#screen-driver	fv	# FileViewer
+#screen-driver	vw	# FileViewer
 #screen-driver	hu	# Hurd
 #screen-driver	lx	# Linux
 #screen-driver	mo	# MacOS
@@ -747,8 +747,8 @@
 #screen-parameters a2:Type=default # [default,all,{terminal,text}+...]
 
 # File Viewer Screen Driver Parameters
-#screen-parameters fv:File=path #
-#screen-parameters fv:show=no # [no,yes]
+#screen-parameters vw:File=path #
+#screen-parameters vw:show=no # [no,yes]
 
 # Linux Screen Driver Parameters
 #screen-parameters lx:Charset=name+... # []

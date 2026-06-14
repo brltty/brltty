@@ -1920,10 +1920,10 @@ in
       dnl itself, and publishes the screen state via SysV shared memory
       dnl — read by brltty in microseconds instead of the 30–100 ms AX
       dnl path.
-      BRLTTY_SCREEN_DRIVER([fv], [FileViewer], [-lncurses])
+      BRLTTY_SCREEN_DRIVER([vw], [FileViewer], [-lncurses])
       ;;
    *)
-      BRLTTY_SCREEN_DRIVER([fv], [FileViewer], [-ltinfo])
+      BRLTTY_SCREEN_DRIVER([vw], [FileViewer], [-ltinfo])
       ;;
 esac
 
