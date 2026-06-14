@@ -21,6 +21,7 @@ source [file join [file dirname [info script]] .. prologue.tcl]
 source [file join $scriptDirectory csv.tcl]
 
 set optionDefinitions {
+   {check flag "test"}
 }
 
 processProgramArguments optionValues $optionDefinitions
@@ -40,14 +41,110 @@ array set tableHeaders {
 proc makeLists {file} {
    set lists [dict create]
    set pattern {^#(\w+-(?:driver|table))\s+([-\w]+)\s*#\s*(.*?)\s*$}
+   array set isDefinedArray {}
 
    forEachLine line $file {
       if {[regexp $pattern $line x directive operand comment]} {
-         dict lappend lists [string tolower $directive] [linsert [lmap column [split $comment ";"] {string trim $column}] 0 $operand]
+         set list [string tolower $directive]
+         set columns [linsert [lmap column [split $comment ";"] {string trim $column}] 0 $operand]
+
+         if {$::optionValues(check)} {
+            upvar 0 isDefinedArray($list,[string tolower $operand]) isDefined
+
+            if {[info exists isDefined]} {
+               logWarning "duplicate definition: $directive $operand"
+            } else {
+               set isDefined 1
+            }
+
+            checkDefinition $list $columns
+         }
+
+         dict lappend lists $list $columns
       }
    }
 
    return $lists
+}
+
+proc checkDefinition {list columns} {
+   set handler "check[join [lmap word [split $list -] {string totitle $word}] ""]"
+
+   try {
+      $handler $columns
+   } trap {TCL LOOKUP COMMAND} {} {
+      logWarning "handler not defined: $handler"
+      proc $handler {columns} {}
+   }
+}
+
+proc checkBrailleDriver {columns} {
+   checkDriver $columns braille $::brailleDriversSubdirectory {auto}
+}
+
+proc checkSpeechDriver {columns} {
+   checkDriver $columns speech $::speechDriversSubdirectory {auto}
+}
+
+proc checkScreenDriver {columns} {
+   checkDriver $columns screen $::screenDriversSubdirectory
+}
+
+proc checkTextTable {columns} {
+   checkTable $columns text $::textTablesSubdirectory $::textTableExtension {auto}
+}
+
+proc checkContractionTable {columns} {
+   checkTable $columns contraction $::contractionTablesSubdirectory $::contractionTableExtension {auto}
+}
+
+proc checkAttributesTable {columns} {
+   checkTable $columns attributes $::attributesTablesSubdirectory $::attributesTableExtension
+}
+
+proc checkKeyboardTable {columns} {
+   checkTable $columns keyboard $::keyboardTablesSubdirectory $::keyTableExtension {off}
+}
+
+proc checkDriver {columns type subdirectory {ignore {}}} {
+   lassign $columns code name
+
+   if {[lsearch -exact $ignore $code] < 0} {
+      set makefile [file join $::sourceRoot $subdirectory $name Makefile.in]
+
+      if {[file isfile $makefile]} {
+      } else {
+         logWarning "unrecognized $type drivder name: $name"
+      }
+   }
+}
+
+proc checkTable {columns type subdirectory extension {ignore {}}} {
+   lassign $columns name
+
+   if {[lsearch -exact $ignore $name] < 0} {
+      set table [file join $::sourceRoot $subdirectory $name.$extension]
+
+      if {![file isfile $table]} {
+         logWarning "unrecognized $type table name: $name"
+      }
+   }
+}
+
+proc updateTables {lists} {
+   set updated 0
+
+   foreach name [dict keys $lists] {
+      if {[updateTable $lists $name]} {
+         set updated 1
+      }
+   }
+
+   if {[updateDriverCodes $lists]} {
+      set updated 1
+   }
+
+   return $updated
 }
 
 proc updateTable {lists name} {
@@ -63,12 +160,13 @@ proc updateTable {lists name} {
 
          foreach columns [lrange $rows 1 end] {
             set driverName [lindex $columns 1]
+            set driverUsage ""
             set makeFile [file join $driversDirectory $driverName Makefile.in]
 
             if {[file exists $makeFile]} {
-               set driverUsage [getMakeFileProperty $makeFile DRIVER_USAGE]
-            } else {
-               set driverUsage ""
+               if {![getMakeFileProperty $makeFile DRIVER_USAGE driverUsage]} {
+                  logWarning "missing driver usage: $makeFile$"
+               }
             }
 
             lappend usageColumn $driverUsage
@@ -134,22 +232,6 @@ proc updateDriverCodes {lists} {
    }
 
    return [replaceFile "driver-code.csv" [csvMakeTable $rows]]
-}
-
-proc updateTables {lists} {
-   set updated 0
-
-   foreach name [dict keys $lists] {
-      if {[updateTable $lists $name]} {
-         set updated 1
-      }
-   }
-
-   if {[updateDriverCodes $lists]} {
-      set updated 1
-   }
-
-   return $updated
 }
 
 if {![updateTables [makeLists "brltty.conf.in"]]} {

@@ -30,6 +30,11 @@ set attributesTablesSubdirectory [file join $tablesSubdirectory Attributes]
 set keyboardTablesSubdirectory [file join $tablesSubdirectory Keyboard]
 set inputTablesSubdirectory [file join $tablesSubdirectory Input]
 
+set textTableExtension ttb
+set contractionTableExtension ctb
+set attributesTableExtension atb
+set keyTableExtension ktb
+
 set driversSubdirectory Drivers
 set brailleDriversSubdirectory [file join $driversSubdirectory Braille]
 set speechDriversSubdirectory [file join $driversSubdirectory Speech]
@@ -75,7 +80,7 @@ proc getMakeFileProperty {file property {variable ""}} {
    }
 
    if {[string length $variable] == 0} {
-      return -code error "property not found: $property"
+      return -code error "make file property not found: $property: $file"
    }
 
    return 0
