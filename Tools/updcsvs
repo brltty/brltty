@@ -90,25 +90,40 @@ proc updateTable {lists name} {
 }
 
 proc updateDriverCodes {lists} {
-   set headers {code name}
-   set seen [dict create]
-   set dataRows [list]
+   set headers {code name types}
+   set rows [list]
+   set keys [dict create]
 
-   foreach driverType {braille-driver speech-driver screen-driver} {
-      if {[dict exists $lists $driverType]} {
-         foreach columns [dict get $lists $driverType] {
-            set row [list [lindex $columns 0] [lindex $columns 1]]
-            set key [join $row \t]
+   foreach driverType {braille speech screen} {
+      set driverDirective "$driverType-driver"
 
-            if {![dict exists $seen $key]} {
-               dict set seen $key 1
-               lappend dataRows $row
+      if {[dict exists $lists $driverDirective]} {
+         foreach columns [dict get $lists $driverDirective] {
+            set code [lindex $columns 0]
+            set name [lindex $columns 1]
+            set key "$code,$name"
+
+            if {![dict exists $keys $key]} {
+               dict set keys $key [dict create code $code name $name types [list]]
+            }
+
+            dict with keys $key {
+               lappend types $driverType
             }
          }
       }
    }
 
-   set rows [linsert [lsort -index 0 $dataRows] 0 $headers]
+   foreach key [dict keys $keys] {
+      set row [list]
+      lappend row [dict get $keys $key code]
+      lappend row [dict get $keys $key name]
+      lappend row [join [dict get $keys $key types] ", "]
+      lappend rows $row
+   }
+
+   set rows [lsort -index 0 $rows]
+   set rows [linsert $rows 0 $headers]
    return [replaceFile "driver-code.csv" [csvMakeTable $rows]]
 }
 

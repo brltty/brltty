@@ -718,8 +718,8 @@
 #screen-driver	an	# Android
 #screen-driver	as	# AtSpi
 #screen-driver	a2	# AtSpi2
-#screen-driver	em	# Terminal Emulator
-#screen-driver	fv	# File Viewer
+#screen-driver	em	# TerminalEmulator
+#screen-driver	fv	# FileViewer
 #screen-driver	hu	# Hurd
 #screen-driver	lx	# Linux
 #screen-driver	mo	# MacOS
