@@ -18,7 +18,7 @@
 
 DRIVER_CODE = mo
 DRIVER_NAME = MacOS
-DRIVER_USAGE = macOS frontmost window via Accessibility API
+DRIVER_USAGE = MacOS operating system via its accessibility API
 DRIVER_VERSION =
 DRIVER_DEVELOPERS = Yannick Plassiard <plassiardyannick@gmail.com>
 DRIVER_DEPENDENCIES = @screen_libraries_mo@

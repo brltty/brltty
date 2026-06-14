@@ -16,7 +16,7 @@
 
 DRIVER_CODE = mo
 DRIVER_NAME = MacOS
-DRIVER_USAGE = macOS speech via AVSpeechSynthesizer
+DRIVER_USAGE = MacOS Speech via AVSpeechSynthesizer
 DRIVER_VERSION =
 DRIVER_DEVELOPERS = Yannick Plassiard <plassiardyannick@gmail.com>
 DRIVER_DEPENDENCIES = @speech_libraries_mo@
