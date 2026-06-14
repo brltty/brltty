@@ -90,40 +90,49 @@ proc updateTable {lists name} {
 }
 
 proc updateDriverCodes {lists} {
-   set headers {code name types}
-   set rows [list]
-   set keys [dict create]
+   set drivers [dict create]
 
-   foreach driverType {braille speech screen} {
-      set driverDirective "$driverType-driver"
+   foreach type {braille speech screen} {
+      set directive "$type-driver"
 
-      if {[dict exists $lists $driverDirective]} {
-         foreach columns [dict get $lists $driverDirective] {
+      if {[dict exists $lists $directive]} {
+         foreach columns [dict get $lists $directive] {
             set code [lindex $columns 0]
             set name [lindex $columns 1]
-            set key "$code,$name"
 
-            if {![dict exists $keys $key]} {
-               dict set keys $key [dict create code $code name $name types [list]]
+            if {![dict exists $drivers $code $name]} {
+               dict set drivers $code $name [dict create types [list]]
             }
 
-            dict with keys $key {
-               lappend types $driverType
+            dict with drivers $code $name {
+               lappend types $type
             }
          }
       }
    }
 
-   foreach key [dict keys $keys] {
-      set row [list]
-      lappend row [dict get $keys $key code]
-      lappend row [dict get $keys $key name]
-      lappend row [join [dict get $keys $key types] ", "]
-      lappend rows $row
+   set headers {code name types}
+   set rows [list $headers]
+
+   foreach code [lsort [dict keys $drivers]] {
+      set codeEntry [dict get $drivers $code]
+      set names [lsort [dict keys $codeEntry]]
+
+      if {[dict size $codeEntry] > 1} {
+         logWarning "ambiguous driver code: $code ([join $names ", "])"
+      }
+
+      foreach name $names {
+         set row [list $code $name]
+
+         dict with codeEntry $name {
+            lappend row [join $types ", "]
+         }
+
+         lappend rows $row
+      }
    }
 
-   set rows [lsort -index 0 $rows]
-   set rows [linsert $rows 0 $headers]
    return [replaceFile "driver-code.csv" [csvMakeTable $rows]]
 }
 
