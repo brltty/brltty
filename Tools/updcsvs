@@ -22,6 +22,8 @@ source [file join $scriptDirectory csv.tcl]
 
 set optionDefinitions {
    {check flag "test"}
+   {missing flag "test"}
+   {noupdate flag "test"}
 }
 
 processProgramArguments optionValues $optionDefinitions
@@ -55,6 +57,17 @@ proc makeLists {file} {
       }
    }
 
+   if {$::optionValues(missing)} {
+      checkForMissingDrivers braille $::brailleDriversSubdirectory
+      checkForMissingDrivers speech $::speechDriversSubdirectory
+      checkForMissingDrivers screen $::screenDriversSubdirectory
+
+      checkForMissingTables text $::textTablesSubdirectory $::textTableExtension
+      checkForMissingTables contraction $::contractionTablesSubdirectory $::contractionTableExtension
+      checkForMissingTables attributes $::attributesTablesSubdirectory $::attributesTableExtension
+      checkForMissingTables keyboard $::keyboardTablesSubdirectory $::keyTableExtension
+   }
+
    return $lists
 }
 
@@ -81,25 +94,9 @@ proc checkScreenDriver {columns} {
    checkDriver $columns screen $::screenDriversSubdirectory
 }
 
-proc checkTextTable {columns} {
-   checkTable $columns text $::textTablesSubdirectory $::textTableExtension {auto}
-}
-
-proc checkContractionTable {columns} {
-   checkTable $columns contraction $::contractionTablesSubdirectory $::contractionTableExtension {auto}
-}
-
-proc checkAttributesTable {columns} {
-   checkTable $columns attributes $::attributesTablesSubdirectory $::attributesTableExtension
-}
-
-proc checkKeyboardTable {columns} {
-   checkTable $columns keyboard $::keyboardTablesSubdirectory $::keyTableExtension {off}
-}
-
 proc checkDriver {columns type subdirectory {ignore {}}} {
    lassign $columns code name
-   checkDuplicateDefinition driver $type $name
+   checkForDuplicateDefinition driver $type $name
 
    if {[lsearch -exact $ignore $code] < 0} {
       set makeFile [file join $::sourceRoot $subdirectory $name Makefile.in]
@@ -122,9 +119,25 @@ proc checkDriver {columns type subdirectory {ignore {}}} {
    }
 }
 
+proc checkTextTable {columns} {
+   checkTable $columns text $::textTablesSubdirectory $::textTableExtension {auto}
+}
+
+proc checkContractionTable {columns} {
+   checkTable $columns contraction $::contractionTablesSubdirectory $::contractionTableExtension {auto}
+}
+
+proc checkAttributesTable {columns} {
+   checkTable $columns attributes $::attributesTablesSubdirectory $::attributesTableExtension
+}
+
+proc checkKeyboardTable {columns} {
+   checkTable $columns keyboard $::keyboardTablesSubdirectory $::keyTableExtension {off}
+}
+
 proc checkTable {columns type subdirectory extension {ignore {}}} {
    lassign $columns name
-   checkDuplicateDefinition table $type $name
+   checkForDuplicateDefinition table $type $name
 
    if {[lsearch -exact $ignore $name] < 0} {
       set table [file join $::sourceRoot $subdirectory $name.$extension]
@@ -136,7 +149,7 @@ proc checkTable {columns type subdirectory extension {ignore {}}} {
 }
 
 set isDefined [dict create]
-proc checkDuplicateDefinition {category type name} {
+proc checkForDuplicateDefinition {category type name} {
    global isDefined
 
    if {[dict exists $isDefined $category $type $name]} {
@@ -144,6 +157,30 @@ proc checkDuplicateDefinition {category type name} {
    } else {
       dict set isDefined $category $type $name 1
    }
+}
+
+proc checkForMissingDrivers {type subdirectory} {
+   foreach name [listSubdirectory $subdirectory *] {
+      checkForMissingDefinition driver $type $name
+   }
+}
+
+proc checkForMissingTables {type subdirectory extension} {
+   foreach file [listSubdirectory $subdirectory *.$extension] {
+      checkForMissingDefinition table $type [file rootname $file]
+   }
+}
+
+proc checkForMissingDefinition {category type name} {
+   global isDefined
+
+   if {![dict exists $isDefined $category $type $name]} {
+      logWarning "missing $type $category definition: $name"
+   }
+}
+
+proc listSubdirectory {subdirectory pattern} {
+   return [lsort [glob -nocomplain -directory [file join $::sourceRoot $subdirectory] -tail -- $pattern]]
 }
 
 proc getDriverProperty {makeFile property valueVariable} {
@@ -164,14 +201,16 @@ proc getDriverProperty {makeFile property valueVariable} {
 proc updateTables {lists} {
    set updated 0
 
-   foreach name [dict keys $lists] {
-      if {[updateTable $lists $name]} {
+   if {!$::optionValues(noupdate)} {
+      foreach name [dict keys $lists] {
+         if {[updateTable $lists $name]} {
+            set updated 1
+         }
+      }
+
+      if {[updateDriverCodes $lists]} {
          set updated 1
       }
-   }
-
-   if {[updateDriverCodes $lists]} {
-      set updated 1
    }
 
    return $updated
