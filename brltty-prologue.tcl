@@ -742,34 +742,6 @@ proc addKeywordOption {definitionsVariable option operand usage keywords} {
    lappend definitions [list $option untyped.$operand $usage]
 }
 
-proc verifyInputFile {path} {
-   if {![file exists $path]} {
-      semanticError "file not found: $path"
-   }
-
-   if {![file isfile $path]} {
-      semanticError "not a file: $path"
-   }
-
-   if {![file readable $path]} {
-      semanticError "file not readable: $path"
-   }
-}
-
-proc verifyOutputDirectory {path} {
-   if {![file exists $path]} {
-      semanticError "directory not found: $path"
-   }
-
-   if {![file isdirectory $path]} {
-      semanticError "not a directory: $path"
-   }
-
-   if {![file writable $path]} {
-      semanticError "directory not writable: $path"
-   }
-}
-
 proc testKeyword {valueVariable keywordList} {
    upvar 1 $valueVariable value
 
@@ -858,6 +830,53 @@ proc verifyInteger {value description {minimum ""} {maximum ""}} {
       if {$value > $maximum} {
          syntaxError "invalid $description: $value > $maximum"
       }
+   }
+}
+
+proc verifyDirectory {path} {
+   if {![file exists $path]} {
+      semanticError "directory not found: $path"
+   }
+
+   if {![file isdirectory $path]} {
+      semanticError "not a directory: $path"
+   }
+}
+
+proc verifyOutputDirectory {path} {
+   verifyDirectory $path
+
+   if {![file writable $path]} {
+      semanticError "directory not writable: $path"
+   }
+}
+
+proc verifyInputFile {path} {
+   if {![file exists $path]} {
+      semanticError "file not found: $path"
+   }
+
+   if {![file isfile $path]} {
+      semanticError "not a file: $path"
+   }
+
+   if {![file readable $path]} {
+      semanticError "file not readable: $path"
+   }
+}
+
+proc verifyOutputFile {path} {
+   if {[file exists $path]} {
+      if {![file isfile $path]} {
+         semanticError "not a file: $path"
+      }
+
+      if {![file writable $path]} {
+         semanticError "file not writable: $path"
+      }
+   } else {
+      set directory [file dirname [file normalize $path]]
+      verifyOutputDirectory $directory
    }
 }
 
