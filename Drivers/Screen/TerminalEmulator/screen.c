@@ -32,6 +32,9 @@
 #include "async_handle.h"
 #include "async_io.h"
 #include "embed.h"
+#include "report.h"
+#include "clipboard.h"
+#include "brlapi_param.h"
 
 typedef enum {
   PARM_DIRECTORY,
@@ -116,6 +119,34 @@ messageHandler_emulatorExiting (const MessageHandlerParameters *parameters) {
   handleException("emulator exiting");
 }
 
+/* BRLTTY clipboard -> host clipboard bridging, driver side. We own BRLTTY's
+ * clipboard; the emulator (in the GUI session) owns the system clipboard. When a
+ * braille copy changes BRLTTY's clipboard, push the new text out to the emulator
+ * to publish to the host. (The reverse direction is intentionally not bridged:
+ * the host clipboard is already reachable in the terminal via the GUI's own
+ * paste.) */
+static ReportListenerInstance *clipboardReportListener = NULL;
+
+static
+REPORT_LISTENER(clipboardParameterListener) {
+  const ApiParameterUpdatedReport *report = parameters->reportData;
+  if (report->parameter != BRLAPI_PARAM_CLIPBOARD_CONTENT) return;
+
+  char *content = getMainClipboardContent();
+  if (!content) return;
+
+  size_t length = strlen(content);
+
+  if (length < TERM_CLIPBOARD_MESSAGE_SIZE) {
+    sendTerminalMessage(TERM_MSG_CLIPBOARD_TO_HOST, content, length);
+  } else {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "BRLTTY clipboard too large to bridge: %"PRIsize, length);
+  }
+
+  free(content);
+}
+
 static void
 enableMessages (key_t key) {
   haveTerminalMessageQueue = getMessageQueue(&terminalMessageQueue, key);
@@ -132,6 +163,12 @@ enableMessages (key_t key) {
       terminalMessageQueue, TERM_MSG_EMULATOR_EXITING,
       0, messageHandler_emulatorExiting, NULL
     );
+
+    if (!clipboardReportListener) {
+      clipboardReportListener = registerReportListener(
+        REPORT_API_PARAMETER_UPDATED, clipboardParameterListener, NULL
+      );
+    }
   }
 }
 
@@ -211,6 +248,11 @@ destruct_TerminalEmulatorScreen (void) {
   if (cachedSegment) {
     free(cachedSegment);
     cachedSegment = NULL;
+  }
+
+  if (clipboardReportListener) {
+    unregisterReportListener(clipboardReportListener);
+    clipboardReportListener = NULL;
   }
 
   haveScreenSegmentKey = 0;

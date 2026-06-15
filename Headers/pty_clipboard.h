@@ -25,12 +25,24 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* Put UTF-8 text onto the host's system clipboard (used to honor OSC 52 from a
- * program running inside the terminal). Returns non-zero on success. Does
- * nothing and returns zero where no integration is available. This must not
- * fork: brltty-pty's single select() loop and its CoreFoundation linkage make
- * spawning a subprocess (e.g. pbcopy) from the I/O path unsafe on macOS. */
-extern int ptySetSystemClipboard (const char *bytes, size_t length);
+/* Resolve, once, how the terminal's clipboard is published to the host. Two
+ * modes:
+ *   - passthrough: re-emit OSC 52 to the outer terminal, which owns the host
+ *     clipboard (cross-platform; the same thing tmux's "set-clipboard on" does).
+ *   - native: write the host clipboard directly (macOS NSPasteboard).
+ * The default is auto: passthrough, except on terminals known to ignore OSC 52
+ * (macOS Terminal.app), where it falls back to native so copy still works. The
+ * BRLTTY_PTY_CLIPBOARD_MODE environment variable (auto|passthrough|native)
+ * overrides the detection. Safe to call more than once; resolved lazily on first
+ * publish if never called. */
+extern void ptyConfigureClipboard (void);
+
+/* Publish UTF-8 text as the terminal's clipboard, honoring the configured mode
+ * (used for OSC 52 from a program inside the terminal, and for BRLTTY's own
+ * clipboard). Returns non-zero on success. Must not fork: brltty-pty's single
+ * select() loop and its CoreFoundation linkage make spawning a subprocess (e.g.
+ * pbcopy) from the I/O path unsafe on macOS. */
+extern int ptyPublishClipboard (const char *bytes, size_t length);
 
 #ifdef __cplusplus
 }

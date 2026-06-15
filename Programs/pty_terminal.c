@@ -911,7 +911,7 @@ handleClipboardRequest (char *payload) {
   unsigned char *bytes = decodeBase64(data, &length);
 
   if (bytes) {
-    if (length > 0) ptySetSystemClipboard((const char *)bytes, length);
+    if (length > 0) ptyPublishClipboard((const char *)bytes, length);
     free(bytes);
   }
 }

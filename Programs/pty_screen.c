@@ -19,10 +19,13 @@
 #include "prologue.h"
 
 #include <wchar.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "get_term.h"
 #include "log.h"
 #include "pty_screen.h"
+#include "pty_clipboard.h"
 #include "scr_emulator.h"
 #include "msg_queue.h"
 #include "utf8.h"
@@ -118,6 +121,14 @@ messageHandler_InputText (const MessageHandlerParameters *parameters) {
     if (character == WEOF) break;
     if (!ptyWriteInputCharacter(pty, character, 0)) break;
   }
+}
+
+/* BRLTTY clipboard -> host clipboard bridging, emulator side. The emulator runs
+ * in the GUI session, so it owns the system clipboard; the driver owns BRLTTY's
+ * clipboard and reports a change here whenever a braille copy updates it. */
+static void
+messageHandler_clipboardToHost (const MessageHandlerParameters *parameters) {
+  ptyPublishClipboard(parameters->content, parameters->length);
 }
 
 static void
@@ -352,6 +363,11 @@ ptyBeginScreen (PtyObject *pty, int driverDirectives) {
       haveInputTextHandler = startTerminalMessageReceiver(
         "terminal-input-text-receiver", TERM_MSG_INPUT_TEXT,
         0X200, messageHandler_InputText, pty
+      );
+
+      startTerminalMessageReceiver(
+        "terminal-clipboard-receiver", TERM_MSG_CLIPBOARD_TO_HOST,
+        TERM_CLIPBOARD_MESSAGE_SIZE, messageHandler_clipboardToHost, NULL
       );
 
       return 1;
