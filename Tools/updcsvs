@@ -42,7 +42,6 @@ if {![info exists optionValues(output)]} {
 
 verifyInputFile $optionValues(input)
 verifyOutputDirectory $optionValues(output)
-cd $optionValues(output)
 
 set definitions [dict create]
 
@@ -274,7 +273,7 @@ proc updateTable {category type} {
       }]
    }
 
-   return [updateFile "$type-$category.csv" [csvMakeTable $rows]]
+   return [updateFile "$type-$category" [csvMakeTable $rows]]
 }
 
 proc updateDriverCodeTable {} {
@@ -319,10 +318,12 @@ proc updateDriverCodeTable {} {
       }
    }
 
-   return [updateFile "driver-code.csv" [csvMakeTable $rows]]
+   return [updateFile "driver-code" [csvMakeTable $rows]]
 }
 
-proc updateFile {file data} {
+proc updateFile {name data} {
+   set file "[file join $::optionValues(output) $name].csv"
+
    if {!$::optionValues(noupdate)} {
       return [replaceFile $file $data]
    }
