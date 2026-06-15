@@ -168,6 +168,7 @@
 #text-table	gu	# Gujarati
 #text-table	he	# Hebrew
 #text-table	he_IL	# Hebrew (Israel)
+#text-table	he-old	# Hebrew (old version)
 #text-table	hi	# Hindi
 #text-table	hr	# Croatian
 #text-table	hu	# Hungarian
@@ -248,6 +249,7 @@
 #contraction-table	ko-g0	# Korean (uncontracted)
 #contraction-table	ko-g1	# Korean (partially contracted)
 #contraction-table	ko-g2	# Korean (contracted)
+#contraction-table	latex-access	# LaTeX (executable)
 #contraction-table	lt	# Lithuanian (uncontracted)
 #contraction-table	mg	# Malagasy (contracted)
 #contraction-table	mun	# Munda (contracted)
@@ -364,6 +366,7 @@
 #speech-driver	fl	# FestivalLite
 #speech-driver	fv	# Festival
 #speech-driver	gs	# GenericSay
+#speech-driver	mb	# MultiBraille
 #speech-driver	mo	# MacOS
 #speech-driver	mp	# Mikropuhe
 #speech-driver	sd	# SpeechDispatcher
@@ -722,13 +725,13 @@
 #screen-driver	as	# AtSpi
 #screen-driver	a2	# AtSpi2
 #screen-driver	em	# TerminalEmulator
-#screen-driver	vw	# FileViewer
 #screen-driver	hu	# Hurd
 #screen-driver	lx	# Linux
 #screen-driver	mo	# MacOS
 #screen-driver	pb	# PcBios
 #screen-driver	sc	# Screen
 #screen-driver	tx	# Tmux
+#screen-driver	vw	# FileViewer
 #screen-driver	wn	# Windows
 
 

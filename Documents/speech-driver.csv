@@ -9,6 +9,7 @@
 "fl","FestivalLite","","software engine"
 "fv","Festival","","software engine"
 "gs","GenericSay","","pipes to /usr/local/bin/say"
+"mb","MultiBraille","","braille device"
 "mo","MacOS","","MacOS Speech via AVSpeechSynthesizer"
 "mp","Mikropuhe","","software engine"
 "sd","SpeechDispatcher","","multi-engine server"
