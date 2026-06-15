@@ -1350,6 +1350,7 @@ install-messages:
 
 install-manpages: install-man1-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/brltty.1 $(INSTALL_MAN1_DIRECTORY)
+	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/brltty-pty.1 $(INSTALL_MAN1_DIRECTORY)
 
 PKGCONFIG_FILE_NAME = brltty.pc
 PKGCONFIG_FILE_PATH = $(INSTALL_PKGCONFIG_DIRECTORY)/$(PKGCONFIG_FILE_NAME)
@@ -1429,6 +1430,7 @@ uninstall-messages:
 
 uninstall-manpages:
 	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty.1
+	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty-pty.1
 	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/xbrlapi.1
 	-rm -f $(INSTALL_MAN3_DIRECTORY)/brlapi_*.3
 

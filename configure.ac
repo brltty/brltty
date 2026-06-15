@@ -2066,6 +2066,7 @@ AC_CONFIG_FILES([
    brltty.pc
    Documents/brltty.conf
    Documents/brltty.1
+   Documents/brltty-pty.1
    Documents/xbrlapi.1
    Documents/BrlAPIref.doxy
    Bindings/Emacs/add_directory.el
