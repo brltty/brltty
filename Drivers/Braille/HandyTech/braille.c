@@ -622,6 +622,62 @@ static const ModelEntry modelTable[] = {
     .hasTime = 1
   },
 
+  { .identifier = HT_MODEL_myBraille24,
+    .name = "myBraille 24",
+    .textCells = 24,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1,
+    .canChangeSize = 1
+  },
+
+  { .identifier = HT_MODEL_myBraille40,
+    .name = "myBraille 40",
+    .textCells = 40,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1,
+    .canChangeSize = 1
+  },
+
+  { .identifier = HT_MODEL_myBraille64,
+    .name = "myBraille 64",
+    .textCells = 64,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1,
+    .canChangeSize = 1
+  },
+
+  { .identifier = HT_MODEL_myBraille80,
+    .name = "myBraille 80",
+    .textCells = 80,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1,
+    .canChangeSize = 1
+  },
+
   { /* end of table */
     .name = NULL
   }

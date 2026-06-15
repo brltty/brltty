@@ -144,6 +144,10 @@ const BluetoothNameEntry bluetoothNameTable[] = {
   // HumanWare: Brailliant
   BLUETOOTH_NAME_ENTRY("HWG Brailliant", "bm"),
 
+  // HandyTech: myBraille
+  BLUETOOTH_NAME_ENTRY("myBraille MF", "ht"),
+  BLUETOOTH_NAME_ENTRY("myBraille MK", "ht"),
+
   // MDV
   BLUETOOTH_NAME_ENTRY("MB248", "md"),
 
