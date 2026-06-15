@@ -47,19 +47,23 @@ cd $optionValues(output)
 set definitions [dict create]
 
 dict set definitions driver braille headers {code name aliases others}
+dict set definitions driver braille ignore {auto}
 dict set definitions driver braille subdirectory $brailleDriversSubdirectory
 
 dict set definitions driver speech headers {code name aliases}
+dict set definitions driver speech ignore {auto}
 dict set definitions driver speech subdirectory $speechDriversSubdirectory
 
 dict set definitions driver screen headers {code name}
 dict set definitions driver screen subdirectory $screenDriversSubdirectory
 
 dict set definitions table text headers {name description}
+dict set definitions table text ignore {auto}
 dict set definitions table text subdirectory $textTablesSubdirectory
 dict set definitions table text extension $textTableExtension
 
 dict set definitions table contraction headers {name description}
+dict set definitions table contraction ignore {auto}
 dict set definitions table contraction subdirectory $contractionTablesSubdirectory
 dict set definitions table contraction extension $contractionTableExtension
 
@@ -68,122 +72,91 @@ dict set definitions table attributes subdirectory $attributesTablesSubdirectory
 dict set definitions table attributes extension $attributesTableExtension
 
 dict set definitions table keyboard headers {name description}
+dict set definitions table keyboard ignore {off}
 dict set definitions table keyboard subdirectory $keyboardTablesSubdirectory
 dict set definitions table keyboard extension $keyTableExtension
 
-array set tableHeaders {
-   braille-driver {code name aliases others}
-   speech-driver  {code name aliases}
-   screen-driver  {code name}
-
-   text-table        {name description}
-   contraction-table {name description}
-   attributes-table  {name description}
-   keyboard-table    {name description}
-}
-
 proc makeLists {} {
-   set lists [dict create]
-   set pattern {^#(\w+-(?:driver|table))\s+([-\w]+)\s*#\s*(.*?)\s*$}
+   global definitions
+   set pattern {^#(\w+)-(driver|table)\s+([-\w]+)\s*#\s*(.*?)\s*$}
 
    forEachLine line $::optionValues(input) {
-      if {[regexp $pattern $line x directive operand comment]} {
-         set list [string tolower $directive]
-         set columns [linsert [lmap column [split $comment ";"] {string trim $column}] 0 $operand]
+      if {[regexp -nocase -- $pattern $line x type category operand comment]} {
+         set category [string tolower $category]
+         set type [string tolower $type]
 
-         checkDefinition $list $columns
-         dict lappend lists $list $columns
+         set columns [linsert [lmap column [split $comment ";"] {string trim $column}] 0 $operand]
+         checkDefinition $category $type $columns
+
+         if {![dict exists $definitions $category $type list]} {
+            dict set definitions $category $type list {}
+         }
+
+         dict with definitions $category $type {
+            lappend list $columns
+         }
       }
    }
 
    if {$::optionValues(missing)} {
-      checkForMissingDrivers braille $::brailleDriversSubdirectory
-      checkForMissingDrivers speech $::speechDriversSubdirectory
-      checkForMissingDrivers screen $::screenDriversSubdirectory
-
-      checkForMissingTables text $::textTablesSubdirectory $::textTableExtension
-      checkForMissingTables contraction $::contractionTablesSubdirectory $::contractionTableExtension
-      checkForMissingTables attributes $::attributesTablesSubdirectory $::attributesTableExtension
-      checkForMissingTables keyboard $::keyboardTablesSubdirectory $::keyTableExtension
-   }
-
-   return $lists
-}
-
-proc checkDefinition {list columns} {
-   set handler "check[join [lmap word [split $list -] {string totitle $word}] ""]"
-
-   try {
-      $handler $columns
-   } trap {TCL LOOKUP COMMAND} {} {
-      logWarning "handler not defined: $handler"
-      proc $handler {columns} {}
+      checkForMissingDefinitions
    }
 }
 
-proc checkBrailleDriver {columns} {
-   checkDriver $columns braille $::brailleDriversSubdirectory {auto}
+proc checkDefinition {category type columns} {
+   global definitions
+   set handler "check[string totitle $category]Definition"
+
+   if {[lsearch -exact [dict getdef $definitions $category $type ignore {}] [lindex $columns 0]] < 0} {
+      try {
+         $handler $category $type $columns
+      } trap {TCL LOOKUP COMMAND} {} {
+         logWarning "handler not defined: $handler"
+         proc $handler {category type columns} {}
+      }
+   }
 }
 
-proc checkSpeechDriver {columns} {
-   checkDriver $columns speech $::speechDriversSubdirectory {auto}
-}
+proc checkDriverDefinition {category type columns} {
+   global definitions
 
-proc checkScreenDriver {columns} {
-   checkDriver $columns screen $::screenDriversSubdirectory
-}
-
-proc checkDriver {columns type subdirectory {ignore {}}} {
    lassign $columns code name
-   checkForDuplicateDefinition driver $type $name
+   checkForDuplicateDefinition $category $type $name
 
-   if {[lsearch -exact $ignore $code] < 0} {
-      set makeFile [file join $::sourceRoot $subdirectory $name Makefile.in]
+   set properties [dict get $definitions $category $type]
+   set subdirectory [dict get $properties subdirectory]
+   set makeFile [file join $::sourceRoot $subdirectory $name Makefile.in]
 
-      if {[file isfile $makeFile]} {
-         if {[getDriverProperty $makeFile DRIVER_CODE driverCode]} {
-            if {![string equal $driverCode $code]} {
-               logWarning "inconsistent $type driver code: $driverCode != $code"
-            }
+   if {[file isfile $makeFile]} {
+      if {[getDriverProperty $makeFile DRIVER_CODE driverCode]} {
+         if {![string equal $driverCode $code]} {
+            logWarning "inconsistent $type $category code: $driverCode != $code"
          }
-
-         if {[getDriverProperty $makeFile DRIVER_NAME driverName]} {
-            if {![string equal $driverName $name]} {
-               logWarning "inconsistent $type driver name: $driverName != $name"
-            }
-         }
-      } else {
-         logWarning "unrecognized $type drivder name: $name"
       }
+
+      if {[getDriverProperty $makeFile DRIVER_NAME driverName]} {
+         if {![string equal $driverName $name]} {
+            logWarning "inconsistent $type $category name: $driverName != $name"
+         }
+      }
+   } else {
+      logWarning "unrecognized $type $category name: $name"
    }
 }
 
-proc checkTextTable {columns} {
-   checkTable $columns text $::textTablesSubdirectory $::textTableExtension {auto}
-}
+proc checkTableDefinition {category type columns} {
+   global definitions
 
-proc checkContractionTable {columns} {
-   checkTable $columns contraction $::contractionTablesSubdirectory $::contractionTableExtension {auto}
-}
-
-proc checkAttributesTable {columns} {
-   checkTable $columns attributes $::attributesTablesSubdirectory $::attributesTableExtension
-}
-
-proc checkKeyboardTable {columns} {
-   checkTable $columns keyboard $::keyboardTablesSubdirectory $::keyTableExtension {off}
-}
-
-proc checkTable {columns type subdirectory extension {ignore {}}} {
    lassign $columns name
-   checkForDuplicateDefinition table $type $name
+   checkForDuplicateDefinition $category $type $name
 
-   if {[lsearch -exact $ignore $name] < 0} {
-      set table [file join $::sourceRoot $subdirectory $name.$extension]
+   set properties [dict get $definitions $category $type]
+   set subdirectory [dict get $properties subdirectory]
+   set extension [dict get $properties extension]
+   set table [file join $::sourceRoot $subdirectory $name.$extension]
 
-      if {![file isfile $table]} {
-         logWarning "unrecognized $type table name: $name"
-      }
+   if {![file isfile $table]} {
+      logWarning "unrecognized $type $category name: $name"
    }
 }
 
@@ -193,19 +166,43 @@ proc checkForDuplicateDefinition {category type name} {
    if {[dict exists $definitions $category $type names $name]} {
       logWarning "duplicate $type $category definition: $name"
    } else {
-      dict set definitions $category $type names $name 1
+      dict set definitions $category $type names $name [dict create]
    }
 }
 
-proc checkForMissingDrivers {type subdirectory} {
+proc checkForMissingDefinitions {} {
+   checkForMissingDriverDefinitions braille
+   checkForMissingDriverDefinitions speech
+   checkForMissingDriverDefinitions screen
+
+   checkForMissingTableDefinitions text
+   checkForMissingTableDefinitions contraction
+   checkForMissingTableDefinitions attributes
+   checkForMissingTableDefinitions keyboard
+}
+
+proc checkForMissingDriverDefinitions {type} {
+   global definitions
+
+   set category driver
+   set properties [dict get $definitions $category $type]
+   set subdirectory [dict get $properties subdirectory]
+
    foreach name [listSubdirectory $subdirectory *] {
-      checkForMissingDefinition driver $type $name
+      checkForMissingDefinition $category $type $name
    }
 }
 
-proc checkForMissingTables {type subdirectory extension} {
+proc checkForMissingTableDefinitions {type} {
+   global definitions
+
+   set category table
+   set properties [dict get $definitions $category $type]
+   set subdirectory [dict get $properties subdirectory]
+   set extension [dict get $properties extension]
+
    foreach file [listSubdirectory $subdirectory *.$extension] {
-      checkForMissingDefinition table $type [file rootname $file]
+      checkForMissingDefinition $category $type [file rootname $file]
    }
 }
 
@@ -236,75 +233,66 @@ proc getDriverProperty {makeFile property valueVariable} {
    return 0
 }
 
-proc updateTables {lists} {
+proc updateTables {} {
+   global definitions
    set updated 0
 
-   if {!$::optionValues(noupdate)} {
-      foreach name [dict keys $lists] {
-         if {[updateTable $lists $name]} {
+   foreach category [dict keys $definitions] {
+      foreach type [dict keys [dict get $definitions $category]] {
+         if {[updateTable $category $type]} {
             set updated 1
          }
       }
+   }
 
-      if {[updateDriverCodes $lists]} {
-         set updated 1
-      }
+   if {[updateDriverCodeTable]} {
+      set updated 1
    }
 
    return $updated
 }
 
-proc updateTable {lists name} {
-   global tableHeaders
+proc updateTable {category type} {
+   global definitions
 
-   if {[info exists tableHeaders($name)]} {
-      set headers $tableHeaders($name)
-      set rows [csvNormalizeRows [linsert [dict get $lists $name] 0 $headers] [llength $headers]]
+   set headers [dict get $definitions $category $type headers]
+   set rows [csvNormalizeRows [linsert [dict get $definitions $category $type list] 0 $headers] [llength $headers]]
 
-      if {[regexp {^(.*)-driver$} $name x driverType]} {
-         set usageColumn [list usage]
-         set driversDirectory [file join $::sourceRoot $::driversSubdirectory [string totitle $driverType]]
+   if {[string equal $category driver]} {
+      set usageColumn [list usage]
+      set driversDirectory [file join $::sourceRoot [dict get $definitions $category $type subdirectory]]
 
-         foreach columns [lrange $rows 1 end] {
-            set driverName [lindex $columns 1]
-            set makeFile [file join $driversDirectory $driverName Makefile.in]
-            getDriverProperty $makeFile DRIVER_USAGE driverUsage
-            lappend usageColumn $driverUsage
-         }
-
-         set rows [lmap columns $rows usage $usageColumn {
-            linsert $columns end $usage
-         }]
+      foreach columns [lrange $rows 1 end] {
+         set driverName [lindex $columns 1]
+         set makeFile [file join $driversDirectory $driverName Makefile.in]
+         getDriverProperty $makeFile DRIVER_USAGE driverUsage
+         lappend usageColumn $driverUsage
       }
 
-      if {[replaceFile "$name.csv" [csvMakeTable $rows]]} {
-         return 1
-      }
-   } else {
-      logWarning "table headers not defined: $name"
+      set rows [lmap columns $rows usage $usageColumn {
+         linsert $columns end $usage
+      }]
    }
 
-   return 0
+   return [updateFile "$type-$category.csv" [csvMakeTable $rows]]
 }
 
-proc updateDriverCodes {lists} {
-   set drivers [dict create]
+proc updateDriverCodeTable {} {
+   global definitions
 
-   foreach type {braille speech screen} {
-      set directive "$type-driver"
+   set drivers [dict get $definitions driver]
+   set types [dict create]
 
-      if {[dict exists $lists $directive]} {
-         foreach columns [dict get $lists $directive] {
-            set code [lindex $columns 0]
-            set name [lindex $columns 1]
+   foreach type [dict keys $drivers] {
+      foreach columns [dict get $drivers $type list] {
+         lassign $columns code name
 
-            if {![dict exists $drivers $code $name]} {
-               dict set drivers $code $name [dict create types [list]]
-            }
-
-            dict with drivers $code $name {
-               lappend types $type
-            }
+         if {![dict exists $types $code $name]} {
+            dict set types $code $name list {}
+         }
+ 
+         dict with types $code $name {
+            lappend list $type
          }
       }
    }
@@ -312,8 +300,8 @@ proc updateDriverCodes {lists} {
    set headers {code name types}
    set rows [list $headers]
 
-   foreach code [lsort [dict keys $drivers]] {
-      set codeEntry [dict get $drivers $code]
+   foreach code [lsort [dict keys $types]] {
+      set codeEntry [dict get $types $code]
       set names [lsort [dict keys $codeEntry]]
 
       if {[dict size $codeEntry] > 1} {
@@ -324,17 +312,35 @@ proc updateDriverCodes {lists} {
          set row [list $code $name]
 
          dict with codeEntry $name {
-            lappend row [join $types ", "]
+            lappend row [join $list ", "]
          }
 
          lappend rows $row
       }
    }
 
-   return [replaceFile "driver-code.csv" [csvMakeTable $rows]]
+   return [updateFile "driver-code.csv" [csvMakeTable $rows]]
 }
 
-if {![updateTables [makeLists]]} {
+proc updateFile {file data} {
+   if {!$::optionValues(noupdate)} {
+      return [replaceFile $file $data]
+   }
+
+   if {![file exists $file]} {
+      logDetail "file not added: $file"
+   } elseif {[string equal [readFile $file] $data]} {
+      logDetail "file not changed: $file"
+   } else {
+      logDetail "file not updated: $file"
+   }
+
+   return 0
+}
+
+makeLists
+
+if {![updateTables]} {
    logTask "no files updated"
 }
 
