@@ -21,9 +21,9 @@ source [file join [file dirname [info script]] .. prologue.tcl]
 source [file join $scriptDirectory csv.tcl]
 
 set optionDefinitions {
-   {check flag "test"}
-   {missing flag "test"}
-   {noupdate flag "test"}
+   {check flag "check for definition problems"}
+   {missing flag "check for missing definitions"}
+   {noupdate flag "don't update changed tables"}
 }
 
 processProgramArguments optionValues $optionDefinitions
