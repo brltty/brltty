@@ -426,6 +426,9 @@
 # GenericSay Speech Driver Parameters
 #speech-parameters gs:Command=/usr/local/bin/say
 
+# MacOS Speech Driver Parameters
+#speech-parameters mo:Voice=
+
 # Mikropuhe Speech Driver Parameters
 #speech-parameters mp:Name= # [/path/to/mikropuhe/name.pu5]
 #speech-parameters mp:Pitch=0 # [-10-10]
@@ -746,7 +749,7 @@
 #screen-parameters a2:Release=yes # [yes,no]
 #screen-parameters a2:Type=default # [default,all,{terminal,text}+...]
 
-# File Viewer Screen Driver Parameters
+# FileViewer Screen Driver Parameters
 #screen-parameters vw:File=path #
 #screen-parameters vw:show=no # [no,yes]
 
@@ -761,7 +764,7 @@
 #screen-parameters lx:VT=0 # [0-63]
 #screen-parameters lx:WidecharPadding=no # [no,yes]
 
-# Terminal Emulator Screen Driver Parameters
+# TerminalEmulator Screen Driver Parameters
 #screen-parameters em:Directory=path # []
 #screen-parameters em:Emulator=command # [brltty-pty]
 #screen-parameters em:Group=name/number # []
