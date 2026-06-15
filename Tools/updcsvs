@@ -26,8 +26,25 @@ set optionDefinitions {
    {noupdate flag "don't update changed tables"}
 }
 
+set defaultInputFile [file join $sourceRoot $documentsSubdirectory brltty.conf.in]
+lappend optionDefinitions [list input untyped.file "the input file - defaults to $defaultInputFile"]
+
+set defaultOutputDirectory [file join $sourceRoot $documentsSubdirectory]
+lappend optionDefinitions [list output untyped.directory "the output directory - defaults to $defaultOutputDirectory"]
+
 processProgramArguments optionValues $optionDefinitions
-cd [file join $sourceRoot $documentsSubdirectory]
+
+if {![info exists optionValues(input)]} {
+   set optionValues(input) $defaultInputFile
+}
+
+if {![info exists optionValues(output)]} {
+   set optionValues(output) $defaultOutputDirectory
+}
+
+verifyInputFile $optionValues(input)
+verifyOutputDirectory $optionValues(output)
+cd $optionValues(output)
 
 array set tableHeaders {
    braille-driver {code name aliases others}
@@ -40,11 +57,11 @@ array set tableHeaders {
    keyboard-table    {name description}
 }
 
-proc makeLists {file} {
+proc makeLists {} {
    set lists [dict create]
    set pattern {^#(\w+-(?:driver|table))\s+([-\w]+)\s*#\s*(.*?)\s*$}
 
-   forEachLine line $file {
+   forEachLine line $::optionValues(input) {
       if {[regexp $pattern $line x directive operand comment]} {
          set list [string tolower $directive]
          set columns [linsert [lmap column [split $comment ";"] {string trim $column}] 0 $operand]
@@ -296,7 +313,7 @@ proc updateDriverCodes {lists} {
    return [replaceFile "driver-code.csv" [csvMakeTable $rows]]
 }
 
-if {![updateTables [makeLists "brltty.conf.in"]]} {
+if {![updateTables [makeLists]]} {
    logTask "no files updated"
 }
 
