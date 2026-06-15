@@ -205,6 +205,36 @@ proc internalError {{message ""}} {
    exit 4
 }
 
+proc getScreenDimension {default variable attribute} {
+   global env
+   set pattern {^[1-9][0-9]*$}
+
+   if {[info exists env($variable)]} {
+      if {[regexp $pattern [set value $env($variable)]]} {
+         return $value
+      }
+   }
+
+   try {
+      set value [exec << "" tput $attribute 2>@ stderr]
+
+      if {[regexp $pattern $value]} {
+         return $value
+      }
+   } trap {POSIX ENOENT} {} {
+   }
+
+   return $default
+}
+
+proc getScreenColumns {} {
+   return [getScreenDimension 80 COLUMNS cols]
+}
+
+proc getScreenLines {} {
+   return [getScreenDimension 25 LINES lines]
+}
+
 proc toRelativePath {to {from .}} {
    set variables {from to}
 
@@ -411,7 +441,11 @@ proc wrapLine {line width} {
    return $lines
 }
 
-proc formatLines {lines {width 79}} {
+proc formatLines {lines {width ""}} {
+   if {[string length $width] == 0} {
+      set width [getScreenColumns]
+   }
+
    set result [list]
    set paragraph ""
 
