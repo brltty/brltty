@@ -34,6 +34,7 @@
 #include "cmdline.h"
 #include "pty_object.h"
 #include "pty_terminal.h"
+#include "pty_clipboard.h"
 #include "parse.h"
 #include "file.h"
 #include "async_handle.h"
@@ -488,6 +489,10 @@ main (int argc, char *argv[]) {
   ptySetLogTerminalOutput(opt_logOutput);
   ptySetLogTerminalSequences(opt_logSequences);
   ptySetLogUnexpectedTerminalIO(opt_logUnexpected);
+
+  /* Decide how a copy (OSC 52 from an inner program, or BRLTTY's clipboard) is
+   * published to the host, based on the outer terminal. See pty_clipboard.h. */
+  ptyConfigureClipboard();
 
   /* When invoked by the TerminalEmulator screen driver (which spawns us
    * with --driver-directives so it can read the PTY path back on stderr),

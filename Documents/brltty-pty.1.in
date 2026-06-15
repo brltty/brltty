@@ -46,13 +46,15 @@ If no
 .I command
 is given, the user's login shell is run.
 .PP
-When a program inside the terminal emits an
+When text is copied \- either with
+.BR BRLTTY 's
+braille copy commands, or by a program inside the terminal that emits an
 .B OSC 52
-sequence (a request to copy),
+sequence \-
 .B brltty-pty
-writes the text to the host clipboard (on macOS, the pasteboard). An
-.B OSC 52
-read request is declined for privacy.
+publishes it to the host clipboard. See
+.B ENVIRONMENT
+below for how that is done.
 .SH OPTIONS
 .TP
 \fB-x\fR (\fB--driver-directives\fR)
@@ -93,12 +95,39 @@ Print a command line usage summary and then exit.
 Print a thorough command line usage summary and then exit.
 .SH ENVIRONMENT
 .TP
+.B BRLTTY_PTY_CLIPBOARD_MODE
+How a copy is published to the host clipboard: one of
+.BR native ", " passthrough ", or " auto
+(the default).
+In
+.B native
+mode the host clipboard is written directly (on macOS, the pasteboard) - this
+reaches the clipboard regardless of the terminal and works even under
+.BR screen / tmux .
+In
+.B passthrough
+mode the copy is re-emitted to the outer terminal as an
+.B OSC 52
+sequence for that terminal to publish (as
+.BR tmux 's
+.B set-clipboard on
+does), which is the only way to reach the clipboard over
+.BR ssh .
+.B auto
+uses native when a local pasteboard is reachable, and passthrough when running
+remotely (detected via
+.BR SSH_CONNECTION / SSH_TTY )
+or where no native backend exists; a failed native write also falls back to
+passthrough.
+.TP
 .B BRLTTY_PTY_CLIPBOARD_FILE
 If set, a copy is written to this file instead of the host clipboard. This is a
 fork-free way to wire up a custom clipboard (for example a fifo paired with
 .B xclip
 or
-.BR wl-copy ).
+.BR wl-copy ),
+and it takes precedence over
+.BR BRLTTY_PTY_CLIPBOARD_MODE .
 .SH "SEE ALSO"
 .BR brltty (1)
 .PP
