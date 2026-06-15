@@ -41,7 +41,6 @@ array set tableHeaders {
 proc makeLists {file} {
    set lists [dict create]
    set pattern {^#(\w+-(?:driver|table))\s+([-\w]+)\s*#\s*(.*?)\s*$}
-   array set isDefinedArray {}
 
    forEachLine line $file {
       if {[regexp $pattern $line x directive operand comment]} {
@@ -49,14 +48,6 @@ proc makeLists {file} {
          set columns [linsert [lmap column [split $comment ";"] {string trim $column}] 0 $operand]
 
          if {$::optionValues(check)} {
-            upvar 0 isDefinedArray($list,[string tolower $operand]) isDefined
-
-            if {[info exists isDefined]} {
-               logWarning "duplicate definition: $directive $operand"
-            } else {
-               set isDefined 1
-            }
-
             checkDefinition $list $columns
          }
 
@@ -108,11 +99,23 @@ proc checkKeyboardTable {columns} {
 
 proc checkDriver {columns type subdirectory {ignore {}}} {
    lassign $columns code name
+   checkDuplicateDefinition driver $type $name
 
    if {[lsearch -exact $ignore $code] < 0} {
-      set makefile [file join $::sourceRoot $subdirectory $name Makefile.in]
+      set makeFile [file join $::sourceRoot $subdirectory $name Makefile.in]
 
-      if {[file isfile $makefile]} {
+      if {[file isfile $makeFile]} {
+         if {[getDriverProperty $makeFile DRIVER_CODE driverCode]} {
+            if {![string equal $driverCode $code]} {
+               logWarning "inconsistent $type driver code: $driverCode != $code"
+            }
+         }
+
+         if {[getDriverProperty $makeFile DRIVER_NAME driverName]} {
+            if {![string equal $driverName $name]} {
+               logWarning "inconsistent $type driver name: $driverName != $name"
+            }
+         }
       } else {
          logWarning "unrecognized $type drivder name: $name"
       }
@@ -121,6 +124,7 @@ proc checkDriver {columns type subdirectory {ignore {}}} {
 
 proc checkTable {columns type subdirectory extension {ignore {}}} {
    lassign $columns name
+   checkDuplicateDefinition table $type $name
 
    if {[lsearch -exact $ignore $name] < 0} {
       set table [file join $::sourceRoot $subdirectory $name.$extension]
@@ -129,6 +133,32 @@ proc checkTable {columns type subdirectory extension {ignore {}}} {
          logWarning "unrecognized $type table name: $name"
       }
    }
+}
+
+set isDefined [dict create]
+proc checkDuplicateDefinition {category type name} {
+   global isDefined
+
+   if {[dict exists $isDefined $category $type $name]} {
+      logWarning "duplicate $type $category definition: $name"
+   } else {
+      dict set isDefined $category $type $name 1
+   }
+}
+
+proc getDriverProperty {makeFile property valueVariable} {
+   upvar 1 $valueVariable value
+
+   if {[file exists $makeFile]} {
+      if {[getMakeFileProperty $makeFile $property value]} {
+         return 1
+      } else {
+         logWarning "missing driver property: $property: $makeFile"
+      }
+   }
+
+   set value ""
+   return 0
 }
 
 proc updateTables {lists} {
@@ -160,15 +190,8 @@ proc updateTable {lists name} {
 
          foreach columns [lrange $rows 1 end] {
             set driverName [lindex $columns 1]
-            set driverUsage ""
             set makeFile [file join $driversDirectory $driverName Makefile.in]
-
-            if {[file exists $makeFile]} {
-               if {![getMakeFileProperty $makeFile DRIVER_USAGE driverUsage]} {
-                  logWarning "missing driver usage: $makeFile$"
-               }
-            }
-
+            getDriverProperty $makeFile DRIVER_USAGE driverUsage
             lappend usageColumn $driverUsage
          }
 
