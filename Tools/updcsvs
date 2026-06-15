@@ -21,7 +21,6 @@ source [file join [file dirname [info script]] .. prologue.tcl]
 source [file join $scriptDirectory csv.tcl]
 
 set optionDefinitions {
-   {check flag "check for definition problems"}
    {missing flag "check for missing definitions"}
    {noupdate flag "don't update changed tables"}
 }
@@ -31,7 +30,6 @@ lappend optionDefinitions [list input untyped.file "the input file - defaults to
 
 set defaultOutputDirectory [file join $sourceRoot $documentsSubdirectory]
 lappend optionDefinitions [list output untyped.directory "the output directory - defaults to $defaultOutputDirectory"]
-
 processProgramArguments optionValues $optionDefinitions
 
 if {![info exists optionValues(input)]} {
@@ -45,6 +43,33 @@ if {![info exists optionValues(output)]} {
 verifyInputFile $optionValues(input)
 verifyOutputDirectory $optionValues(output)
 cd $optionValues(output)
+
+set definitions [dict create]
+
+dict set definitions driver braille headers {code name aliases others}
+dict set definitions driver braille subdirectory $brailleDriversSubdirectory
+
+dict set definitions driver speech headers {code name aliases}
+dict set definitions driver speech subdirectory $speechDriversSubdirectory
+
+dict set definitions driver screen headers {code name}
+dict set definitions driver screen subdirectory $screenDriversSubdirectory
+
+dict set definitions table text headers {name description}
+dict set definitions table text subdirectory $textTablesSubdirectory
+dict set definitions table text extension $textTableExtension
+
+dict set definitions table contraction headers {name description}
+dict set definitions table contraction subdirectory $contractionTablesSubdirectory
+dict set definitions table contraction extension $contractionTableExtension
+
+dict set definitions table attributes headers {name description}
+dict set definitions table attributes subdirectory $attributesTablesSubdirectory
+dict set definitions table attributes extension $attributesTableExtension
+
+dict set definitions table keyboard headers {name description}
+dict set definitions table keyboard subdirectory $keyboardTablesSubdirectory
+dict set definitions table keyboard extension $keyTableExtension
 
 array set tableHeaders {
    braille-driver {code name aliases others}
@@ -66,10 +91,7 @@ proc makeLists {} {
          set list [string tolower $directive]
          set columns [linsert [lmap column [split $comment ";"] {string trim $column}] 0 $operand]
 
-         if {$::optionValues(check)} {
-            checkDefinition $list $columns
-         }
-
+         checkDefinition $list $columns
          dict lappend lists $list $columns
       }
    }
@@ -165,14 +187,13 @@ proc checkTable {columns type subdirectory extension {ignore {}}} {
    }
 }
 
-set isDefined [dict create]
 proc checkForDuplicateDefinition {category type name} {
-   global isDefined
+   global definitions
 
-   if {[dict exists $isDefined $category $type $name]} {
+   if {[dict exists $definitions $category $type names $name]} {
       logWarning "duplicate $type $category definition: $name"
    } else {
-      dict set isDefined $category $type $name 1
+      dict set definitions $category $type names $name 1
    }
 }
 
@@ -189,9 +210,9 @@ proc checkForMissingTables {type subdirectory extension} {
 }
 
 proc checkForMissingDefinition {category type name} {
-   global isDefined
+   global definitions
 
-   if {![dict exists $isDefined $category $type $name]} {
+   if {![dict exists $definitions $category $type names $name]} {
       logWarning "missing $type $category definition: $name"
    }
 }
