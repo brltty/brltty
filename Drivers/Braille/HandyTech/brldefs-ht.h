@@ -57,6 +57,10 @@ typedef enum {
   HT_MODEL_Activator           = 0XA4,
   HT_MODEL_ActivatorPro64      = 0XA6,
   HT_MODEL_ActivatorPro80      = 0XA8,
+  HT_MODEL_myBraille24         = 0XB2,
+  HT_MODEL_myBraille40         = 0XB4,
+  HT_MODEL_myBraille64         = 0XB6,
+  HT_MODEL_myBraille80         = 0XB8,
 } HT_ModelIdentifier;
 
 /* Packet definition */

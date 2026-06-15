@@ -622,6 +622,62 @@ static const ModelEntry modelTable[] = {
     .hasTime = 1
   },
 
+  { .identifier = HT_MODEL_myBraille24,
+    .name = "myBraille 24",
+    .textCells = 24,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1,
+    .canChangeSize = 1
+  },
+
+  { .identifier = HT_MODEL_myBraille40,
+    .name = "myBraille 40",
+    .textCells = 40,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1,
+    .canChangeSize = 1
+  },
+
+  { .identifier = HT_MODEL_myBraille64,
+    .name = "myBraille 64",
+    .textCells = 64,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1,
+    .canChangeSize = 1
+  },
+
+  { .identifier = HT_MODEL_myBraille80,
+    .name = "myBraille 80",
+    .textCells = 80,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1,
+    .canChangeSize = 1
+  },
+
   { /* end of table */
     .name = NULL
   }
@@ -1464,6 +1520,34 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* Activator Pro 80 */
       .vendor=0X1FE4, .product=0X00A8,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* myBraille 24 */
+      .vendor=0X1FE4, .product=0X00B2,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* myBraille 40 */
+      .vendor=0X1FE4, .product=0X00B4,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* myBraille 64 */
+      .vendor=0X1FE4, .product=0X00B6,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* myBraille 80 */
+      .vendor=0X1FE4, .product=0X00B8,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
