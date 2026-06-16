@@ -8,28 +8,8 @@ copyright = '1995-2026, The BRLTTY Developers'
 author = 'The BRLTTY Developers'
 
 extensions = []
-# French chapter files included via .. include:: in the master document.
-# If Sphinx discovers them independently it creates duplicate labels.
-# These names don't exist in the English or BrlAPI directories so the
-# exclude is harmless for those builds.
-exclude_patterns = [
-    '_build',
-    'Introduction.rst',
-    'Compilation.rst',
-    'Utilisation.rst',
-    'Features.rst',
-    'Translation.rst',
-    'Advanced.rst',
-    'Displays.rst',
-    'Synthesizers.rst',
-    'Drivers.rst',
-    'Screen.rst',
-    'Syntax.rst',
-    'Dots.rst',
-    'nabcc.rst',
-    'fr-2007.rst',
-    'Midi.rst',
-]
+# Keep Sphinx from treating the build output directory as source.
+exclude_patterns = ['_build']
 source_encoding = 'utf-8'
 master_doc = 'BRLTTY'
 
