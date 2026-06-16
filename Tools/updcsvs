@@ -77,7 +77,7 @@ dict set definitions table keyboard ignore {off}
 dict set definitions table keyboard subdirectory $keyboardTablesSubdirectory
 dict set definitions table keyboard extension $keyTableExtension
 
-set parameterHeaders {code name default comment}
+set parameterHeaders {code name example comment}
 dict set definitions parameter braille headers $parameterHeaders
 dict set definitions parameter speech headers $parameterHeaders
 dict set definitions parameter screen headers $parameterHeaders
@@ -181,7 +181,7 @@ proc checkParameterDefinition {category type columnsVariable} {
    upvar 1 $columnsVariable columns
 
    lassign $columns parameter
-   set pattern {^(?:([[:alnum:]]*?):)?([[:alpha:]]*?)=(.*)$}
+   set pattern {^(?:([[:alnum:]]+):)?([_[:alpha:]]+)=(.*)$}
 
    if {[regexp $pattern $parameter x qualifier name default]} {
       set columns [lreplace $columns 0 0 $qualifier $name $default]

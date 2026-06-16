@@ -287,8 +287,8 @@
 #braille-parameters al:secondaryRoutingKeyEmulation=no # [no,yes]
 
 # BrlAPI Braille Driver Parameters
-#braille-parameters ba:auth=@CONFIGURATION_DIRECTORY@/@api_authkeyfile@
-#braille-parameters ba:host=:0
+#braille-parameters ba:auth=@CONFIGURATION_DIRECTORY@/@api_authkeyfile@ #
+#braille-parameters ba:host=:0 #
 
 # BrailleLite Braille Driver Parameters
 #braille-parameters bl:baudRate=9600 # [300,600,1200,2400,4800,9600,19200,38400]
@@ -406,18 +406,18 @@
 
 # eSpeak Speech Driver Parameters
 #speech-parameters es:maxRate=450 # [80-]
-#speech-parameters es:path=
-#speech-parameters es:punctList=
-#speech-parameters es:voice=default
+#speech-parameters es:path= #
+#speech-parameters es:punctList= #
+#speech-parameters es:voice=default #
 
 # eSpeak-NG Speech Driver Parameters
 #speech-parameters en:maxRate=450 # [80-]
-#speech-parameters en:path=
-#speech-parameters en:punctList=
-#speech-parameters en:voice=en
+#speech-parameters en:path= #
+#speech-parameters en:punctList= #
+#speech-parameters en:voice=en #
 
 # ExternalSpeech Speech Driver Parameters
-#speech-parameters xs:socket_path=/tmp/exs-data
+#speech-parameters xs:socket_path=/tmp/exs-data #
 
 # Festival Speech Driver Parameters
 #speech-parameters fv:command=festival # [/path/to/command]
@@ -427,10 +427,10 @@
 #speech-parameters fl:pitch=100 # [50-200]
 
 # GenericSay Speech Driver Parameters
-#speech-parameters gs:command=/usr/local/bin/say
+#speech-parameters gs:command=/usr/local/bin/say #
 
 # MacOS Speech Driver Parameters
-#speech-parameters mo:voice=
+#speech-parameters mo:voice= #
 
 # Mikropuhe Speech Driver Parameters
 #speech-parameters mp:name= # [/path/to/mikropuhe/name.pu5]
@@ -685,10 +685,10 @@
 #privilege-parameters platform:name=value,...
 
 # Linux Privilege Parameters
-#privilege-parameters lx:path=/usr/sbin:/sbin:/usr/bin:/bin
+#privilege-parameters lx:path=/usr/sbin:/sbin:/usr/bin:/bin #
 #privilege-parameters lx:scfMode=no # [no,log,fail,kill]
-#privilege-parameters lx:shell=/bin/sh
-#privilege-parameters lx:user=brltty
+#privilege-parameters lx:shell=/bin/sh #
+#privilege-parameters lx:user=brltty #
 
 
 ################################################
@@ -711,7 +711,7 @@
 #api-parameters auth=polkit		# authenticate via Polkit
 #api-parameters host=:0			# Accept only local Unix connections
 #api-parameters host=0.0.0.0:0		# Accept any internet connection.
-#api-parameters stackSize=65536
+#api-parameters stackSize=65536 #
 
 
 ###################
