@@ -1525,6 +1525,34 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&usbOperations3
     },
 
+    { /* myBraille 24 */
+      .vendor=0X1FE4, .product=0X00B2,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* myBraille 40 */
+      .vendor=0X1FE4, .product=0X00B4,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* myBraille 64 */
+      .vendor=0X1FE4, .product=0X00B6,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* myBraille 80 */
+      .vendor=0X1FE4, .product=0X00B8,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
     { /* Active Star 40 */
       .vendor=0X1FE4, .product=0X0064,
       .configuration=1, .interface=0, .alternative=0,
