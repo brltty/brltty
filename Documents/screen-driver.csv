@@ -1,7 +1,7 @@
 "code","name","usage"
+"a2","AtSpi2","X11 desktop via AT-SPI 2"
 "an","Android","Android operating system"
 "as","AtSpi","X11 desktop via AT-SPI 1"
-"a2","AtSpi2","X11 desktop via AT-SPI 2"
 "em","TerminalEmulator","terminal emulator with shared memory segment"
 "hu","Hurd","The Hurd operating system"
 "lx","Linux","Linux operating system"

@@ -1,7 +1,7 @@
 "code","name","aliases","others","usage"
-"auto","autodetect","","",""
 "al","Alva","","","ABT(3nn), Delphi(4nn), Satellite(5nn), Braille System 40, Braille Controller 640/680, Easy Link 12"
 "at","Albatross","","","46/80"
+"auto","autodetect","","",""
 "ba","BrlAPI","","","BrlAPI client"
 "bc","BrailComm","","","III"
 "bd","Braudi","","","Pro"

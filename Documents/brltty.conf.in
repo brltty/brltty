@@ -300,8 +300,8 @@
 
 # DotPad Braille Driver Parameters
 #braille-parameters dp:display=default # [default,text,graphic]
-#braille-parameters dp:statusCells=yes # [yes,no]
 #braille-parameters dp:horizontalSpacing=1 # [0-10] (dots)
+#braille-parameters dp:statusCells=yes # [yes,no]
 #braille-parameters dp:verticalSpacing=2 # [0-10] (dots)
 
 # EuroBraille Braille Driver Parameters
@@ -326,7 +326,7 @@
 
 # TTY Braille Driver Parameters
 #braille-parameters tt:baud=9600 # 
-#braille-parameters tt:charSet=ISO8859-1 # 
+#braille-parameters tt:charset=ISO8859-1 # 
 #braille-parameters tt:columns=40 # [1-80]
 #braille-parameters tt:lines=1 # [1-3]
 #braille-parameters tt:locale= # 
@@ -455,21 +455,21 @@
 #speech-parameters th:pitch=0.0 # [-2.0-2.0]
 
 # ViaVoice Speech Driver Parameters
-#speech-parameters vv:quality= # [fair,poor,good]
-#speech-parameters vv:mode= # [words,letters,punctuation,phonetic]
-#speech-parameters vv:synthesize= # [sentences,all]
 #speech-parameters vv:abbreviations= # [on,off]
-#speech-parameters vv:years= # [on,off]
-#speech-parameters vv:language= # [American-English, British-English, Castilian-Spanish, Mexican-Spanish, Standard-French, Canadian-French, Standard-German, Standard-Italian, Standard-Mandarin-GBK, Standard-Mandarin-PinYin, Standard-Mandarin-UCS2, Taiwanese-Mandarin-Big5, Taiwanese-Mandarin-ZhuYin, Taiwanese-Mandarin-PinYin, Taiwanese-Mandarin-UCS2, Brazilian-Portuguese, Standard-Japanese-SJIS, Standard-Japanese-UCS2, Standard-Finnish, Standard-Korean-UHC, Standard-Korean-UCS2, Standard-Cantonese-GBK, Standard-Cantonese-UCS2, HongKong-Cantonese-Big5, HongKong-Cantonese-UCS2, Standard-Dutch, Standard-Norwegian, Standard-Swedish, Standard-Danish, Standard-Thai-TIS620]
-#speech-parameters vv:voice= # [man,woman,child,patriarch,matriarch]
+#speech-parameters vv:breathiness= # [0-100]
+#speech-parameters vv:expressiveness= # [0-100] (pitch fluctuation)
 #speech-parameters vv:gender= # [male,female]
 #speech-parameters vv:headSize= # [0-100]
+#speech-parameters vv:language= # [American-English, British-English, Castilian-Spanish, Mexican-Spanish, Standard-French, Canadian-French, Standard-German, Standard-Italian, Standard-Mandarin-GBK, Standard-Mandarin-PinYin, Standard-Mandarin-UCS2, Taiwanese-Mandarin-Big5, Taiwanese-Mandarin-ZhuYin, Taiwanese-Mandarin-PinYin, Taiwanese-Mandarin-UCS2, Brazilian-Portuguese, Standard-Japanese-SJIS, Standard-Japanese-UCS2, Standard-Finnish, Standard-Korean-UHC, Standard-Korean-UCS2, Standard-Cantonese-GBK, Standard-Cantonese-UCS2, HongKong-Cantonese-Big5, HongKong-Cantonese-UCS2, Standard-Dutch, Standard-Norwegian, Standard-Swedish, Standard-Danish, Standard-Thai-TIS620]
+#speech-parameters vv:mode= # [words,letters,punctuation,phonetic]
 #speech-parameters vv:pitchBaseline= # [40-422 Hz]
-#speech-parameters vv:expressiveness= # [0-100] (pitch fluctuation)
+#speech-parameters vv:quality= # [fair,poor,good]
 #speech-parameters vv:roughness= # [0-100]
-#speech-parameters vv:breathiness= # [0-100]
-#speech-parameters vv:volume= # [0-100 %]
 #speech-parameters vv:speed= # [70-1297 wpm]
+#speech-parameters vv:synthesize= # [sentences,all]
+#speech-parameters vv:voice= # [man,woman,child,patriarch,matriarch]
+#speech-parameters vv:volume= # [0-100 %]
+#speech-parameters vv:years= # [on,off]
 
 
 #####################
@@ -781,7 +781,7 @@
 #screen-parameters tx:socket=path #
 #
 # Windows Screen Driver Parameters
-#screen-parameters wn:root=no # [no,yes]
 #screen-parameters wn:followFocus=yes # [yes,no]
+#screen-parameters wn:root=no # [no,yes]
 
 

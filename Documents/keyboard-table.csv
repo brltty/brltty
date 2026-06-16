@@ -1,7 +1,7 @@
 "name","description"
-"off","no keyboard table"
 "braille","bindings for braille keyboards"
 "desktop","bindings for full keyboards"
 "keypad","bindings for keypad-based navigation"
 "laptop","bindings for keyboards without a keypad"
+"off","no keyboard table"
 "sun_type6","bindings for Sun Type 6 keyboards"

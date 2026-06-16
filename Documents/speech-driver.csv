@@ -1,7 +1,7 @@
 "code","name","aliases","usage"
-"auto","autodetect","",""
 "al","Alva","","braille device"
 "an","Android","","OS-specific"
+"auto","autodetect","",""
 "bl","BrailleLite","","braille device"
 "cb","CombiBraille","","braille device"
 "en","eSpeak-NG","","software engine"

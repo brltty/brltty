@@ -285,8 +285,11 @@ proc updateTables {} {
 proc updateTable {category type} {
    global definitions
 
+   set list [dict getdef $definitions $category $type list {}]
+   set list [lsort -index 0 $list]
+
    set headers [dict get $definitions $category $type headers]
-   set rows [csvNormalizeRows [linsert [dict getdef $definitions $category $type list {}] 0 $headers] [llength $headers]]
+   set rows [csvNormalizeRows [linsert $list 0 $headers] [llength $headers]]
 
    if {[string equal $category driver]} {
       set usageColumn [list usage]
