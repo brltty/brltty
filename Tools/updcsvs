@@ -56,28 +56,41 @@ dict set definitions driver speech subdirectory $speechDriversSubdirectory
 dict set definitions driver screen headers {code name}
 dict set definitions driver screen subdirectory $screenDriversSubdirectory
 
-dict set definitions table text headers {name description}
+set tableHeaders {name description}
+dict set definitions table text headers $tableHeaders
+dict set definitions table contraction headers $tableHeaders
+dict set definitions table attributes headers $tableHeaders
+dict set definitions table keyboard headers $tableHeaders
+
 dict set definitions table text ignore {auto}
 dict set definitions table text subdirectory $textTablesSubdirectory
 dict set definitions table text extension $textTableExtension
 
-dict set definitions table contraction headers {name description}
 dict set definitions table contraction ignore {auto}
 dict set definitions table contraction subdirectory $contractionTablesSubdirectory
 dict set definitions table contraction extension $contractionTableExtension
 
-dict set definitions table attributes headers {name description}
 dict set definitions table attributes subdirectory $attributesTablesSubdirectory
 dict set definitions table attributes extension $attributesTableExtension
 
-dict set definitions table keyboard headers {name description}
 dict set definitions table keyboard ignore {off}
 dict set definitions table keyboard subdirectory $keyboardTablesSubdirectory
 dict set definitions table keyboard extension $keyTableExtension
 
+set parameterHeaders {code name default comment}
+dict set definitions parameter braille headers $parameterHeaders
+dict set definitions parameter speech headers $parameterHeaders
+dict set definitions parameter screen headers $parameterHeaders
+dict set definitions parameter api headers $parameterHeaders
+dict set definitions parameter privilege headers $parameterHeaders
+
+proc reportProblem {problem} {
+   logWarning $problem
+}
+
 proc makeLists {} {
    global definitions
-   set pattern {^#(\w+)-(driver|table)\s+([-\w]+)\s*#\s*(.*?)\s*$}
+   set pattern {^#(\w+)-(driver|table|parameter)\s+([^\s]*?)\s*#\s*(.*?)\s*$}
 
    forEachLine line $::optionValues(input) {
       if {[regexp -nocase -- $pattern $line x type category operand comment]} {
@@ -85,7 +98,7 @@ proc makeLists {} {
          set type [string tolower $type]
 
          set columns [linsert [lmap column [split $comment ";"] {string trim $column}] 0 $operand]
-         checkDefinition $category $type $columns
+         checkDefinition $category $type columns
 
          if {![dict exists $definitions $category $type list]} {
             dict set definitions $category $type list {}
@@ -102,22 +115,25 @@ proc makeLists {} {
    }
 }
 
-proc checkDefinition {category type columns} {
+proc checkDefinition {category type columnsVariable} {
    global definitions
-   set handler "check[string totitle $category]Definition"
+   upvar 1 $columnsVariable columns
 
    if {[lsearch -exact [dict getdef $definitions $category $type ignore {}] [lindex $columns 0]] < 0} {
-      try {
-         $handler $category $type $columns
-      } trap {TCL LOOKUP COMMAND} {} {
-         logWarning "handler not defined: $handler"
-         proc $handler {category type columns} {}
+      set handler "check[string totitle $category]Definition"
+
+      if {[llength [info procs $handler]] == 0} {
+         logError "handler not defined: $handler"
+         proc $handler {category type columnsVariable} {}
+      } else {
+         $handler $category $type columns
       }
    }
 }
 
-proc checkDriverDefinition {category type columns} {
+proc checkDriverDefinition {category type columnsVariable} {
    global definitions
+   upvar 1 $columnsVariable columns
 
    lassign $columns code name
    checkForDuplicateDefinition $category $type $name
@@ -129,22 +145,23 @@ proc checkDriverDefinition {category type columns} {
    if {[file isfile $makeFile]} {
       if {[getDriverProperty $makeFile DRIVER_CODE driverCode]} {
          if {![string equal $driverCode $code]} {
-            logWarning "inconsistent $type $category code: $driverCode != $code"
+            reportProblem "inconsistent $type $category code: $driverCode != $code"
          }
       }
 
       if {[getDriverProperty $makeFile DRIVER_NAME driverName]} {
          if {![string equal $driverName $name]} {
-            logWarning "inconsistent $type $category name: $driverName != $name"
+            reportProblem "inconsistent $type $category name: $driverName != $name"
          }
       }
    } else {
-      logWarning "unrecognized $type $category name: $name"
+      reportProblem "unrecognized $type $category name: $name"
    }
 }
 
-proc checkTableDefinition {category type columns} {
+proc checkTableDefinition {category type columnsVariable} {
    global definitions
+   upvar 1 $columnsVariable columns
 
    lassign $columns name
    checkForDuplicateDefinition $category $type $name
@@ -155,7 +172,21 @@ proc checkTableDefinition {category type columns} {
    set table [file join $::sourceRoot $subdirectory $name.$extension]
 
    if {![file isfile $table]} {
-      logWarning "unrecognized $type $category name: $name"
+      reportProblem "unrecognized $type $category name: $name"
+   }
+}
+
+proc checkParameterDefinition {category type columnsVariable} {
+   global definitions
+   upvar 1 $columnsVariable columns
+
+   lassign $columns parameter
+   set pattern {^(?:([[:alnum:]]*?):)?([[:alpha:]]*?)=(.*)$}
+
+   if {[regexp $pattern $parameter x qualifier name default]} {
+      set columns [lreplace $columns 0 0 $qualifier $name $default]
+   } else {
+      reportProblem "unrecognized $type $category: $parameter"
    }
 }
 
@@ -163,7 +194,7 @@ proc checkForDuplicateDefinition {category type name} {
    global definitions
 
    if {[dict exists $definitions $category $type names $name]} {
-      logWarning "duplicate $type $category definition: $name"
+      reportProblem "duplicate $type $category definition: $name"
    } else {
       dict set definitions $category $type names $name [dict create]
    }
@@ -209,7 +240,7 @@ proc checkForMissingDefinition {category type name} {
    global definitions
 
    if {![dict exists $definitions $category $type names $name]} {
-      logWarning "missing $type $category definition: $name"
+      reportProblem "missing $type $category definition: $name"
    }
 }
 
@@ -224,7 +255,7 @@ proc getDriverProperty {makeFile property valueVariable} {
       if {[getMakeFileProperty $makeFile $property value]} {
          return 1
       } else {
-         logWarning "missing driver property: $property: $makeFile"
+         reportProblem "missing driver property: $property: $makeFile"
       }
    }
 
@@ -255,7 +286,7 @@ proc updateTable {category type} {
    global definitions
 
    set headers [dict get $definitions $category $type headers]
-   set rows [csvNormalizeRows [linsert [dict get $definitions $category $type list] 0 $headers] [llength $headers]]
+   set rows [csvNormalizeRows [linsert [dict getdef $definitions $category $type list {}] 0 $headers] [llength $headers]]
 
    if {[string equal $category driver]} {
       set usageColumn [list usage]
@@ -304,7 +335,7 @@ proc updateDriverCodeTable {} {
       set names [lsort [dict keys $codeEntry]]
 
       if {[dict size $codeEntry] > 1} {
-         logWarning "ambiguous driver code: $code ([join $names ", "])"
+         reportProblem "ambiguous driver code: $code ([join $names ", "])"
       }
 
       foreach name $names {
