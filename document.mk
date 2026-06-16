@@ -19,7 +19,7 @@
 LOCALE = C
 SETLOCALE = LC_ALL=$(LOCALE)
 
-SPHINX_CONFDIR = $(SRC_TOP)Documents
+SPHINX_CONFDIR = $(SRC_TOP)Documents/Sphinx
 
 all: all-yes
 all-yes: txt html
