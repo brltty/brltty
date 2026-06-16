@@ -283,67 +283,67 @@
 #braille-parameters driver:name=value,...
 
 # Alva Braille Driver Parameters
-#braille-parameters al:RotatedCells=no # [no,yes]
-#braille-parameters al:SecondaryRoutingKeyEmulation=no # [no,yes]
+#braille-parameters al:rotatedCells=no # [no,yes]
+#braille-parameters al:secondaryRoutingKeyEmulation=no # [no,yes]
 
 # BrlAPI Braille Driver Parameters
-#braille-parameters ba:Auth=@CONFIGURATION_DIRECTORY@/@api_authkeyfile@
-#braille-parameters ba:Host=:0
+#braille-parameters ba:auth=@CONFIGURATION_DIRECTORY@/@api_authkeyfile@
+#braille-parameters ba:host=:0
 
 # BrailleLite Braille Driver Parameters
-#braille-parameters bl:BaudRate=9600 # [300,600,1200,2400,4800,9600,19200,38400]
-#braille-parameters bl:KbEmu=yes # [yes,no]
+#braille-parameters bl:baudRate=9600 # [300,600,1200,2400,4800,9600,19200,38400]
+#braille-parameters bl:kbEmu=yes # [yes,no]
 
 # Baum Braille Driver Parameters
-#braille-parameters bm:Protocol=default # [default,escape,hid1,hid2,ht,pb]
-#braille-parameters bm:VarioKeys=no # [no,yes]
+#braille-parameters bm:protocol=default # [default,escape,hid1,hid2,ht,pb]
+#braille-parameters bm:varioKeys=no # [no,yes]
 
 # DotPad Braille Driver Parameters
-#braille-parameters dp:Display=default # [default,text,graphic]
-#braille-parameters dp:StatusCells=yes # [yes,no]
-#braille-parameters dp:HorizontalSpacing=1 # [0-10] (dots)
-#braille-parameters dp:VerticalSpacing=2 # [0-10] (dots)
+#braille-parameters dp:display=default # [default,text,graphic]
+#braille-parameters dp:statusCells=yes # [yes,no]
+#braille-parameters dp:horizontalSpacing=1 # [0-10] (dots)
+#braille-parameters dp:verticalSpacing=2 # [0-10] (dots)
 
 # EuroBraille Braille Driver Parameters
-#braille-parameters eu:Protocol= # [auto,azerbraille,clio,eurobraille,notebraille,pupibraille,scriba,esys,esytime,iris,esysiris]
+#braille-parameters eu:protocol= # [auto,azerbraille,clio,eurobraille,notebraille,pupibraille,scriba,esys,esytime,iris,esysiris]
 
 # HandyTech Braille Driver Parameters
-#braille-parameters ht:SetTime=no # [no,yes]
+#braille-parameters ht:setTime=no # [no,yes]
 
 # Iris Braille Driver Parameters
-#braille-parameters ir:Embedded= # [no,yes]
-#braille-parameters ir:LatchDelay=10 # [0-100] (tenths of a second)
-#braille-parameters ir:Protocol= # [eurobraille,native]
+#braille-parameters ir:embedded= # [no,yes]
+#braille-parameters ir:latchDelay=10 # [0-100] (tenths of a second)
+#braille-parameters ir:protocol= # [eurobraille,native]
 
 # Libbraille Braille Driver Parameters
-#braille-parameters lb:Device=/dev/ttyS0 # 
-#braille-parameters lb:Driver=auto # 
-#braille-parameters lb:Table=us.tbl # 
+#braille-parameters lb:device=/dev/ttyS0 # 
+#braille-parameters lb:driver=auto # 
+#braille-parameters lb:table=us.tbl # 
 
 # TSI Braille Driver Parameters
-#braille-parameters ts:HighBaud=yes # [yes,no]
-#braille-parameters ts:SetBaud=9600 # [4800,9600,19200]
+#braille-parameters ts:highBaud=yes # [yes,no]
+#braille-parameters ts:setBaud=9600 # [4800,9600,19200]
 
 # TTY Braille Driver Parameters
-#braille-parameters tt:Baud=9600 # 
-#braille-parameters tt:CharSet=ISO8859-1 # 
-#braille-parameters tt:Columns=40 # [1-80]
-#braille-parameters tt:Lines=1 # [1-3]
-#braille-parameters tt:Locale= # 
-#braille-parameters tt:Term=vt100 # [terminfo]
+#braille-parameters tt:baud=9600 # 
+#braille-parameters tt:charSet=ISO8859-1 # 
+#braille-parameters tt:columns=40 # [1-80]
+#braille-parameters tt:lines=1 # [1-3]
+#braille-parameters tt:locale= # 
+#braille-parameters tt:term=vt100 # [terminfo]
 
 # VisioBraille Braille Driver Parameters
-#braille-parameters vs:Baud=57600 # 
-#braille-parameters vs:DisplaySize=40 # [20-40]
-#braille-parameters vs:PromVersion=4 # [3-6]
+#braille-parameters vs:baud=57600 # 
+#braille-parameters vs:displaySize=40 # [20-40]
+#braille-parameters vs:promVersion=4 # [3-6]
 
 # XWindow Braille Driver Parameters
-#braille-parameters xw:Columns=40 # [1-80]
-#braille-parameters xw:Font=name # []
-#braille-parameters xw:Input=off # [off,on]
-#braille-parameters xw:Lines=1 # [1-3]
-#braille-parameters xw:Model=bare # [bare]
-#braille-parameters xw:TkParms= # 
+#braille-parameters xw:columns=40 # [1-80]
+#braille-parameters xw:font=name # []
+#braille-parameters xw:input=off # [off,on]
+#braille-parameters xw:lines=1 # [1-3]
+#braille-parameters xw:model=bare # [bare]
+#braille-parameters xw:tkParms= # 
 
 
 ###################
@@ -405,71 +405,71 @@
 #speech-parameters driver:name=value,...
 
 # eSpeak Speech Driver Parameters
-#speech-parameters es:MaxRate=450 # [80-]
-#speech-parameters es:Path=
-#speech-parameters es:PunctList=
-#speech-parameters es:Voice=default
+#speech-parameters es:maxRate=450 # [80-]
+#speech-parameters es:path=
+#speech-parameters es:punctList=
+#speech-parameters es:voice=default
 
 # eSpeak-NG Speech Driver Parameters
-#speech-parameters en:MaxRate=450 # [80-]
-#speech-parameters en:Path=
-#speech-parameters en:PunctList=
-#speech-parameters en:Voice=en
+#speech-parameters en:maxRate=450 # [80-]
+#speech-parameters en:path=
+#speech-parameters en:punctList=
+#speech-parameters en:voice=en
 
 # ExternalSpeech Speech Driver Parameters
-#speech-parameters xs:Socket_Path=/tmp/exs-data
+#speech-parameters xs:socket_path=/tmp/exs-data
 
 # Festival Speech Driver Parameters
-#speech-parameters fv:Command=festival # [/path/to/command]
-#speech-parameters fv:Name= # [kevin,kal]
+#speech-parameters fv:command=festival # [/path/to/command]
+#speech-parameters fv:name= # [kevin,kal]
 
 # FestivalLite Speech Driver Parameters
-#speech-parameters fl:Pitch=100 # [50-200]
+#speech-parameters fl:pitch=100 # [50-200]
 
 # GenericSay Speech Driver Parameters
-#speech-parameters gs:Command=/usr/local/bin/say
+#speech-parameters gs:command=/usr/local/bin/say
 
 # MacOS Speech Driver Parameters
-#speech-parameters mo:Voice=
+#speech-parameters mo:voice=
 
 # Mikropuhe Speech Driver Parameters
-#speech-parameters mp:Name= # [/path/to/mikropuhe/name.pu5]
-#speech-parameters mp:Pitch=0 # [-10-10]
+#speech-parameters mp:name= # [/path/to/mikropuhe/name.pu5]
+#speech-parameters mp:pitch=0 # [-10-10]
 
 # SpeechDispatcher Speech Driver Parameters
-#speech-parameters sd:Address= # [address of speech-dispatcher's server]
-#speech-parameters sd:Autospawn= # [yes,no]
-#speech-parameters sd:Language= # [two-letter language code]
-#speech-parameters sd:Module= # [flite,festival,epos-generic,dtk-generic,...]
-#speech-parameters sd:Name= # 
-#speech-parameters sd:Voice= # [male1,female1,male2,female2,male3,female3,child_male,child_female]
+#speech-parameters sd:address= # [address of speech-dispatcher's server]
+#speech-parameters sd:autospawn= # [yes,no]
+#speech-parameters sd:language= # [two-letter language code]
+#speech-parameters sd:module= # [flite,festival,epos-generic,dtk-generic,...]
+#speech-parameters sd:name= # 
+#speech-parameters sd:voice= # [male1,female1,male2,female2,male3,female3,child_male,child_female]
 
 # Swift Speech Driver Parameters
-#speech-parameters sw:Name= # [voice,/path/to/voice]
+#speech-parameters sw:name= # [voice,/path/to/voice]
 
 # Theta Speech Driver Parameters
-#speech-parameters th:Age= # [1-99,-1--99]
-#speech-parameters th:Gender= # [male,female,neuter]
-#speech-parameters th:Language= # [two-letter language code]
-#speech-parameters th:Name= # [voice,/path/to/voice]
-#speech-parameters th:Pitch=0.0 # [-2.0-2.0]
+#speech-parameters th:age= # [1-99,-1--99]
+#speech-parameters th:gender= # [male,female,neuter]
+#speech-parameters th:language= # [two-letter language code]
+#speech-parameters th:name= # [voice,/path/to/voice]
+#speech-parameters th:pitch=0.0 # [-2.0-2.0]
 
 # ViaVoice Speech Driver Parameters
-#speech-parameters vv:Quality= # [fair,poor,good]
-#speech-parameters vv:Mode= # [words,letters,punctuation,phonetic]
-#speech-parameters vv:Synthesize= # [sentences,all]
-#speech-parameters vv:Abbreviations= # [on,off]
-#speech-parameters vv:Years= # [on,off]
-#speech-parameters vv:Language= # [American-English, British-English, Castilian-Spanish, Mexican-Spanish, Standard-French, Canadian-French, Standard-German, Standard-Italian, Standard-Mandarin-GBK, Standard-Mandarin-PinYin, Standard-Mandarin-UCS2, Taiwanese-Mandarin-Big5, Taiwanese-Mandarin-ZhuYin, Taiwanese-Mandarin-PinYin, Taiwanese-Mandarin-UCS2, Brazilian-Portuguese, Standard-Japanese-SJIS, Standard-Japanese-UCS2, Standard-Finnish, Standard-Korean-UHC, Standard-Korean-UCS2, Standard-Cantonese-GBK, Standard-Cantonese-UCS2, HongKong-Cantonese-Big5, HongKong-Cantonese-UCS2, Standard-Dutch, Standard-Norwegian, Standard-Swedish, Standard-Danish, Standard-Thai-TIS620]
-#speech-parameters vv:Voice= # [man,woman,child,patriarch,matriarch]
-#speech-parameters vv:Gender= # [male,female]
-#speech-parameters vv:HeadSize= # [0-100]
-#speech-parameters vv:PitchBaseline= # [40-422 Hz]
-#speech-parameters vv:Expressiveness= # [0-100] (pitch fluctuation)
-#speech-parameters vv:Roughness= # [0-100]
-#speech-parameters vv:Breathiness= # [0-100]
-#speech-parameters vv:Volume= # [0-100 %]
-#speech-parameters vv:Speed= # [70-1297 wpm]
+#speech-parameters vv:quality= # [fair,poor,good]
+#speech-parameters vv:mode= # [words,letters,punctuation,phonetic]
+#speech-parameters vv:synthesize= # [sentences,all]
+#speech-parameters vv:abbreviations= # [on,off]
+#speech-parameters vv:years= # [on,off]
+#speech-parameters vv:language= # [American-English, British-English, Castilian-Spanish, Mexican-Spanish, Standard-French, Canadian-French, Standard-German, Standard-Italian, Standard-Mandarin-GBK, Standard-Mandarin-PinYin, Standard-Mandarin-UCS2, Taiwanese-Mandarin-Big5, Taiwanese-Mandarin-ZhuYin, Taiwanese-Mandarin-PinYin, Taiwanese-Mandarin-UCS2, Brazilian-Portuguese, Standard-Japanese-SJIS, Standard-Japanese-UCS2, Standard-Finnish, Standard-Korean-UHC, Standard-Korean-UCS2, Standard-Cantonese-GBK, Standard-Cantonese-UCS2, HongKong-Cantonese-Big5, HongKong-Cantonese-UCS2, Standard-Dutch, Standard-Norwegian, Standard-Swedish, Standard-Danish, Standard-Thai-TIS620]
+#speech-parameters vv:voice= # [man,woman,child,patriarch,matriarch]
+#speech-parameters vv:gender= # [male,female]
+#speech-parameters vv:headSize= # [0-100]
+#speech-parameters vv:pitchBaseline= # [40-422 Hz]
+#speech-parameters vv:expressiveness= # [0-100] (pitch fluctuation)
+#speech-parameters vv:roughness= # [0-100]
+#speech-parameters vv:breathiness= # [0-100]
+#speech-parameters vv:volume= # [0-100 %]
+#speech-parameters vv:speed= # [70-1297 wpm]
 
 
 #####################
@@ -686,7 +686,7 @@
 
 # Linux Privilege Parameters
 #privilege-parameters lx:path=/usr/sbin:/sbin:/usr/bin:/bin
-#privilege-parameters lx:scfmode=no # [no,log,fail,kill]
+#privilege-parameters lx:scfMode=no # [no,log,fail,kill]
 #privilege-parameters lx:shell=/bin/sh
 #privilege-parameters lx:user=brltty
 
@@ -705,13 +705,13 @@
 # (can be overridden with the --api-parameters= [-A] option)
 #api-parameters name=value,...
 
-#api-parameters Auth=keyfile:@CONFIGURATION_DIRECTORY@/@api_authkeyfile@	# Require authentication key
-#api-parameters Auth=user:joe		# Allow some local user
-#api-parameters Auth=group:brl		# Allow some local group
-#api-parameters Auth=polkit		# authenticate via Polkit
-#api-parameters Host=:0			# Accept only local Unix connections
-#api-parameters Host=0.0.0.0:0		# Accept any internet connection.
-#api-parameters StackSize=65536
+#api-parameters auth=keyfile:@CONFIGURATION_DIRECTORY@/@api_authkeyfile@	# Require authentication key
+#api-parameters auth=user:joe		# Allow some local user
+#api-parameters auth=group:brl		# Allow some local group
+#api-parameters auth=polkit		# authenticate via Polkit
+#api-parameters host=:0			# Accept only local Unix connections
+#api-parameters host=0.0.0.0:0		# Accept any internet connection.
+#api-parameters stackSize=65536
 
 
 ###################
@@ -746,42 +746,42 @@
 #screen-parameters driver:name=value,...
 
 # AtSpi Screen Driver Parameters
-#screen-parameters as:Type=text+terminal # [text,terminal,all]+...
+#screen-parameters as:type=text+terminal # [text,terminal,all]+...
 
 # AtSpi2 Screen Driver Parameters
-#screen-parameters a2:Release=yes # [yes,no]
-#screen-parameters a2:Type=default # [default,all,{terminal,text}+...]
+#screen-parameters a2:release=yes # [yes,no]
+#screen-parameters a2:type=default # [default,all,{terminal,text}+...]
 
 # FileViewer Screen Driver Parameters
-#screen-parameters vw:File=path #
+#screen-parameters vw:file=path #
 #screen-parameters vw:show=no # [no,yes]
 
 # Linux Screen Driver Parameters
-#screen-parameters lx:Charset=name+... # []
-#screen-parameters lx:FallbackText=text # ""
-#screen-parameters lx:HFB=auto # [auto,vga,fb,0-7]
-#screen-parameters lx:LargeScreenBug=no # [no,yes]
-#screen-parameters lx:LogSFM=no # [no,yes]
-#screen-parameters lx:RpiSpacesBug=no # [no,yes]
-#screen-parameters lx:Unicode=yes # [yes,no]
-#screen-parameters lx:VT=0 # [0-63]
-#screen-parameters lx:WidecharPadding=no # [no,yes]
+#screen-parameters lx:charset=name+... # []
+#screen-parameters lx:fallbackText=text # ""
+#screen-parameters lx:hfb=auto # [auto,vga,fb,0-7]
+#screen-parameters lx:largeScreenBug=no # [no,yes]
+#screen-parameters lx:logSFM=no # [no,yes]
+#screen-parameters lx:rpiSpacesBug=no # [no,yes]
+#screen-parameters lx:unicode=yes # [yes,no]
+#screen-parameters lx:vt=0 # [0-63]
+#screen-parameters lx:widecharPadding=no # [no,yes]
 
 # TerminalEmulator Screen Driver Parameters
-#screen-parameters em:Directory=path # []
-#screen-parameters em:Emulator=command # [brltty-pty]
-#screen-parameters em:Group=name/number # []
-#screen-parameters em:Home=path # []
-#screen-parameters em:Path=path # []
-#screen-parameters em:Shell=command # [$SHELL]
-#screen-parameters em:User=name/number # []
+#screen-parameters em:directory=path # []
+#screen-parameters em:emulator=command # [brltty-pty]
+#screen-parameters em:group=name/number # []
+#screen-parameters em:home=path # []
+#screen-parameters em:path=path # []
+#screen-parameters em:shell=command # [$SHELL]
+#screen-parameters em:user=name/number # []
 
 # Tmux Screen Driver Parameters
-#screen-parameters tx:Session=name #
-#screen-parameters tx:Socket=path #
+#screen-parameters tx:session=name #
+#screen-parameters tx:socket=path #
 #
 # Windows Screen Driver Parameters
-#screen-parameters wn:Root=no # [no,yes]
-#screen-parameters wn:FollowFocus=yes # [yes,no]
+#screen-parameters wn:root=no # [no,yes]
+#screen-parameters wn:followFocus=yes # [yes,no]
 
 
