@@ -1182,7 +1182,7 @@ getConsoleEncoding (void) {
     unsigned cp = GetConsoleOutputCP();
 
     if (cp == CP_UTF8) {
-      strcpy(encoding, "UTF-8");
+      snprintf(encoding, sizeof(encoding), "UTF-8");
     } else {
       snprintf(encoding, sizeof(encoding), "CP%u", cp);
     }
