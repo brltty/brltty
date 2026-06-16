@@ -1,0 +1,7 @@
+"code","name","default","comment"
+"","auth","keyfile:@CONFIGURATION_DIRECTORY@/@api_authkeyfile@","Require authentication key"
+"","auth","user:joe","Allow some local user"
+"","auth","group:brl","Allow some local group"
+"","auth","polkit","authenticate via Polkit"
+"","host",":0","Accept only local Unix connections"
+"","host","0.0.0.0:0","Accept any internet connection."

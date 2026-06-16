@@ -90,11 +90,11 @@ proc reportProblem {problem} {
 
 proc makeLists {} {
    global definitions
-   set pattern {^#(\w+)-(driver|table|parameter)\s+([^\s]*?)\s*#\s*(.*?)\s*$}
+   set pattern {^#(\w+)-(driver|table|parameters)\s+([^\s]*?)\s*#\s*(.*?)\s*$}
 
    forEachLine line $::optionValues(input) {
       if {[regexp -nocase -- $pattern $line x type category operand comment]} {
-         set category [string tolower $category]
+         set category [string trimright [string tolower $category] s]
          set type [string tolower $type]
 
          set columns [linsert [lmap column [split $comment ";"] {string trim $column}] 0 $operand]
