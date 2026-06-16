@@ -43,47 +43,6 @@ if {![info exists optionValues(output)]} {
 verifyInputFile $optionValues(input)
 verifyOutputDirectory $optionValues(output)
 
-set definitions [dict create]
-
-dict set definitions driver braille headers {code name aliases others}
-dict set definitions driver braille ignore {auto}
-dict set definitions driver braille subdirectory $brailleDriversSubdirectory
-
-dict set definitions driver speech headers {code name aliases}
-dict set definitions driver speech ignore {auto}
-dict set definitions driver speech subdirectory $speechDriversSubdirectory
-
-dict set definitions driver screen headers {code name}
-dict set definitions driver screen subdirectory $screenDriversSubdirectory
-
-set tableHeaders {name description}
-dict set definitions table text headers $tableHeaders
-dict set definitions table contraction headers $tableHeaders
-dict set definitions table attributes headers $tableHeaders
-dict set definitions table keyboard headers $tableHeaders
-
-dict set definitions table text ignore {auto}
-dict set definitions table text subdirectory $textTablesSubdirectory
-dict set definitions table text extension $textTableExtension
-
-dict set definitions table contraction ignore {auto}
-dict set definitions table contraction subdirectory $contractionTablesSubdirectory
-dict set definitions table contraction extension $contractionTableExtension
-
-dict set definitions table attributes subdirectory $attributesTablesSubdirectory
-dict set definitions table attributes extension $attributesTableExtension
-
-dict set definitions table keyboard ignore {off}
-dict set definitions table keyboard subdirectory $keyboardTablesSubdirectory
-dict set definitions table keyboard extension $keyTableExtension
-
-set parameterHeaders {code name example comment}
-dict set definitions parameter braille headers $parameterHeaders
-dict set definitions parameter speech headers $parameterHeaders
-dict set definitions parameter screen headers $parameterHeaders
-dict set definitions parameter api headers $parameterHeaders
-dict set definitions parameter privilege headers $parameterHeaders
-
 proc reportProblem {problem} {
    logWarning $problem
 }
@@ -119,7 +78,7 @@ proc checkDefinition {category type columnsVariable} {
    global definitions
    upvar 1 $columnsVariable columns
 
-   if {[lsearch -exact [dict getdef $definitions $category $type ignore {}] [lindex $columns 0]] >= 0} {
+   if {[lsearch -exact [dict getdef $definitions $category $type accept {}] [lindex $columns 0]] >= 0} {
       return 1
    }
 
@@ -388,6 +347,86 @@ proc updateFile {name data} {
    return 0
 }
 
+proc makeDefinitions {} {
+   set tableHeaders {name description}
+   set parameterHeaders {code name example comment}
+
+   set definitions [makeDictionary {
+      driver dict {
+         braille dict {
+            headers list {code name aliases others}
+            accept list {auto}
+            subdirectory subst $::brailleDriversSubdirectory
+         }
+
+         speech dict {
+            headers list {code name aliases}
+            accept list {auto}
+            subdirectory subst $::speechDriversSubdirectory
+         }
+
+         screen dict {
+            headers list {code name}
+            subdirectory subst $::screenDriversSubdirectory
+         }
+      }
+
+      table dict {
+         text dict {
+            headers subst $tableHeaders
+            accept list {auto}
+            subdirectory subst $::textTablesSubdirectory
+            extension subst $::textTableExtension
+         }
+
+         contraction dict {
+            headers subst $tableHeaders
+            accept list {auto}
+            subdirectory subst $::contractionTablesSubdirectory
+            extension subst $::contractionTableExtension
+         }
+
+         attributes dict {
+            headers subst $tableHeaders
+            subdirectory subst $::attributesTablesSubdirectory
+            extension subst $::attributesTableExtension
+         }
+
+         keyboard dict {
+            headers subst $tableHeaders
+            accept list {off}
+            subdirectory subst $::keyboardTablesSubdirectory
+            extension subst $::keyTableExtension
+         }
+      }
+
+      parameter dict {
+         braille dict {
+            headers subst $parameterHeaders
+         }
+
+         speech dict {
+            headers subst $parameterHeaders
+         }
+
+         screen dict {
+            headers subst $parameterHeaders
+         }
+
+         api dict {
+            headers subst $parameterHeaders
+         }
+
+         privilege dict {
+            headers subst $parameterHeaders
+         }
+      }
+   }]
+
+   return $definitions
+}
+
+set definitions [makeDefinitions]
 makeLists
 
 if {![updateTables]} {

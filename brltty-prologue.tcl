@@ -914,3 +914,33 @@ proc verifyOutputFile {path} {
    }
 }
 
+proc makeDictionary {initializer} {
+   set result [dict create]
+
+   foreach {name type value} $initializer {
+      switch -exact -- $type {
+         dict {
+            dict set result $name [uplevel 1 [list makeDictionary $value]]
+         }
+
+         string {
+            dict set result $name $value
+         }
+
+         subst {
+            dict set result $name [uplevel 1 [list subst $value]]
+         }
+
+         list {
+            dict set result $name [eval list $value]
+         }
+
+         default {
+            return -code error "unrecognized type: $type"
+         }
+      }
+   }
+
+   return $result
+}
+
