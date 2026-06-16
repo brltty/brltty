@@ -96,16 +96,16 @@ proc makeLists {} {
       if {[regexp -nocase -- $pattern $line x type category operand comment]} {
          set category [string trimright [string tolower $category] s]
          set type [string tolower $type]
-
          set columns [linsert [lmap column [split $comment ";"] {string trim $column}] 0 $operand]
-         checkDefinition $category $type columns
 
-         if {![dict exists $definitions $category $type list]} {
-            dict set definitions $category $type list {}
-         }
+         if {[checkDefinition $category $type columns]} {
+            if {![dict exists $definitions $category $type list]} {
+               dict set definitions $category $type list {}
+            }
 
-         dict with definitions $category $type {
-            lappend list $columns
+            dict with definitions $category $type {
+               lappend list $columns
+            }
          }
       }
    }
@@ -119,16 +119,20 @@ proc checkDefinition {category type columnsVariable} {
    global definitions
    upvar 1 $columnsVariable columns
 
-   if {[lsearch -exact [dict getdef $definitions $category $type ignore {}] [lindex $columns 0]] < 0} {
-      set handler "check[string totitle $category]Definition"
+   if {[lsearch -exact [dict getdef $definitions $category $type ignore {}] [lindex $columns 0]] >= 0} {
+      return 1
+   }
 
-      if {[llength [info procs $handler]] == 0} {
-         logError "handler not defined: $handler"
-         proc $handler {category type columnsVariable} {}
-      } else {
-         $handler $category $type columns
+   set handler "check[string totitle $category]Definition"
+   if {[llength [info procs $handler]] == 0} {
+      logError "handler not defined: $handler"
+
+      proc $handler {category type columnsVariable} {
+	 return 0
       }
    }
+
+   return [$handler $category $type columns]
 }
 
 proc checkDriverDefinition {category type columnsVariable} {
@@ -154,9 +158,13 @@ proc checkDriverDefinition {category type columnsVariable} {
             reportProblem "inconsistent $type $category name: $driverName != $name"
          }
       }
+
+      return 1
    } else {
       reportProblem "unrecognized $type $category name: $name"
    }
+
+   return 0
 }
 
 proc checkTableDefinition {category type columnsVariable} {
@@ -171,9 +179,13 @@ proc checkTableDefinition {category type columnsVariable} {
    set extension [dict get $properties extension]
    set table [file join $::sourceRoot $subdirectory $name.$extension]
 
-   if {![file isfile $table]} {
+   if {[file isfile $table]} {
+      return 1
+   } else {
       reportProblem "unrecognized $type $category name: $name"
    }
+
+   return 0
 }
 
 proc checkParameterDefinition {category type columnsVariable} {
@@ -185,9 +197,12 @@ proc checkParameterDefinition {category type columnsVariable} {
 
    if {[regexp $pattern $parameter x qualifier name default]} {
       set columns [lreplace $columns 0 0 $qualifier $name $default]
+      return 1
    } else {
       reportProblem "unrecognized $type $category: $parameter"
    }
+
+   return 0
 }
 
 proc checkForDuplicateDefinition {category type name} {
@@ -317,7 +332,7 @@ proc updateDriverCodeTable {} {
    set types [dict create]
 
    foreach type [dict keys $drivers] {
-      foreach columns [dict get $drivers $type list] {
+      foreach columns [dict getdef $drivers $type list {}] {
          lassign $columns code name
 
          if {![dict exists $types $code $name]} {
