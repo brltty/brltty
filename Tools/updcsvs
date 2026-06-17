@@ -213,8 +213,10 @@ proc checkForMissingTableDefinitions {type} {
 proc checkForMissingDefinition {category type name} {
    global definitions
 
-   if {![dict exists $definitions $category $type names $name]} {
-      reportProblem "missing $type $category definition: $name"
+   if {[lsearch -exact [dict getdef $definitions $category $type missing {}] $name] < 0} {
+      if {![dict exists $definitions $category $type names $name]} {
+         reportProblem "missing $type $category definition: $name"
+      }
    }
 }
 
@@ -355,35 +357,39 @@ proc makeDefinitions {} {
       driver dict {
          braille dict {
             headers list {code name aliases others}
-            accept list {auto}
             subdirectory subst $::brailleDriversSubdirectory
+            accept list {auto}
+            missing list {Skeleton TTY XWindow B2G}
          }
 
          speech dict {
             headers list {code name aliases}
-            accept list {auto}
             subdirectory subst $::speechDriversSubdirectory
+            accept list {auto}
+            missing list {Skeleton}
          }
 
          screen dict {
             headers list {code name}
             subdirectory subst $::screenDriversSubdirectory
+            missing list {Skeleton Grub}
          }
       }
 
       table dict {
          text dict {
             headers subst $tableHeaders
-            accept list {auto}
             subdirectory subst $::textTablesSubdirectory
             extension subst $::textTableExtension
+            accept list {auto}
          }
 
          contraction dict {
             headers subst $tableHeaders
-            accept list {auto}
             subdirectory subst $::contractionTablesSubdirectory
             extension subst $::contractionTableExtension
+            accept list {auto}
+            missing list {none}
          }
 
          attributes dict {
@@ -394,9 +400,9 @@ proc makeDefinitions {} {
 
          keyboard dict {
             headers subst $tableHeaders
-            accept list {off}
             subdirectory subst $::keyboardTablesSubdirectory
             extension subst $::keyTableExtension
+            accept list {off}
          }
       }
 
