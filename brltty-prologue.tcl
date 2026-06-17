@@ -917,7 +917,21 @@ proc verifyOutputFile {path} {
 proc makeDictionary {initializer} {
    set result [dict create]
 
+   switch -exact [expr {[llength $initializer] % 3}] {
+      1 {
+         return -code error "missing type"
+      }
+
+      2 {
+         return -code error "missing value"
+      }
+   }
+
    foreach {name type value} $initializer {
+      if {[dict exists $result $name]} {
+         return -code error "duplicate name: $name"
+      }
+
       switch -exact -- $type {
          dict {
             dict set result $name [uplevel 1 [list makeDictionary $value]]
@@ -927,8 +941,16 @@ proc makeDictionary {initializer} {
             dict set result $name $value
          }
 
+         integer -
+         wideinteger -
+         double -
+         boolean -
          list {
-            dict set result $name [eval list $value]
+            if {![string is $type -strict $value]} {
+               return -code error "improperly structured $type: $value"
+            }
+
+            dict set result $name $value
          }
 
          subst {
