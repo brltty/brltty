@@ -657,7 +657,7 @@ proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVa
 
             if {![string equal $type string]} {
                try {
-                  string is $type -strict $value
+                  set result [string is $type -strict $value]
                } trap {TCL LOOKUP INDEX} {} {
                   return -code error "unimplemented option type: $type"
                }
