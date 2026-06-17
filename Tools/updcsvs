@@ -281,6 +281,8 @@ proc updateTable {category type} {
       set rows [lmap columns $rows usage $usageColumn {
          linsert $columns end $usage
       }]
+   } elseif {[string equal $category parameter] && [string equal $type api]} {
+      set rows [lmap row $rows {lrange $row 1 end}]
    }
 
    return [updateFile "$type-$category" [csvMakeTable $rows]]

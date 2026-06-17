@@ -705,13 +705,13 @@
 # (can be overridden with the --api-parameters= [-A] option)
 #api-parameters name=value,...
 
-#api-parameters auth=keyfile:@CONFIGURATION_DIRECTORY@/@api_authkeyfile@	# Require authentication key
-#api-parameters auth=user:joe		# Allow some local user
-#api-parameters auth=group:brl		# Allow some local group
+#api-parameters auth=group:brl		# allow a specific local group
+#api-parameters auth=keyfile:@CONFIGURATION_DIRECTORY@/@api_authkeyfile@	# require authentication key
 #api-parameters auth=polkit		# authenticate via Polkit
-#api-parameters host=:0			# Accept only local Unix connections
-#api-parameters host=0.0.0.0:0		# Accept any internet connection.
-#api-parameters stackSize=65536 #
+#api-parameters auth=user:joe		# allow a specific local user
+#api-parameters host=:0			# only allow local clients
+#api-parameters host=0.0.0.0:0		# allow any network client
+#api-parameters stackSize=65536 # the stack size for each client thread
 
 
 ###################
