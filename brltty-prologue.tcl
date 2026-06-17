@@ -914,27 +914,32 @@ proc verifyOutputFile {path} {
    }
 }
 
-proc makeDictionary {initializer} {
+proc makeDictionary {initializer {namesPath {}}} {
    set result [dict create]
 
-   switch -exact [expr {[llength $initializer] % 3}] {
-      1 {
-         return -code error "missing type"
-      }
+   set namesDelimiter " -> "
+   set namesString [join $namesPath $namesDelimiter]
+   lappend namesPath ""
 
-      2 {
-         return -code error "missing value"
-      }
+   if {[string length $namesString] == 0} {
+      set namesString "at top level"
+   }
+
+   switch -exact [expr {[llength $initializer] % 3}] {
+      1 {return -code error "missing type: $namesString"}
+      2 {return -code error "missing value: $namesString"}
    }
 
    foreach {name type value} $initializer {
+      set namesString [join [lset namesPath end $name] $namesDelimiter]
+
       if {[dict exists $result $name]} {
-         return -code error "duplicate name: $name"
+         return -code error "duplicate name: $namesString"
       }
 
       switch -exact -- $type {
          dict {
-            dict set result $name [uplevel 1 [list makeDictionary $value]]
+            dict set result $name [uplevel 1 [list makeDictionary $value $namesPath]]
          }
 
          string {
@@ -947,22 +952,19 @@ proc makeDictionary {initializer} {
          boolean -
          list {
             if {![string is $type -strict $value]} {
-               return -code error "improperly structured $type: $value"
+               return -code error "invalid $type: $value: $namesString"
             }
 
             dict set result $name $value
          }
 
+         expr -
          subst {
-            dict set result $name [uplevel 1 [list subst $value]]
-         }
-
-         expr {
-            dict set result $name [uplevel 1 [list expr $value]]
+            dict set result $name [uplevel 1 [list $type $value]]
          }
 
          default {
-            return -code error "unrecognized type: $type"
+            return -code error "unrecognized type: $type: $namesString"
          }
       }
    }
