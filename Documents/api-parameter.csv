@@ -1,4 +1,4 @@
-"code","name","example","comment"
+"qualifier","name","example","comment"
 "","auth","keyfile:@CONFIGURATION_DIRECTORY@/@api_authkeyfile@","Require authentication key"
 "","auth","user:joe","Allow some local user"
 "","auth","group:brl","Allow some local group"

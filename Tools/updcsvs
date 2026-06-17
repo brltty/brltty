@@ -351,7 +351,9 @@ proc updateFile {name data} {
 
 proc makeDefinitions {} {
    set tableHeaders {name description}
-   set parameterHeaders {code name example comment}
+   set parameterHeaders {qualifier name example comment}
+   set driverParameterHeaders [lreplace $parameterHeaders 0 0 driver]
+   set privilegeParameterHeaders [lreplace $parameterHeaders 0 0 platform]
 
    set definitions [makeDictionary {
       driver dict {
@@ -408,15 +410,15 @@ proc makeDefinitions {} {
 
       parameter dict {
          braille dict {
-            headers subst $parameterHeaders
+            headers subst $driverParameterHeaders
          }
 
          speech dict {
-            headers subst $parameterHeaders
+            headers subst $driverParameterHeaders
          }
 
          screen dict {
-            headers subst $parameterHeaders
+            headers subst $driverParameterHeaders
          }
 
          api dict {
@@ -424,7 +426,7 @@ proc makeDefinitions {} {
          }
 
          privilege dict {
-            headers subst $parameterHeaders
+            headers subst $privilegeParameterHeaders
          }
       }
    }]

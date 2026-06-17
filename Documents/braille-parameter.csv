@@ -1,4 +1,4 @@
-"code","name","example","comment"
+"driver","name","example","comment"
 "al","rotatedCells","no","[no,yes]"
 "al","secondaryRoutingKeyEmulation","no","[no,yes]"
 "ba","auth","@CONFIGURATION_DIRECTORY@/@api_authkeyfile@",""

@@ -1,4 +1,4 @@
-"code","name","example","comment"
+"driver","name","example","comment"
 "a2","release","yes","[yes,no]"
 "a2","type","default","[default,all,{terminal,text}+...]"
 "as","type","text+terminal","[text,terminal,all]+..."
