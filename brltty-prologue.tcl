@@ -919,15 +919,16 @@ proc makeDictionary {initializer {namesPath {}}} {
 
    set namesDelimiter " -> "
    set namesString [join $namesPath $namesDelimiter]
-   lappend namesPath ""
 
    if {[string length $namesString] == 0} {
-      set namesString "at top level"
+      set namesString "top"
    }
 
-   switch -exact [expr {[llength $initializer] % 3}] {
-      1 {return -code error "missing type: $namesString"}
-      2 {return -code error "missing value: $namesString"}
+   append namesString " [string trim $namesDelimiter]"
+   lappend namesPath ""
+
+   if {([llength $initializer] % 3) != 0} {
+      return -code error "incorrectly formatted initializer: $namesString"
    }
 
    foreach {name type value} $initializer {
