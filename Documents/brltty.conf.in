@@ -705,13 +705,14 @@
 # (can be overridden with the --api-parameters= [-A] option)
 #api-parameters name=value,...
 
-#api-parameters auth=group:brl		# allow a specific local group
-#api-parameters auth=keyfile:@CONFIGURATION_DIRECTORY@/@api_authkeyfile@	# require authentication key
-#api-parameters auth=polkit		# authenticate via Polkit
-#api-parameters auth=user:joe		# allow a specific local user
-#api-parameters host=:0			# only allow local clients
-#api-parameters host=0.0.0.0:0		# allow any network client
-#api-parameters stackSize=65536 # the stack size for each client thread
+#api-parameters auth=group:brlapi # authorize a specific local group
+#api-parameters auth=keyfile:/etc/brlapi.key # authenticate with a shared key
+#api-parameters auth=polkit # authenticate via Polkit
+#api-parameters auth=user:joe # authorize a specific local user
+#api-parameters host=:0 # allow local clients
+#api-parameters host=0.0.0.0:0 # allow clients from any host
+#api-parameters host=192.168.10.11:0 # allow clients from a specific host
+#api-parameters stackSize=65536 # the stack size (in bytes) for each client thread
 
 
 ###################
