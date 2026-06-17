@@ -132,10 +132,7 @@ ptyGetTerminalType (void) {
 }
 
 static unsigned char insertMode = 0;
-static unsigned char keypadTransmitMode = 0;   /* DECKPAM: application keypad   */
 static unsigned char cursorKeyMode = 0;        /* DECCKM: application cursor keys */
-static unsigned char bracketedPasteMode = 0;
-static unsigned char absoluteCursorAddressingMode = 0;
 
 /* Character-set state for VT100 line drawing. An app designates G0/G1 as the
  * DEC special graphics set ("ESC ( 0" / "ESC ) 0") and switches between them
@@ -165,10 +162,7 @@ static void ptyResetTerminalInput (PtyObject *pty);
 int
 ptyBeginTerminal (PtyObject *pty, int driverDirectives) {
   insertMode = 0;
-  keypadTransmitMode = 0;
   cursorKeyMode = 0;
-  bracketedPasteMode = 0;
-  absoluteCursorAddressingMode = 0;
 
   charsetShiftedOut = 0;
   g0GraphicsCharset = 0;
@@ -197,15 +191,6 @@ ptyResizeTerminal (unsigned int height, unsigned int width) {
   ptyResizeScreen(height, width);
 }
 
-static void
-soundAlert (void) {
-  beep();
-}
-
-static void
-showAlert (void) {
-  flash();
-}
 
 /* Keyboard input parser.
  *
@@ -626,10 +611,87 @@ addTextCharacter (wchar_t character) {
   lastTextCharacter = character;
 }
 
+/* Display: brltty-pty writes the child's output straight to the outer terminal,
+ * which renders it with full fidelity (true colour, and anything new it
+ * supports). The curses grid is still maintained - it is never painted to the
+ * real screen, only read back to fill the braille segment - so braille is
+ * unchanged. brltty-pty is a single-child observer (unlike tmux, which must
+ * composite panes and therefore render itself), so it can let the terminal do
+ * the rendering.
+ *
+ * A few sequences must NOT reach the outer terminal, because we act on them
+ * ourselves and a second actor would conflict: device-attribute/status queries
+ * (we answer them), the keypad and application-cursor modes and keyboard-
+ * protocol negotiation (we use them to encode braille/host input), and OSC 52
+ * (we publish it via ptyPublishClipboard). Each such handler calls
+ * suppressPassthroughUnit().
+ */
+static unsigned char passthroughUnit[0X2000];
+static size_t passthroughUnitLength = 0;
+static int passthroughSuppress = 0;
+
+static void
+writeOuterTerminal (const unsigned char *bytes, size_t count) {
+  while (count > 0) {
+    ssize_t written = write(STDOUT_FILENO, bytes, count);
+
+    if (written < 0) {
+      if (errno == EINTR) continue;
+      break;
+    }
+
+    bytes += written;
+    count -= (size_t)written;
+  }
+}
+
+/* Reset the per-unit passthrough capture (called at the start of each unit). */
+static void
+beginPassthroughUnit (void) {
+  passthroughUnitLength = 0;
+  passthroughSuppress = 0;
+}
+
+/* Mark the current sequence as one we consume ourselves: drop what we have
+ * captured and stop capturing the rest, so it never reaches the outer terminal.
+ * Called early enough (e.g. as soon as an OSC is recognized as OSC 52) that even
+ * a large payload never leaks. */
+static void
+suppressPassthroughUnit (void) {
+  passthroughSuppress = 1;
+  passthroughUnitLength = 0;
+}
+
+static void
+capturePassthroughByte (unsigned char byte) {
+  if (passthroughSuppress) return;
+
+  if (passthroughUnitLength == sizeof(passthroughUnit)) {
+    /* A long, non-suppressed sequence (e.g. a very long window title): emit
+     * what we have and keep going. Suppressed sequences are recognized well
+     * before this, so they never reach here. */
+    writeOuterTerminal(passthroughUnit, passthroughUnitLength);
+    passthroughUnitLength = 0;
+  }
+
+  passthroughUnit[passthroughUnitLength++] = byte;
+}
+
+/* Emit the captured bytes of a completed unit, unless it was suppressed. */
+static void
+flushPassthroughUnit (void) {
+  if (!passthroughSuppress && passthroughUnitLength) {
+    writeOuterTerminal(passthroughUnit, passthroughUnitLength);
+  }
+
+  passthroughUnitLength = 0;
+}
+
 /* Reply to a device query by writing the response to the child as if typed. */
 static void
 sendDeviceResponse (const char *response) {
   if (inputPty) ptyWriteInputData(inputPty, response, strlen(response));
+  suppressPassthroughUnit(); /* the query is ours to answer; don't echo it on */
 }
 
 static OutputByteParserResult
@@ -645,7 +707,7 @@ parseOutputByte_BASIC (unsigned char byte) {
 
     case ASCII_BEL:
       logOutputAction("bel", "audible alert");
-      soundAlert();
+      /* passed through: the outer terminal rings the bell */
       return OBP_DONE;
 
     case ASCII_BS:
@@ -742,12 +804,12 @@ parseOutputByte_ESCAPE (unsigned char byte) {
 
     case '=':
       logOutputAction("smkx", "keypad transmit on");
-      keypadTransmitMode = 1;
+      /* passed through: the terminal handles application keypad, and its keypad
+       * sequences are forwarded verbatim by our input parser */
       return OBP_DONE;
 
     case '>':
       logOutputAction("rmkx", "keypad transmit off");
-      keypadTransmitMode = 0;
       return OBP_DONE;
 
     case 'E':
@@ -767,14 +829,22 @@ parseOutputByte_ESCAPE (unsigned char byte) {
       return OBP_DONE;
 
     case 'c':
-      logOutputAction("clear", "clear screen");
+      logOutputAction("ris", "reset to initial state");
+      /* RIS is a full reset, not just a clear: drop the modes and attributes we
+       * track so the grid matches the freshly-reset terminal. */
+      insertMode = 0;
+      cursorKeyMode = 0;
+      charsetShiftedOut = 0;
+      g0GraphicsCharset = 0;
+      g1GraphicsCharset = 0;
+      ptySetAttributes(A_NORMAL);
       ptySetCursorPosition(0, 0);
       ptyClearToEndOfDisplay();
       return OBP_DONE;
 
     case 'g':
       logOutputAction("flash", "visual alert");
-      showAlert();
+      /* passed through: the outer terminal does the visual bell */
       return OBP_DONE;
 
     case '7':
@@ -849,6 +919,13 @@ appendOscByte (unsigned char byte) {
   }
 
   oscBuffer[oscLength++] = byte;
+
+  /* As soon as an OSC is recognized as OSC 52, suppress it from passthrough: we
+   * publish it ourselves (ptyPublishClipboard), and this keeps even a large
+   * clipboard payload from ever reaching the outer terminal. */
+  if ((oscLength == 3) && (memcmp(oscBuffer, "52;", 3) == 0)) {
+    suppressPassthroughUnit();
+  }
 }
 
 static int
@@ -918,7 +995,13 @@ handleClipboardRequest (char *payload) {
 
 static void
 handleOscString (void) {
-  if (oscOverflow) return;
+  if (oscOverflow) {
+    /* The OSC outgrew oscBuffer (e.g. a clipboard payload over ~64 KiB) and was
+     * truncated, so we can't act on it; drop it rather than use partial data. */
+    logMessage(terminalLogLevel, "OSC string too large; dropped");
+    return;
+  }
+
   oscBuffer[oscLength] = 0;
 
   if (strncmp(oscBuffer, "52;", 3) == 0) {
@@ -1033,7 +1116,7 @@ performBracketAction_h (unsigned char byte) {
 
       case 34:
         logOutputAction("cnorm", "cursor normal visibility");
-        ptySetCursorVisibility(1);
+        /* passed through: cursor visibility is the terminal's to show */
         return OBP_DONE;
     }
   }
@@ -1051,8 +1134,8 @@ performBracketAction_l (unsigned char byte) {
         return OBP_DONE;
 
       case 34:
-        logOutputAction("cvvis", "cursor very visile");
-        ptySetCursorVisibility(2);
+        logOutputAction("cvvis", "cursor very visible");
+        /* passed through: cursor visibility is the terminal's to show */
         return OBP_DONE;
     }
   }
@@ -1476,13 +1559,17 @@ performBracketAction (unsigned char byte) {
       /* "CSI > ... m" is XTMODKEYS (modifyOtherKeys) keyboard-protocol
        * negotiation, not SGR. Swallow it rather than mistaking the parameters
        * for graphic renditions (e.g. turning on underline/dim). */
-      if (outputParserGreaterThan) return OBP_DONE;
+      if (outputParserGreaterThan) {
+        suppressPassthroughUnit(); /* we don't negotiate keyboard protocols */
+        return OBP_DONE;
+      }
       return performBracketAction_m(byte);
 
     case 'u':
       /* "CSI ... u" is the kitty keyboard-protocol negotiation (push/pop/set
        * the keyboard mode). We don't drive the host into those modes, so just
        * consume it - it must never reach the screen as text. */
+      suppressPassthroughUnit(); /* we don't negotiate keyboard protocols */
       return OBP_DONE;
 
     case 'r': {
@@ -1515,28 +1602,26 @@ performQuestionMarkAction_h (unsigned char byte) {
       case 1:
         logOutputAction("DECCKM", "application cursor keys on");
         cursorKeyMode = 1;
+        suppressPassthroughUnit(); /* we encode cursor keys ourselves */
         return OBP_DONE;
 
       case 25:
         logOutputAction("cnorm", "cursor normal visibility");
-        ptySetCursorVisibility(1);
+        /* passed through: cursor visibility is the terminal's to show */
         return OBP_DONE;
 
       case 1049:
-        logOutputAction("smcup", "absolute cursor addressing on");
-        absoluteCursorAddressingMode = 1;
-        /* Entering the alternate screen presents a cleared buffer (this is
-         * what xterm's ?1049 does). We have only one buffer, so emulate it by
-         * saving the cursor and clearing the screen; otherwise a full-screen
-         * program (e.g. Claude Code) draws on top of the previous contents. */
-        ptySaveCursorPosition();
-        ptySetCursorPosition(0, 0);
-        ptyClearToEndOfDisplay();
+        logOutputAction("smcup", "enter alternate screen");
+        /* Save the current grid and present a cleared screen, mirroring the
+         * terminal's alternate screen so braille tracks it (and can be restored
+         * when the full-screen program exits). */
+        ptyEnterAlternateScreen();
         return OBP_DONE;
 
       case 2004:
         logOutputAction("smbp", "bracketed paste on");
-        bracketedPasteMode = 1;
+        /* passed through: the terminal brackets pastes; our input parser
+         * forwards the wrapped paste verbatim to the child */
         return OBP_DONE;
     }
   }
@@ -1551,28 +1636,23 @@ performQuestionMarkAction_l (unsigned char byte) {
       case 1:
         logOutputAction("DECCKM", "application cursor keys off");
         cursorKeyMode = 0;
+        suppressPassthroughUnit(); /* we encode cursor keys ourselves */
         return OBP_DONE;
 
       case 25:
         logOutputAction("civis", "cursor invisible");
-        ptySetCursorVisibility(0);
+        /* passed through: cursor visibility is the terminal's to show */
         return OBP_DONE;
 
       case 1049:
-        logOutputAction("rmcup", "absolute cursor addressing off");
-        absoluteCursorAddressingMode = 0;
-        /* Leaving the alternate screen would normally restore the primary
-         * screen. We can't restore it (single buffer), but we must not leave
-         * the full-screen program's last frame behind as stale text; clear it
-         * and put the cursor back where it was before smcup. */
-        ptySetCursorPosition(0, 0);
-        ptyClearToEndOfDisplay();
-        ptyRestoreCursorPosition();
+        logOutputAction("rmcup", "leave alternate screen");
+        /* Restore the grid saved on smcup so braille shows the screen the
+         * terminal restored (falls back to clearing if nothing was saved). */
+        ptyExitAlternateScreen();
         return OBP_DONE;
 
       case 2004:
         logOutputAction("rmbp", "bracketed paste off");
-        bracketedPasteMode = 0;
         return OBP_DONE;
     }
   }
@@ -1596,7 +1676,7 @@ performQuestionMarkAction (unsigned char byte) {
 static OutputByteParserResult
 parseOutputByte_ACTION (unsigned char byte) {
   if ((byte >= 0X20) && (byte <= 0X2F)) {
-    /* CSI intermediate byte (e.g. the space in "\e[5 q" to set the
+    /* CSI intermediate byte (e.g. the space in "\E[5 q" to set the
      * cursor shape). Consume it and wait for the final byte so the
      * whole sequence is swallowed as a unit rather than leaking.
      */
@@ -1639,11 +1719,14 @@ static int
 parseOutputByte (unsigned char byte) {
   if (outputParserState == OPS_BASIC) {
     outputByteCount = 0;
+    beginPassthroughUnit();
   }
 
   if (outputByteCount < ARRAY_COUNT(outputByteBuffer)) {
     outputByteBuffer[outputByteCount++] = byte;
   }
+
+  capturePassthroughByte(byte);
 
   while (1) {
     OutputByteParserResult result = outputParserStateTable[outputParserState].parseOutputByte(byte);
@@ -1658,6 +1741,7 @@ parseOutputByte (unsigned char byte) {
 
       case OBP_DONE:
         outputParserState = OPS_BASIC;
+        flushPassthroughUnit();
         return 1;
 
       case OBP_CONTINUE:

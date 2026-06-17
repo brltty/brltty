@@ -35,7 +35,7 @@ all-tools: all-brltty-cldr all-brltty-lsinc
 all-brltty-cldr: brltty-cldr$X
 all-brltty-lsinc: brltty-lsinc$X
 
-everything: all all-brltest all-spktest all-scrtest all-cmdtest all-colortest all-crctest all-matchtest all-msgtest all-utf8test all-ptytest all-ptyinput all-ptyresize all-ptyclip
+everything: all all-brltest all-spktest all-scrtest all-cmdtest all-colortest all-crctest all-matchtest all-msgtest all-utf8test all-ptytest all-ptyinput all-ptyresize all-ptyclip all-ptypass
 all-brltest: brltest$X | $(BRAILLE_DRIVERS)
 all-spktest: spktest$X | $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X | $(SCREEN_DRIVERS)
@@ -49,14 +49,16 @@ all-ptytest: ptytest$X
 all-ptyinput: ptyinput$X
 all-ptyresize: ptyresize$X
 all-ptyclip: ptyclip$X
+all-ptypass: ptypass$X
 
 # Build and run the brltty-pty test suite.
-tests: utf8test$X ptytest$X ptyinput$X ptyresize$X ptyclip$X
+tests: utf8test$X ptytest$X ptyinput$X ptyresize$X ptyclip$X ptypass$X
 	./utf8test$X
 	./ptytest$X
 	./ptyinput$X
 	./ptyresize$X
 	./ptyclip$X
+	./ptypass$X
 
 all-api: $(ALL_XBRLAPI) all-brltty-clip all-apitest brlapi_brldefs.auto.h
 all-xbrlapi: xbrlapi$X
@@ -468,6 +470,16 @@ ptyclip$X: $(PTYCLIP_OBJECTS)
 
 ptyclip.$O: $(SRC_DIR)/ptyclip.c
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ptyclip.c
+
+###############################################################################
+
+PTYPASS_OBJECTS = ptypass.$O $(PROGRAM_OBJECTS) $(TERMINAL_EMULATOR_OBJECTS)
+
+ptypass$X: $(PTYPASS_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(PTYPASS_OBJECTS) $(LDLIBS)
+
+ptypass.$O: $(SRC_DIR)/ptypass.c
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ptypass.c
 
 ###############################################################################
 

@@ -21,6 +21,7 @@
 #include <wchar.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/msg.h> /* IPC_NOWAIT */
 
 #include "get_term.h"
 #include "log.h"
@@ -101,7 +102,13 @@ static int haveInputTextHandler = 0;
 static int
 sendTerminalMessage (MessageType type, const void *content, size_t length) {
   if (!haveTerminalMessageQueue) return 0;
-  return sendMessage(terminalMessageQueue, type, content, length, 0);
+
+  /* These are best-effort notifications (segment-updated, emulator-exiting), not
+   * data: send non-blocking. The driver also polls the segment, so a dropped
+   * "updated" hint just defers a braille refresh to the next poll. Blocking here
+   * would stall the whole I/O loop - and thus the child - whenever the daemon is
+   * slow and the small SysV queue fills during a burst of output. */
+  return sendMessage(terminalMessageQueue, type, content, length, IPC_NOWAIT);
 }
 
 static int
@@ -319,16 +326,17 @@ ptyBeginScreen (PtyObject *pty, int driverDirectives) {
 #endif /* NCURSES_VERSION */
 
   if (initscr()) {
-    intrflush(stdscr, FALSE);
-    keypad(stdscr, TRUE);
-
+    /* curses is used only as the in-memory grid that backs the braille segment;
+     * it is never painted to the screen (see ptyRefreshScreen). raw()/noecho()/
+     * nonl() are kept because they are the only thing putting the real tty into
+     * raw mode for our own input reader - there is no separate termios setup.
+     * (keypad/intrflush/idlok/idcok only affect curses input or refresh output,
+     * neither of which we use, so they are omitted.) */
     raw();
     noecho();
     nonl();
 
     scrollok(stdscr, TRUE);
-    idlok(stdscr, TRUE);
-    idcok(stdscr, TRUE);
 
     scrollRegionTop = getbegy(stdscr);
     scrollRegionBottom = getmaxy(stdscr) - 1;
@@ -379,8 +387,11 @@ ptyBeginScreen (PtyObject *pty, int driverDirectives) {
   return 0;
 }
 
+static void releaseAlternateScreen (void);
+
 void
 ptyEndScreen (void) {
+  releaseAlternateScreen();
   endwin();
   sendTerminalMessage(TERM_MSG_EMULATOR_EXITING, NULL, 0);
   detachScreenSegment(segmentHeader);
@@ -395,7 +406,12 @@ ptyResizeScreen (unsigned int height, unsigned int width) {
     return;
   }
 
-  /* Resize the curses screen we render through. */
+  /* A saved alternate-screen grid is sized for the old dimensions; drop it so we
+   * don't later restore a stale grid (the terminal will repaint anyway). */
+  releaseAlternateScreen();
+
+  /* Resize the in-memory curses grid (it backs the braille segment and is never
+   * painted to the screen). */
   if (is_term_resized(height, width)) {
     resize_term(height, width);
   }
@@ -435,7 +451,7 @@ ptyResizeScreen (unsigned int height, unsigned int width) {
   if (savedCursorRow >= height) savedCursorRow = height - 1;
   if (savedCursorColumn >= width) savedCursorColumn = width - 1;
 
-  /* Mirror the (resized) curses screen into the fresh segment so the new
+  /* Mirror the (resized) in-memory grid into the fresh segment so the new
    * dimensions are immediately populated; the child repaints on its own
    * SIGWINCH soon after. */
   storeCursorPosition();
@@ -452,8 +468,11 @@ ptyResizeScreen (unsigned int height, unsigned int width) {
 
 void
 ptyRefreshScreen (void) {
+  /* The outer terminal is painted from the child's raw output (see the display
+   * passthrough in pty_terminal.c); the curses grid is kept in memory only and
+   * read back to fill the braille segment, so it is never painted to the real
+   * screen. We just announce that the segment changed. */
   sendTerminalMessage(TERM_MSG_SEGMENT_UPDATED, NULL, 0);
-  refresh();
 }
 
 void
@@ -482,6 +501,109 @@ ptySaveCursorPosition (void) {
 void
 ptyRestoreCursorPosition (void) {
   ptySetCursorPosition(savedCursorRow, savedCursorColumn);
+}
+
+/* Alternate-screen (smcup/rmcup, DECSET/RST 1049) support for the braille grid.
+ * The outer terminal does the real alternate screen via passthrough; we mirror
+ * it for braille by saving the grid on enter and restoring it on exit, so that
+ * after a full-screen program quits the braille user can review the screen the
+ * terminal restored instead of a blank grid. We save the raw curses cells (so
+ * attributes and colour survive exactly), then mirror them back into the
+ * segment the same way a resize does. */
+#ifdef GOT_CURSES_WCH
+typedef cchar_t SavedCell;
+#else /* GOT_CURSES_WCH */
+typedef chtype SavedCell;
+#endif /* GOT_CURSES_WCH */
+
+static SavedCell *alternateScreen = NULL;
+static unsigned int alternateScreenRows = 0;
+static unsigned int alternateScreenColumns = 0;
+static unsigned int alternateCursorRow = 0;
+static unsigned int alternateCursorColumn = 0;
+
+static void
+releaseAlternateScreen (void) {
+  if (alternateScreen) {
+    free(alternateScreen);
+    alternateScreen = NULL;
+  }
+
+  alternateScreenRows = 0;
+  alternateScreenColumns = 0;
+}
+
+void
+ptyEnterAlternateScreen (void) {
+  /* Save the current grid (unless we already have one saved - nested smcup). */
+  if (!alternateScreen) {
+    unsigned int rows = segmentHeader->screenHeight;
+    unsigned int width = segmentHeader->screenWidth;
+    SavedCell *cells = malloc((size_t)rows * width * sizeof(*cells));
+
+    if (cells) {
+      alternateScreen = cells;
+      alternateScreenRows = rows;
+      alternateScreenColumns = width;
+      alternateCursorRow = segmentHeader->cursorRow;
+      alternateCursorColumn = segmentHeader->cursorColumn;
+
+      for (unsigned int row=0; row<rows; row+=1) {
+        for (unsigned int column=0; column<width; column+=1) {
+          move(row, column);
+        #ifdef GOT_CURSES_WCH
+          in_wch(&cells[(row * width) + column]);
+        #else /* GOT_CURSES_WCH */
+          cells[(row * width) + column] = inch();
+        #endif /* GOT_CURSES_WCH */
+        }
+      }
+    }
+  }
+
+  /* Present a cleared screen to the full-screen program. */
+  ptySetCursorPosition(0, 0);
+  ptyClearToEndOfDisplay();
+}
+
+void
+ptyExitAlternateScreen (void) {
+  unsigned int rows = segmentHeader->screenHeight;
+  unsigned int width = segmentHeader->screenWidth;
+
+  /* If we have no saved grid, or it no longer fits (the screen was resized while
+   * in the alternate screen), we cannot restore it - just clear, as before. */
+  if (!alternateScreen ||
+      (alternateScreenRows != rows) || (alternateScreenColumns != width)) {
+    releaseAlternateScreen();
+    ptySetCursorPosition(0, 0);
+    ptyClearToEndOfDisplay();
+    return;
+  }
+
+  /* Write the saved cells back into the curses grid (without scrolling at the
+   * bottom-right corner), then mirror the whole grid into the segment. */
+  scrollok(stdscr, FALSE);
+  for (unsigned int row=0; row<rows; row+=1) {
+    for (unsigned int column=0; column<width; column+=1) {
+      move(row, column);
+    #ifdef GOT_CURSES_WCH
+      add_wch(&alternateScreen[(row * width) + column]);
+    #else /* GOT_CURSES_WCH */
+      addch(alternateScreen[(row * width) + column]);
+    #endif /* GOT_CURSES_WCH */
+    }
+  }
+  scrollok(stdscr, TRUE);
+
+  for (unsigned int row=0; row<rows; row+=1) {
+    for (unsigned int column=0; column<width; column+=1) {
+      setCharacter(row, column, NULL);
+    }
+  }
+
+  ptySetCursorPosition(alternateCursorRow, alternateCursorColumn);
+  releaseAlternateScreen();
 }
 
 void
@@ -723,11 +845,6 @@ ptyAddCharacter (wchar_t character) {
     moveCursor(row, segmentHeader->screenWidth - 1);
     pendingWrap = 1;
   }
-}
-
-void
-ptySetCursorVisibility (unsigned int visibility) {
-  curs_set(visibility);
 }
 
 void
