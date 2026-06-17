@@ -927,12 +927,16 @@ proc makeDictionary {initializer} {
             dict set result $name $value
          }
 
+         list {
+            dict set result $name [eval list $value]
+         }
+
          subst {
             dict set result $name [uplevel 1 [list subst $value]]
          }
 
-         list {
-            dict set result $name [eval list $value]
+         expr {
+            dict set result $name [uplevel 1 [list expr $value]]
          }
 
          default {
