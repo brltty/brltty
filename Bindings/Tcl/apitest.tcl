@@ -78,9 +78,9 @@ proc ttyShowKeys {session timeout} {
 
 proc mainProgram {} {
    set optionDefinitions {
-      {host untyped.server  "which server to connect to"}
-      {auth untyped.schemes "which authorization schemes to use"}
-      {tty  untyped.number  "which virtual terminal to claim"}
+      {host string.server  "which server to connect to"}
+      {auth string.schemes "which authorization schemes to use"}
+      {tty  string.number  "which virtual terminal to claim"}
    }
 
    processProgramArguments optionValues $optionDefinitions

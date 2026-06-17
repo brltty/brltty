@@ -581,10 +581,8 @@ proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVa
             set type [string range $type 0 $index-1]
          }
 
-         if {![string equal $type untyped]} {
-            if {[catch [list string is $type ""]] != 0} {
-               return -code error "invalid type for $description: $type"
-            }
+         if {![lcontain {string integer wideinteger double boolean} $type]} {
+            return -code error "invalid type for $description: $type"
          }
 
          dict set options $name operand $operand
@@ -657,8 +655,10 @@ proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVa
             set value [lindex $arguments 0]
             set arguments [lreplace $arguments 0 0]
 
-            if {![string equal $type untyped]} {
-               if {[catch [list string is $type -strict $value] result] != 0} {
+            if {![string equal $type string]} {
+               try {
+                  string is $type -strict $value
+               } trap {TCL LOOKUP INDEX} {} {
                   return -code error "unimplemented option type: $type"
                }
 
@@ -773,7 +773,7 @@ proc addKeywordOption {definitionsVariable option operand usage keywords} {
       append usage " - [formatChoicesPhrase $choices]"
    }
 
-   lappend definitions [list $option untyped.$operand $usage]
+   lappend definitions [list $option string.$operand $usage]
 }
 
 proc testKeyword {valueVariable keywordList} {
