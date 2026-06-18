@@ -548,7 +548,17 @@ proc nextElement {listVariable {elementVariable ""}} {
    return 1
 }
 
-proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVariable ""}} {
+proc addProgramOption {definitionsVariable name type usage {default ""}} {
+   upvar 1 $definitionsVariable definitions
+
+   if {[string length $default] > 0} {
+      append usage " - defaults to $default"
+   }
+
+   lappend definitions [list $name $type $usage]
+}
+
+proc processProgramOptions {valuesArray argumentsVariable definitions {optionsVariable ""}} {
    upvar 1 $valuesArray values
    upvar 1 $argumentsVariable arguments
 
@@ -741,11 +751,11 @@ proc processProgramArguments {
    upvar 1 $optionValuesArray optionValues
    set argumentValues $::argv
 
-   lappend optionDefinitions {help flag "show this usage summary and then exit"}
-   lappend optionDefinitions {quiet counter "decrease verbosity"}
-   lappend optionDefinitions {verbose counter "increase verbosity"}
+   addProgramOption optionDefinitions help flag "show this usage summary and then exit"
+   addProgramOption optionDefinitions quiet counter "decrease verbosity"
+   addProgramOption optionDefinitions verbose counter "increase verbosity"
 
-   if {![processCommandOptions optionValues argumentValues $optionDefinitions optionsDescriptor]} {
+   if {![processProgramOptions optionValues argumentValues $optionDefinitions optionsDescriptor]} {
       syntaxError
    }
 

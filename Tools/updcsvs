@@ -26,10 +26,10 @@ set optionDefinitions {
 }
 
 set defaultInputFile [file join $sourceRoot $documentsSubdirectory brltty.conf.in]
-lappend optionDefinitions [list input string.file "the input file - defaults to $defaultInputFile"]
+addProgramOption optionDefinitions input string.file "the input file" $defaultInputFile
 
 set defaultOutputDirectory [file join $sourceRoot $documentsSubdirectory]
-lappend optionDefinitions [list output string.directory "the output directory - defaults to $defaultOutputDirectory"]
+addProgramOption optionDefinitions output string.directory "the output directory" $defaultOutputDirectory
 processProgramArguments optionValues $optionDefinitions
 
 if {![info exists optionValues(input)]} {
