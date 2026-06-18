@@ -285,7 +285,7 @@ proc updateTable {category type} {
       set rows [lmap row $rows {lrange $row 1 end}]
    }
 
-   return [updateFile "$type-$category" [csvMakeTable $rows]]
+   return [replaceTable "$type-$category" [csvMakeTable $rows]]
 }
 
 proc updateDriverCodeTable {} {
@@ -330,25 +330,12 @@ proc updateDriverCodeTable {} {
       }
    }
 
-   return [updateFile "driver-code" [csvMakeTable $rows]]
+   return [replaceTable "driver-code" [csvMakeTable $rows]]
 }
 
-proc updateFile {name data} {
+proc replaceTable {name data} {
    set file "[file join $::optionValues(output) $name].csv"
-
-   if {!$::optionValues(noupdate)} {
-      return [replaceFile $file $data]
-   }
-
-   if {![file exists $file]} {
-      logDetail "file not added: $file"
-   } elseif {[string equal [readFile $file] $data]} {
-      logDetail "file not changed: $file"
-   } else {
-      logDetail "file not updated: $file"
-   }
-
-   return 0
+   return [replaceFile $file $data $::optionValues(noupdate)]
 }
 
 proc makeDefinitions {} {
@@ -440,7 +427,7 @@ set definitions [makeDefinitions]
 makeLists
 
 if {![updateTables]} {
-   logTask "no files updated"
+   logTask "no tables updated"
 }
 
 exit 0

@@ -346,12 +346,12 @@ proc refreshFile {newFile oldFile {executable ""}} {
       }
 
       if {[compareFiles $newFile $oldFile]} {
-         logDetail "file not changed: $oldFile"
+         logDetail "file not updated: $oldFile"
          file delete $newFile
          return 0
       }
 
-      set action "refreshing"
+      set action "updating"
    } else {
       set actualPermissions $preferredPermissions
       set action "adding"
@@ -372,10 +372,22 @@ proc writeFile {file data} {
    }
 }
 
-proc replaceFile {file data} {
-   set newFile "$file.new"
-   writeFile $newFile $data
-   return [refreshFile $newFile $file]
+proc replaceFile {file data {noRefresh 0}} {
+   if {!$noRefresh} {
+      set newFile "$file.new"
+      writeFile $newFile $data
+      return [refreshFile $newFile $file]
+   }
+
+   if {![file exists $file]} {
+      logDetail "file not added: $file"
+   } elseif {[string equal [readFile $file] $data]} {
+      logDetail "file not changed: $file"
+   } else {
+      logDetail "file not replaced: $file"
+   }
+
+   return 0
 }
 
 proc forEachLine {lineVariable file body} {
