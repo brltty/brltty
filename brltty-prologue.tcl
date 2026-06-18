@@ -380,11 +380,11 @@ proc replaceFile {file data {noRefresh 0}} {
    }
 
    if {![file exists $file]} {
-      logDetail "file not added: $file"
+      logNote "file not added: $file"
    } elseif {[string equal [readFile $file] $data]} {
       logDetail "file not changed: $file"
    } else {
-      logDetail "file not replaced: $file"
+      logNote "file not replaced: $file"
    }
 
    return 0
@@ -412,6 +412,21 @@ proc readLines {file} {
    }
 
    return $lines
+}
+
+proc nextElement {listVariable {elementVariable ""}} {
+   upvar 1 $listVariable list
+
+   if {[llength $list] == 0} {
+      return 0
+   }
+
+   if {[string length $elementVariable] > 0} {
+      uplevel 1 [list set $elementVariable [lindex $list 0]]
+      set list [lreplace $list 0 0]
+   }
+
+   return 1
 }
 
 proc isWhitespace {string} {
@@ -545,19 +560,54 @@ proc formatChoicesPhrase {choices} {
    return [join $choices $separator]
 }
 
-proc nextElement {listVariable {elementVariable ""}} {
-   upvar 1 $listVariable list
+proc formatProgramOptionsUsage {options} {
+   set rows [list]
 
-   if {[llength $list] == 0} {
-      return 0
+   foreach name [lsort [dict keys $options]] {
+      set option [dict get $options $name]
+      set row [list]
+      lappend row "-$name"
+
+      foreach property {operand usage} {
+         if {[dict exists $option $property]} {
+            lappend row [dict get $option $property]
+         } else {
+            lappend row ""
+         }
+      }
+
+      lappend rows $row
    }
 
-   if {[string length $elementVariable] > 0} {
-      uplevel 1 [list set $elementVariable [lindex $list 0]]
-      set list [lreplace $list 0 0]
+   return [formatColumns $rows]
+}
+
+proc showProgramArgumentsUsage {name optionsDescriptor argumentsUsage getArgumentsUsageSummary} {
+   set optionsUsage [formatProgramOptionsUsage $optionsDescriptor]
+   set usage "Syntax: $name"
+
+   if {[string length $optionsUsage] > 0} {
+      append usage " \[-option ...\]"
    }
 
-   return 1
+   if {[string length $argumentsUsage] > 0} {
+      append usage " $argumentsUsage"
+   }
+
+   if {[string length $getArgumentsUsageSummary] > 0} {
+      if {[string length [set lines [formatLines [$getArgumentsUsageSummary]]]] > 0} {
+         append usage "\n\n"
+         append usage $lines
+         append usage "\n"
+      }
+   }
+
+   if {[string length $optionsUsage] > 0} {
+      append usage \n
+      append usage "The following options may be specified:\n$optionsUsage"
+   }
+
+   puts stdout $usage
 }
 
 proc addProgramOption {definitionsVariable name type usage {default ""}} {
@@ -698,56 +748,6 @@ proc processProgramOptions {valuesArray argumentsVariable definitions {optionsVa
    return 1
 }
 
-proc formatCommandOptionsUsage {options} {
-   set rows [list]
-
-   foreach name [lsort [dict keys $options]] {
-      set option [dict get $options $name]
-      set row [list]
-      lappend row "-$name"
-
-      foreach property {operand usage} {
-         if {[dict exists $option $property]} {
-            lappend row [dict get $option $property]
-         } else {
-            lappend row ""
-         }
-      }
-
-      lappend rows $row
-   }
-
-   return [formatColumns $rows]
-}
-
-proc showCommandUsage {name optionsDescriptor argumentsUsage getArgumentsUsageSummary} {
-   set optionsUsage [formatCommandOptionsUsage $optionsDescriptor]
-   set usage "Syntax: $name"
-
-   if {[string length $optionsUsage] > 0} {
-      append usage " \[-option ...\]"
-   }
-
-   if {[string length $argumentsUsage] > 0} {
-      append usage " $argumentsUsage"
-   }
-
-   if {[string length $getArgumentsUsageSummary] > 0} {
-      if {[string length [set lines [formatLines [$getArgumentsUsageSummary]]]] > 0} {
-         append usage "\n\n"
-         append usage $lines
-         append usage "\n"
-      }
-   }
-
-   if {[string length $optionsUsage] > 0} {
-      append usage \n
-      append usage "The following options may be specified:\n$optionsUsage"
-   }
-
-   puts stdout $usage
-}
-
 proc noMorePositionalArguments {arguments} {
    if {[nextElement arguments]} {
       syntaxError "too many positional arguments: [join $arguments " "]"
@@ -776,7 +776,7 @@ proc processProgramArguments {
    incr logLevel -$optionValues(quiet)
 
    if {$optionValues(help)} {
-      showCommandUsage [getProgramName] $optionsDescriptor $argumentsUsage $getArgumentsUsageSummary
+      showProgramArgumentsUsage [getProgramName] $optionsDescriptor $argumentsUsage $getArgumentsUsageSummary
       exit 0
    }
 
