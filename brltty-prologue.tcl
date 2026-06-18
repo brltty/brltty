@@ -783,7 +783,7 @@ proc addKeywordOption {definitionsVariable option operand usage keywords} {
       append usage " - [formatChoicesPhrase $choices]"
    }
 
-   lappend definitions [list $option string.$operand $usage]
+   addProgramOption definitions $option string.$operand $usage
 }
 
 proc testKeyword {valueVariable keywordList} {
@@ -832,7 +832,7 @@ proc addIntegerOption {definitionsVariable option operand usage {minimum ""} {ma
       append usage " - must be [join $bounds " and "]"
    }
 
-   lappend definitions [list $option integer.$operand $usage]
+   addProgramOption definitions $option integer.$operand $usage
 }
 
 proc testInteger {value {minimum ""} {maximum ""}} {
