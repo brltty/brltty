@@ -500,7 +500,7 @@ proc formatLines {lines {width ""}} {
    }
 
    eval $finishParagraph
-   return [join $result \n]
+   return $result
 }
 
 proc formatColumns {rows} {
@@ -595,9 +595,9 @@ proc showProgramArgumentsUsage {name optionsDescriptor argumentsUsage getArgumen
    }
 
    if {[string length $getArgumentsUsageSummary] > 0} {
-      if {[string length [set lines [formatLines [$getArgumentsUsageSummary]]]] > 0} {
+      if {[llength [set lines [formatLines [$getArgumentsUsageSummary]]]] > 0} {
          append usage "\n\n"
-         append usage $lines
+         append usage [join $lines \n]
          append usage "\n"
       }
    }
@@ -993,5 +993,591 @@ proc makeDictionary {initializer {namesPath {}}} {
    }
 
    return $result
+}
+
+namespace eval ::brltty {
+  oo::class create CommandArgumentsParser {
+    constructor {command} {
+      variable commandName $command
+      variable commandPurpose ""
+      variable commandNotes [list]
+
+      variable valueKeys [list]
+      variable parameterDefinitions [list]
+      variable optionDefinitions [dict create]
+
+      variable shortOptions [dict create]
+      variable longOptions [dict create]
+
+      variable shortOptionPrefix -
+      variable longOptionPrefix [string repeat $shortOptionPrefix 2]
+
+      [self] addOption showHelp h help flag "show this usage summary on standard output and then exit"
+    }
+
+    method setPurpose {purpose} {
+      variable commandPurpose $purpose
+    }
+
+    method addNote {line {newParagraph 0}} {
+      variable commandNotes
+
+      if {$newParagraph} {
+        lappend commandNotes ""
+      }
+
+      lappend commandNotes $line
+    }
+
+    method addNotes {lines} {
+      set newParagraph 1
+
+      foreach line $lines {
+        my addNote $line $newParagraph
+        set newParagraph 0
+      }
+    }
+
+    method _claimValueKey {key} {
+      variable valueKeys
+
+      if {[string length $key] == 0} {
+        return -code error "value key not specified"
+      }
+
+      if {[lsearch -exact $valueKeys $key] >= 0} {
+        return -code error "value key specified more than once: $key"
+      }
+
+      lappend valueKeys $key
+    }
+
+    method _addParameter {valueKey disposition label helpText} {
+      set parameter [dict create value $valueKey disposition $disposition label $label help $helpText]
+
+      variable parameterDefinitions
+      lappend parameterDefinitions $parameter
+      return $parameter
+    }
+
+    method _isRequiredParameter {parameter} {
+      return [string equal [dict get $parameter disposition] required]
+    }
+
+    method _isOptionalParameter {parameter} {
+      return [string equal [dict get $parameter disposition] optional]
+    }
+
+    method _isExtraParameters {parameter} {
+      return [string equal [dict get $parameter disposition] extra]
+    }
+
+    method _verifyNoExtraParameters {valueKey} {
+      variable parameterDefinitions
+
+      if {[llength $parameterDefinitions] > 0} {
+        if {[my _isExtraParameters [lindex $parameterDefinitions end]]} {
+          return -code error "extra parameters already defined: $valueKey"
+        }
+      }
+    }
+
+    method requiredParameter {valueKey label helpText} {
+      my _claimValueKey $valueKey
+      variable parameterDefinitions
+
+      if {[llength $parameterDefinitions] > 0} {
+        if {![my _isRequiredParameter [lindex $parameterDefinitions end]]} {
+          return -code error "optional parameter already defined: $valueKey"
+        }
+      }
+
+      my _addParameter $valueKey required $label $helpText
+    }
+
+    method optionalParameter {valueKey label helpText} {
+      my _claimValueKey $valueKey
+      my _verifyNoExtraParameters $valueKey
+      my _addParameter $valueKey optional $label $helpText
+    }
+
+    method extraParameters {valueKey label helpText} {
+      my _claimValueKey $valueKey
+      my _verifyNoExtraParameters $valueKey
+      my _addParameter $valueKey extra "$label ..." $helpText
+    }
+
+    method addOption {valueKey shortName longName optionType helpText} {
+      my _claimValueKey $valueKey
+      set option [dict create value $valueKey help $helpText]
+
+      variable optionDefinitions
+      set identifier "opt[dict size $optionDefinitions]"
+
+      variable shortOptions
+      variable longOptions
+
+      variable shortOptionPrefix
+      variable longOptionPrefix
+
+      set commands [list]
+      set optionName ""
+
+      if {[set shortLength [string length $shortName]] > 0} {
+        set optionName "$shortOptionPrefix$shortName"
+
+        if {$shortLength != 1} {
+          return -code error "short option isn't a single character: $optionName"
+        }
+
+        if {[dict exists $shortOptions $shortName]} {
+          return -code error "short option defined more than once: $optionName"
+        }
+
+        dict set option short $shortName
+        lappend commands [list dict set shortOptions $shortName $identifier]
+      }
+
+      if {[set longLength [string length $longName]] > 0} {
+        set optionName "$longOptionPrefix$longName"
+
+        if {$longLength < 2} {
+          return -code error "long option is too short: $optionName"
+        }
+
+        if {[dict exists $longOptions $longName]} {
+          return -code error "long option defined more than once: $optionName"
+        }
+
+        dict set option long $longName
+        lappend commands [list dict set longOptions $longName $identifier]
+      }
+
+      if {[string length $optionName] == 0} {
+        return -code error "option name not specified: $valueKey"
+      }
+
+      if {[lsearch -exact {flag counter toggle} $optionType] >= 0} {
+        dict set option type $optionType
+        dict set option default 0
+      } else {
+        set filter [lassign [split $optionType .] type operand]
+
+        if {[string length $type] == 0} {
+          return -code error "option type not specified: $optionName"
+        }
+
+        if {[string length $operand] == 0} {
+          set operand $type
+        }
+
+        if {[lsearch -exact {string} $type] < 0} {
+          return -code error "unrecognized option type: $type: $optionName"
+        }
+
+        dict set option type $type
+        dict set option operand $operand
+        dict set option default ""
+        dict set option filter $filter
+      }
+
+      foreach command $commands {
+        eval $command
+      }
+
+      dict set optionDefinitions $identifier $option
+      return $option
+    }
+
+    method getUsageSummary {} {
+      set lines [list]
+      my _includePurpose lines
+      my _includeSyntax lines
+      my _includeParameters lines
+      my _includeOptions lines
+      my _includeNotes lines
+      return $lines
+    }
+
+    method _includePurpose {linesList} {
+      variable commandPurpose
+
+      if {[string length $commandPurpose] > 0} {
+        upvar 1 $linesList lines
+        lappend lines $commandPurpose
+        lappend lines ""
+      }
+    }
+
+    method _includeSyntax {linesList} {
+      variable commandName
+      set line "Syntax: $commandName"
+
+      variable optionDefinitions
+      variable parameterDefinitions
+      set optionalParameterCount 0
+
+      if {[llength $optionDefinitions] > 0} {
+        append line " \[-option ...\]"
+      }
+
+      foreach parameter $parameterDefinitions {
+        set label [dict get $parameter label]
+
+        if {![my _isRequiredParameter $parameter]} {
+          set label "\[$label"
+          incr optionalParameterCount 1
+        }
+
+        append line " $label"
+      }
+
+      append line [string repeat "\]" $optionalParameterCount]
+      uplevel 1 [list lappend $linesList $line]
+    }
+
+    method _includeParameters {linesList} {
+      upvar 1 $linesList lines
+      variable parameterDefinitions
+
+      if {[llength $parameterDefinitions] > 0} {
+        lappend lines ""
+        lappend lines "Parameters:"
+
+        set labelColumn [list]
+        set helpColumn [list]
+
+        foreach parameter $parameterDefinitions {
+          lappend labelColumn [dict get $parameter label]
+          lappend helpColumn [dict get $parameter help]
+        }
+
+        my _includeTable lines 2 2 $labelColumn $helpColumn
+      }
+    }
+
+    method _includeOptions {linesList} {
+      upvar 1 $linesList lines
+      variable optionDefinitions
+
+      if {[llength $optionDefinitions] > 0} {
+        lappend lines ""
+        lappend lines "Options:"
+
+        variable shortOptionPrefix
+        variable longOptionPrefix
+
+        set operandColumn [list]
+        set shortColumn [list]
+        set longColumn [list]
+        set helpColumn [list]
+
+        foreach option [dict values $optionDefinitions] {
+          set operandField ""
+          set shortField ""
+          set longField ""
+
+          if {[dict exists $option operand]} {
+            set operandField [dict get $option operand]
+          }
+
+          if {[dict exists $option short]} {
+            set shortField "$shortOptionPrefix[dict get $option short]"
+          }
+
+          if {[dict exists $option long]} {
+            set longField "$longOptionPrefix[dict get $option long]"
+
+            if {[string length $operandField] > 0} {
+              append longField "="
+            }
+          }
+
+          lappend operandColumn $operandField
+          lappend shortColumn $shortField
+          lappend longColumn $longField
+          lappend helpColumn [dict get $option help]
+        }
+
+        my _includeTable lines 2 2 $shortColumn $longColumn $operandColumn $helpColumn
+      }
+    }
+
+    method _includeNotes {linesList} {
+      upvar 1 $linesList lines
+      variable commandNotes
+
+      if {[llength $commandNotes] > 0} {
+        lappend lines ""
+        eval lappend lines [formatLines $commandNotes]
+      }
+    }
+
+    method _includeTable {linesList indent spacing args} {
+      upvar 1 $linesList lines
+
+      set linePrefix [string repeat " " $indent]
+      set columnSeparator [string repeat " " $spacing]
+
+      set columnWidths [list]
+      set rowCount 0
+      set rowIndex 0
+
+      foreach column $args {
+        set width 0
+
+        foreach field $column {
+          set width [expr {max($width, [string length $field])}]
+        }
+
+        lappend columnWidths $width
+        set rowCount [expr {max($rowCount, [llength $column])}]
+      }
+
+      while {$rowIndex < $rowCount} {
+        set line ""
+
+        foreach column $args width $columnWidths {
+          if {$width > 0} {
+            if {[string length $line] == 0} {
+              append line $linePrefix
+            } else {
+              append line $columnSeparator
+            }
+
+            if {$rowIndex < [llength $column]} {
+              set field [lindex $column $rowIndex]
+            } else {
+              set field ""
+            }
+
+            append line $field
+            append line [string repeat " " [expr {$width - [string length $field]}]]
+          }
+        }
+
+        lappend lines [string trimright $line]
+        incr rowIndex 1
+      }
+    }
+
+    method _getOptionDefinition {identifier} {
+      variable optionDefinitions
+      return [dict get $optionDefinitions $identifier]
+    }
+
+    method _updateValue {valuesDictionary option} {
+      upvar 1 $valuesDictionary values
+      my "_updateValue_[dict get $option type]" values $option
+    }
+
+    method _updateValue_flag {valuesDictionary option} {
+      upvar 1 $valuesDictionary values
+      dict set values [dict get $option value] 1
+    }
+
+    method _updateValue_counter {valuesDictionary option} {
+      upvar 1 $valuesDictionary values
+      dict incr values [dict get $option value] 1
+    }
+
+    method _updateValue_toggle {valuesDictionary option} {
+      upvar 1 $valuesDictionary values
+
+      dict update values [dict get $option value] value {
+        set value [expr {!$value}]
+      }
+    }
+
+    method _setValue {valuesDictionary option value} {
+      upvar 1 $valuesDictionary values
+      my "_setValue_[dict get $option type]" values $option $value
+    }
+
+    method _setValue_string {valuesDictionary option value} {
+      upvar 1 $valuesDictionary values
+      dict set values [dict get $option value] $value
+    }
+
+    method _processShortOptions {valuesDictionary argument} {
+      upvar 1 $valuesDictionary values
+
+      variable shortOptions
+      variable shortOptionPrefix
+
+      while {[string length $argument] > 0} {
+        set character [string index $argument 0]
+        set argument [string range $argument 1 end]
+
+        if {![dict exists $shortOptions $character]} {
+          syntaxError "unrecognized option: $shortOptionPrefix$character"
+        }
+
+        set option [my _getOptionDefinition [dict get $shortOptions $character]]
+
+        if {[dict exists $option operand]} {
+          if {[string length $argument] == 0} {
+            return $option
+          }
+
+          my _setValue values $option $argument
+          break
+        }
+
+        my _updateValue values $option
+      }
+
+      return ""
+    }
+
+    method _processLongOption {valuesDictionary argument} {
+      upvar 1 $valuesDictionary values
+
+      variable longOptions
+      variable longOptionPrefix
+
+      if {[set hasValue [expr {[set index [string first = $argument]] >= 0}]]} {
+        set name [string range $argument 0 $index-1]
+        set value [string range $argument $index+1 end]
+      } else {
+        set name $argument
+      }
+
+      if {![dict exists $longOptions $name]} {
+        if {[set nameCount [llength [set names [dict keys $longOptions $name*]]]] == 0} {
+          syntaxError "unrecognized option: $longOptionPrefix$name"
+        }
+
+        if {$nameCount > 1} {
+          syntaxError "ambiguous option: $longOptionPrefix$name ([join $names ", "])"
+        }
+
+        set name [lindex $names 0]
+      }
+
+      set option [my _getOptionDefinition [dict get $longOptions $name]]
+
+      if {![dict exists $option operand]} {
+        my _updateValue values $option
+      } elseif {$hasValue} {
+        my _setValue values $option $value
+      } else {
+        return $option
+      }
+
+      return ""
+    }
+
+    method parseArguments {arguments} {
+      set values [dict create]
+
+      variable parameterDefinitions
+      variable optionDefinitions
+
+      variable shortOptionPrefix
+      variable longOptionPrefix
+
+      foreach parameter $parameterDefinitions {
+        if {[my _isExtraParameters $parameter]} {
+          set default [list]
+        } else {
+          set default ""
+        }
+
+        dict set values [dict get $parameter value] $default
+      }
+
+      foreach option [dict values $optionDefinitions] {
+        dict set values [dict get $option value] [dict get $option default]
+      }
+
+      while {[llength $arguments] > 0} {
+        if {[string length [set argument [lindex $arguments 0]]] == 0} {
+          break
+        }
+
+        if {![string equal [string index $argument 0] -]} {
+          break
+        }
+
+        set arguments [lrange $arguments 1 end]
+
+        if {[string length $argument] == 1} {
+          break
+        }
+
+        if {![string equal [string index $argument 1] -]} {
+          set option [my _processShortOptions values [string range $argument 1 end]]
+          set variant short
+        } elseif {[string length $argument] == 2} {
+          break
+        } else {
+          set option [my _processLongOption values [string range $argument 2 end]]
+          set variant long
+        }
+
+        if {[string length $option] > 0} {
+          set name "[set "${variant}OptionPrefix"][dict get $option $variant]"
+
+          if {[llength $arguments] == 0} {
+            syntaxError "missing value: $name"
+          }
+
+          my _setValue values $option [lindex $arguments 0]
+          set arguments [lrange $arguments 1 end]
+        }
+      }
+
+      if {[dict get $values showHelp]} {
+        puts stdout [join [[self] getUsageSummary] "\n"]
+        exit 0
+      }
+
+      foreach parameter $parameterDefinitions {
+        if {[my _isExtraParameters $parameter]} {
+          dict set values [dict get $parameter value] $arguments
+          set arguments [list]
+          break
+        }
+
+        if {[llength $arguments] == 0} {
+          if {[my _isOptionalParameter $parameter]} {
+            break
+          }
+
+          syntaxError "missing [dict get $parameter label]"
+        }
+
+        dict set values [dict get $parameter value] [lindex $arguments 0]
+        set arguments [lrange $arguments 1 end]
+      }
+
+      if {[llength $arguments] > 0} {
+        syntaxError "too many parameters"
+      }
+
+      return $values
+    }
+  }
+
+  oo::class create ProgramArgumentsParser {
+    superclass CommandArgumentsParser
+
+    constructor {} {
+      next [getProgramName]
+      [self] addOption quietCount q quiet counter "decrease output verbosity level (may be specified more than noce)"
+      [self] addOption verboseCount v verbose counter "increase output verbosity level (may be specified more than noce)"
+    }
+
+    method parseArguments {} {
+      set values [next $::argv]
+
+      global logLevel
+      incr logLevel [dict get $values verboseCount]
+      incr logLevel -[dict get $values quietCount]
+
+      return $values
+    }
+  }
 }
 
