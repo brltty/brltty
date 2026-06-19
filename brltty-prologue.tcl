@@ -1012,7 +1012,7 @@ namespace eval ::brltty {
       variable shortOptionPrefix -
       variable longOptionPrefix [string repeat $shortOptionPrefix 2]
 
-      [self] addOption showHelp h help flag "show this usage summary on standard output and then exit"
+      [self] option showHelp h help flag "show this usage summary on standard output and then exit"
     }
 
     method setPurpose {purpose} {
@@ -1023,7 +1023,9 @@ namespace eval ::brltty {
       variable commandNotes
 
       if {$newParagraph} {
-        lappend commandNotes ""
+        if {[llength $commandNotes] > 0} {
+          lappend commandNotes ""
+        }
       }
 
       lappend commandNotes $line
@@ -1052,24 +1054,29 @@ namespace eval ::brltty {
       lappend valueKeys $key
     }
 
-    method _addParameter {valueKey disposition label helpText} {
-      set parameter [dict create value $valueKey disposition $disposition label $label help $helpText]
+    method _addParameter {valueKey disposition label help} {
+      set parameter [dict create value $valueKey disposition $disposition label $label help $help]
 
       variable parameterDefinitions
       lappend parameterDefinitions $parameter
+
       return $parameter
     }
 
+    method _getParameterDisposition {parameter} {
+      return [dict get $parameter disposition]
+    }
+
     method _isRequiredParameter {parameter} {
-      return [string equal [dict get $parameter disposition] required]
+      return [string equal [my _getParameterDisposition $parameter] required]
     }
 
     method _isOptionalParameter {parameter} {
-      return [string equal [dict get $parameter disposition] optional]
+      return [string equal [my _getParameterDisposition $parameter] optional]
     }
 
     method _isExtraParameters {parameter} {
-      return [string equal [dict get $parameter disposition] extra]
+      return [string equal [my _getParameterDisposition $parameter] extra]
     }
 
     method _verifyNoExtraParameters {valueKey} {
@@ -1082,7 +1089,7 @@ namespace eval ::brltty {
       }
     }
 
-    method requiredParameter {valueKey label helpText} {
+    method parameter {valueKey label help} {
       my _claimValueKey $valueKey
       variable parameterDefinitions
 
@@ -1092,22 +1099,22 @@ namespace eval ::brltty {
         }
       }
 
-      my _addParameter $valueKey required $label $helpText
+      my _addParameter $valueKey required $label $help
     }
 
-    method optionalParameter {valueKey label helpText} {
+    method optional {valueKey label help} {
       my _claimValueKey $valueKey
       my _verifyNoExtraParameters $valueKey
-      my _addParameter $valueKey optional $label $helpText
+      my _addParameter $valueKey optional $label $help
     }
 
-    method extraParameters {valueKey label helpText} {
+    method extra {valueKey label help} {
       my _claimValueKey $valueKey
       my _verifyNoExtraParameters $valueKey
-      my _addParameter $valueKey extra "$label ..." $helpText
+      my _addParameter $valueKey extra "$label ..." $help
     }
 
-    method addOption {valueKey shortName longName optionType helpText} {
+    method option {valueKey shortName longName optionType helpText} {
       my _claimValueKey $valueKey
       set option [dict create value $valueKey help $helpText]
 
@@ -1116,12 +1123,10 @@ namespace eval ::brltty {
 
       variable shortOptions
       variable longOptions
+      set optionName ""
 
       variable shortOptionPrefix
       variable longOptionPrefix
-
-      set commands [list]
-      set optionName ""
 
       if {[set shortLength [string length $shortName]] > 0} {
         set optionName "$shortOptionPrefix$shortName"
@@ -1135,7 +1140,7 @@ namespace eval ::brltty {
         }
 
         dict set option short $shortName
-        lappend commands [list dict set shortOptions $shortName $identifier]
+        dict set shortOptions $shortName $identifier
       }
 
       if {[set longLength [string length $longName]] > 0} {
@@ -1150,7 +1155,7 @@ namespace eval ::brltty {
         }
 
         dict set option long $longName
-        lappend commands [list dict set longOptions $longName $identifier]
+        dict set longOptions $longName $identifier
       }
 
       if {[string length $optionName] == 0} {
@@ -1181,10 +1186,6 @@ namespace eval ::brltty {
         dict set option filter $filter
       }
 
-      foreach command $commands {
-        eval $command
-      }
-
       dict set optionDefinitions $identifier $option
       return $option
     }
@@ -1204,7 +1205,7 @@ namespace eval ::brltty {
 
       if {[string length $commandPurpose] > 0} {
         upvar 1 $linesList lines
-        lappend lines $commandPurpose
+        eval lappend lines [formatLines $commandPurpose]
         lappend lines ""
       }
     }
@@ -1368,33 +1369,28 @@ namespace eval ::brltty {
 
     method _updateValue {valuesDictionary option} {
       upvar 1 $valuesDictionary values
-      my "_updateValue_[dict get $option type]" values $option
-    }
-
-    method _updateValue_flag {valuesDictionary option} {
-      upvar 1 $valuesDictionary values
-      dict set values [dict get $option value] 1
-    }
-
-    method _updateValue_counter {valuesDictionary option} {
-      upvar 1 $valuesDictionary values
-      dict incr values [dict get $option value] 1
-    }
-
-    method _updateValue_toggle {valuesDictionary option} {
-      upvar 1 $valuesDictionary values
 
       dict update values [dict get $option value] value {
-        set value [expr {!$value}]
+        my "_updateValue_[dict get $option type]" value
       }
     }
 
-    method _setValue {valuesDictionary option value} {
-      upvar 1 $valuesDictionary values
-      my "_setValue_[dict get $option type]" values $option $value
+    method _updateValue_flag {valueVariable} {
+      upvar 1 $valueVariable value
+      set value 1
     }
 
-    method _setValue_string {valuesDictionary option value} {
+    method _updateValue_counter {valueVariable} {
+      upvar 1 $valueVariable value
+      incr value 1
+    }
+
+    method _updateValue_toggle {valueVariable} {
+      upvar 1 $valueVariable value
+      set value [expr {!$value}]
+    }
+
+    method _setValue {valuesDictionary option value} {
       upvar 1 $valuesDictionary values
       dict set values [dict get $option value] $value
     }
@@ -1468,7 +1464,7 @@ namespace eval ::brltty {
       return ""
     }
 
-    method parseArguments {arguments} {
+    method parse {arguments} {
       set values [dict create]
 
       variable parameterDefinitions
@@ -1520,7 +1516,7 @@ namespace eval ::brltty {
           set name "[set "${variant}OptionPrefix"][dict get $option $variant]"
 
           if {[llength $arguments] == 0} {
-            syntaxError "missing value: $name"
+            syntaxError "missing option value: $name"
           }
 
           my _setValue values $option [lindex $arguments 0]
@@ -1565,11 +1561,11 @@ namespace eval ::brltty {
 
     constructor {} {
       next [getProgramName]
-      [self] addOption quietCount q quiet counter "decrease output verbosity level (may be specified more than noce)"
-      [self] addOption verboseCount v verbose counter "increase output verbosity level (may be specified more than noce)"
+      [self] option quietCount q quiet counter "decrease output verbosity level (may be specified more than once)"
+      [self] option verboseCount v verbose counter "increase output verbosity level (may be specified more than once)"
     }
 
-    method parseArguments {} {
+    method parse {} {
       set values [next $::argv]
 
       global logLevel
@@ -1579,5 +1575,31 @@ namespace eval ::brltty {
       return $values
     }
   }
+}
+
+proc testProgramArgumentsParser {} {
+   set parser [::brltty::ProgramArgumentsParser new]
+   $parser setPurpose "An example showing how to use BRLTTY's TCL command line parser."
+
+   $parser addNotes {
+     "First, use the \"parameter\" method to define, in order, any required parameters."
+     "Next, use the \"optional\" method to define, in order, any optional parameters."
+     "Finally, if you need them, use the \"extra\" method to capture any remaining parameters."
+     "The required and optional parameters are returned as strings."
+     "Unspecified optional parameters are returned as empty (zero-length) strings."
+     "The extra parameters are returned as a list of strings."
+   }
+
+   $parser option flagOption f flag flag "this is a flag option"
+   $parser option counterOption c counter counter "this is a counter option"
+   $parser option toggleOption t toggle toggle "this is a toggle option"
+
+   $parser option stringOption s string string "this is a string option"
+
+   $parser parameter requiredParameter required "this is a required parameter"
+   $parser optional optionalParameter optional "this is an optional parameter"
+   $parser extra extraParameters extra "these are the extra parameters"
+
+   return [$parser parse]
 }
 
