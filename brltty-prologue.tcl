@@ -653,7 +653,7 @@ proc processProgramOptions {valuesArray argumentsVariable definitions {optionsVa
             set type [string range $type 0 $index-1]
          }
 
-         if {![lcontain {string integer wideinteger double boolean} $type]} {
+         if {![lcontain {string integer double boolean} $type]} {
             return -code error "invalid type for $description: $type"
          }
 
@@ -970,7 +970,6 @@ proc makeDictionary {initializer {namesPath {}}} {
          }
 
          integer -
-         wideinteger -
          double -
          boolean -
          list {
@@ -1005,7 +1004,6 @@ namespace eval ::brltty {
       variable valueKeys [list]
       variable parameterDefinitions [list]
       variable optionDefinitions [dict create]
-
       variable shortOptions [dict create]
       variable longOptions [dict create]
 
@@ -1040,6 +1038,10 @@ namespace eval ::brltty {
       }
     }
 
+    method _isTclStringType {type} {
+      return [lcontain {integer double boolean list} $type]
+    }
+
     method _claimValueKey {key} {
       variable valueKeys
 
@@ -1047,20 +1049,11 @@ namespace eval ::brltty {
         return -code error "value key not specified"
       }
 
-      if {[lsearch -exact $valueKeys $key] >= 0} {
+      if {[lcontain $valueKeys $key]} {
         return -code error "value key specified more than once: $key"
       }
 
       lappend valueKeys $key
-    }
-
-    method _addParameter {valueKey disposition label help} {
-      set parameter [dict create value $valueKey disposition $disposition label $label help $help]
-
-      variable parameterDefinitions
-      lappend parameterDefinitions $parameter
-
-      return $parameter
     }
 
     method _getParameterDisposition {parameter} {
@@ -1079,57 +1072,54 @@ namespace eval ::brltty {
       return [string equal [my _getParameterDisposition $parameter] extra]
     }
 
-    method _verifyNoExtraParameters {valueKey} {
+    method _addParameter {valueKey disposition label help} {
+      my _claimValueKey $valueKey
       variable parameterDefinitions
+
+      if {[string length $label] == 0} {
+        return -code error "parameter label not specified: $valueKey"
+      }
 
       if {[llength $parameterDefinitions] > 0} {
         if {[my _isExtraParameters [lindex $parameterDefinitions end]]} {
           return -code error "extra parameters already defined: $valueKey"
         }
       }
+
+      set parameter [dict create value $valueKey disposition $disposition label $label help $help]
+      lappend parameterDefinitions $parameter
+
+      return $parameter
     }
 
-    method parameter {valueKey label help} {
-      my _claimValueKey $valueKey
-      variable parameterDefinitions
-
-      if {[llength $parameterDefinitions] > 0} {
-        if {![my _isRequiredParameter [lindex $parameterDefinitions end]]} {
-          return -code error "optional parameter already defined: $valueKey"
-        }
-      }
-
+    method requiredParameter {valueKey label help} {
       my _addParameter $valueKey required $label $help
     }
 
-    method optional {valueKey label help} {
-      my _claimValueKey $valueKey
-      my _verifyNoExtraParameters $valueKey
+    method optionalParameter {valueKey label help} {
       my _addParameter $valueKey optional $label $help
     }
 
-    method extra {valueKey label help} {
-      my _claimValueKey $valueKey
-      my _verifyNoExtraParameters $valueKey
+    method extraParameters {valueKey label help} {
       my _addParameter $valueKey extra "$label ..." $help
     }
 
     method option {valueKey shortName longName optionType helpText} {
       my _claimValueKey $valueKey
-      set option [dict create value $valueKey help $helpText]
+      set option [dict create value $valueKey]
 
       variable optionDefinitions
       set identifier "opt[dict size $optionDefinitions]"
 
       variable shortOptions
       variable longOptions
-      set optionName ""
+      set optionNames [list]
 
       variable shortOptionPrefix
       variable longOptionPrefix
 
       if {[set shortLength [string length $shortName]] > 0} {
-        set optionName "$shortOptionPrefix$shortName"
+        lappend optionNames "$shortOptionPrefix$shortName"
 
         if {$shortLength != 1} {
           return -code error "short option isn't a single character: $optionName"
@@ -1144,7 +1134,7 @@ namespace eval ::brltty {
       }
 
       if {[set longLength [string length $longName]] > 0} {
-        set optionName "$longOptionPrefix$longName"
+        lappend optionNames "$longOptionPrefix$longName"
 
         if {$longLength < 2} {
           return -code error "long option is too short: $optionName"
@@ -1158,15 +1148,22 @@ namespace eval ::brltty {
         dict set longOptions $longName $identifier
       }
 
-      if {[string length $optionName] == 0} {
+      if {[set nameCount [llength $optionNames]] == 0} {
         return -code error "option name not specified: $valueKey"
       }
 
-      if {[lsearch -exact {flag counter toggle} $optionType] >= 0} {
+      set optionName [lindex $optionNames 0]
+      if {$nameCount > 1} {
+        append optionName " ([lindex $optionNames 1])"
+      }
+      dict set option name $optionName
+
+      if {[lcontain {flag counter toggle} $optionType]} {
         dict set option type $optionType
         dict set option default 0
       } else {
-        set filter [lassign [split $optionType .] type operand]
+        set typeDelimiter .
+        set default [join [lassign [split $optionType $typeDelimiter] type operand] $typeDelimiter]
 
         if {[string length $type] == 0} {
           return -code error "option type not specified: $optionName"
@@ -1176,16 +1173,22 @@ namespace eval ::brltty {
           set operand $type
         }
 
-        if {[lsearch -exact {string} $type] < 0} {
-          return -code error "unrecognized option type: $type: $optionName"
+        if {![lcontain {string} $type]} {
+          if {![my _isTclStringType $type]} {
+            return -code error "unrecognized option type: $type: $optionName"
+          }
         }
 
         dict set option type $type
         dict set option operand $operand
-        dict set option default ""
-        dict set option filter $filter
+        dict set option default $default
+
+        if {[string length $default] > 0} {
+          append helpText " - defaults to $default"
+        }
       }
 
+      dict set option help $helpText
       dict set optionDefinitions $identifier $option
       return $option
     }
@@ -1392,6 +1395,14 @@ namespace eval ::brltty {
 
     method _setValue {valuesDictionary option value} {
       upvar 1 $valuesDictionary values
+      set type [dict get $option type]
+
+      if {[my _isTclStringType $type]} {
+        if {![string is $type -strict $value]} {
+          syntaxError "invalid $type value: $value: [dict get $option name]"
+        }
+      }
+
       dict set values [dict get $option value] $value
     }
 
@@ -1406,7 +1417,7 @@ namespace eval ::brltty {
         set argument [string range $argument 1 end]
 
         if {![dict exists $shortOptions $character]} {
-          syntaxError "unrecognized option: $shortOptionPrefix$character"
+          syntaxError "undefned option: $shortOptionPrefix$character"
         }
 
         set option [my _getOptionDefinition [dict get $shortOptions $character]]
@@ -1441,7 +1452,7 @@ namespace eval ::brltty {
 
       if {![dict exists $longOptions $name]} {
         if {[set nameCount [llength [set names [dict keys $longOptions $name*]]]] == 0} {
-          syntaxError "unrecognized option: $longOptionPrefix$name"
+          syntaxError "undefiined option: $longOptionPrefix$name"
         }
 
         if {$nameCount > 1} {
@@ -1504,16 +1515,14 @@ namespace eval ::brltty {
 
         if {![string equal [string index $argument 1] -]} {
           set option [my _processShortOptions values [string range $argument 1 end]]
-          set variant short
         } elseif {[string length $argument] == 2} {
           break
         } else {
           set option [my _processLongOption values [string range $argument 2 end]]
-          set variant long
         }
 
         if {[string length $option] > 0} {
-          set name "[set "${variant}OptionPrefix"][dict get $option $variant]"
+          set name [dict get $option name]
 
           if {[llength $arguments] == 0} {
             syntaxError "missing option value: $name"
@@ -1577,29 +1586,38 @@ namespace eval ::brltty {
   }
 }
 
-proc testProgramArgumentsParser {} {
+proc testProgramArgumentsParser {showValues} {
    set parser [::brltty::ProgramArgumentsParser new]
    $parser setPurpose "An example showing how to use BRLTTY's TCL command line parser."
 
+   $parser option flagOption f flag flag "initially false - set the flag to true"
+   $parser option counterOption c counter counter "initially 0 - each use increments the counter by 1"
+   $parser option toggleOption t toggle toggle "initially false - each use toggles the flag to true, back to false, etc"
+
+   $parser option stringOption s string string.text "may contain arbitrary text"
+   $parser option integerOption i integer integer.value "must be a properly formatted integer of any size"
+   $parser option doubleOption d double double.value "must be a properly formatted floating-point number, infinity, inf, or nan"
+   $parser option booleanOption b boolean boolean.value "may be true/false, on/off, yes/no, or 1/0"
+   $parser option listOption l list list.value "must be a properly formatted TCL list"
+
+   $parser requiredParameter firstParameter first "must be specified"
+   $parser optionalParameter secondParameter second "may be omitted"
+   $parser requiredParameter thirdParameter third "must be specified if the first parameter has been specified"
+   $parser optionalParameter fourthParameter fourth "may be omitted"
+   $parser requiredParameter fifthParameter fifth "must be specified if the fourth parameter has been specified"
+   $parser extraParameters extraParameters extra "a TCL list containing all of the additional parameters"
+
    $parser addNotes {
-     "First, use the \"parameter\" method to define, in order, any required parameters."
-     "Next, use the \"optional\" method to define, in order, any optional parameters."
-     "Finally, if you need them, use the \"extra\" method to capture any remaining parameters."
-     "The required and optional parameters are returned as strings."
-     "Unspecified optional parameters are returned as empty (zero-length) strings."
-     "The extra parameters are returned as a list of strings."
    }
 
-   $parser option flagOption f flag flag "this is a flag option"
-   $parser option counterOption c counter counter "this is a counter option"
-   $parser option toggleOption t toggle toggle "this is a toggle option"
+   set values [$parser parse]
 
-   $parser option stringOption s string string "this is a string option"
+   if {$showValues} {
+      foreach key [dict keys $values] {
+         puts stdout "$key = [dict get $values $key]"
+      }
+   }
 
-   $parser parameter requiredParameter required "this is a required parameter"
-   $parser optional optionalParameter optional "this is an optional parameter"
-   $parser extra extraParameters extra "these are the extra parameters"
-
-   return [$parser parse]
+   return $values
 }
 
