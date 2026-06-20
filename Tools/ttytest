@@ -170,7 +170,7 @@ proc getArgumentsUsageSummary {} {
       set label [getSerialPropertyLabel $name]
       set choices [getSerialPropertyChoices $name]
       set default [getSerialPropertyDefault $name]
-      addSettingUsage lines $label [formatChoicesPhrase $choices] $default
+      addSettingUsage lines $label [makeChoicesPhrase $choices] $default
    }
 
    return $lines

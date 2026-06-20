@@ -549,7 +549,7 @@ proc formatColumns {rows} {
    return $lines
 }
 
-proc formatChoicesPhrase {choices} {
+proc makeChoicesPhrase {choices} {
    set separator " "
 
    if {[set count [llength $choices]] > 2} {
@@ -795,7 +795,7 @@ proc addKeywordOption {definitionsVariable option operand usage keywords} {
 
    if {![lempty $keywords]} {
       set choices [lmap choice $keywords {set choice "\"$choice\""}]
-      append usage " - [formatChoicesPhrase $choices]"
+      append usage " - [makeChoicesPhrase $choices]"
    }
 
    addProgramOption definitions $option string.$operand $usage
@@ -1045,6 +1045,10 @@ namespace eval ::brltty {
       return [lcontain {integer double boolean list} $type]
     }
 
+    method _makeChoicesPhrase {choices} {
+      return [makeChoicesPhrase [lmap choice $choices {set choice "\"$choice\""}]]
+    }
+
     method _claimValueKey {key argumentVariable} {
       variable valueKeys
 
@@ -1130,11 +1134,11 @@ namespace eval ::brltty {
         lappend optionNames "$shortOptionPrefix$shortName"
 
         if {$shortLength != 1} {
-          return -code error "short option isn't a single character: $optionName"
+          return -code error "short option isn't a single character: $valueKey"
         }
 
         if {[dict exists $shortOptions $shortName]} {
-          return -code error "short option defined more than once: $optionName"
+          return -code error "short option defined more than once: $valueKey"
         }
 
         dict set option short $shortName
@@ -1145,11 +1149,11 @@ namespace eval ::brltty {
         lappend optionNames "$longOptionPrefix$longName"
 
         if {$longLength < 2} {
-          return -code error "long option is too short: $optionName"
+          return -code error "long option is too short: $valueKey"
         }
 
         if {[dict exists $longOptions $longName]} {
-          return -code error "long option defined more than once: $optionName"
+          return -code error "long option defined more than once: $valueKey"
         }
 
         dict set option long $longName
@@ -1214,8 +1218,19 @@ namespace eval ::brltty {
       return [my _addOption $valueKey $short $long toggle $help]
     }
 
-    method stringOption {valueKey short long operand help} {
-      return [my _addOption $valueKey $short $long string.$operand $help]
+    method stringOption {valueKey short long operand help {choices {}}} {
+      set identifier [my _addOption $valueKey $short $long string.$operand $help]
+
+      if {[llength $choices] > 0} {
+        variable optionDefinitions
+        dict set optionDefinitions $identifier choices $choices
+
+        dict with optionDefinitions $identifier {
+          append help " - must be [my _makeChoicesPhrase $choices]"
+        }
+      }
+
+      return $identifier
     }
 
     method listOption {valueKey short long operand help} {
@@ -1460,15 +1475,41 @@ namespace eval ::brltty {
     }
 
     method _setValue {valuesDictionary option value} {
-      upvar 1 $valuesDictionary values
+      set name [dict get $option name]
       set type [dict get $option type]
+      set message "invalid option value"
 
       if {[my _isTclStringType $type]} {
         if {![string is $type -strict $value]} {
-          syntaxError "invalid $type value: $value: [dict get $option name]"
+          syntaxError "$message: $value not $type: $name"
         }
       }
 
+      if {[dict exists $option choices]} {
+        set choices [dict get $option choices]
+
+        if {[testKeyword value $choices] < 0} {
+          syntaxError "$message: $value != [my _makeChoicesPhrase $choices]: $name"
+        }
+      }
+
+      if {[dict exists $option minimum]} {
+        set minimum [dict get $option minimum]
+
+        if {$value < $minimum} {
+          syntaxError "$message: $value < $minimum: $name"
+        }
+      }
+
+      if {[dict exists $option maximum]} {
+        set maximum [dict get $option maximum]
+
+        if {$value > $maximum} {
+          syntaxError "$message: $value > $maximum: $name"
+        }
+      }
+
+      upvar 1 $valuesDictionary values
       dict set values [dict get $option value] $value
     }
 
@@ -1661,6 +1702,7 @@ proc testScriptArgumentsParser {showValues} {
    $parser toggleOption toggleOption t toggle "initially false - each use toggles the flag to true, back to false, etc"
 
    $parser stringOption stringOption s string text "may contain arbitrary text"
+   $parser stringOption keywordOption k keyword keword "may contain arbitrary text" {blue green red}
    $parser listOption listOption l list value "must be a properly formatted TCL list"
    $parser booleanOption booleanOption b boolean value "may be true/false, on/off, yes/no, or 1/0"
    $parser integerOption integerOption i integer value.5 "must be a properly formatted integer of any size" 1 8
