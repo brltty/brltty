@@ -16,8 +16,11 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+set scriptPath [file normalize $argv0]
+set scriptDirectory [file dirname $scriptPath]
+set scriptName [file tail $scriptPath]
+
 set initialDirectory [pwd]
-set scriptDirectory [file normalize [file dirname $::argv0]]
 set prologueDirectory [file normalize [file dirname [info script]]]
 
 try {
@@ -155,13 +158,13 @@ proc writeProgramMessage {message} {
    }
 }
 
-makeEnumeration logLevels {error warning notice task note detail}
-set logLevel $logLevels(task)
+makeEnumeration definedLogLevels {error warning notice task note detail}
+set currentLogLevel $definedLogLevels(task)
 
 proc logMessage {level message} {
-   global logLevels logLevel
+   global definedLogLevels currentLogLevel
 
-   if {$logLevels($level) <= $logLevel} {
+   if {$currentLogLevel >= $definedLogLevels($level)} {
       writeProgramMessage $message
    }
 }
@@ -771,9 +774,9 @@ proc processProgramArguments {
       syntaxError
    }
 
-   global logLevel
-   incr logLevel $optionValues(verbose)
-   incr logLevel -$optionValues(quiet)
+   global currentLogLevel
+   incr currentLogLevel $optionValues(verbose)
+   incr currentLogLevel -$optionValues(quiet)
 
    if {$optionValues(help)} {
       showProgramArgumentsUsage [getProgramName] $optionsDescriptor $argumentsUsage $getArgumentsUsageSummary
@@ -1475,7 +1478,7 @@ namespace eval ::brltty {
       return ""
     }
 
-    method parse {arguments} {
+    method parseArguments {arguments} {
       set values [dict create]
 
       variable parameterDefinitions
@@ -1565,29 +1568,29 @@ namespace eval ::brltty {
     }
   }
 
-  oo::class create ProgramArgumentsParser {
+  oo::class create ScriptArgumentsParser {
     superclass CommandArgumentsParser
 
     constructor {} {
-      next [getProgramName]
+      next $::scriptName
       [self] option quietCount q quiet counter "decrease output verbosity level (may be specified more than once)"
       [self] option verboseCount v verbose counter "increase output verbosity level (may be specified more than once)"
     }
 
-    method parse {} {
+    method parseArguments {} {
       set values [next $::argv]
 
-      global logLevel
-      incr logLevel [dict get $values verboseCount]
-      incr logLevel -[dict get $values quietCount]
+      global currentLogLevel
+      incr currentLogLevel [dict get $values verboseCount]
+      incr currentLogLevel -[dict get $values quietCount]
 
       return $values
     }
   }
 }
 
-proc testProgramArgumentsParser {showValues} {
-   set parser [::brltty::ProgramArgumentsParser new]
+proc testScriptArgumentsParser {showValues} {
+   set parser [::brltty::ScriptArgumentsParser new]
    $parser setPurpose "An example showing how to use BRLTTY's TCL command line parser."
 
    $parser option flagOption f flag flag "initially false - set the flag to true"
@@ -1610,7 +1613,7 @@ proc testProgramArgumentsParser {showValues} {
    $parser addNotes {
    }
 
-   set values [$parser parse]
+   set values [$parser parseArguments]
 
    if {$showValues} {
       foreach key [dict keys $values] {
