@@ -1004,7 +1004,7 @@ namespace eval ::brltty {
       variable commandPurpose ""
       variable commandNotes [list]
 
-      variable valueKeys [list]
+      variable valueKeys [dict create]
       variable parameterDefinitions [list]
       variable optionDefinitions [dict create]
       variable shortOptions [dict create]
@@ -1013,7 +1013,7 @@ namespace eval ::brltty {
       variable shortOptionPrefix -
       variable longOptionPrefix [string repeat $shortOptionPrefix 2]
 
-      [self] option showHelp h help flag "show this usage summary on standard output and then exit"
+      [self] flagOption showHelp h help "show this usage summary on standard output and then exit"
     }
 
     method setPurpose {purpose} {
@@ -1045,18 +1045,20 @@ namespace eval ::brltty {
       return [lcontain {integer double boolean list} $type]
     }
 
-    method _claimValueKey {key} {
+    method _claimValueKey {key argumentVariable} {
       variable valueKeys
 
       if {[string length $key] == 0} {
         return -code error "value key not specified"
       }
 
-      if {[lcontain $valueKeys $key]} {
+      if {[dict exists $valueKeys $key]} {
         return -code error "value key specified more than once: $key"
       }
 
-      lappend valueKeys $key
+      upvar 1 $argumentVariable argument
+      dict set argument value $key
+      dict set valueKeys $key [dict create]
     }
 
     method _getParameterDisposition {parameter} {
@@ -1076,7 +1078,8 @@ namespace eval ::brltty {
     }
 
     method _addParameter {valueKey disposition label help} {
-      my _claimValueKey $valueKey
+      set parameter [dict create]
+      my _claimValueKey $valueKey parameter
       variable parameterDefinitions
 
       if {[string length $label] == 0} {
@@ -1089,9 +1092,11 @@ namespace eval ::brltty {
         }
       }
 
-      set parameter [dict create value $valueKey disposition $disposition label $label help $help]
-      lappend parameterDefinitions $parameter
+      dict set parameter disposition $disposition
+      dict set parameter label $label
+      dict set parameter help $help
 
+      lappend parameterDefinitions $parameter
       return $parameter
     }
 
@@ -1107,17 +1112,17 @@ namespace eval ::brltty {
       my _addParameter $valueKey extra "$label ..." $help
     }
 
-    method option {valueKey shortName longName optionType helpText} {
-      my _claimValueKey $valueKey
-      set option [dict create value $valueKey]
+    method _addOption {valueKey shortName longName optionType helpText} {
+      set option [dict create]
+      my _claimValueKey $valueKey option
 
       variable optionDefinitions
       set identifier "opt[dict size $optionDefinitions]"
 
       variable shortOptions
       variable longOptions
-      set optionNames [list]
 
+      set optionNames [list]
       variable shortOptionPrefix
       variable longOptionPrefix
 
@@ -1193,7 +1198,65 @@ namespace eval ::brltty {
 
       dict set option help $helpText
       dict set optionDefinitions $identifier $option
-      return $option
+
+      return $identifier
+    }
+
+    method flagOption {valueKey short long help} {
+      return [my _addOption $valueKey $short $long flag $help]
+    }
+
+    method counterOption {valueKey short long help} {
+      return [my _addOption $valueKey $short $long counter $help]
+    }
+
+    method toggleOption {valueKey short long help} {
+      return [my _addOption $valueKey $short $long toggle $help]
+    }
+
+    method stringOption {valueKey short long operand help} {
+      return [my _addOption $valueKey $short $long string.$operand $help]
+    }
+
+    method listOption {valueKey short long operand help} {
+      return [my _addOption $valueKey $short $long list.$operand $help]
+    }
+
+    method booleanOption {valueKey short long operand help} {
+      return [my _addOption $valueKey $short $long boolean.$operand $help]
+    }
+
+    method _rangeOption {valueKey short long type help minimum maximum} {
+      variable optionDefinitions
+
+      set identifier [my _addOption $valueKey $short $long $type $help]
+      set bounds [list]
+
+      if {[string length $minimum] > 0} {
+         lappend bounds ">=$minimum"
+         dict set optionDefinitions $identifier minimum $minimum
+      }
+
+      if {[string length $maximum] > 0} {
+         lappend bounds "<=$maximum"
+         dict set optionDefinitions $identifier maximum $maximum
+      }
+
+      if {[llength $bounds] > 0} {
+        dict with optionDefinitions $identifier {
+          append help " - must be [join $bounds " and "]"
+        }
+      }
+
+      return $identifier
+    }
+
+    method integerOption {valueKey short long operand help {minimum ""} {maximum ""}} {
+      return [my _rangeOption $valueKey $short $long integer.$operand $help $minimum $maximum]
+    }
+
+    method doubleOption {valueKey short long operand help {minimum ""} {maximum ""}} {
+      return [my _rangeOption $valueKey $short $long double.$operand $help $minimum $maximum]
     }
 
     method getUsageSummary {} {
@@ -1573,8 +1636,8 @@ namespace eval ::brltty {
 
     constructor {} {
       next $::scriptName
-      [self] option quietCount q quiet counter "decrease output verbosity level (may be specified more than once)"
-      [self] option verboseCount v verbose counter "increase output verbosity level (may be specified more than once)"
+      [self] counterOption quietCount q quiet "decrease output verbosity level (may be specified more than once)"
+      [self] counterOption verboseCount v verbose "increase output verbosity level (may be specified more than once)"
     }
 
     method parseArguments {} {
@@ -1593,22 +1656,22 @@ proc testScriptArgumentsParser {showValues} {
    set parser [::brltty::ScriptArgumentsParser new]
    $parser setPurpose "An example showing how to use BRLTTY's TCL command line parser."
 
-   $parser option flagOption f flag flag "initially false - set the flag to true"
-   $parser option counterOption c counter counter "initially 0 - each use increments the counter by 1"
-   $parser option toggleOption t toggle toggle "initially false - each use toggles the flag to true, back to false, etc"
+   $parser flagOption flagOption f flag "initially false - set the flag to true"
+   $parser counterOption counterOption c counter "initially 0 - each use increments the counter by 1"
+   $parser toggleOption toggleOption t toggle "initially false - each use toggles the flag to true, back to false, etc"
 
-   $parser option stringOption s string string.text "may contain arbitrary text"
-   $parser option integerOption i integer integer.value "must be a properly formatted integer of any size"
-   $parser option doubleOption d double double.value "must be a properly formatted floating-point number, infinity, inf, or nan"
-   $parser option booleanOption b boolean boolean.value "may be true/false, on/off, yes/no, or 1/0"
-   $parser option listOption l list list.value "must be a properly formatted TCL list"
+   $parser stringOption stringOption s string text "may contain arbitrary text"
+   $parser listOption listOption l list value "must be a properly formatted TCL list"
+   $parser booleanOption booleanOption b boolean value "may be true/false, on/off, yes/no, or 1/0"
+   $parser integerOption integerOption i integer value.5 "must be a properly formatted integer of any size" 1 8
+   $parser doubleOption doubleOption d double value.5.6 "must be a properly formatted floating-point number, infinity, inf, or nan" 1.2 9.8
 
    $parser requiredParameter firstParameter first "must be specified"
    $parser optionalParameter secondParameter second "may be omitted"
    $parser requiredParameter thirdParameter third "must be specified if the first parameter has been specified"
    $parser optionalParameter fourthParameter fourth "may be omitted"
    $parser requiredParameter fifthParameter fifth "must be specified if the fourth parameter has been specified"
-   $parser extraParameters extraParameters extra "a TCL list containing all of the additional parameters"
+   $parser extraParameters extraParameters parameter "a TCL list containing all of the additional parameters"
 
    $parser addNotes {
    }
