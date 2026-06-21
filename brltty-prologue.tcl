@@ -1250,9 +1250,9 @@ namespace eval ::brltty {
 
       if {$haveChoices} {
         my _ensureDefault operand [lindex $choices 0]
+        append help " - must be [my _makeChoicesPhrase $choices]"
       }
 
-      append help " - must be [my _makeChoicesPhrase $choices]"
       set identifier [my _addOption $valueKey $short $long string.$operand $help]
 
       if {$haveChoices} {
@@ -1288,8 +1288,8 @@ namespace eval ::brltty {
         append help " - must be [join $bounds " and "]"
       }
 
-      variable optionDefinitions
       set identifier [my _addOption $valueKey $short $long $type $help]
+      variable optionDefinitions
 
       if {$haveMinimum} {
          dict set optionDefinitions $identifier minimum $minimum
