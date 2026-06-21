@@ -1252,15 +1252,12 @@ namespace eval ::brltty {
         my _ensureDefault operand [lindex $choices 0]
       }
 
+      append help " - must be [my _makeChoicesPhrase $choices]"
       set identifier [my _addOption $valueKey $short $long string.$operand $help]
 
       if {$haveChoices} {
         variable optionDefinitions
         dict set optionDefinitions $identifier choices $choices
-
-        dict with optionDefinitions $identifier {
-          append help " - must be [my _makeChoicesPhrase $choices]"
-        }
       }
 
       return $identifier
@@ -1275,25 +1272,31 @@ namespace eval ::brltty {
     }
 
     method _rangeOption {valueKey short long type help minimum maximum} {
-      variable optionDefinitions
-
-      set identifier [my _addOption $valueKey $short $long $type $help]
+      set haveMinimum [expr {[llength $minimum] > 0}]
+      set haveMaximum [expr {[llength $maximum] > 0}]
       set bounds [list]
 
-      if {[string length $minimum] > 0} {
+      if {$haveMinimum} {
          lappend bounds ">=$minimum"
-         dict set optionDefinitions $identifier minimum $minimum
       }
 
-      if {[string length $maximum] > 0} {
+      if {$haveMaximum} {
          lappend bounds "<=$maximum"
-         dict set optionDefinitions $identifier maximum $maximum
       }
 
       if {[llength $bounds] > 0} {
-        dict with optionDefinitions $identifier {
-          append help " - must be [join $bounds " and "]"
-        }
+        append help " - must be [join $bounds " and "]"
+      }
+
+      variable optionDefinitions
+      set identifier [my _addOption $valueKey $short $long $type $help]
+
+      if {$haveMinimum} {
+         dict set optionDefinitions $identifier minimum $minimum
+      }
+
+      if {$haveMaximum} {
+         dict set optionDefinitions $identifier maximum $maximum
       }
 
       return $identifier
@@ -1522,7 +1525,7 @@ namespace eval ::brltty {
         set choices [dict get $option choices]
 
         if {[testKeyword value $choices] < 0} {
-          syntaxError "$message: $value not unambiguous abbreviation of [my _makeChoicesPhrase $choices]: $name"
+          syntaxError "$message: $value must be an unambiguous abbreviation of [my _makeChoicesPhrase $choices]: $name"
         }
       }
 
