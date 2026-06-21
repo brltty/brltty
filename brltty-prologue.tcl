@@ -810,17 +810,34 @@ proc testKeyword {valueVariable keywordList} {
    }
 
    set valueLength [string length $value]
+   set matchFound 0
 
    loop index 0 [llength $keywordList] {
       set keyword [lindex $keywordList $index]
 
       if {[string equal -nocase -length $valueLength $value $keyword]} {
-         set value $keyword
-         return $index
+         if {[string equal -nocase $value $keyword]} {
+            set matchFound 1
+            set matchIndex $index
+            break
+         }
+
+         if {$matchFound} {
+            set matchFound 0
+            break
+         }
+
+         set matchFound 1
+         set matchIndex $index
       }
    }
 
-   return -1
+   if {!$matchFound} {
+      return -1
+   }
+
+   set value [lindex $keywordList $matchIndex]
+   return $matchIndex
 }
 
 proc verifyKeyword {valueVariable description keywordList} {
@@ -1718,7 +1735,7 @@ proc testScriptArgumentsParser {showValues} {
    $parser toggleOption toggleOption t toggle "initially false - each use toggles the flag to true, back to false, etc"
 
    $parser stringOption stringOption s string text "may contain arbitrary text"
-   $parser stringOption keywordOption k keyword keword "may contain arbitrary text" {blue green red}
+   $parser stringOption keywordOption k keyword keword "may contain arbitrary text" {blue green red gray}
    $parser listOption listOption l list value "must be a properly formatted TCL list"
    $parser booleanOption booleanOption b boolean value "may be true/false, on/off, yes/no, or 1/0"
    $parser integerOption integerOption i integer value.5 "must be a properly formatted integer of any size" 1 8
