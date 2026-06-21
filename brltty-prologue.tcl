@@ -1059,8 +1059,21 @@ namespace eval ::brltty {
       }
     }
 
-    method _isTclStringType {type} {
+    method _isTclType {type} {
       return [lcontain {integer double boolean list} $type]
+    }
+
+    method _testValueType {value type} {
+      if {[my _isTclType $type]} {
+        return [string is $type -strict $value]
+      }
+
+      return 1
+    }
+
+    method _testValueChoice {valueVariable choices} {
+      upvar 1 $valueVariable value
+      return [expr {[testKeyword value $choices] >= 0}]
     }
 
     method _makeChoicesPhrase {choices} {
@@ -1204,7 +1217,7 @@ namespace eval ::brltty {
         }
 
         if {![lcontain {string} $type]} {
-          if {![my _isTclStringType $type]} {
+          if {![my _isTclType $type]} {
             return -code error "unrecognized option type: $type: $optionName"
           }
         }
@@ -1214,6 +1227,10 @@ namespace eval ::brltty {
         dict set option default $default
 
         if {[string length $default] > 0} {
+          if {![my _testValueType $default $type]} {
+            return -code error "default not $type: $default: $optionName"
+          }
+
           append helpText " - defaults to $default"
         }
       }
@@ -1254,9 +1271,20 @@ namespace eval ::brltty {
       }
 
       set identifier [my _addOption $valueKey $short $long string.$operand $help]
+      variable optionDefinitions
+
+      set option [dict get $optionDefinitions $identifier]
+      set name [dict get $option name]
 
       if {$haveChoices} {
-        variable optionDefinitions
+        if {[dict exists $option default]} {
+          set default [dict get $option default]
+
+          if {![my _testValueChoice default $choices]} {
+            return -code error "default not a choice: $default: $name"
+          }
+        }
+
         dict set optionDefinitions $identifier choices $choices
       }
 
@@ -1291,12 +1319,24 @@ namespace eval ::brltty {
       set identifier [my _addOption $valueKey $short $long $type $help]
       variable optionDefinitions
 
+      set option [dict get $optionDefinitions $identifier]
+      set name [dict get $option name]
+      set type [dict get $option type]
+
       if {$haveMinimum} {
-         dict set optionDefinitions $identifier minimum $minimum
+        if {![my _testValueType $minimum $type]} {
+          return -code error "minimum not $type: $minimum: $name"
+        }
+
+        dict set optionDefinitions $identifier minimum $minimum
       }
 
       if {$haveMaximum} {
-         dict set optionDefinitions $identifier maximum $maximum
+        if {![my _testValueType $maximum $type]} {
+          return -code error "maximum not $type: $maximum: $name"
+        }
+
+        dict set optionDefinitions $identifier maximum $maximum
       }
 
       return $identifier
@@ -1515,16 +1555,14 @@ namespace eval ::brltty {
       set type [dict get $option type]
       set message "invalid option value"
 
-      if {[my _isTclStringType $type]} {
-        if {![string is $type -strict $value]} {
-          syntaxError "$message: $value not $type: $name"
-        }
+      if {![my _testValueType $value $type]} {
+        syntaxError "$message: $value not $type: $name"
       }
 
       if {[dict exists $option choices]} {
         set choices [dict get $option choices]
 
-        if {[testKeyword value $choices] < 0} {
+        if {![my _testValueChoice value $choices]} {
           syntaxError "$message: $value must be an unambiguous abbreviation of [my _makeChoicesPhrase $choices]: $name"
         }
       }
@@ -1738,7 +1776,7 @@ proc testScriptArgumentsParser {showValues} {
    $parser toggleOption toggleOption t toggle "initially false - each use toggles the flag to true, back to false, etc"
 
    $parser stringOption stringOption s string text "may contain arbitrary text"
-   $parser stringOption keywordOption k keyword keword "may contain arbitrary text" {blue green red gray}
+   $parser stringOption keywordOption k keyword keword.gra "may contain arbitrary text" {blue green red gray}
    $parser listOption listOption l list value "must be a properly formatted TCL list"
    $parser booleanOption booleanOption b boolean value "may be true/false, on/off, yes/no, or 1/0"
    $parser integerOption integerOption i integer value.5 "must be a properly formatted integer of any size" 1 8
