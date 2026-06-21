@@ -1012,6 +1012,7 @@ namespace eval ::brltty {
 
       variable shortOptionPrefix -
       variable longOptionPrefix [string repeat $shortOptionPrefix 2]
+      variable optionTypeDelimiter .
 
       [self] flagOption showHelp h help "show this usage summary on standard output and then exit"
     }
@@ -1174,8 +1175,8 @@ namespace eval ::brltty {
         dict set option type $optionType
         dict set option default 0
       } else {
-        set typeDelimiter .
-        set default [join [lassign [split $optionType $typeDelimiter] type operand] $typeDelimiter]
+        variable optionTypeDelimiter
+        set default [join [lassign [split $optionType $optionTypeDelimiter] type operand] $optionTypeDelimiter]
 
         if {[string length $type] == 0} {
           return -code error "option type not specified: $optionName"
@@ -1218,10 +1219,25 @@ namespace eval ::brltty {
       return [my _addOption $valueKey $short $long toggle $help]
     }
 
+    method _ensureDefault {operandVariable default} {
+      upvar 1 $operandVariable operand
+      variable optionTypeDelimiter
+
+      if {[string first $optionTypeDelimiter $operand] < 0} {
+        append operand "$optionTypeDelimiter$default"
+      }
+    }
+
     method stringOption {valueKey short long operand help {choices {}}} {
+      set haveChoices [expr {[llength $choices] > 0}]
+
+      if {$haveChoices} {
+        my _ensureDefault operand [lindex $choices 0]
+      }
+
       set identifier [my _addOption $valueKey $short $long string.$operand $help]
 
-      if {[llength $choices] > 0} {
+      if {$haveChoices} {
         variable optionDefinitions
         dict set optionDefinitions $identifier choices $choices
 
