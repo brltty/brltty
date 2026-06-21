@@ -1522,7 +1522,7 @@ namespace eval ::brltty {
         set choices [dict get $option choices]
 
         if {[testKeyword value $choices] < 0} {
-          syntaxError "$message: $value != [my _makeChoicesPhrase $choices]: $name"
+          syntaxError "$message: $value not unambiguous abbreviation of [my _makeChoicesPhrase $choices]: $name"
         }
       }
 
@@ -1690,7 +1690,7 @@ namespace eval ::brltty {
             break
           }
 
-          syntaxError "missing [dict get $parameter label]"
+          syntaxError "[dict get $parameter label] not specified"
         }
 
         dict set values [dict get $parameter value] [lindex $arguments 0]
