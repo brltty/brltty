@@ -38,8 +38,10 @@ Running as Root
 BRLTTY needs root privileges to open USB and serial braille devices.
 ``brltty-term`` uses ``sudo`` to start BRLTTY.
 
-After running ``sudo make install-hammerspoon``, a sudoers template is
-installed at ``/usr/local/share/brltty/Autostart/Hammerspoon/sudoers.brltty``.
+If you are using the optional Hammerspoon automation (see `Hammerspoon
+Automation`_ below), a sudoers template is installed by
+``sudo make install-hammerspoon`` at
+``/usr/local/share/brltty/Autostart/Hammerspoon/sudoers.brltty``.
 Edit it to replace ``username`` with the account that will run ``brltty-term``,
 then install it::
 
@@ -72,53 +74,70 @@ and should not be set in ``brltty.conf``.
 Sharing the Braille Display with VoiceOver
 ==========================================
 
-VoiceOver and BRLTTY cannot share a USB braille display simultaneously.
-When VoiceOver holds the device, BRLTTY cannot open it, and vice versa.
+VoiceOver and BRLTTY both require exclusive access to a USB braille display;
+macOS does not allow two applications to hold the same USB device
+simultaneously.  There are two ways to use them together:
 
-``brltty-handoff`` — described below — provides a mechanism to transfer
-control of the display between the two.  Hammerspoon_ (a macOS automation
-tool) can use ``brltty-handoff`` to perform the transfer automatically
-whenever focus moves between the terminal emulator running brltty and any
-other application.
+**BRLTTY for braille, VoiceOver for speech only**
+   Start BRLTTY before starting VoiceOver.  BRLTTY claims the USB device
+   first; VoiceOver finds it already taken and falls back to text-to-speech
+   only.  No additional software is needed.  Braille output is always driven
+   by BRLTTY; VoiceOver provides speech in GUI applications alongside it.
+
+**Automatic handoff: braille follows focus** *(optional, requires Hammerspoon)*
+   If you want braille output in GUI applications via VoiceOver *and* in the
+   terminal via BRLTTY, the display must transfer between the two whenever
+   you switch focus.  Hammerspoon_ — a free macOS automation app that is not
+   part of BRLTTY and must be installed separately — can do this
+   automatically: when you switch to the terminal emulator, VoiceOver quits
+   and BRLTTY reclaims the display; when you switch away, BRLTTY suspends
+   and VoiceOver restarts.
+
+   The switch takes a few seconds in the BRLTTY direction because VoiceOver
+   must fully release the USB device before BRLTTY can open it.
 
 brltty-handoff
 --------------
 
-``brltty-handoff`` is a small program that connects to the running BRLTTY
-via BrlAPI and either suspends or resumes the braille driver:
+``brltty-handoff`` is a small utility that tells a running BRLTTY to release
+or reclaim the braille device via BrlAPI.  It is used by the Hammerspoon
+automation script but can also be called directly:
 
 ``brltty-handoff suspend``
-   Queries the active driver name, calls ``brlapi_suspendDriver()``, forks
-   a background worker that holds the BrlAPI connection open (keeping the
-   driver suspended), and writes the worker's PID to
-   ``/tmp/brltty-handoff.pid``.  The parent returns immediately once the
-   driver is confirmed suspended.
+   Causes BRLTTY to release the USB device.  Forks a background worker that
+   holds the BrlAPI connection open (keeping the driver suspended) and writes
+   the worker PID to ``/tmp/brltty-handoff.pid``.
 
 ``brltty-handoff resume``
-   Sends ``SIGUSR1`` to the background worker, which calls
-   ``brlapi_resumeDriver()`` and exits.  If no worker is running (no PID
-   file) the command is a no-op.
+   Signals the background worker to resume the driver and exit.  If no
+   worker is running the command is a no-op.
 
-The background worker is necessary because the braille driver stays
-suspended only while the BrlAPI connection remains open.  When the worker
-receives ``SIGUSR1`` it resumes the driver and closes the connection so
-BRLTTY can reclaim the device.
+The background worker is necessary because the braille driver stays suspended
+only while a BrlAPI connection remains open.
 
 Hammerspoon Automation
 ----------------------
 
-``Autostart/Hammerspoon/brltty.lua`` in the BRLTTY source tree is a
-Hammerspoon_ configuration that watches for the terminal emulator running
-brltty to gain or lose focus, and automatically hands off the braille
-display between BRLTTY and VoiceOver.
+Hammerspoon_ is a free, open-source macOS automation app that exposes
+system events (application focus changes, hotkeys, etc.) to a Lua scripting
+interface.  BRLTTY ships an optional Hammerspoon configuration
+(``Autostart/Hammerspoon/brltty.lua``) that implements the automatic handoff
+described above.  It is not required and does not need to be installed unless
+you want braille output in both the terminal and GUI applications.
 
-The active terminal emulator is detected automatically by walking up
-brltty's process ancestry (brltty → sudo → shell → terminal app), so no
-hardcoded application name is needed.  ``TERMINAL_BUNDLES`` near the top
-of the file is a fallback allowlist used before brltty has started;
-extend it if you use a terminal emulator not listed there.
+**Prerequisites**
 
-First install the Hammerspoon support files::
+Before installing the BRLTTY Hammerspoon script:
+
+1. Install Hammerspoon: ``brew install --cask hammerspoon``
+2. Grant Hammerspoon Accessibility permission in
+   System Settings → Privacy & Security → Accessibility
+3. In VoiceOver Utility → General, enable
+   "Allow VoiceOver to be controlled with AppleScript"
+
+**Installing the BRLTTY Hammerspoon script**
+
+::
 
    sudo make install-hammerspoon
 
@@ -141,13 +160,11 @@ Then add the following line to your ``~/.hammerspoon/init.lua``::
 
    require("brltty")
 
-Before the Hammerspoon config will work:
-
-1. Install Hammerspoon: ``brew install --cask hammerspoon``
-2. Grant Hammerspoon Accessibility permission in
-   System Settings → Privacy & Security → Accessibility
-3. In VoiceOver Utility → General, enable
-   "Allow VoiceOver to be controlled with AppleScript"
+The active terminal emulator is detected automatically by walking up
+BRLTTY's process ancestry (brltty → sudo → shell → terminal app), so no
+hardcoded application name is needed.  ``TERMINAL_BUNDLES`` near the top
+of ``brltty.lua`` is a fallback allowlist used before BRLTTY has started;
+extend it if you use a terminal emulator not listed there.
 
 How the Handoff Works
 ~~~~~~~~~~~~~~~~~~~~~
@@ -170,52 +187,51 @@ When **the terminal emulator loses focus**:
 The ``HANDOFF_COOLDOWN`` (3 s) suppresses the spurious "away from terminal"
 event that macOS fires when VoiceOver emits its startup announcement.
 
-Spoken Announcements
-~~~~~~~~~~~~~~~~~~~~
+The automation triggers on any focus change away from the terminal —
+including system dialogs and permission prompts — so a blind user is never
+left without braille output unexpectedly.  One current limitation: focus
+changes *within* the terminal app itself (e.g. a native dialog spawned by
+iTerm2) are not detected, since Hammerspoon's app-switch events do not
+cover intra-application focus changes.
 
 While VoiceOver is off (during terminal use), macOS "Speak announcements"
 (System Settings → Accessibility → Spoken Content → Speak announcements)
 is enabled automatically so that system notifications are still read aloud.
-It is disabled again when VoiceOver resumes.  The original setting is
-restored when Hammerspoon exits.
+It is restored when VoiceOver resumes.
 
-VoiceOver IOKit Device Release
-------------------------------
-
-On macOS, killing VoiceOver with ``SIGTERM`` or ``SIGKILL`` leaves the
-IOKit USB user-client seize unreleased.  Any attempt to open the same USB
-device (``USBDeviceOpenSeize``) fails with ``kIOReturnExclusiveAccess``
-(``0xE00002C5``) for 60 seconds or more.
-
-Using ``osascript -e 'tell application "VoiceOver" to quit'`` triggers
-VoiceOver's normal AppleScript shutdown path, which releases the USB device
-cleanly before exiting.
-
-BrailleTranslationService
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Technical Notes
+~~~~~~~~~~~~~~~
 
 VoiceOver's braille support runs in a separate XPC process called
-``BrailleTranslationService`` (inside ``ScreenReader.framework``).  After
-VoiceOver quits, ``BrailleTranslationService`` continues to hold the USB
-device for a few seconds.  BRLTTY must wait for this process to exit before
-attempting to open the device.
+``BrailleTranslationService``.  After VoiceOver quits, this process
+continues to hold the USB device for a few seconds; BRLTTY must wait for
+it to exit before opening the device.  If VoiceOver Utility (the
+configuration app) is open, it keeps ``BrailleTranslationService`` alive
+indefinitely — the Hammerspoon config detects this and quits VoiceOver
+Utility automatically before starting the handoff.
 
-The Hammerspoon config polls for both ``VoiceOver`` and
-``BrailleTranslationService`` to be gone before calling
-``brltty-handoff resume``.
+Killing VoiceOver with ``SIGTERM`` or ``SIGKILL`` leaves the IOKit USB
+seize unreleased for 60 seconds or more.  The Hammerspoon config always
+quits VoiceOver via AppleScript (``tell application "VoiceOver" to quit``),
+which triggers a clean shutdown and releases the device promptly.
 
-VoiceOver Utility
-~~~~~~~~~~~~~~~~~
+Clipboard
+=========
 
-When VoiceOver Utility (the VoiceOver configuration app) is open, it keeps
-``BrailleTranslationService`` alive indefinitely even after VoiceOver itself
-has quit.  The USB device therefore remains held and BRLTTY can never reclaim
-it.
+``brltty-pty`` supports clipboard modes configured via the
+``BRLTTY_PTY_CLIPBOARD_MODE`` environment variable:
 
-The Hammerspoon config detects this and quits VoiceOver Utility automatically
-as part of the handoff sequence, before quitting VoiceOver.  VoiceOver Utility
-settings take effect immediately and have no unsaved state, so closing it
-silently is safe.
+``auto`` *(default)*
+   ``brltty-pty`` probes the outer terminal for OSC 52 support and picks
+   ``passthrough`` or ``native`` accordingly.
+
+``passthrough``
+   ``brltty-pty`` forwards OSC 52 sequences to the outer terminal.  Works
+   with iTerm2, kitty, WezTerm, and most modern terminal emulators.
+
+``native``
+   ``brltty-pty`` writes directly to the macOS clipboard via AppKit.
+   Use this for Apple Terminal.app, which does not support OSC 52.
 
 Troubleshooting
 ===============
