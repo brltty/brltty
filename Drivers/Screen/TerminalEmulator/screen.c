@@ -88,6 +88,13 @@ static const char *problemText = NULL;
 static ScreenSegmentHeader *screenSegment = NULL;
 static ScreenSegmentHeader *cachedSegment = NULL;
 
+/* The emulator recreates its shared-memory segment (under the same key) when
+ * the terminal is resized, so the identifier we attached to becomes stale. We
+ * remember the key and identifier to detect this and re-attach. */
+static key_t screenSegmentKey = 0;
+static int haveScreenSegmentKey = 0;
+static int screenSegmentIdentifier = -1;
+
 static int haveTerminalMessageQueue = 0;
 static int terminalMessageQueue;
 static int haveSegmentUpdatedHandler = 0;
@@ -133,7 +140,14 @@ accessSegmentForPath (const char *path) {
   key_t key;
 
   if (makeTerminalKey(&key, path)) {
-    if ((screenSegment = getScreenSegmentForKey(key))) {
+    int identifier;
+
+    if (getScreenSegment(&identifier, key) &&
+        (screenSegment = attachScreenSegment(identifier))) {
+      screenSegmentKey = key;
+      haveScreenSegmentKey = 1;
+      screenSegmentIdentifier = identifier;
+
       problemText = gettext("no screen cache");
       enableMessages(key);
       return 1;
@@ -143,6 +157,31 @@ accessSegmentForPath (const char *path) {
   }
 
   return 0;
+}
+
+/* When the emulator resizes, it publishes a new segment under the same key.
+ * Detect the changed identifier and re-attach so we read the new size. */
+static void
+reattachIfSegmentChanged (void) {
+  if (!haveScreenSegmentKey) return;
+
+  int identifier;
+  if (!getScreenSegment(&identifier, screenSegmentKey)) return;
+  if (identifier == screenSegmentIdentifier) return;
+
+  ScreenSegmentHeader *fresh = attachScreenSegment(identifier);
+  if (!fresh) return;
+
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER), "re-attaching to resized screen segment");
+
+  if (screenSegment) detachScreenSegment(screenSegment);
+  screenSegment = fresh;
+  screenSegmentIdentifier = identifier;
+
+  if (cachedSegment) {
+    free(cachedSegment);
+    cachedSegment = NULL;
+  }
 }
 
 static void
@@ -173,6 +212,9 @@ destruct_TerminalEmulatorScreen (void) {
     free(cachedSegment);
     cachedSegment = NULL;
   }
+
+  haveScreenSegmentKey = 0;
+  screenSegmentIdentifier = -1;
 }
 
 static void
@@ -410,6 +452,7 @@ poll_TerminalEmulatorScreen (void) {
 
 static int
 refresh_TerminalEmulatorScreen (void) {
+  reattachIfSegmentChanged();
   if (!screenSegment) return 0;
   size_t size = screenSegment->segmentSize;
 
