@@ -436,8 +436,18 @@ proc isWhitespace {string} {
    return [string is space $string]
 }
 
-proc wrapLine {line width} {
+proc wrapLine {line width indent} {
    set lines [list]
+   set wrapPrefix [string repeat " " $indent]
+
+   if {$width < $indent} {
+     append line [string repeat " " [expr {$indent - $width}]]
+   }
+
+   set linePrefix [string range $line 0 $indent-1]
+   set line [string range $line $indent end]
+   incr width -$indent
+   set width [expr {max($width,10)}]
 
    while {[set length [string length [set line [string trimleft $line]]]] > 0} {
       if {$width < $length} {
@@ -464,14 +474,15 @@ proc wrapLine {line width} {
          set index $length
       }
 
-      lappend lines [string trimright [string range $line 0 $index-1]]
+      lappend lines "$linePrefix[string trimright [string range $line 0 $index-1]]"
       set line [string range $line $index end]
+      set linePrefix $wrapPrefix
    }
 
    return $lines
 }
 
-proc formatLines {lines {width ""}} {
+proc formatLines {lines {width ""} {indent 0}} {
    if {[string length $width] == 0} {
       set width [getScreenColumns]
    }
@@ -481,7 +492,7 @@ proc formatLines {lines {width ""}} {
 
    set finishParagraph {
       if {[string length $paragraph] > 0} {
-         lvarcat result [wrapLine $paragraph $width]
+         lvarcat result [wrapLine $paragraph $width $indent]
          set paragraph ""
       }
    }
@@ -1017,6 +1028,8 @@ proc makeDictionary {initializer {namesPath {}}} {
 namespace eval ::brltty {
   oo::class create CommandArgumentsParser {
     constructor {command} {
+      variable screenColumns [getScreenColumns]
+
       variable commandName $command
       variable commandPurpose ""
       variable commandNotes [list]
@@ -1365,14 +1378,18 @@ namespace eval ::brltty {
 
       if {[string length $commandPurpose] > 0} {
         upvar 1 $linesList lines
-        eval lappend lines [formatLines $commandPurpose]
+        my _includeLine lines $commandPurpose 0
         lappend lines ""
       }
     }
 
     method _includeSyntax {linesList} {
+      upvar 1 $linesList lines
       variable commandName
-      set line "Syntax: $commandName"
+
+      set line "Syntax: "
+      set wrapIndent [string length $line]
+      append line $commandName
 
       variable optionDefinitions
       variable parameterDefinitions
@@ -1394,7 +1411,7 @@ namespace eval ::brltty {
       }
 
       append line [string repeat "\]" $optionalParameterCount]
-      uplevel 1 [list lappend $linesList $line]
+      my _includeLine lines $line $wrapIndent
     }
 
     method _includeParameters {linesList} {
@@ -1469,8 +1486,9 @@ namespace eval ::brltty {
       variable commandNotes
 
       if {[llength $commandNotes] > 0} {
+        variable screenColumns
         lappend lines ""
-        eval lappend lines [formatLines $commandNotes]
+        lappend lines {*}[formatLines $commandNotes $screenColumns 0]
       }
     }
 
@@ -1497,6 +1515,7 @@ namespace eval ::brltty {
 
       while {$rowIndex < $rowCount} {
         set line ""
+        set wrapIndent 0
 
         foreach column $args width $columnWidths {
           if {$width > 0} {
@@ -1505,6 +1524,8 @@ namespace eval ::brltty {
             } else {
               append line $columnSeparator
             }
+
+            set wrapIndent [string length $line]
 
             if {$rowIndex < [llength $column]} {
               set field [lindex $column $rowIndex]
@@ -1517,9 +1538,15 @@ namespace eval ::brltty {
           }
         }
 
-        lappend lines [string trimright $line]
+        my _includeLine lines $line $wrapIndent
         incr rowIndex 1
       }
+    }
+
+    method _includeLine {linesList line indent} {
+      upvar 1 $linesList lines
+      variable screenColumns
+      lappend lines {*}[wrapLine [string trimright $line] $screenColumns $indent]
     }
 
     method _getOptionDefinition {identifier} {
