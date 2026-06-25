@@ -324,6 +324,7 @@ always amateur 1-134-1-2345-126-1235
 always samateur 234-1-134-1-2345-126-1235
 always animateur 235-24-134-1-2345-126-1235
 always akquisiteur 1-13-6-12345-136-24-234-24-2345-126-1235
+always arrangeur 356-1235-235-1245-126-1235
 always bankrotteur 12-235-13-1235-135-2345-2345-126-1235
 always dekorateur 145-15-13-26-1-2345-126-1235 shouldn't use the te-contraction
 always demonteur 145-15-134-135-1345-2345-126-1235
@@ -333,6 +334,8 @@ always dompteur 145-135-134-1234-2345-126-1235
 always eskamoteur 123456-13-1-134-135-2345-126-1235
 sufword exporteur 1346-1234-26-2345-126-1235
 midendword exporteur 15-6-1346-1234-26-2345-126-1235
+sufword exterieur 1346-2345-12456-24-126-1235
+midendword exterieur 15-6-1346-2345-12456-24-126-1235
 always ingenieur 35-1245-14-24-126-1235
 always inspekteur 35-234-1234-15-13-2345-126-1235
 always einspekteur 15-35-234-1234-15-13-2345-126-1235
@@ -362,6 +365,7 @@ always esaboteur 15-234-1-12-135-2345-126-1235
 always ssaboteur 234-234-1-12-135-2345-126-1235
 always skulpteur 234-13-136-123-1234-2345-126-1235
 always solarteur 234-135-123-356-2345-126-1235
+always souffleur 234-135-136-124-124-123-126-1235
 always spediteur 234-1234-15-145-24-2345-126-1235
 always espediteur 15-234-1234-15-145-24-2345-126-1235
 always sspediteur 234-234-1234-15-145-24-2345-126-1235
@@ -944,16 +948,6 @@ prfword eraums 15-1235-16-134-234
 prfword eraumes 15-1235-16-134-123456
 prfword eräume 15-1235-34-134-15
 prfword eräumen 15-1235-34-134-14
-before m always schirm 156-24-1235-134
-before m always strom 23456-1235-135-134
-before m always lärm =
-before m always vakuum =
-before m always darm 145-356-134
-before m sufword problem 12345-12-123-12356
-before m always problem 1234-1235-135-12-123-12356
-before m always symptom =
-before m always system 234-6-13456-23456-12356
-before m always traum 2345-1235-16-134
 
 before cost always antriebs 235-2345-1235-346-12-234
 prfword antriebst 235-2345-1235-346-12-23456
@@ -1797,6 +1791,7 @@ always wibbelig 2456-24-12-12-13456-45
 before konsonant always bem 12-12356
 before konsonant always ben 12-14
 before konsonant always ber 12-12456
+always ober 135-12-12456 shouldn't use the be-contraction
 always säuber 234-34-12-12456
 always schrauber 156-1235-16-12-12456
 always zauber 1356-16-12-12456
@@ -1807,6 +1802,7 @@ prfword geleien 1245-13456-146-14
 always evangel 15-1236-235-1245-13456
 always kegel 13-15-1245-13456
 always kugel 13-136-1245-13456
+always nagel 1345-1-1245-13456
 sufword orgel 26-1245-13456
 always segel 234-15-1245-13456
 
@@ -1870,6 +1866,7 @@ begmidword ämter 345-134-2345-12456
 begmidword behälter 23-125-345-123-2345-12456
 begmidword beobachter 23-135-12-56-2345-12456
 begmidword callcenter 6-14-1-12345-6-14-14-2345-12456
+sufword folter 124-135-123-2345-12456
 always geschlechter 12346-156-123-15-1456-2345-12456
 always güter 1245-1256-2345-12456 should use the er-contraction
 always güteregel 1245-1256-236-1235-15-1245-13456
@@ -1926,7 +1923,37 @@ before t always edelleu 15-145-13456-123-126
 
 midendword mm 1346
 always ummantel 136-134-134-235-2345-13456
+before m always ammonium 1-1346-135-1345-24-136-134
+before m sufword atom =
+always caesium =
+before m always cäsium =
+before m always calcium 6-14-25-6-14-24-136-134
+before m always darm 145-356-134
+before m sufword extrem 1346-2345-1235-12356
+before m always extrem 15-6-1346-2345-1235-12356
+before m always film =
+before m always geheim 12346-125-146-134
+before m always kalzium 13-25-1356-24-136-134
+before m always lehm 123-2356-134
+before m always lärm =
+before m always magnesium 134-1-1245-1345-123456-24-136-134
+always mainstream 134-1-24-1345-23456-1235-15-1-134
+before m always natrium =
+before m always palm 1234-25-134
+before m always radium =
+before m always schaum 156-16-134
+before m always schirm 156-24-1235-134
+before m always schleim 156-123-146-134
+before m always strom 23456-1235-135-134
+before m always vakuum =
+before m sufword problem 12345-12-123-12356
+before m always problem 1234-1235-135-12-123-12356
+before m always symptom =
+before m always system 234-6-13456-23456-12356
+before m always traum 2345-1235-16-134
+before m always turm =
 always wurm = wurmmittel shouldn't use the mm-contraction
+before m always herum 125-12456-136-134
 
 begmidword or 26
 always neorass 1345-15-135-1235-1-2346
@@ -2100,15 +2127,42 @@ endword benes 12-14-123456
 endword tenes 2345-14-123456
 endword tens 2345-14-234
 endword ter 2345-12456
+endword tera 2345-12456-1
 endword tere 2345-12456-15
+endword teral 2345-12456-1-123
+endword terale 2345-12456-25-15
+endword teralem 2345-12456-25-12356
+endword teralen 2345-12456-25-14
+endword teraler 2345-12456-25-12456
+endword terales 2345-12456-25-123456
+endword teralität 2345-12456-25-6-345
 endword terei 2345-12456-146
 endword tereien 2345-12456-146-14
 endword terem 2345-12456-12356
 endword teren 2345-12456-14
 endword terer 2345-12456-12456
+endword terere 2345-12456-12456-15
+endword tererem 2345-12456-12456-12356
+endword tereren 2345-12456-12456-14
+endword tererer 2345-12456-12456-12456
+endword tereres 2345-12456-12456-123456
 endword terern 2345-12456-12456-1345
 endword terers 2345-12456-12456-234
 endword teres 2345-12456-123456
+endword teria 2345-12456-24-1
+endword terich 2345-12456-3456
+endword teriche 2345-12456-3456-15
+endword terichen 2345-12456-3456-14
+endword terichs 2345-12456-3456-234
+endword terie 2345-12456-346
+endword terien 2345-12456-24-14
+endword terig 2345-12456-45
+endword terige 2345-12456-45-15
+endword terigem 2345-12456-45-12356
+endword terigen 2345-12456-45-14
+endword teriger 2345-12456-45-12456
+endword teriges 2345-12456-45-123456
+endword terik 2345-12456-24-13
 endword terin 2345-12456-35
 endword terinnen 2345-12456-35-1345-14
 endword terisch 2345-12456-24-156
@@ -2135,6 +2189,9 @@ endword teristischen 2345-12456-5-156-14
 endword teristischem 2345-12456-5-156-12356
 endword teristischer 2345-12456-5-156-12456
 endword teristisches 2345-12456-5-156-123456
+endword teritis 2345-12456-24-2345-24-234
+endword terium 2345-12456-24-136-134
+endword terol 2345-12456-135-123
 endword ters 2345-12456-234
 always liter 123-24-2345-12456
 endword tern 2345-12456-1345
@@ -2179,7 +2236,6 @@ endword berin 12-12456-35 shouldn't use the be-contraction
 endword berinnen 12-12456-35-1345-14 shouldn't use the be-contraction
 endword bern 12-12456-1345 shouldn't use the be-contraction
 endword bers 12-12456-234 shouldn't use the be-contraction
-always ober 135-12-12456 shouldn't use the be-contraction
 endword bes 12-123456 shouldn't use the be-contraction
 prfword besen 12-123456-14
 prfword besens 12-123456-14-234
@@ -2204,10 +2260,11 @@ midendword gelung 1245-13456-136
 before cost midendword gelungs 1245-13456-136-234
 prfword gem 1245-12356 shouldn't use the ge-contraction
 prfword gen 1245-14 shouldn't use the ge-contraction
-midendword gend 1245-14-145 shouldn't use the ge-contraction
+#midendword gend 1245-14-145 shouldn't use the ge-contraction
 always regendurch 1235-15-1245-14-2-1456
 endword gens 1245-14-234 shouldn't use the ge-contraction
 midendword ger 1245-12456 should use er-contraction if not part of a word intro
+before konsonant always ger 1245-12456
 before t always geraff 12346-1235-1-124-124
 always gerammel 12346-1235-1-1346-13456
 before t always gerann 12346-1235-235-1345
@@ -2491,9 +2548,15 @@ before g always stimmzun 23456-24-1346-1356-256
 before g always unterzun 2-256-1356-256
 before g always vorderzun 2-26-145-12456-1356-256
 before g always weichenzun 2456-146-1456-14-1356-256
+always herumlunger 125-12456-136-134-123-256-1245-12456
+always rumlunger 1235-136-134-123-256-1245-12456
 
 
 endword wärts 2456
+begmidword abwärts 1-12-2456-345-1235-2345-234
+begmidword aufwärts 2-16-2456-345-1235-2345-234
+begmidword rückwärts 1235-46-2456-345-1235-2345-234
+begmidword vorwärts 2-26-2456-345-1235-2345-234
 
 midendword ation 5-1345
 always industrienation 35-145-136-23456-1235-346-1345-5-1345
@@ -2613,6 +2676,9 @@ before konsonant always aufzug 2-16-1356-136-1245
 always aufzugsturm 2-16-1356-136-1245-234-2345-136-1235-134 shouldn't use zu-contraction and st-contraction
 before m always aufzugstür 2-16-1356-136-1245-234-2345-1256-1235 shouldn't use zu-contraction and st-contraction
 always aufzugstür 2-16-1356-136-1245-234-2345-1256-1235 shouldn't use zu-contraction and st-contraction
+always chauffeur 1456-16-124-124-126-1235
+always buschauffeur 12-136-234-1456-16-124-124-126-1235 shouldn't use sch-contraction
+always taxichauffeur 2345-1-6-1346-24-1456-16-124-124-126-1235 shouldn't use ich-contraction
 prfword lauf 123-16-124
 prfword laufe 123-16-124-15
 prfword laufen 123-16-124-14
@@ -3725,11 +3791,11 @@ always gegenwart 1245-2456
 contraction gw
 always gegenwärt 5-1245-2456
 always gegenwaert 5-1245-2456
-always gelb 1245-13456-12 should use the el-contraction
-always geld 1245-13456-145 should use the el-contraction
+#always gelb 1245-13456-12 should use the el-contraction
+#always geld 1245-13456-145 should use the el-contraction
 always gelegen 1245-1245
 contraction gg
-begword gelt 1245-13456-2345 gelten shouldn't use the ge-contraction
+#begword gelt 1245-13456-2345 gelten shouldn't use the ge-contraction
 prfword gene 1245-14-15
 prfword genem 1245-14-12356
 prfword genen 1245-14-14
@@ -3848,6 +3914,7 @@ always sherry 234-125-12456-1235-6-13456
 
 always hier 125-1235
 contraction hr
+always atrophier 1-2345-1235-135-1234-125-346-1235
 sufword extrahier 1346-2345-1235-1-125-346-1235
 midendword extrahier 15-6-1346-2345-1235-1-125-346-1235
 always graphier 1245-1235-1-1234-125-346-1235 shouldn't use the hier-contraction
@@ -4691,7 +4758,6 @@ always ankläng 235-13-123-345-1345-1245 shouldn't use the läng-contraction
 begword anlagen 235-123-1-1245-14
 always anlauf 235-123-16-124 shouldn't use the auf-contraction
 before m always anleihe 235-123-146-125-15 Anleihemarkt shouldn't use the em-contraction
-before m always film =
 before cegn begword anti 235-2345-24
 before cegn always alkali 25-13-25-24
 before cegn begword epi =
@@ -4918,7 +4984,6 @@ always zweistaat 1356-2456-146-23456-2345 shouldn't use the weis-contraction
 midendword heitstätig 125-234-2345-345-2345-45 gelegenheitstätigkeit shouldn't use the st-contraction
 begmidword admiral 1-145-134-24-1235-25
 begmidword astral 1-23456-1235-25
-before m sufword atom =
 begmidword bifokal 12-24-124-135-13-25
 #begmidword brachial 12-1235-56-24-25
 begmidword bronchial 12-1235-135-1345-1456-24-25 bronchiallymphknoten shouldn't use the ll-contraction
