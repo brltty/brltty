@@ -517,44 +517,51 @@ proc formatLines {lines {width ""} {indent 0}} {
    return $result
 }
 
-proc formatColumns {rows} {
-   set spacer [string repeat " " 2]
-   set lines [list]
+proc formatColumns {lineWidth lineIndent columnSpacing args} {
+   set linePrefix [string repeat " " $lineIndent]
+   set columnSeparator [string repeat " " $columnSpacing]
 
-   foreach row $rows {
-      set index 0
+   set columnWidths [list]
+   set rowCount 0
+   set rowIndex 0
 
-      foreach cell $row {
-         if {![info exists widths($index)]} {
-            set widths($index) 0
-         }
+   foreach column $args {
+      set width 0
 
-         set widths($index) [max $widths($index) [string length $cell]]
-         incr index
+      foreach field $column {
+         set width [expr {max($width, [string length $field])}]
       }
+
+      lappend columnWidths $width
+      set rowCount [expr {max($rowCount, [llength $column])}]
    }
 
-   foreach row $rows {
+   while {$rowIndex < $rowCount} {
       set line ""
-      set index 0
+      set wrapIndent 0
 
-      foreach cell $row {
-         if {[set width $widths($index)] > 0} {
-            append line $cell
-            append line [string repeat " " [expr {$width - [string length $cell]}]]
-            append line $spacer
+      foreach column $args width $columnWidths {
+         if {$width > 0} {
+            if {[string length $line] == 0} {
+               append line $linePrefix
+            } else {
+               append line $columnSeparator
+            }
+
+            if {$rowIndex < [llength $column]} {
+               set field [lindex $column $rowIndex]
+            } else {
+               set field ""
+            }
+
+            set wrapIndent [string length $line]
+            append line $field
+            append line [string repeat " " [expr {$width - [string length $field]}]]
          }
-
-         incr index
       }
 
-      if {[string length [set line [string trimright $line]]] > 0} {
-         if {[string length $lines] > 0} {
-            append lines "\n"
-         }
-
-         append lines $line
-      }
+      lappend lines {*}[wrapLine $line $lineWidth $wrapIndent]
+      incr rowIndex 1
    }
 
    return $lines
@@ -574,54 +581,55 @@ proc makeChoicesPhrase {choices} {
    return [join $choices $separator]
 }
 
-proc formatProgramOptionsUsage {options} {
-   set rows [list]
+proc formatProgramOptionsUsage {options width} {
+   set nameColumn [list]
+   set operandColumn [list]
+   set usageColumn [list]
 
    foreach name [lsort [dict keys $options]] {
+      lappend nameColumn "-$name"
       set option [dict get $options $name]
-      set row [list]
-      lappend row "-$name"
 
       foreach property {operand usage} {
-         if {[dict exists $option $property]} {
-            lappend row [dict get $option $property]
-         } else {
-            lappend row ""
-         }
+         lappend "${property}Column" [dict getdef $option $property ""]
       }
-
-      lappend rows $row
    }
 
-   return [formatColumns $rows]
+   return [formatColumns $width 2 2 $nameColumn $operandColumn $usageColumn]
 }
 
-proc showProgramArgumentsUsage {name optionsDescriptor argumentsUsage getArgumentsUsageSummary} {
-   set optionsUsage [formatProgramOptionsUsage $optionsDescriptor]
-   set usage "Syntax: $name"
+proc showProgramArgumentsUsage {name optionsDescriptor argumentsUsage getProgramUsageNotes} {
+   set width [getScreenColumns]
+   set optionsUsage [formatProgramOptionsUsage $optionsDescriptor $width]
 
-   if {[string length $optionsUsage] > 0} {
-      append usage " \[-option ...\]"
+   set syntax "Syntax: "
+   set indent [string length $syntax]
+   append syntax "$name"
+
+   if {[llength $optionsUsage] > 0} {
+      append syntax " \[-option ...\]"
    }
 
    if {[string length $argumentsUsage] > 0} {
-      append usage " $argumentsUsage"
+      append syntax " $argumentsUsage"
    }
 
-   if {[string length $getArgumentsUsageSummary] > 0} {
-      if {[llength [set lines [formatLines [$getArgumentsUsageSummary]]]] > 0} {
-         append usage "\n\n"
-         append usage [join $lines \n]
-         append usage "\n"
+   set argumentsUsage [list]
+   lappend argumentsUsage {*}[wrapLine $syntax $width $indent]
+
+   if {[llength $optionsUsage] > 0} {
+      lappend argumentsUsage ""
+      lappend argumentsUsage {*}[wrapLine "The following options may be specified:" $width 0]
+      lappend argumentsUsage {*}$optionsUsage
+   }
+
+   if {[string length $getProgramUsageNotes] > 0} {
+      if {[llength [set lines [formatLines [$getProgramUsageNotes] $width 0]]] > 0} {
+         lappend argumentsUsage "" {*}$lines
       }
    }
 
-   if {[string length $optionsUsage] > 0} {
-      append usage \n
-      append usage "The following options may be specified:\n$optionsUsage"
-   }
-
-   puts stdout $usage
+   puts stdout [join $argumentsUsage \n]
 }
 
 proc addProgramOption {definitionsVariable name type usage {default ""}} {
@@ -772,7 +780,7 @@ proc processProgramArguments {
    optionValuesArray optionDefinitions
    {argumentValuesList ""}
    {argumentsUsage ""}
-   {getArgumentsUsageSummary ""}
+   {getProgramUsageNotes ""}
 } {
    upvar 1 $optionValuesArray optionValues
    set argumentValues $::argv
@@ -790,7 +798,7 @@ proc processProgramArguments {
    incr currentLogLevel -$optionValues(quiet)
 
    if {$optionValues(help)} {
-      showProgramArgumentsUsage [getProgramName] $optionsDescriptor $argumentsUsage $getArgumentsUsageSummary
+      showProgramArgumentsUsage [getProgramName] $optionsDescriptor $argumentsUsage $getProgramUsageNotes
       exit 0
    }
 

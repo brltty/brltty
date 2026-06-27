@@ -160,7 +160,7 @@ proc addSettingUsage {linesVariable label specification default} {
    lappend lines "To set the $label, specify $specification (the default is $default)."
 }
 
-proc getArgumentsUsageSummary {} {
+proc getProgramUsageNotes {} {
    set lines [list]
 
    global devicePath
@@ -180,7 +180,7 @@ proc parseCommandLine {} {
    set optionDefinitions {
    }
 
-   processProgramArguments optionValues $optionDefinitions argumentValues "\[setting ...\]" getArgumentsUsageSummary
+   processProgramArguments optionValues $optionDefinitions argumentValues "\[setting ...\]" getProgramUsageNotes
    return $argumentValues
 }
 
