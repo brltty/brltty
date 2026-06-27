@@ -20,7 +20,6 @@
 source [file join [file dirname [info script]] .. brltty-prologue.tcl]
 
 set serialProperties [dict create]
-set devicePath "/dev/ttyS0"
 
 proc getSerialPropertyNames {} {
    global serialProperties
@@ -33,7 +32,7 @@ proc isSerialPropertyDefined {name} {
 
 proc getSerialPropertyLabel {name} {
    global serialProperties
-   return [dict get $serialProperties $name label]
+   return [string map {- " "} [dict get $serialProperties $name long]]
 }
 
 proc getSerialPropertyChoices {name} {
@@ -44,11 +43,6 @@ proc getSerialPropertyChoices {name} {
 proc getSerialPropertyOptions {name} {
    global serialProperties
    return [dict get $serialProperties $name options]
-}
-
-proc getSerialPropertyDefault {name} {
-   global serialProperties
-   return [dict get $serialProperties $name default]
 }
 
 proc getSerialPropertySetting {name} {
@@ -67,15 +61,15 @@ proc setSerialPropertyField {name field value} {
    dict set serialProperties $name $field $value
 }
 
-proc defineSerialProperty {name label default args} {
+proc defineSerialProperty {name short long help default args} {
    if {[isSerialPropertyDefined $name]} {
       return -code error "serial property already defined: $name"
    }
 
    global serialProperties
-   dict set serialProperties $name [dict create label $label choices $args options [dict create]]
+   dict set serialProperties $name [dict create short $short long $long help $help choices $args options [dict create]]
+
    verifySerialPropertyChoice $name $default
-   setSerialPropertyField $name default $default
    setSerialPropertyField $name setting $default
 }
 
@@ -93,12 +87,12 @@ proc addSerialOption {option property args} {
    dict set serialProperties $property options $option $args
 }
 
-defineSerialProperty lineMode "mode" local local modem
-defineSerialProperty lineBaud "baud" 38400 50 75 110 134 150 200 300 600 1200 1800 2400 4800 9600 19200 38400 57600 115200 230400 460800 500000 576000 921600 1000000 1152000 1500000 2000000 2500000 3000000 3500000 4000000
-defineSerialProperty flowControl "flow control" no no hardware software
-defineSerialProperty dataParity "parity" none none odd even mark space
-defineSerialProperty dataBits "data bits" 8 5 6 7 8
-defineSerialProperty stopBits "stop bits" 1 1 2
+defineSerialProperty lineMode m mode "the line mode" local local modem
+defineSerialProperty lineBaud b baud "the serial baud" 38400 50 75 110 134 150 200 300 600 1200 1800 2400 4800 9600 19200 38400 57600 115200 230400 460800 500000 576000 921600 1000000 1152000 1500000 2000000 2500000 3000000 3500000 4000000
+defineSerialProperty flowControl f flow-control "the flow control" no no hardware software
+defineSerialProperty dataParity p parity "the data parity" none none odd even mark space
+defineSerialProperty dataBits d data-bits "the number of data bits" 8 5 6 7 8
+defineSerialProperty stopBits s stop-bits "the number of stop bits" 1 1 2
 
 addSerialOption clocal lineMode local
 addSerialOption crtscts flowControl hardware
@@ -110,19 +104,19 @@ addSerialOption cstopb stopBits 2
 
 proc logSerialConfiguration {} {
    global devicePath
-   set log "serial configuration: $devicePath"
+
+   set log $devicePath
+   set delimiter :
 
    foreach name [getSerialPropertyNames] {
-      append log ", [getSerialPropertySetting $name]"
-      append log " [getSerialPropertyLabel $name]"
+      append log "$delimiter "
+      set delimiter ,
+
+      append log [getSerialPropertyLabel $name]
+      append log " [getSerialPropertySetting $name]"
    }
 
    logTask $log
-}
-
-proc configureSerialProperty {name value} {
-   verifySerialPropertyChoice $name $value
-   setSerialPropertyField $name setting $value
 }
 
 proc verifySerialDevice {path} {
@@ -155,35 +149,6 @@ proc configureSerialDevice {{options {-g}}} {
    return $response
 }
 
-proc addSettingUsage {linesVariable label specification default} {
-   upvar 1 $linesVariable lines
-   lappend lines "To set the $label, specify $specification (the default is $default)."
-}
-
-proc getProgramUsageNotes {} {
-   set lines [list]
-
-   global devicePath
-   addSettingUsage lines "port" "the absolute path to the corresponding serial device" $devicePath
-
-   foreach name [getSerialPropertyNames] {
-      set label [getSerialPropertyLabel $name]
-      set choices [getSerialPropertyChoices $name]
-      set default [getSerialPropertyDefault $name]
-      addSettingUsage lines $label [makeChoicesPhrase $choices] $default
-   }
-
-   return $lines
-}
-
-proc parseCommandLine {} {
-   set optionDefinitions {
-   }
-
-   processProgramArguments optionValues $optionDefinitions argumentValues "\[setting ...\]" getProgramUsageNotes
-   return $argumentValues
-}
-
 proc getRequestedConfiguration {} {
    set configuration [list raw -echo -echoe -echok -echonl]
    lappend configuration [getSerialPropertySetting lineBaud]
@@ -205,24 +170,35 @@ proc getRequestedConfiguration {} {
    return $configuration
 }
 
-foreach argument [parseCommandLine] {
-   if {[cequal [file pathtype $argument] absolute]} {
-      set devicePath $argument
-   } else {
-      set found 0
+proc parseScriptArguments {} {
+   set parser [::brltty::ScriptArgumentsParser new]
+   global serialProperties
 
-      foreach name [getSerialPropertyNames] {
-         if {[lcontain [getSerialPropertyChoices $name] $argument]} {
-            set found 1
-            configureSerialProperty $name $argument
-            break
-         }
-      }
+   foreach name [dict keys $serialProperties] {
+      set properties [dict get $serialProperties $name]
 
-      if {!$found} {
-         syntaxError "unrecognized serial property: $argument"
-      }
+      set short [dict get $properties short]
+      set long [dict get $properties long]
+      set help [dict get $properties help]
+      set choices [dict get $properties choices]
+      set default [dict get $properties setting]
+
+      $parser stringOption $name $short $long choice.$default $help $choices
    }
+
+   $parser requiredParameter devicePath device "the path to the serial device"
+
+   return [$parser parseArguments]
+}
+
+set argumentValues [parseScriptArguments]
+
+foreach name [getSerialPropertyNames] {
+   setSerialPropertyField $name setting [dict get $argumentValues $name]
+}
+
+if {![string equal [file pathtype [set devicePath [dict get $argumentValues devicePath]]] absolute]} {
+   set devicePath [file join / dev $devicePath]
 }
 
 verifySerialDevice $devicePath
