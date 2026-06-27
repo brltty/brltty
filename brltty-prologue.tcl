@@ -1502,53 +1502,8 @@ namespace eval ::brltty {
 
     method _includeTable {linesList indent spacing args} {
       upvar 1 $linesList lines
-
-      set linePrefix [string repeat " " $indent]
-      set columnSeparator [string repeat " " $spacing]
-
-      set columnWidths [list]
-      set rowCount 0
-      set rowIndex 0
-
-      foreach column $args {
-        set width 0
-
-        foreach field $column {
-          set width [expr {max($width, [string length $field])}]
-        }
-
-        lappend columnWidths $width
-        set rowCount [expr {max($rowCount, [llength $column])}]
-      }
-
-      while {$rowIndex < $rowCount} {
-        set line ""
-        set wrapIndent 0
-
-        foreach column $args width $columnWidths {
-          if {$width > 0} {
-            if {[string length $line] == 0} {
-              append line $linePrefix
-            } else {
-              append line $columnSeparator
-            }
-
-            set wrapIndent [string length $line]
-
-            if {$rowIndex < [llength $column]} {
-              set field [lindex $column $rowIndex]
-            } else {
-              set field ""
-            }
-
-            append line $field
-            append line [string repeat " " [expr {$width - [string length $field]}]]
-          }
-        }
-
-        my _includeLine lines $line $wrapIndent
-        incr rowIndex 1
-      }
+      variable screenColumns
+      lappend lines {*}[formatColumns $screenColumns $indent $spacing {*}$args]
     }
 
     method _includeLine {linesList line indent} {
