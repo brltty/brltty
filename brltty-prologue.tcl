@@ -482,17 +482,13 @@ proc wrapLine {line width indent} {
    return $lines
 }
 
-proc formatLines {lines {width ""} {indent 0}} {
-   if {[string length $width] == 0} {
-      set width [getScreenColumns]
-   }
-
+proc formatLines {lines width indent} {
    set result [list]
    set paragraph ""
 
    set finishParagraph {
       if {[string length $paragraph] > 0} {
-         lvarcat result [wrapLine $paragraph $width $indent]
+         lappend result {*}[wrapLine $paragraph $width $indent]
          set paragraph ""
       }
    }
@@ -619,7 +615,7 @@ proc showProgramArgumentsUsage {name optionsDescriptor argumentsUsage getProgram
 
    if {[llength $optionsUsage] > 0} {
       lappend argumentsUsage ""
-      lappend argumentsUsage {*}[wrapLine "The following options may be specified:" $width 0]
+      lappend argumentsUsage "Options:"
       lappend argumentsUsage {*}$optionsUsage
    }
 
@@ -1274,6 +1270,14 @@ namespace eval ::brltty {
       return [my _addOption $valueKey $short $long toggle $help]
     }
 
+    method _extendHelp {identifier text} {
+      variable optionDefinitions
+
+      dict with optionDefinitions $identifier {
+        append help " - $text"
+      }
+    }
+
     method _ensureDefault {operandVariable default} {
       upvar 1 $operandVariable operand
       variable optionTypeDelimiter
@@ -1288,7 +1292,6 @@ namespace eval ::brltty {
 
       if {$haveChoices} {
         my _ensureDefault operand [lindex $choices 0]
-        append help " - must be [my _makeChoicesPhrase $choices]"
       }
 
       set identifier [my _addOption $valueKey $short $long string.$operand $help]
@@ -1307,6 +1310,7 @@ namespace eval ::brltty {
         }
 
         dict set optionDefinitions $identifier choices $choices
+        my _extendHelp $identifier "must be [my _makeChoicesPhrase $choices]"
       }
 
       return $identifier
@@ -1325,18 +1329,6 @@ namespace eval ::brltty {
       set haveMaximum [expr {[llength $maximum] > 0}]
       set bounds [list]
 
-      if {$haveMinimum} {
-         lappend bounds ">=$minimum"
-      }
-
-      if {$haveMaximum} {
-         lappend bounds "<=$maximum"
-      }
-
-      if {[llength $bounds] > 0} {
-        append help " - must be [join $bounds " and "]"
-      }
-
       set identifier [my _addOption $valueKey $short $long $type $help]
       variable optionDefinitions
 
@@ -1350,6 +1342,7 @@ namespace eval ::brltty {
         }
 
         dict set optionDefinitions $identifier minimum $minimum
+        lappend bounds ">=$minimum"
       }
 
       if {$haveMaximum} {
@@ -1358,6 +1351,11 @@ namespace eval ::brltty {
         }
 
         dict set optionDefinitions $identifier maximum $maximum
+        lappend bounds "<=$maximum"
+      }
+
+      if {[llength $bounds] > 0} {
+        my _extendHelp $identifier "must be [join $bounds " and "]"
       }
 
       return $identifier
