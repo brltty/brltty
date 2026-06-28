@@ -148,14 +148,14 @@ proc configureSerialDevice {args} {
    }
 }
 
-proc getRequestedConfiguration {} {
+proc getConfigurationOptions {} {
    set configuration [list raw -echo -echoe -echok -echonl]
    lappend configuration [getSerialPropertySetting lineBaud]
    lappend configuration cs[getSerialPropertySetting dataBits]
 
-   foreach property [getSerialPropertyNames] {
-      set setting [getSerialPropertySetting $property]
-      set options [getSerialPropertyOptions $property]
+   foreach name [getSerialPropertyNames] {
+      set setting [getSerialPropertySetting $name]
+      set options [getSerialPropertyOptions $name]
 
       foreach option [dict keys $options] {
          if {![lcontain [dict get $options $option] $setting]} {
@@ -170,8 +170,13 @@ proc getRequestedConfiguration {} {
 }
 
 proc parseScriptArguments {} {
-   set parser [::brltty::ScriptArgumentsParser new]
    global serialProperties
+
+   set parser [::brltty::ScriptArgumentsParser new]
+   $parser setPurpose "Interactively send data to and view data received from a serial device."
+
+   $parser requiredParameter devicePath device "the path to the serial device"
+   $parser flagOption testMode t test-mode "help"
 
    foreach name [dict keys $serialProperties] {
       set properties [dict get $serialProperties $name]
@@ -185,12 +190,21 @@ proc parseScriptArguments {} {
       $parser stringOption $name $short $long choice.$default $help $choices
    }
 
-   $parser requiredParameter devicePath device "the path to the serial device"
+   $parser addNotes {
+      "Each full line read from standard input is sent to the serial device."
+      "Its trailing newline (\\n) isn't sent."
+      "All TCL-recognized backslash escape sequences are interpreted;"
+      "probably the most useful of these is \\x."
+      "Entering a zero-length line or an end-of-file (usually Control D) ends the interactive session."
+      ""
+      "All bytes received from the serial device are written to standard output as a two-digit hexadecimal number followed by a space."
+   }
 
    return [$parser parseArguments]
 }
 
 set argumentValues [parseScriptArguments]
+set testMode [dict get $argumentValues testMode]
 
 foreach name [getSerialPropertyNames] {
    setSerialPropertyField $name setting [dict get $argumentValues $name]
@@ -200,15 +214,19 @@ if {![string equal [file pathtype [set devicePath [dict get $argumentValues devi
    set devicePath [file join / dev $devicePath]
 }
 
-verifySerialDevice $devicePath
 logSerialConfiguration
+set configurationOptions [getConfigurationOptions]
+logNote "configuration options: [join $configurationOptions " "]"
 
-set originalConfiguration [configureSerialDevice -g]
-set requestedConfiguration [getRequestedConfiguration]
-logNote "stty options: [join $requestedConfiguration " "]"
+if {$testMode} {
+   exit 0
+}
+
+verifySerialDevice $devicePath
+set originalSettings [configureSerialDevice -g]
 
 try {
-   configureSerialDevice {*}$requestedConfiguration
+   configureSerialDevice {*}$configurationOptions
 
    try {
       withChannel deviceChannel [open $devicePath {RDWR NOCTTY NONBLOCK}] {
@@ -240,7 +258,7 @@ try {
       semanticError $message
    }
 } finally {
-   configureSerialDevice $originalConfiguration
+   configureSerialDevice $originalSettings
 }
 
 exit $exitStatus
