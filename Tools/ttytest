@@ -131,22 +131,21 @@ proc verifySerialDevice {path} {
    }
 }
 
-proc configureSerialDevice {{options {-g}}} {
+proc configureSerialDevice {args} {
    global devicePath
 
-   set command [list]
-   lappend command stty -F $devicePath
-   eval lappend command $options
-   logNote "command: [join $command " "]"
+   set command [list stty -F $devicePath]
+   lappend command {*}$args
+   logDetail "command: [join $command " "]"
 
-   lvarpush command exec
-   lappend command 2>@ stderr
-
-   if {[catch $command response] != 0} {
+   try {
+      return [exec {*}$command 2>@ stderr]
+   } trap {CHILDSTATUS} {} {
       exit 9
+   } trap {POSIX} {message} {
+      logError $message
+      exit 8
    }
-
-   return $response
 }
 
 proc getRequestedConfiguration {} {
@@ -204,11 +203,12 @@ if {![string equal [file pathtype [set devicePath [dict get $argumentValues devi
 verifySerialDevice $devicePath
 logSerialConfiguration
 
-set originalConfiguration [configureSerialDevice]
+set originalConfiguration [configureSerialDevice -g]
 set requestedConfiguration [getRequestedConfiguration]
+logNote "stty options: [join $requestedConfiguration " "]"
 
 try {
-   configureSerialDevice $requestedConfiguration
+   configureSerialDevice {*}$requestedConfiguration
 
    try {
       withChannel deviceChannel [open $devicePath {RDWR NOCTTY NONBLOCK}] {
