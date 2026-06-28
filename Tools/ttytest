@@ -127,24 +127,24 @@ proc verifySerialDevice {path} {
    }
 
    if {![string equal [file type $path] characterSpecial]} {
-      semanticError "not a serial device: $path"
+      semanticError "not a character-special device: $path"
    }
 }
 
 proc configureSerialDevice {args} {
    global devicePath
 
-   set command [list stty -F $devicePath]
+   set command [list stty --file $devicePath]
    lappend command {*}$args
    logDetail "command: [join $command " "]"
 
    try {
-      return [exec {*}$command 2>@ stderr]
-   } trap {CHILDSTATUS} {} {
-      exit 9
+      return [exec << "" {*}$command 2>@ stderr]
    } trap {POSIX} {message} {
       logError $message
-      exit 8
+      exit 11
+   } trap {CHILDSTATUS} {} {
+      exit 12
    }
 }
 
@@ -176,7 +176,7 @@ proc parseScriptArguments {} {
    $parser setPurpose "Interactively send data to and view data received from a serial device."
 
    $parser requiredParameter devicePath device "the path to the serial device"
-   $parser flagOption testMode t test-mode "help"
+   $parser flagOption noSession n no-session "don't start the interactive session"
 
    foreach name [dict keys $serialProperties] {
       set properties [dict get $serialProperties $name]
@@ -191,10 +191,11 @@ proc parseScriptArguments {} {
    }
 
    $parser addNotes {
-      "Each full line read from standard input is sent to the serial device."
-      "Its trailing newline (\\n) isn't sent."
-      "All TCL-recognized backslash escape sequences are interpreted;"
-      "probably the most useful of these is \\x."
+      "Each full line read from standard input is sent to the serial device;"
+      "its trailing newline (\\n) isn't sent."
+      "All TCL-recognized backslash escape sequences are interpreted as documented."
+      "To send an actual backslash, therefore, type two of them."
+      "To send a byte hexadecimally, use \\x."
       "Entering a zero-length line or an end-of-file (usually Control D) ends the interactive session."
       ""
       "All bytes received from the serial device are written to standard output as a two-digit hexadecimal number followed by a space."
@@ -204,7 +205,7 @@ proc parseScriptArguments {} {
 }
 
 set argumentValues [parseScriptArguments]
-set testMode [dict get $argumentValues testMode]
+set noSession [dict get $argumentValues noSession]
 
 foreach name [getSerialPropertyNames] {
    setSerialPropertyField $name setting [dict get $argumentValues $name]
@@ -218,15 +219,16 @@ logSerialConfiguration
 set configurationOptions [getConfigurationOptions]
 logNote "configuration options: [join $configurationOptions " "]"
 
-if {$testMode} {
+if {$noSession} {
    exit 0
 }
 
 verifySerialDevice $devicePath
-set originalSettings [configureSerialDevice -g]
+set originalSettings [configureSerialDevice --save]
+set exitStatus 10
 
 try {
-   configureSerialDevice {*}$configurationOptions
+  configureSerialDevice {*}$configurationOptions
 
    try {
       withChannel deviceChannel [open $devicePath {RDWR NOCTTY NONBLOCK}] {
