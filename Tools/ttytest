@@ -119,7 +119,7 @@ proc logSerialConfiguration {} {
    logTask $log
 }
 
-proc verifySerialDevice {path} {
+proc verifyDevicePath {path} {
    foreach {test word} {exists "found" readable "readable" writable "writable"} {
       if {![file $test $path]} {
          semanticError "device not $word: $path"
@@ -127,24 +127,29 @@ proc verifySerialDevice {path} {
    }
 
    if {![string equal [file type $path] characterSpecial]} {
-      semanticError "not a character-special device: $path"
+      semanticError "not a character special device: $path"
+   }
+}
+
+proc verifySerialChannel {channel path} {
+   try {
+      fconfigure $channel -mode
+   } trap {} {} {
+      semanticError "not a serial device: $path"
    }
 }
 
 proc configureSerialDevice {args} {
-   global devicePath
-
-   set command [list stty --file $devicePath]
+   set command [list stty]
    lappend command {*}$args
    logDetail "command: [join $command " "]"
 
    try {
-      return [exec << "" {*}$command 2>@ stderr]
+      return [exec <@ $::deviceChannel {*}$command 2>@ stderr]
    } trap {POSIX} {message} {
-      logError $message
-      exit 11
+      throw {EXIT 11} $message
    } trap {CHILDSTATUS} {} {
-      exit 12
+      throw {EXIT 12} ""
    }
 }
 
@@ -194,8 +199,8 @@ proc parseScriptArguments {} {
       "Each full line read from standard input is sent to the serial device;"
       "its trailing newline (\\n) isn't sent."
       "All TCL-recognized backslash escape sequences are interpreted as documented."
-      "To send an actual backslash, therefore, type two of them."
-      "To send a byte hexadecimally, use \\x."
+      "Use \\\\, therefore, to send an actual backslash."
+      "Use \\x to send a byte hexadecimally."
       "Entering a zero-length line or an end-of-file (usually Control D) ends the interactive session."
       ""
       "All bytes received from the serial device are written to standard output as a two-digit hexadecimal number followed by a space."
@@ -223,17 +228,18 @@ if {$noSession} {
    exit 0
 }
 
-verifySerialDevice $devicePath
-set originalSettings [configureSerialDevice --save]
+verifyDevicePath $devicePath
 set exitStatus 10
 
 try {
-  configureSerialDevice {*}$configurationOptions
+   withChannel deviceChannel [open $devicePath {RDWR NOCTTY NONBLOCK}] {
+      verifySerialChannel $deviceChannel $devicePath
+      fconfigure $deviceChannel -buffering none -translation binary
 
-   try {
-      withChannel deviceChannel [open $devicePath {RDWR NOCTTY NONBLOCK}] {
-         fconfigure $deviceChannel -buffering none -translation binary
+      set originalSettings [configureSerialDevice --save]
+      configureSerialDevice {*}$configurationOptions
 
+      try {
          fileevent $deviceChannel readable {
             foreach byte [split [read $deviceChannel] ""] {
                scan $byte %c number
@@ -255,12 +261,16 @@ try {
          }
 
          vwait exitStatus
+      } finally {
+         configureSerialDevice $originalSettings
       }
-   } trap {POSIX} {problem} {
-      semanticError $message
    }
-} finally {
-   configureSerialDevice $originalSettings
+} trap {EXIT} {message} {
+   set exitStatus [lindex $::errorCode 1]
+
+   if {[string length $message] > 0} {
+      logError $message
+   }
 }
 
 exit $exitStatus
