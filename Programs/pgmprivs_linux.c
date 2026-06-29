@@ -2118,22 +2118,30 @@ typedef struct {
   const char *whichDirectory;
   const char *(*getPath) (void);
   const char *expectedName;
+
+  /* Whether the group may write to (and, for directories, owns new entries
+   * within) this directory. The sockets directory is an exception: the server
+   * is its sole writer, so the group only needs to traverse and read it. */
+  unsigned char groupWritable;
 } StateDirectoryEntry;
 
 static const StateDirectoryEntry stateDirectoryTable[] = {
   { .whichDirectory = "updatable",
     .getPath = getUpdatableDirectory,
     .expectedName = "brltty",
+    .groupWritable = 1,
   },
 
   { .whichDirectory = "writable",
     .getPath = getWritableDirectory,
     .expectedName = "brltty",
+    .groupWritable = 1,
   },
 
   { .whichDirectory = "sockets",
     .getPath = getSocketsDirectory,
     .expectedName = "BrlAPI",
+    .groupWritable = 0,
   },
 }; static const uint8_t stateDirectoryCount = ARRAY_COUNT(stateDirectoryTable);
 
@@ -2184,6 +2192,7 @@ canChangePathPermissions (const char *path) {
 typedef struct {
   uid_t owningUser;
   gid_t owningGroup;
+  unsigned char groupWritable;
 } StateDirectoryData;
 
 static int
@@ -2212,8 +2221,13 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
       mode_t oldMode = status.st_mode;
       mode_t newMode = oldMode;
 
-      newMode |= S_IRGRP | S_IWGRP;
-      if (S_ISDIR(newMode)) newMode |= S_IXGRP | S_ISGID;
+      newMode |= S_IRGRP;
+      if (S_ISDIR(newMode)) newMode |= S_IXGRP;
+
+      if (sdd->groupWritable) {
+        newMode |= S_IWGRP;
+        if (S_ISDIR(newMode)) newMode |= S_ISGID;
+      }
 
       if (newMode != oldMode) {
         if (!canChangePathPermissions(path)) {
@@ -2249,6 +2263,7 @@ claimStateDirectories (void) {
       const char *name = locatePathName(path);
 
       if (strcasecmp(name, sde->expectedName) == 0) {
+        sdd.groupWritable = sde->groupWritable;
         processPathTree(path, claimStateDirectory, &sdd);
       } else {
         logMessage(LOG_DEBUG,

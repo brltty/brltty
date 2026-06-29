@@ -180,11 +180,15 @@ BRLTTY's state directories are:
 |sockets directory|
   This directory is where BRLTTY creates BrlAPI's
   local (UNIX domain) server sockets.
-  It needs to be world writable, and, as such,
-  should also have its sticky bit set.
+  It's owned by the user that BRLTTY runs as,
+  which is the only writer (it creates the sockets).
+  It just needs to be searchable and readable by everyone else
+  so that clients running as other users can reach those sockets
+  (which BRLTTY itself makes connectable);
+  access is controlled by the authorization key rather than by these permissions.
   So:
 
-  .. parsed-literal:: chmod ugo=rwx,o+t *path*
+  .. parsed-literal:: chmod 0755 *path*
 
 |updatable directory|
   This directory is where BRLTTY saves user data.
