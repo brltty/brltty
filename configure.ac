@@ -900,6 +900,18 @@ AC_SUBST([all_xbrlapi])
 AC_SUBST([install_xbrlapi])
 AC_SUBST([xsel_object])
 
+all_brltty_handoff=""
+install_brltty_handoff=""
+case "${host_os}"
+in
+   darwin*)
+      all_brltty_handoff="all-brltty-handoff"
+      install_brltty_handoff="install-brltty-handoff"
+      ;;
+esac
+AC_SUBST([all_brltty_handoff])
+AC_SUBST([install_brltty_handoff])
+
 test -z "$gui_toolkit_package" && {
    case "${host_os}"
    in
@@ -2072,6 +2084,7 @@ AC_CONFIG_FILES([
    Bindings/Lisp/brlapi.asd
    Bindings/Lisp/brlapi_config.lisp
    Bindings/Python/setup.py
+   Autostart/Hammerspoon/sudoers.brltty:Autostart/Hammerspoon/sudoers.brltty.in
    Autostart/Systemd/brltty@.service
    Autostart/Systemd/tmpfiles
    Autostart/Udev/usb-template.rules
