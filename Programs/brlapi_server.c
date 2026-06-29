@@ -3227,9 +3227,18 @@ adjustPermissions (
 
       #ifdef S_IRGRP
       if (oldPermissions & S_IRUSR) newPermissions |= S_IRGRP | S_IROTH;
-      if (oldPermissions & S_IWUSR) newPermissions |= S_IWGRP | S_IWOTH;
       if (oldPermissions & S_IXUSR) newPermissions |= S_IXGRP | S_IXOTH;
-      if (S_ISDIR(status.st_mode)) newPermissions |= S_ISVTX | S_IXOTH;
+
+      if (!S_ISDIR(status.st_mode)) {
+        /* A server socket must be connectable by clients running as any user,
+         * which requires write access to the socket inode. Access is actually
+         * controlled by the authorization key, not by these permissions. The
+         * sockets directory itself only needs to be searchable and readable by
+         * other users so that they can reach the sockets within it - it must
+         * never be group/other writable, and so has no need for the sticky bit.
+         */
+        if (oldPermissions & S_IWUSR) newPermissions |= S_IWGRP | S_IWOTH;
+      }
       #endif
 
       if (newPermissions != oldPermissions) {
@@ -3361,6 +3370,11 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   int lock,n,done,res;
   mode_t permissions = S_IRWXU | S_IRWXG | S_IRWXO;
 
+  /* The sockets directory is owned by the user the server runs as, which
+   * creates the sockets within it. Clients running as other users only need to
+   * traverse and read it, so it's neither group/other writable nor sticky. */
+  const mode_t directoryPermissions = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+
   if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))==-1) {
     logSystemError("socket");
     goto out;
@@ -3377,7 +3391,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   while (1) {
     {
       lockUmask();
-      int mkdirResult = mkdir(BRLAPI_SOCKETPATH, (permissions | S_ISVTX));
+      int mkdirResult = mkdir(BRLAPI_SOCKETPATH, directoryPermissions);
       unlockUmask();
       if (mkdirResult != -1) break;
     }

@@ -396,7 +396,7 @@ unlockUmask (void) {
 }
 
 int
-createDirectory (const char *path, int worldWritable) {
+createDirectory (const char *path, int worldTraversable) {
 #if defined(GRUB_RUNTIME)
   errno = EROFS;
 
@@ -409,24 +409,19 @@ createDirectory (const char *path, int worldWritable) {
   unlockUmask();
 
   if (created) {
-    if (!worldWritable) return 1;
+    if (!worldTraversable) return 1;
     mode_t mode = 0;
 
     #ifdef S_IRWXU
     mode |= S_IRWXU;
     #endif /* S_IRWXU */
 
-    #ifdef S_IRWXG
-    mode |= S_IRWXG;
-    #endif /* S_IRWXG */
-
-    #ifdef S_IRWXO
-    mode |= S_IRWXO;
-    #endif /* S_IRWXO */
-
-    #ifdef S_ISVTX
-    mode |= S_ISVTX;
-    #endif /* S_ISVTX */
+    #ifdef S_IRGRP
+    /* group and other get search+read access (but not write): enough to
+     * traverse the directory and reach what it contains, without the sticky
+     * bit a world-writable directory would have needed. */
+    mode |= S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+    #endif /* S_IRGRP */
 
     {
       lockUmask();
@@ -437,7 +432,7 @@ createDirectory (const char *path, int worldWritable) {
 
     logMessage(LOG_WARNING,
       "%s: %s: %s",
-      gettext("cannot make world writable"),
+      gettext("cannot make directory traversable"),
       path, strerror(errno)
     );
 
@@ -456,7 +451,7 @@ createDirectory (const char *path, int worldWritable) {
 }
 
 int
-ensureDirectory (const char *path, int worldWritable) {
+ensureDirectory (const char *path, int worldTraversable) {
   if (testDirectoryPath(path)) return 1;
 
   if (errno == EEXIST) {
@@ -477,7 +472,7 @@ ensureDirectory (const char *path, int worldWritable) {
       if (!exists) return 0;
     }
 
-    if (createDirectory(path, worldWritable)) {
+    if (createDirectory(path, worldTraversable)) {
       logMessage(LOG_NOTICE, "directory created: %s", path);
       return 1;
     }
