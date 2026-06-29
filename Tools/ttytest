@@ -132,24 +132,10 @@ proc verifyDevicePath {path} {
 }
 
 proc verifySerialChannel {channel path} {
-   try {
-      fconfigure $channel -mode
-   } trap {} {} {
+   array set properties [fconfigure $channel]
+
+   if {![info exists properties(-mode)]} {
       semanticError "not a serial device: $path"
-   }
-}
-
-proc configureSerialDevice {args} {
-   set command [list stty]
-   lappend command {*}$args
-   logDetail "command: [join $command " "]"
-
-   try {
-      return [exec <@ $::deviceChannel {*}$command 2>@ stderr]
-   } trap {POSIX} {message} {
-      throw {EXIT 11} $message
-   } trap {CHILDSTATUS} {} {
-      throw {EXIT 12} ""
    }
 }
 
@@ -172,6 +158,21 @@ proc getConfigurationOptions {} {
    }
 
    return $configuration
+}
+
+proc configureSerialDevice {args} {
+   set command [list stty]
+   lappend command {*}$args
+   logDetail "command: [join $command " "]"
+
+   try {
+      return [exec <@ $::deviceChannel {*}$command 2>@ stderr]
+   } trap {POSIX} {message} {
+      logError $message
+      exit 11
+   } trap {CHILDSTATUS} {} {
+      exit 12
+   }
 }
 
 proc parseScriptArguments {} {
@@ -200,7 +201,7 @@ proc parseScriptArguments {} {
       "its trailing newline (\\n) isn't sent."
       "All TCL-recognized backslash escape sequences are interpreted as documented."
       "Use \\\\, therefore, to send an actual backslash."
-      "Use \\x to send a byte hexadecimally."
+      "Use \\x to to specify a byte to be sent via its hexadecimal value."
       "Entering a zero-length line or an end-of-file (usually Control D) ends the interactive session."
       ""
       "All bytes received from the serial device are written to standard output as a two-digit hexadecimal number followed by a space."
@@ -217,60 +218,47 @@ foreach name [getSerialPropertyNames] {
 }
 
 if {![string equal [file pathtype [set devicePath [dict get $argumentValues devicePath]]] absolute]} {
-   set devicePath [file join / dev $devicePath]
+   set devicePath [file join [file separator] dev $devicePath]
 }
 
 logSerialConfiguration
 set configurationOptions [getConfigurationOptions]
 logNote "configuration options: [join $configurationOptions " "]"
-
-if {$noSession} {
-   exit 0
-}
-
 verifyDevicePath $devicePath
-set exitStatus 10
 
-try {
+if {!$noSession} {
    withChannel deviceChannel [open $devicePath {RDWR NOCTTY NONBLOCK}] {
       verifySerialChannel $deviceChannel $devicePath
       fconfigure $deviceChannel -buffering none -translation binary
 
-      set originalSettings [configureSerialDevice --save]
       configureSerialDevice {*}$configurationOptions
+      logNotice "interactive session started"
 
-      try {
-         fileevent $deviceChannel readable {
-            foreach byte [split [read $deviceChannel] ""] {
-               scan $byte %c number
-               puts -nonewline stdout [format "%02x " $number]
-            }
-
-            flush stdout
+      fileevent $deviceChannel readable {
+         foreach byte [split [read $deviceChannel] ""] {
+            scan $byte %c number
+            puts -nonewline stdout [format "%02x " $number]
          }
 
-         fileevent stdin readable {
-            if {[set length [gets stdin line]] == 0} {
-               set exitStatus 0
-            } elseif {$length > 0} {
-               puts -nonewline $deviceChannel [subst -nocommands -novariables $line]
-               flush $deviceChannel
-            } elseif {[eof stdin]} {
-               set exitStatus 0
-            }
-         }
-
-         vwait exitStatus
-      } finally {
-         configureSerialDevice $originalSettings
+         flush stdout
       }
-   }
-} trap {EXIT} {message} {
-   set exitStatus [lindex $::errorCode 1]
 
-   if {[string length $message] > 0} {
-      logError $message
+      fileevent stdin readable {
+         if {[set length [gets stdin line]] > 0} {
+            puts -nonewline $deviceChannel [subst -nocommands -novariables $line]
+            flush $deviceChannel
+         } elseif {$length == 0} {
+            set endReason "zero-length line on standard input"
+         } elseif {[eof stdin]} {
+            puts stdout ""
+            flush stdout
+            set endReason "end-of-file on standard input"
+         }
+      }
+
+      vwait endReason
+      logNotice "interactive session ended - $endReason"
    }
 }
 
-exit $exitStatus
+exit 0
