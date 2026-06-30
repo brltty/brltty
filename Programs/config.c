@@ -1732,7 +1732,7 @@ startApiServer (void) {
       logParameters(parameters, apiParameters, "API Parameter");
 
       if (!opt_verify) {
-        if (api.startServer(apiParameters)) {
+        if (api.startServer(apiParameters, wasStartedWithPrivileges)) {
           onProgramExit("api-server", exitApiServer, NULL);
         }
       }
