@@ -32,6 +32,9 @@
 #include "async_handle.h"
 #include "async_io.h"
 #include "embed.h"
+#include "report.h"
+#include "clipboard.h"
+#include "brlapi_param.h"
 
 typedef enum {
   PARM_DIRECTORY,
@@ -88,6 +91,13 @@ static const char *problemText = NULL;
 static ScreenSegmentHeader *screenSegment = NULL;
 static ScreenSegmentHeader *cachedSegment = NULL;
 
+/* The emulator recreates its shared-memory segment (under the same key) when
+ * the terminal is resized, so the identifier we attached to becomes stale. We
+ * remember the key and identifier to detect this and re-attach. */
+static key_t screenSegmentKey = 0;
+static int haveScreenSegmentKey = 0;
+static int screenSegmentIdentifier = -1;
+
 static int haveTerminalMessageQueue = 0;
 static int terminalMessageQueue;
 static int haveSegmentUpdatedHandler = 0;
@@ -109,6 +119,34 @@ messageHandler_emulatorExiting (const MessageHandlerParameters *parameters) {
   handleException("emulator exiting");
 }
 
+/* BRLTTY clipboard -> host clipboard bridging, driver side. We own BRLTTY's
+ * clipboard; the emulator (in the GUI session) owns the system clipboard. When a
+ * braille copy changes BRLTTY's clipboard, push the new text out to the emulator
+ * to publish to the host. (The reverse direction is intentionally not bridged:
+ * the host clipboard is already reachable in the terminal via the GUI's own
+ * paste.) */
+static ReportListenerInstance *clipboardReportListener = NULL;
+
+static
+REPORT_LISTENER(clipboardParameterListener) {
+  const ApiParameterUpdatedReport *report = parameters->reportData;
+  if (report->parameter != BRLAPI_PARAM_CLIPBOARD_CONTENT) return;
+
+  char *content = getMainClipboardContent();
+  if (!content) return;
+
+  size_t length = strlen(content);
+
+  if (length < TERM_CLIPBOARD_MESSAGE_SIZE) {
+    sendTerminalMessage(TERM_MSG_CLIPBOARD_TO_HOST, content, length);
+  } else {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "BRLTTY clipboard too large to bridge: %"PRIsize, length);
+  }
+
+  free(content);
+}
+
 static void
 enableMessages (key_t key) {
   haveTerminalMessageQueue = getMessageQueue(&terminalMessageQueue, key);
@@ -125,6 +163,12 @@ enableMessages (key_t key) {
       terminalMessageQueue, TERM_MSG_EMULATOR_EXITING,
       0, messageHandler_emulatorExiting, NULL
     );
+
+    if (!clipboardReportListener) {
+      clipboardReportListener = registerReportListener(
+        REPORT_API_PARAMETER_UPDATED, clipboardParameterListener, NULL
+      );
+    }
   }
 }
 
@@ -133,7 +177,14 @@ accessSegmentForPath (const char *path) {
   key_t key;
 
   if (makeTerminalKey(&key, path)) {
-    if ((screenSegment = getScreenSegmentForKey(key))) {
+    int identifier;
+
+    if (getScreenSegment(&identifier, key) &&
+        (screenSegment = attachScreenSegment(identifier))) {
+      screenSegmentKey = key;
+      haveScreenSegmentKey = 1;
+      screenSegmentIdentifier = identifier;
+
       problemText = gettext("no screen cache");
       enableMessages(key);
       return 1;
@@ -143,6 +194,31 @@ accessSegmentForPath (const char *path) {
   }
 
   return 0;
+}
+
+/* When the emulator resizes, it publishes a new segment under the same key.
+ * Detect the changed identifier and re-attach so we read the new size. */
+static void
+reattachIfSegmentChanged (void) {
+  if (!haveScreenSegmentKey) return;
+
+  int identifier;
+  if (!getScreenSegment(&identifier, screenSegmentKey)) return;
+  if (identifier == screenSegmentIdentifier) return;
+
+  ScreenSegmentHeader *fresh = attachScreenSegment(identifier);
+  if (!fresh) return;
+
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER), "re-attaching to resized screen segment");
+
+  if (screenSegment) detachScreenSegment(screenSegment);
+  screenSegment = fresh;
+  screenSegmentIdentifier = identifier;
+
+  if (cachedSegment) {
+    free(cachedSegment);
+    cachedSegment = NULL;
+  }
 }
 
 static void
@@ -173,6 +249,14 @@ destruct_TerminalEmulatorScreen (void) {
     free(cachedSegment);
     cachedSegment = NULL;
   }
+
+  if (clipboardReportListener) {
+    unregisterReportListener(clipboardReportListener);
+    clipboardReportListener = NULL;
+  }
+
+  haveScreenSegmentKey = 0;
+  screenSegmentIdentifier = -1;
 }
 
 static void
@@ -410,6 +494,7 @@ poll_TerminalEmulatorScreen (void) {
 
 static int
 refresh_TerminalEmulatorScreen (void) {
+  reattachIfSegmentChanged();
   if (!screenSegment) return 0;
   size_t size = screenSegment->segmentSize;
 

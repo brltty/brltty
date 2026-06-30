@@ -18,9 +18,15 @@
 
 #include "prologue.h"
 
+#include <wchar.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/msg.h> /* IPC_NOWAIT */
+
 #include "get_term.h"
 #include "log.h"
 #include "pty_screen.h"
+#include "pty_clipboard.h"
 #include "scr_emulator.h"
 #include "msg_queue.h"
 #include "utf8.h"
@@ -96,7 +102,13 @@ static int haveInputTextHandler = 0;
 static int
 sendTerminalMessage (MessageType type, const void *content, size_t length) {
   if (!haveTerminalMessageQueue) return 0;
-  return sendMessage(terminalMessageQueue, type, content, length, 0);
+
+  /* These are best-effort notifications (segment-updated, emulator-exiting), not
+   * data: send non-blocking. The driver also polls the segment, so a dropped
+   * "updated" hint just defers a braille refresh to the next poll. Blocking here
+   * would stall the whole I/O loop - and thus the child - whenever the daemon is
+   * slow and the small SysV queue fills during a burst of output. */
+  return sendMessage(terminalMessageQueue, type, content, length, IPC_NOWAIT);
 }
 
 static int
@@ -118,6 +130,14 @@ messageHandler_InputText (const MessageHandlerParameters *parameters) {
   }
 }
 
+/* BRLTTY clipboard -> host clipboard bridging, emulator side. The emulator runs
+ * in the GUI session, so it owns the system clipboard; the driver owns BRLTTY's
+ * clipboard and reports a change here whenever a braille copy updates it. */
+static void
+messageHandler_clipboardToHost (const MessageHandlerParameters *parameters) {
+  ptyPublishClipboard(parameters->content, parameters->length);
+}
+
 static void
 enableMessages (key_t key) {
   haveTerminalMessageQueue = createMessageQueue(&terminalMessageQueue, key);
@@ -125,6 +145,8 @@ enableMessages (key_t key) {
 
 static int segmentIdentifier = 0;
 static ScreenSegmentHeader *segmentHeader = NULL;
+static key_t segmentKey = 0;
+static int haveSegmentKey = 0;
 
 static int
 destroySegment (void) {
@@ -138,13 +160,12 @@ destroySegment (void) {
 
 static int
 createSegment (const char *path, int driverDirectives) {
-  key_t key;
-
-  if (makeTerminalKey(&key, path)) {
-    segmentHeader = createScreenSegment(&segmentIdentifier, key, LINES, COLS, ENABLE_ROW_ARRAY);
+  if (makeTerminalKey(&segmentKey, path)) {
+    haveSegmentKey = 1;
+    segmentHeader = createScreenSegment(&segmentIdentifier, segmentKey, LINES, COLS, ENABLE_ROW_ARRAY);
 
     if (segmentHeader) {
-      if (driverDirectives) enableMessages(key);
+      if (driverDirectives) enableMessages(segmentKey);
       return 1;
     }
   }
@@ -156,6 +177,21 @@ static void
 storeCursorPosition (void) {
   segmentHeader->cursorRow = getcury(stdscr);
   segmentHeader->cursorColumn = getcurx(stdscr);
+}
+
+/* When a glyph is written into the last column the cursor lingers there with
+ * this flag set, rather than wrapping immediately. The wrap is performed only
+ * when the next glyph arrives. This is the VT "magic margin" / xenl behavior
+ * that screen and tmux (which this emulator impersonates) advertise, and that
+ * full-screen programs such as Claude Code rely on when drawing boxes. */
+static int pendingWrap = 0;
+
+/* Move the curses cursor and mirror the position into the segment, without
+ * disturbing the pending-wrap state (used for internal repositioning). */
+static void
+moveCursor (unsigned int row, unsigned int column) {
+  move(row, column);
+  storeCursorPosition();
 }
 
 static void
@@ -186,7 +222,7 @@ setCharacter (unsigned int row, unsigned int column, const ScreenSegmentCharacte
     unsigned int oldRow = segmentHeader->cursorRow;
     unsigned int oldColumn = segmentHeader->cursorColumn;
     int move = (row != oldRow) || (column != oldColumn);
-    if (move) ptySetCursorPosition(row, column);
+    if (move) moveCursor(row, column);
 
     {
     #ifdef GOT_CURSES_WCH
@@ -204,7 +240,7 @@ setCharacter (unsigned int row, unsigned int column, const ScreenSegmentCharacte
     #endif /* GOT_CURSES_WCH */
     }
 
-    if (move) ptySetCursorPosition(oldRow, oldColumn);
+    if (move) moveCursor(oldRow, oldColumn);
   }
 
   ScreenSegmentCharacter character = {
@@ -278,19 +314,33 @@ ptyBeginScreen (PtyObject *pty, int driverDirectives) {
   haveTerminalMessageQueue = 0;
   haveInputTextHandler = 0;
 
-  if (initscr()) {
-    intrflush(stdscr, FALSE);
-    keypad(stdscr, TRUE);
+  /* Make curses size the screen from the real terminal rather than from the
+   * inherited LINES/COLUMNS environment variables. Those variables are often
+   * stale (commonly left at 80x24) and, when honored, would cap the emulated
+   * screen regardless of the actual terminal size. use_tioctl(TRUE) asks
+   * curses to obtain the size from the operating system (TIOCGWINSZ).
+   * use_tioctl is an ncurses extension (6.0+), so guard it. */
+#ifdef NCURSES_VERSION
+  use_env(FALSE);
+  use_tioctl(TRUE);
+#endif /* NCURSES_VERSION */
 
+  if (initscr()) {
+    /* curses is used only as the in-memory grid that backs the braille segment;
+     * it is never painted to the screen (see ptyRefreshScreen). raw()/noecho()/
+     * nonl() are kept because they are the only thing putting the real tty into
+     * raw mode for our own input reader - there is no separate termios setup.
+     * (keypad/intrflush/idlok/idcok only affect curses input or refresh output,
+     * neither of which we use, so they are omitted.) */
     raw();
     noecho();
+    nonl();
 
     scrollok(stdscr, TRUE);
-    idlok(stdscr, TRUE);
-    idcok(stdscr, TRUE);
 
     scrollRegionTop = getbegy(stdscr);
     scrollRegionBottom = getmaxy(stdscr) - 1;
+    pendingWrap = 0;
 
     savedCursorRow = 0;
     savedCursorColumn = 0;
@@ -323,6 +373,11 @@ ptyBeginScreen (PtyObject *pty, int driverDirectives) {
         0X200, messageHandler_InputText, pty
       );
 
+      startTerminalMessageReceiver(
+        "terminal-clipboard-receiver", TERM_MSG_CLIPBOARD_TO_HOST,
+        TERM_CLIPBOARD_MESSAGE_SIZE, messageHandler_clipboardToHost, NULL
+      );
+
       return 1;
     }
 
@@ -332,8 +387,11 @@ ptyBeginScreen (PtyObject *pty, int driverDirectives) {
   return 0;
 }
 
+static void releaseAlternateScreen (void);
+
 void
 ptyEndScreen (void) {
+  releaseAlternateScreen();
   endwin();
   sendTerminalMessage(TERM_MSG_EMULATOR_EXITING, NULL, 0);
   detachScreenSegment(segmentHeader);
@@ -342,21 +400,86 @@ ptyEndScreen (void) {
 
 void
 ptyResizeScreen (unsigned int height, unsigned int width) {
+  if ((height == 0) || (width == 0)) return;
+  if ((height == segmentHeader->screenHeight) &&
+      (width == segmentHeader->screenWidth)) {
+    return;
+  }
+
+  /* A saved alternate-screen grid is sized for the old dimensions; drop it so we
+   * don't later restore a stale grid (the terminal will repaint anyway). */
+  releaseAlternateScreen();
+
+  /* Resize the in-memory curses grid (it backs the braille segment and is never
+   * painted to the screen). */
   if (is_term_resized(height, width)) {
     resize_term(height, width);
   }
+
+  /* A System V shared-memory segment cannot be resized in place, so publish a
+   * fresh one at the new size under the same key. The reader notices the new
+   * segment (its identifier changes) and re-attaches; the old mapping stays
+   * valid for anyone still reading it until they detach. */
+  if (haveSegmentKey) {
+    ScreenSegmentHeader *old = segmentHeader;
+
+    /* createScreenSegment removes the prior segment under this key (it calls
+     * getScreenSegment + destroyScreenSegment) before allocating the new one. */
+    ScreenSegmentHeader *fresh = createScreenSegment(
+      &segmentIdentifier, segmentKey, height, width, ENABLE_ROW_ARRAY
+    );
+
+    if (!fresh) {
+      /* Allocation failed: keep the existing (smaller) segment intact rather
+       * than writing the new, larger geometry into it. */
+      logMessage(LOG_WARNING, "screen segment resize failed; keeping old size");
+      return;
+    }
+
+    segmentHeader = fresh;
+    segmentHeader->screenNumber = 1;
+    if (old) detachScreenSegment(old);
+  }
+
+  /* A resize resets the scroll region to the whole screen and cancels any
+   * deferred wrap; clamp the saved cursor to the new bounds. */
+  scrollRegionTop = 0;
+  scrollRegionBottom = height - 1;
+  setscrreg(scrollRegionTop, scrollRegionBottom);
+  pendingWrap = 0;
+
+  if (savedCursorRow >= height) savedCursorRow = height - 1;
+  if (savedCursorColumn >= width) savedCursorColumn = width - 1;
+
+  /* Mirror the (resized) in-memory grid into the fresh segment so the new
+   * dimensions are immediately populated; the child repaints on its own
+   * SIGWINCH soon after. */
+  storeCursorPosition();
+
+  for (unsigned int row=0; row<height; row+=1) {
+    for (unsigned int column=0; column<width; column+=1) {
+      setCharacter(row, column, NULL);
+    }
+  }
+
+  storeCursorPosition();
+  ptyRefreshScreen();
 }
 
 void
 ptyRefreshScreen (void) {
+  /* The outer terminal is painted from the child's raw output (see the display
+   * passthrough in pty_terminal.c); the curses grid is kept in memory only and
+   * read back to fill the braille segment, so it is never painted to the real
+   * screen. We just announce that the segment changed. */
   sendTerminalMessage(TERM_MSG_SEGMENT_UPDATED, NULL, 0);
-  refresh();
 }
 
 void
 ptySetCursorPosition (unsigned int row, unsigned int column) {
-  move(row, column);
-  storeCursorPosition();
+  /* Any explicit cursor movement cancels a deferred wrap. */
+  pendingWrap = 0;
+  moveCursor(row, column);
 }
 
 void
@@ -378,6 +501,109 @@ ptySaveCursorPosition (void) {
 void
 ptyRestoreCursorPosition (void) {
   ptySetCursorPosition(savedCursorRow, savedCursorColumn);
+}
+
+/* Alternate-screen (smcup/rmcup, DECSET/RST 1049) support for the braille grid.
+ * The outer terminal does the real alternate screen via passthrough; we mirror
+ * it for braille by saving the grid on enter and restoring it on exit, so that
+ * after a full-screen program quits the braille user can review the screen the
+ * terminal restored instead of a blank grid. We save the raw curses cells (so
+ * attributes and colour survive exactly), then mirror them back into the
+ * segment the same way a resize does. */
+#ifdef GOT_CURSES_WCH
+typedef cchar_t SavedCell;
+#else /* GOT_CURSES_WCH */
+typedef chtype SavedCell;
+#endif /* GOT_CURSES_WCH */
+
+static SavedCell *alternateScreen = NULL;
+static unsigned int alternateScreenRows = 0;
+static unsigned int alternateScreenColumns = 0;
+static unsigned int alternateCursorRow = 0;
+static unsigned int alternateCursorColumn = 0;
+
+static void
+releaseAlternateScreen (void) {
+  if (alternateScreen) {
+    free(alternateScreen);
+    alternateScreen = NULL;
+  }
+
+  alternateScreenRows = 0;
+  alternateScreenColumns = 0;
+}
+
+void
+ptyEnterAlternateScreen (void) {
+  /* Save the current grid (unless we already have one saved - nested smcup). */
+  if (!alternateScreen) {
+    unsigned int rows = segmentHeader->screenHeight;
+    unsigned int width = segmentHeader->screenWidth;
+    SavedCell *cells = malloc((size_t)rows * width * sizeof(*cells));
+
+    if (cells) {
+      alternateScreen = cells;
+      alternateScreenRows = rows;
+      alternateScreenColumns = width;
+      alternateCursorRow = segmentHeader->cursorRow;
+      alternateCursorColumn = segmentHeader->cursorColumn;
+
+      for (unsigned int row=0; row<rows; row+=1) {
+        for (unsigned int column=0; column<width; column+=1) {
+          move(row, column);
+        #ifdef GOT_CURSES_WCH
+          in_wch(&cells[(row * width) + column]);
+        #else /* GOT_CURSES_WCH */
+          cells[(row * width) + column] = inch();
+        #endif /* GOT_CURSES_WCH */
+        }
+      }
+    }
+  }
+
+  /* Present a cleared screen to the full-screen program. */
+  ptySetCursorPosition(0, 0);
+  ptyClearToEndOfDisplay();
+}
+
+void
+ptyExitAlternateScreen (void) {
+  unsigned int rows = segmentHeader->screenHeight;
+  unsigned int width = segmentHeader->screenWidth;
+
+  /* If we have no saved grid, or it no longer fits (the screen was resized while
+   * in the alternate screen), we cannot restore it - just clear, as before. */
+  if (!alternateScreen ||
+      (alternateScreenRows != rows) || (alternateScreenColumns != width)) {
+    releaseAlternateScreen();
+    ptySetCursorPosition(0, 0);
+    ptyClearToEndOfDisplay();
+    return;
+  }
+
+  /* Write the saved cells back into the curses grid (without scrolling at the
+   * bottom-right corner), then mirror the whole grid into the segment. */
+  scrollok(stdscr, FALSE);
+  for (unsigned int row=0; row<rows; row+=1) {
+    for (unsigned int column=0; column<width; column+=1) {
+      move(row, column);
+    #ifdef GOT_CURSES_WCH
+      add_wch(&alternateScreen[(row * width) + column]);
+    #else /* GOT_CURSES_WCH */
+      addch(alternateScreen[(row * width) + column]);
+    #endif /* GOT_CURSES_WCH */
+    }
+  }
+  scrollok(stdscr, TRUE);
+
+  for (unsigned int row=0; row<rows; row+=1) {
+    for (unsigned int column=0; column<width; column+=1) {
+      setCharacter(row, column, NULL);
+    }
+  }
+
+  ptySetCursorPosition(alternateCursorRow, alternateCursorColumn);
+  releaseAlternateScreen();
 }
 
 void
@@ -545,20 +771,80 @@ ptyDeleteCharacters (unsigned int count) {
   fillCharacters(segmentHeader->cursorRow, (COLS - count), count);
 }
 
-void
-ptyAddCharacter (unsigned char character) {
-  unsigned int row = segmentHeader->cursorRow;
-  unsigned int column = segmentHeader->cursorColumn;
+/* Place a glyph at an explicit position without letting curses scroll at the
+ * bottom-right corner; the caller sets the final cursor position afterwards. */
+static void
+writeGlyph (unsigned int row, unsigned int column, wchar_t character) {
+  scrollok(stdscr, FALSE);
+  move(row, column);
 
+#ifdef GOT_CURSES_WCH
+  {
+    attr_t attributes;
+    short colorPair;
+    attr_get(&attributes, &colorPair, NULL);
+
+    wchar_t string[] = {character, 0};
+    cchar_t wch;
+
+    if (setcchar(&wch, string, attributes, colorPair, NULL) == OK) {
+      add_wch(&wch);
+    } else {
+      addch(character);
+    }
+  }
+#else /* GOT_CURSES_WCH */
   addch(character);
-  storeCursorPosition();
+#endif /* GOT_CURSES_WCH */
 
-  setCharacter(row, column, NULL);
+  scrollok(stdscr, TRUE);
+
+  /* Resync the segment cursor with the position curses advanced to, so that
+   * setCharacter() reads back the cells we just wrote rather than the next. */
+  storeCursorPosition();
+}
+
+static void
+wrapToNextLine (void) {
+  ptySetCursorColumn(0);
+  ptyMoveDown1();
 }
 
 void
-ptySetCursorVisibility (unsigned int visibility) {
-  curs_set(visibility);
+ptyAddCharacter (wchar_t character) {
+  int width = wcwidth(character);
+  if (width < 1) width = 1;
+
+  /* Resolve a wrap deferred from the previous glyph before placing this one. */
+  if (pendingWrap) {
+    pendingWrap = 0;
+    wrapToNextLine();
+  }
+
+  /* A double-width glyph that no longer fits on the line wraps to the next. */
+  if ((segmentHeader->cursorColumn + width) > segmentHeader->screenWidth) {
+    wrapToNextLine();
+  }
+
+  unsigned int row = segmentHeader->cursorRow;
+  unsigned int column = segmentHeader->cursorColumn;
+
+  writeGlyph(row, column, character);
+
+  /* Mirror every cell the glyph occupied (two for a double-width character). */
+  for (unsigned int c=column; (c<(column+width)) && (c<segmentHeader->screenWidth); c+=1) {
+    setCharacter(row, c, NULL);
+  }
+
+  unsigned int newColumn = column + width;
+  if (newColumn < segmentHeader->screenWidth) {
+    moveCursor(row, newColumn);
+  } else {
+    /* The glyph reached the right margin: keep the cursor on the last column
+     * and defer the wrap until the next glyph (xenl behavior). */
+    moveCursor(row, segmentHeader->screenWidth - 1);
+    pendingWrap = 1;
+  }
 }
 
 void
@@ -633,4 +919,70 @@ ptyClearToEndOfDisplay (void) {
     getScreenCharacterArray(segmentHeader, &to);
     propagateScreenCharacter(from, to);
   }
+}
+
+void
+ptyClearToBeginningOfDisplay (void) {
+  unsigned int row = segmentHeader->cursorRow;
+
+  /* Clear every row above the cursor in full. */
+  if (row > 0) {
+    unsigned int savedRow = segmentHeader->cursorRow;
+    unsigned int savedColumn = segmentHeader->cursorColumn;
+
+    for (unsigned int r=0; r<row; r+=1) {
+      moveCursor(r, 0);
+      clrtoeol();
+    }
+
+    fillRows(0, row);
+    moveCursor(savedRow, savedColumn);
+  }
+
+  /* Clear the cursor's own row from its start up to the cursor. */
+  ptyClearToBeginningOfLine();
+}
+
+/* Clear the cursor's entire row, leaving the cursor where it is. */
+void
+ptyClearLine (void) {
+  unsigned int column = segmentHeader->cursorColumn;
+  ptySetCursorColumn(0);
+  ptyClearToEndOfLine();
+  ptySetCursorColumn(column);
+}
+
+/* Clear the whole screen, leaving the cursor where it is (CSI 2J). */
+void
+ptyClearDisplay (void) {
+  unsigned int row = segmentHeader->cursorRow;
+  unsigned int column = segmentHeader->cursorColumn;
+  ptySetCursorPosition(0, 0);
+  ptyClearToEndOfDisplay();
+  ptySetCursorPosition(row, column);
+}
+
+/* Erase count characters at the cursor (overwrite with blanks) without moving
+ * the cursor or shifting the rest of the line (CSI X / ECH). */
+void
+ptyEraseCharacters (unsigned int count) {
+  unsigned int row = segmentHeader->cursorRow;
+  unsigned int column = segmentHeader->cursorColumn;
+
+  unsigned int available = segmentHeader->screenWidth - column;
+  if (count > available) count = available;
+
+  for (unsigned int i=0; i<count; i+=1) {
+    writeGlyph(row, (column + i), ' ');
+    setCharacter(row, (column + i), NULL);
+  }
+
+  pendingWrap = 0;
+  moveCursor(row, column);
+}
+
+void
+ptyGetCursorPosition (unsigned int *row, unsigned int *column) {
+  if (row) *row = segmentHeader->cursorRow;
+  if (column) *column = segmentHeader->cursorColumn;
 }

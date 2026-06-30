@@ -38,6 +38,9 @@ extern void ptySetCursorColumn (unsigned int column);
 extern void ptySaveCursorPosition (void);
 extern void ptyRestoreCursorPosition (void);
 
+extern void ptyEnterAlternateScreen (void);
+extern void ptyExitAlternateScreen (void);
+
 extern void ptySetScrollRegion (unsigned int top, unsigned int bottom);
 extern int ptyAmWithinScrollRegion (void);
 extern void ptyScrollDown (unsigned int count);
@@ -59,9 +62,8 @@ extern void ptyDeleteLines (unsigned int count);
 
 extern void ptyInsertCharacters (unsigned int count);
 extern void ptyDeleteCharacters (unsigned int count);
-extern void ptyAddCharacter (unsigned char character);
+extern void ptyAddCharacter (wchar_t character);
 
-extern void ptySetCursorVisibility (unsigned int visibility);
 extern void ptySetAttributes (attr_t attributes);
 extern void ptyAddAttributes (attr_t attributes);
 extern void ptyRemoveAttributes (attr_t attributes);
@@ -70,7 +72,12 @@ extern void ptySetBackgroundColor (int color);
 
 extern void ptyClearToEndOfLine (void);
 extern void ptyClearToBeginningOfLine (void);
+extern void ptyClearLine (void);
 extern void ptyClearToEndOfDisplay (void);
+extern void ptyClearToBeginningOfDisplay (void);
+extern void ptyClearDisplay (void);
+extern void ptyEraseCharacters (unsigned int count);
+extern void ptyGetCursorPosition (unsigned int *row, unsigned int *column);
 
 extern void ptySetScreenLogLevel (unsigned char level);
 
