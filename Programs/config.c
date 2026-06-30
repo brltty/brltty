@@ -313,8 +313,10 @@ static KeyTable *guiKeyboardTable = NULL;
 
 #ifdef ENABLE_API
 int opt_noApi;
+int opt_apiEnable;
 char *opt_apiParameters;
 static char **apiParameters = NULL;
+static int apiStartedPrivileged = 0;
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -606,6 +608,12 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .flags = OPT_Config | OPT_EnvVar,
     .setting.flag = &opt_noApi,
     .description = strtext("Disable the application programming interface.")
+  },
+
+  { .word = "api",
+    .flags = OPT_Config | OPT_EnvVar,
+    .setting.flag = &opt_apiEnable,
+    .description = strtext("Enable the application programming interface (the default when brltty is started by a privileged user). Use this to run a server when started by an unprivileged user.")
   },
 
   { .word = "api-parameters",
@@ -951,6 +959,27 @@ brlttyPrepare (int argc, char *argv[]) {
 #ifdef ENABLE_SPEECH_SUPPORT
   setAutospeakThreshold();
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+#ifdef ENABLE_API
+  /* Decide, while still running as the user who launched brltty (before the
+   * privilege switch below), whether to run the embedded BrlAPI server by
+   * default. A start by root keeps it on; an unprivileged start (e.g. a user
+   * running brltty in their own session) leaves it off unless explicitly
+   * requested, so it can't accidentally shadow the system server. (The system
+   * service runs as an unprivileged user but enables it explicitly.) The
+   * captured flag is also handed to the server, where - together with whether
+   * an XDG runtime directory is present - it selects the sockets directory:
+   * the shared system one, or the user's own. */
+  {
+#ifdef __MINGW32__
+    apiStartedPrivileged = 1;
+#else /* __MINGW32__ */
+    apiStartedPrivileged = (geteuid() == 0);
+#endif /* __MINGW32__ */
+
+    if (!opt_noApi && !opt_apiEnable && !apiStartedPrivileged) opt_noApi = 1;
+  }
+#endif /* ENABLE_API */
 
   establishPrivileges();
   return PROG_EXIT_SUCCESS;
@@ -1720,7 +1749,7 @@ startApiServer (void) {
       logParameters(parameters, apiParameters, "API Parameter");
 
       if (!opt_verify) {
-        if (api.startServer(apiParameters)) {
+        if (api.startServer(apiParameters, apiStartedPrivileged)) {
           onProgramExit("api-server", exitApiServer, NULL);
         }
       }

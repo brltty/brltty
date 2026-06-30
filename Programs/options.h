@@ -76,6 +76,7 @@ extern char *opt_stopMessage;
 extern char *opt_promptPatterns;
 
 extern int opt_noApi;
+extern int opt_apiEnable;
 extern char *opt_apiParameters;
 
 #ifdef __cplusplus

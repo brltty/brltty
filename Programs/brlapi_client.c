@@ -788,12 +788,12 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
 
 #if defined(PF_LOCAL)
   if (handle->addrfamily == PF_LOCAL) {
-    int lpath = strlen(BRLAPI_SOCKETPATH),lport;
-    lport = strlen(port);
+    int lport = strlen(port);
 
 #ifdef __MINGW32__
     {
       HANDLE pipefd;
+      int lpath = strlen(BRLAPI_SOCKETPATH);
       char path[lpath+lport+1];
 
       memcpy(path, BRLAPI_SOCKETPATH, lpath);
@@ -815,38 +815,86 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
 #else /* __MINGW32__ */
     {
       struct sockaddr_un sa;
+      char xdgPath[sizeof(sa.sun_path)];
+      const char *directories[3];
+      unsigned int directoryCount = 0;
+      unsigned int directoryIndex;
+      int connectError = 0;
 
-      if (lpath+1+lport+1 > sizeof(sa.sun_path)) {
-	brlapi_libcerrno=ENAMETOOLONG;
-	brlapi_errfun="path";
-	brlapi_errno = BRLAPI_ERROR_LIBCERR;
-	goto out;
+      /* Connect to the first server that's found, searching in this order: one
+       * the user started within their own session (under $XDG_RUNTIME_DIR), then
+       * the system server, and finally the legacy location in case a running
+       * server still uses the pre-/run path. So a session server is preferred
+       * when present, otherwise the system server is reached - without the
+       * client having to be told any path. */
+      {
+        const char *runtimeDirectory = getenv("XDG_RUNTIME_DIR");
+
+        if (runtimeDirectory && *runtimeDirectory) {
+          int length = snprintf(xdgPath, sizeof(xdgPath), "%s/brltty", runtimeDirectory);
+          if ((length > 0) && (length < (int)sizeof(xdgPath))) directories[directoryCount++] = xdgPath;
+        }
       }
 
-      if ((sockfd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
-        brlapi_errfun="socket";
-        setSocketErrno();
-        goto outlibc;
+      directories[directoryCount++] = BRLAPI_SOCKETPATH;
+
+      if (strcmp(BRLAPI_SOCKETPATH, BRLAPI_SOCKETPATH_LEGACY) != 0) {
+        directories[directoryCount++] = BRLAPI_SOCKETPATH_LEGACY;
       }
+
+      for (directoryIndex=0; directoryIndex<directoryCount; directoryIndex+=1) {
+	const char *directory = directories[directoryIndex];
+	int ldir = strlen(directory);
+
+	if (ldir+1+lport+1 > sizeof(sa.sun_path)) {
+	  brlapi_libcerrno=ENAMETOOLONG;
+	  brlapi_errfun="path";
+	  brlapi_errno = BRLAPI_ERROR_LIBCERR;
+	  continue;
+	}
+
+	if ((sockfd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
+	  brlapi_errfun="socket";
+	  setSocketErrno();
+	  goto outlibc;
+	}
 
 #if !defined(HAVE_POLL)
-      if (sockfd >= FD_SETSIZE) {
-	/* Will not be able to call select() on this */
-	closeFileDescriptor(sockfd);
-	brlapi_errfun="socket";
-	setErrno(EMFILE);
-	goto outlibc;
-      }
+	if (sockfd >= FD_SETSIZE) {
+	  /* Will not be able to call select() on this */
+	  closeFileDescriptor(sockfd);
+	  sockfd = -1;
+	  brlapi_errfun="socket";
+	  setErrno(EMFILE);
+	  goto outlibc;
+	}
 #endif /* !HAVE_POLL */
 
-      sa.sun_family = AF_LOCAL;
-      memcpy(sa.sun_path,BRLAPI_SOCKETPATH "/",lpath+1);
-      memcpy(sa.sun_path+lpath+1,port,lport+1);
+	sa.sun_family = AF_LOCAL;
+	memcpy(sa.sun_path,directory,ldir);
+	sa.sun_path[ldir]='/';
+	memcpy(sa.sun_path+ldir+1,port,lport+1);
 
-      if (connect(sockfd, (struct sockaddr *) &sa, sizeof(sa))<0) {
-        brlapi_errfun="connect";
-        setSocketErrno();
-        goto outlibc;
+	if (connect(sockfd, (struct sockaddr *) &sa, sizeof(sa))<0) {
+	  connectError = errno;
+	  closeSocketDescriptor(sockfd);
+	  sockfd = -1;
+	  continue; /* try the next candidate directory */
+	}
+
+	break;
+      }
+
+      if (sockfd < 0) {
+	if (connectError) {
+	  brlapi_errfun = "connect";
+	  errno = connectError;
+	  goto outlibc;
+	}
+
+	/* No directory was actually tried (every candidate was too long); the
+	 * path error that was set still applies. */
+	goto out;
       }
     }
 #endif /* __MINGW32__ */

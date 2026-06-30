@@ -32,7 +32,7 @@ api_logServerIdentity (int full) {
 }
 
 int
-api_startServer (BrailleDisplay *brl, char **parameters) {
+api_startServer (BrailleDisplay *brl, char **parameters, int startedPrivileged) {
   return 0;
 }
 
@@ -101,8 +101,8 @@ apiGetServerParameters (void) {
 }
 
 static int
-apiStartServer (char **parameters) {
-  if (api_startServer(&brl, parameters)) {
+apiStartServer (char **parameters, int startedPrivileged) {
+  if (api_startServer(&brl, parameters, startedPrivileged)) {
     isRunning = 1;
     return 1;
   }
