@@ -30,7 +30,7 @@ typedef struct {
   void (*logServerIdentity) (int full);
   const char *const * (*getServerParameters) (void);
 
-  int (*startServer) (char **parameters);
+  int (*startServer) (char **parameters, int startedPrivileged);
   void (*stopServer) (void);
   int (*isServerRunning) (void);
 

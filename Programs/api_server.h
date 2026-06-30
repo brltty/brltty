@@ -28,7 +28,7 @@ extern "C" {
 extern void api_logServerIdentity (int full);
 extern const char *const api_serverParameters[];
 
-extern int api_startServer (BrailleDisplay *brl, char **parameters);
+extern int api_startServer (BrailleDisplay *brl, char **parameters, int startedPrivileged);
 extern void api_stopServer (BrailleDisplay *brl);
 
 extern void api_linkServer (BrailleDisplay *brl);

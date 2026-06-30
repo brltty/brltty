@@ -3198,6 +3198,42 @@ static int readPid(char *path)
   return pid;
 }
 
+static int serverStartedPrivileged = 0;
+static const char *serverSocketDirectory = NULL;
+static int serverSocketDirectoryIsPrivate = 0;
+
+/* Function : getServerSocketDirectory */
+/* Determines the directory in which the local sockets are placed. The shared */
+/* system location is used when brltty was started by a privileged user, or */
+/* when there's no XDG runtime directory (as for the system service). An */
+/* unprivileged user running their own server within a session instead */
+/* publishes under that user's XDG runtime directory, so that it needs neither */
+/* a world-writable directory nor to shadow the system server. The result is */
+/* computed once, before the socket threads are started, and then cached. */
+static const char *
+getServerSocketDirectory (void) {
+  if (!serverSocketDirectory) {
+    serverSocketDirectory = BRLAPI_SOCKETPATH;
+
+    if (!serverStartedPrivileged) {
+      const char *runtimeDirectory = getenv("XDG_RUNTIME_DIR");
+
+      if (runtimeDirectory && *runtimeDirectory) {
+        char *path = makePath(runtimeDirectory, "brltty");
+
+        if (path) {
+          serverSocketDirectory = path;
+          serverSocketDirectoryIsPrivate = 1;
+        }
+      }
+    }
+
+    logMessage(LOG_CATEGORY(SERVER_EVENTS), "BrlAPI socket directory: %s", serverSocketDirectory);
+  }
+
+  return serverSocketDirectory;
+}
+
 static int
 adjustPermissions (
   const void *object, const char *container,
@@ -3361,6 +3397,9 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   }
   CloseHandle(info->overl.hEvent);
 #else /* __MINGW32__ */
+  const char *socketDirectory = getServerSocketDirectory();
+  lpath = strlen(socketDirectory);
+
   struct sockaddr_un sa;
   char tmppath[lpath+lport+4];
   char lockpath[lpath+lport+3];
@@ -3370,10 +3409,14 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   int lock,n,done,res;
   mode_t permissions = S_IRWXU | S_IRWXG | S_IRWXO;
 
-  /* The sockets directory is owned by the user the server runs as, which
+  /* The system sockets directory is owned by the user the server runs as, which
    * creates the sockets within it. Clients running as other users only need to
-   * traverse and read it, so it's neither group/other writable nor sticky. */
-  const mode_t directoryPermissions = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+   * traverse and read it, so it's neither group/other writable nor sticky. A
+   * per-user server instead publishes in its own XDG runtime directory, which is
+   * private to that user, so there it's 0700. */
+  const mode_t directoryPermissions = serverSocketDirectoryIsPrivate?
+    S_IRWXU:
+    (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 
   if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))==-1) {
     logSystemError("socket");
@@ -3383,7 +3426,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   setCloseOnExec(fd, 1);
   sa.sun_family = AF_LOCAL;
 
-  if (lpath+lport+1>sizeof(sa.sun_path)) {
+  if (lpath+lport+2>sizeof(sa.sun_path)) {
     logMessage(LOG_ERR, "Unix path too long");
     goto outfd;
   }
@@ -3391,7 +3434,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   while (1) {
     {
       lockUmask();
-      int mkdirResult = mkdir(BRLAPI_SOCKETPATH, directoryPermissions);
+      int mkdirResult = mkdir(socketDirectory, directoryPermissions);
       unlockUmask();
       if (mkdirResult != -1) break;
     }
@@ -3408,13 +3451,17 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
     approximateDelay(1000);
   }
 
-  if (!adjustPathPermissions(BRLAPI_SOCKETPATH)) {
-    goto outfd;
+  if (!serverSocketDirectoryIsPrivate) {
+    if (!adjustPathPermissions(socketDirectory)) {
+      goto outfd;
+    }
   }
 
-  memcpy(sa.sun_path,BRLAPI_SOCKETPATH "/",lpath+1);
+  memcpy(sa.sun_path,socketDirectory,lpath);
+  sa.sun_path[lpath]='/';
   memcpy(sa.sun_path+lpath+1,info->port,lport+1);
-  memcpy(tmppath, BRLAPI_SOCKETPATH "/", lpath+1);
+  memcpy(tmppath, socketDirectory, lpath);
+  tmppath[lpath]='/';
   tmppath[lpath+1]='.';
   memcpy(tmppath+lpath+2, info->port, lport);
   memcpy(lockpath, tmppath, lpath+2+lport);
@@ -3539,8 +3586,10 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
     goto outfd;
   }
 
-  if (!adjustFilePermissions(fd, BRLAPI_SOCKETPATH)) {
-    goto outfd;
+  if (!serverSocketDirectoryIsPrivate) {
+    if (!adjustFilePermissions(fd, socketDirectory)) {
+      goto outfd;
+    }
   }
 
   if (listen(fd,1)<0) {
@@ -3615,10 +3664,12 @@ static void closeSockets(void *arg)
 #if defined(PF_LOCAL)
       if (info->addrfamily==PF_LOCAL) {
 	char *path;
-	int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
+	const char *socketDirectory=getServerSocketDirectory();
+	int lpath=strlen(socketDirectory),lport=strlen(info->port);
 
 	if ((path=malloc(lpath+lport+3))) {
-	  memcpy(path,BRLAPI_SOCKETPATH "/",lpath+1);
+	  memcpy(path,socketDirectory,lpath);
+	  path[lpath]='/';
 	  memcpy(path+lpath+1,info->port,lport+1);
 
 	  if (unlink(path) == -1) {
@@ -4713,7 +4764,7 @@ static int api_connect(void){
     ss_size = sizeof(*sun);
     memset(sun, 0, ss_size);
     sun->sun_family = AF_LOCAL;
-    sprintf(sun->sun_path, BRLAPI_SOCKETPATH "/%s", socketInfo[0].port);
+    snprintf(sun->sun_path, sizeof(sun->sun_path), "%s/%s", getServerSocketDirectory(), socketInfo[0].port);
   } else
 #endif /* PF_LOCAL */
   {
@@ -4934,9 +4985,19 @@ out:
 /* Initializes BrlApi */
 /* One first initialize the driver */
 /* Then one creates the communication socket */
-int api_startServer(BrailleDisplay *brl, char **parameters)
+int api_startServer(BrailleDisplay *brl, char **parameters, int startedPrivileged)
 {
   int res,i;
+
+#if defined(PF_LOCAL) && !defined(__MINGW32__)
+  /* Whether brltty was started by a privileged user, captured by the caller */
+  /* before any privilege switch. getServerSocketDirectory() uses it, together */
+  /* with whether an XDG runtime directory is present, to choose the sockets */
+  /* directory. Resolve it now, while still single-threaded, so the socket */
+  /* threads see it cached. */
+  serverStartedPrivileged = startedPrivileged;
+  getServerSocketDirectory();
+#endif /* PF_LOCAL && !__MINGW32__ */
 
   char *hosts =
 #if defined(PF_LOCAL)

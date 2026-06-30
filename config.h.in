@@ -625,6 +625,11 @@ extern "C" {
 /* Define this to be a string containing the path to BrlAPI's local sockets directory. */
 #undef BRLAPI_SOCKETPATH
 
+/* Define this to be a string containing the legacy (pre-/run) path to BrlAPI's local
+   sockets directory, kept so that clients can still reach a server which uses the old
+   location. */
+#undef BRLAPI_SOCKETPATH_LEGACY
+
 /* Define this to be a string containing the path to BrlAPI's data files directory. */
 #undef BRLAPI_ETCDIR
 

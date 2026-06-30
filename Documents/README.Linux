@@ -18,7 +18,7 @@ BRLTTY on Linux
 .. |configuration file path| replace:: ``/etc/brltty.conf``
 .. |key file path| replace:: ``/etc/brlapi.key``
 
-.. |sockets directory path| replace:: ``/var/lib/BrlAPI/``
+.. |sockets directory path| replace:: ``/run/BrlAPI/``
 .. |updatable directory path| replace:: ``/var/lib/brltty/``
 .. |writable directory path| replace:: ``/var/run/brltty/``
 
@@ -178,7 +178,7 @@ A state directory is one which a program needs to be able to write data to.
 BRLTTY's state directories are:
 
 |sockets directory|
-  This directory is where BRLTTY creates BrlAPI's
+  This directory is where the system-wide BrlAPI server creates its
   local (UNIX domain) server sockets.
   It's owned by the user that BRLTTY runs as,
   which is the only writer (it creates the sockets).
@@ -189,6 +189,22 @@ BRLTTY's state directories are:
   So:
 
   .. parsed-literal:: chmod 0755 *path*
+
+  It's within ``/run`` so that it's cleaned up automatically at reboot.
+  For backward compatibility, the old location (``/var/lib/BrlAPI/``)
+  should be a symbolic link to it
+  so that clients which were built to look there can still find the sockets.
+
+  When BRLTTY is started by an unprivileged user (for example, within a desktop
+  session) it doesn't run a BrlAPI server by default
+  (doing so would only shadow the system one),
+  so this directory isn't needed in that case.
+  Such a user can still run their own server (see the ``--api`` option),
+  which places its sockets within the user's own XDG runtime directory
+  (``$XDG_RUNTIME_DIR/brltty/``) rather than here.
+  Clients look there first,
+  so they reach the user's own server when it's running
+  and otherwise fall back to the system one.
 
 |updatable directory|
   This directory is where BRLTTY saves user data.
@@ -252,10 +268,13 @@ The following actions are taken for each of the state directories:
   This requires the |cap_chown| (temporary) capability
   for a directory or file that's owned by a different user.
 
-* Group read and write permissions are added to it
-  and to whatever it contains.
-  For directories, group search permission is also added
-  and the set-group-ID bit is set.
+* Group read permission is added to it and to whatever it contains,
+  and, for directories, group search permission as well.
+  For the directories that are meant to be writable by the group
+  - that's all of them except the |sockets directory|,
+  which only its owner ever writes to -
+  group write permission is added too (to the directory and its contents),
+  and the set-group-ID bit is set on the directory.
   This requires the |cap_fowner| (temporary) capability
   for a directory or file that's owned by a different user.
 
@@ -882,10 +901,12 @@ and are relinquished right after this has been done.
   then it can add group permissions to its `state directories`_
   and to their contents
   after having successfully switched to executing as `the unprivileged user`_.
-  Both read and write group permissions are added to all files and directories.
-  In addition, for all directories,
-  group search permission is added
-  and the set-group-ID bit is set.
+  Group read permission is added to all files and directories,
+  and group search permission to all directories.
+  For those that are meant to be group-writable
+  (all except the |sockets directory|),
+  group write permission is added as well,
+  and the set-group-ID bit is set on the directories.
 
 |cap_setgid|
   If this capability has also been assigned to BRLTTY's executable

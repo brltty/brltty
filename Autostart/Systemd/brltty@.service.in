@@ -53,6 +53,18 @@ Type=@SYSTEMD_SERVICE_TYPE@
 Environment="BRLTTY_EXECUTABLE_ARGUMENTS=@SYSTEMD_SERVICE_ARGUMENTS@"
 ExecStart=@HELPERS_DIRECTORY@/systemd-wrapper
 
+# This instance is the system-wide BrlAPI server. brltty only starts its BrlAPI
+# server by default when launched by a privileged user, but this service runs as
+# the unprivileged "brltty" user (see User= below), so the server is enabled here
+# explicitly.
+Environment="BRLTTY_API=on"
+
+# This is a system service rather than a user session, so it has no XDG runtime
+# directory. Pin it to the empty string so that the server always uses the shared
+# system sockets directory (never a per-user one), regardless of any
+# XDG_RUNTIME_DIR that might otherwise leak into the service's environment.
+Environment="XDG_RUNTIME_DIR="
+
 TimeoutStartSec=5
 TimeoutStopSec=10
 
