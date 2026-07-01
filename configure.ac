@@ -734,7 +734,8 @@ BRLTTY_ARG_DISABLE(
       api_dynamic_library="api-dynamic-library"
       install_api_libraries="install-api-libraries"
       uninstall_api_libraries="uninstall-api-libraries"
-      default_api_socket_path="${localstatedir}/lib/BrlAPI"
+      default_api_socket_path="/run/BrlAPI"
+      legacy_api_socket_path="${localstatedir}/lib/BrlAPI"
 
       case "${host_os}"
       in
@@ -787,6 +788,7 @@ AC_SUBST([install_api_libraries])
 AC_SUBST([uninstall_api_libraries])
 AC_SUBST([api_authkeyfile], [brlapi.key])
 AC_SUBST([api_socket_path])
+AC_SUBST([legacy_api_socket_path])
 BRLTTY_SUMMARY_ITEM([api-socket-path], [api_socket_path])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHKEYFILE], ["${api_authkeyfile}"],
                        [Define this to be a string containing the name of BrlAPI's authorization key file.])
@@ -2048,6 +2050,9 @@ BRLTTY_PUBLIC_DIRECTORY([BRLAPI_ETCDIR], [${CONFIGURATION_DIRECTORY}],
 
 BRLTTY_PUBLIC_DIRECTORY([BRLAPI_SOCKETPATH], [${api_socket_path}],
                         [Define this to be a string containing the path to BrlAPI's local sockets directory.])
+
+BRLTTY_PUBLIC_DIRECTORY([BRLAPI_SOCKETPATH_LEGACY], [${legacy_api_socket_path}],
+                        [Define this to be a string containing the legacy (pre-/run) path to BrlAPI's local sockets directory, kept so that clients can still reach a server which uses the old location.])
 
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"

@@ -23,7 +23,11 @@ d @WRITABLE_DIRECTORY@ 0750 brltty brltty
 d @UPDATABLE_DIRECTORY@ 2770 brltty brltty
 
 # BrlAPI's sockets directory
-d @BRLAPI_SOCKETPATH@ 3777 brltty brltty
+d @BRLAPI_SOCKETPATH@ 0755 brltty brltty
+
+# Backward compatibility: let clients built against the old location still reach
+# the server, which now uses the /run directory.
+L+ @BRLAPI_SOCKETPATH_LEGACY@ - - - - @BRLAPI_SOCKETPATH@
 
 # BrlAPI's authorization key file
 z @CONFIGURATION_DIRECTORY@/@api_authkeyfile@ 0640 root brlapi
