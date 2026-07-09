@@ -20,28 +20,24 @@
 source [file join [file dirname [info script]] .. prologue.tcl]
 source [file join $scriptDirectory csv.tcl]
 
-set optionDefinitions {
-   {missing flag "check for missing definitions"}
-   {noupdate flag "don't update changed tables"}
+proc parseScriptArguments {} {
+   set parser [::brltty::ScriptArgumentsParser new]
+
+   $parser flagOption missingDefinitions m missing "check for missing definitions"
+   $parser flagOption noUpdate n no-update "don't update changed tables"
+
+   set defaultInputFile [file join $::sourceRoot $::documentsSubdirectory brltty.conf.in]
+   $parser stringOption inputFile i input file.$defaultInputFile "the input file"
+
+   set defaultOutputDirectory [file join $::sourceRoot $::documentsSubdirectory]
+   $parser stringOption outputDirectory o output directory.$defaultOutputDirectory "the output directory"
+
+   return [$parser parseArguments]
 }
 
-set defaultInputFile [file join $sourceRoot $documentsSubdirectory brltty.conf.in]
-addProgramOption optionDefinitions input string.file "the input file" $defaultInputFile
-
-set defaultOutputDirectory [file join $sourceRoot $documentsSubdirectory]
-addProgramOption optionDefinitions output string.directory "the output directory" $defaultOutputDirectory
-processProgramArguments optionValues $optionDefinitions
-
-if {![info exists optionValues(input)]} {
-   set optionValues(input) $defaultInputFile
-}
-
-if {![info exists optionValues(output)]} {
-   set optionValues(output) $defaultOutputDirectory
-}
-
-verifyInputFile $optionValues(input)
-verifyOutputDirectory $optionValues(output)
+set argumentValues [parseScriptArguments]
+verifyInputFile [dict get $argumentValues inputFile]
+verifyOutputDirectory [dict get $argumentValues outputDirectory]
 
 proc reportProblem {problem} {
    logWarning $problem
@@ -51,7 +47,7 @@ proc makeLists {} {
    global definitions
    set pattern {^#(\w+)-(driver|table|parameters)\s+([^\s]*?)\s*#\s*(.*?)\s*$}
 
-   forEachLine line $::optionValues(input) {
+   forEachLine line [dict get $::argumentValues inputFile] {
       if {[regexp -nocase -- $pattern $line x type category operand comment]} {
          set category [string trimright [string tolower $category] s]
          set type [string tolower $type]
@@ -69,7 +65,7 @@ proc makeLists {} {
       }
    }
 
-   if {$::optionValues(missing)} {
+   if {[dict get $::argumentValues missingDefinitions]} {
       checkForMissingDefinitions
    }
 }
@@ -334,8 +330,8 @@ proc updateDriverCodeTable {} {
 }
 
 proc replaceTable {name data} {
-   set file "[file join $::optionValues(output) $name].csv"
-   return [replaceFile $file $data $::optionValues(noupdate)]
+   set file "[file join [dict get $::argumentValues outputDirectory] $name].csv"
+   return [replaceFile $file $data [dict get $::argumentValues noUpdate]]
 }
 
 proc makeDefinitions {} {
