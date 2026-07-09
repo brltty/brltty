@@ -42,6 +42,7 @@
   <string name="TEXT_TABLE_LABEL_gon" translatable="true">Gondi</string>
   <string name="TEXT_TABLE_LABEL_gu" translatable="true">Gujarati</string>
   <string name="TEXT_TABLE_LABEL_he" translatable="true">Hebrew</string>
+  <string name="TEXT_TABLE_LABEL_he_old" translatable="true">Hebrew (old version)</string>
   <string name="TEXT_TABLE_LABEL_he_IL" translatable="true">Hebrew (Israel)</string>
   <string name="TEXT_TABLE_LABEL_hi" translatable="true">Hindi</string>
   <string name="TEXT_TABLE_LABEL_hr" translatable="true">Croatian</string>
@@ -134,6 +135,7 @@
     <item>@string/TEXT_TABLE_LABEL_gon</item>
     <item>@string/TEXT_TABLE_LABEL_gu</item>
     <item>@string/TEXT_TABLE_LABEL_he</item>
+    <item>@string/TEXT_TABLE_LABEL_he_old</item>
     <item>@string/TEXT_TABLE_LABEL_he_IL</item>
     <item>@string/TEXT_TABLE_LABEL_hi</item>
     <item>@string/TEXT_TABLE_LABEL_hr</item>
@@ -227,6 +229,7 @@
     <item>gon</item>
     <item>gu</item>
     <item>he</item>
+    <item>he-old</item>
     <item>he_IL</item>
     <item>hi</item>
     <item>hr</item>
