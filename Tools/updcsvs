@@ -376,7 +376,7 @@ proc makeDefinitions {} {
             subdirectory subst $::contractionTablesSubdirectory
             extension subst $::contractionTableExtension
             accept list {auto}
-            missing list {none}
+            missing list {none latex-access}
          }
 
          attributes dict {

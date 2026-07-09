@@ -249,7 +249,6 @@
 #contraction-table	ko-g0	# Korean (uncontracted)
 #contraction-table	ko-g1	# Korean (partially contracted)
 #contraction-table	ko-g2	# Korean (contracted)
-#contraction-table	latex-access	# LaTeX (executable)
 #contraction-table	lt	# Lithuanian (uncontracted)
 #contraction-table	mg	# Malagasy (contracted)
 #contraction-table	mun	# Munda (contracted)
