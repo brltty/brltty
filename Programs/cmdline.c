@@ -480,6 +480,16 @@ ensureSetting (
   return 1;
 }
 
+static int
+isOptionWord (const OptionProcessingData *opd, const char *word) {
+  for (unsigned int index=0; index<opd->options->count; index+=1) {
+    const char *optionWord = opd->options->table[index].word;
+    if (optionWord && (strcasecmp(optionWord, word) == 0)) return 1;
+  }
+
+  return 0;
+}
+
 static void
 processOptions (
   OptionProcessingData *opd,
@@ -570,14 +580,20 @@ processOptions (
           }
         }
 
-        if (name) {
+        if (!name) {
+          logMallocError();
+        } else if (isOptionWord(opd, name)) {
+          /* A real option already provides this word - e.g. --api alongside
+           * --no-api. Don't add the generated negation, which would otherwise
+           * shadow that real option in getopt_long() and quietly reduce it to a
+           * no-op. */
+          free(name);
+        } else {
           opt->name = name;
           opt->has_arg = no_argument;
           opt->flag = &resetLetter;
           opt->val = letter;
           opt += 1;
-        } else {
-          logMallocError();
         }
       }
     }
