@@ -819,7 +819,6 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
       const char *directories[3];
       unsigned int directoryCount = 0;
       unsigned int directoryIndex;
-      int connectError = 0;
 
       /* Connect to the first server that's found, searching in this order: one
        * the user started within their own session (under $XDG_RUNTIME_DIR), then
@@ -842,59 +841,51 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
         directories[directoryCount++] = BRLAPI_SOCKETPATH_LEGACY;
       }
 
+      if ((sockfd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
+        brlapi_errfun="socket";
+        setSocketErrno();
+        goto outlibc;
+      }
+
+#if !defined(HAVE_POLL)
+      if (sockfd >= FD_SETSIZE) {
+        /* Will not be able to call select() on this */
+        closeFileDescriptor(sockfd);
+        sockfd = -1;
+        brlapi_errfun="socket";
+        setErrno(EMFILE);
+        goto outlibc;
+      }
+#endif /* !HAVE_POLL */
+
+      /* The one socket is reused for every attempt: a local connect() that
+       * fails leaves it usable for connecting to the next candidate. */
       for (directoryIndex=0; directoryIndex<directoryCount; directoryIndex+=1) {
 	const char *directory = directories[directoryIndex];
 	int ldir = strlen(directory);
 
 	if (ldir+1+lport+1 > sizeof(sa.sun_path)) {
-	  brlapi_libcerrno=ENAMETOOLONG;
-	  brlapi_errfun="path";
-	  brlapi_errno = BRLAPI_ERROR_LIBCERR;
+	  errno = ENAMETOOLONG;
+	  brlapi_errfun = "path";
 	  continue;
 	}
-
-	if ((sockfd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
-	  brlapi_errfun="socket";
-	  setSocketErrno();
-	  goto outlibc;
-	}
-
-#if !defined(HAVE_POLL)
-	if (sockfd >= FD_SETSIZE) {
-	  /* Will not be able to call select() on this */
-	  closeFileDescriptor(sockfd);
-	  sockfd = -1;
-	  brlapi_errfun="socket";
-	  setErrno(EMFILE);
-	  goto outlibc;
-	}
-#endif /* !HAVE_POLL */
 
 	sa.sun_family = AF_LOCAL;
 	memcpy(sa.sun_path,directory,ldir);
 	sa.sun_path[ldir]='/';
 	memcpy(sa.sun_path+ldir+1,port,lport+1);
 
-	if (connect(sockfd, (struct sockaddr *) &sa, sizeof(sa))<0) {
-	  connectError = errno;
-	  closeSocketDescriptor(sockfd);
-	  sockfd = -1;
-	  continue; /* try the next candidate directory */
-	}
+	if (connect(sockfd, (struct sockaddr *) &sa, sizeof(sa)) != -1) break;
 
-	break;
+	brlapi_errfun = "connect";
+	setSocketErrno();
       }
 
-      if (sockfd < 0) {
-	if (connectError) {
-	  brlapi_errfun = "connect";
-	  errno = connectError;
-	  goto outlibc;
-	}
-
-	/* No directory was actually tried (every candidate was too long); the
-	 * path error that was set still applies. */
-	goto out;
+      if (directoryIndex == directoryCount) {
+	/* None of the candidates could be connected to. The error left by the
+	 * final attempt - a failed connect(), or a path that wouldn't fit - is
+	 * what gets reported. */
+	goto outlibc;
       }
     }
 #endif /* __MINGW32__ */
