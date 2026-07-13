@@ -234,6 +234,8 @@ char \u0153	( 2 4 6 8)  # ⢪ œ [LATIN SMALL LIGATURE OE]
 
 glyph \u2018	(  3    8)  # ‘ ’ [LEFT SINGLE QUOTATION MARK]
 glyph \u2019	(     67 )  # ⠄ ’ [RIGHT SINGLE QUOTATION MARK]
+glyph \u201C	(  3   78)  #  “ [LEFT DOUBLE QUOTATION MARK]
+glyph \u201D	(     678)  # ” ’ [RIGHT DOUBLE QUOTATION MARK]
 char \u20AC	(1   5  8)  # ⢑ € [EURO SIGN]
 char \xA7	(1234 6 8)  # ⢯ § [SECTION SIGN]
 char \xB7 (    5 7 )  # B7 ◈ · [MIDDLE DOT]
