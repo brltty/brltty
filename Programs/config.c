@@ -268,6 +268,7 @@ char *opt_promptPatterns;
 
 int opt_stayPrivileged;
 char *opt_privilegeParameters;
+static int wasStartedWithPrivileges = 1;
 
 char *opt_pidFile;
 char *opt_configurationFile;
@@ -315,6 +316,12 @@ static KeyTable *guiKeyboardTable = NULL;
 int opt_noApi;
 char *opt_apiParameters;
 static char **apiParameters = NULL;
+
+static int
+setDefault_noApi (char **flag) {
+  const FlagKeywordPair *fkp = &fkpTrueFalse;
+  return changeStringSetting(flag, (wasStartedWithPrivileges? fkp->off: fkp->on));
+}
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -605,6 +612,7 @@ BEGIN_COMMAND_LINE_OPTIONS(programOptions)
     .letter = 'N',
     .flags = OPT_Config | OPT_EnvVar,
     .setting.flag = &opt_noApi,
+    .internal.adjust = setDefault_noApi,
     .description = strtext("Disable the application programming interface.")
   },
 
@@ -909,6 +917,10 @@ establishPrivileges (void) {
 
 ProgramExitStatus
 brlttyPrepare (int argc, char *argv[]) {
+#ifndef __MINGW32__
+  wasStartedWithPrivileges = geteuid() == 0;
+#endif /* __MINGW32__ */
+
   {
     ProgramExitStatus exitStatus = processCommandLine(&programDescriptor, &argc, &argv);
 
