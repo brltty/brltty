@@ -447,7 +447,13 @@ construct_TerminalEmulatorScreen (void) {
 
 static int
 poll_TerminalEmulatorScreen (void) {
-  return !haveSegmentUpdatedHandler;
+  /* The segment-updated message is a best-effort, non-blocking notification
+   * (see ptyRefreshScreen()/sendTerminalMessage() in pty_screen.c) - the small
+   * SysV queue can fill and silently drop it. Always poll as a fallback so a
+   * dropped notification costs at most one poll interval instead of leaving
+   * the braille display stuck until some unrelated event (e.g. a key press)
+   * happens to trigger a refresh. */
+  return 1;
 }
 
 static int
