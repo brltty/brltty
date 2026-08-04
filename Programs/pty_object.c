@@ -103,6 +103,12 @@ ptySetLogInput (PtyObject *pty, int yes) {
   pty->logInput = yes;
 }
 
+ASYNC_OUTPUT_CALLBACK(ptyHandleInputWriteResult) {
+  if (parameters->error) {
+    logMessage(LOG_WARNING, "pty write input failed: %s", strerror(parameters->error));
+  }
+}
+
 int
 ptyWriteInputData (PtyObject *pty, const void *data, size_t length) {
   if (pty->logInput) {
@@ -116,8 +122,11 @@ ptyWriteInputData (PtyObject *pty, const void *data, size_t length) {
    * queued message) for as long as the child isn't draining its input -
    * which is exactly when it's busy, e.g. repainting after a jump to the
    * top of the screen. asyncWriteFile() copies the buffer internally, so it
-   * is safe to pass a short-lived/stack buffer here. */
-  if (asyncWriteFile(NULL, pty->master, data, length, NULL, NULL)) return 1;
+   * is safe to pass a short-lived/stack buffer here. The completion callback
+   * only exists to keep logging a failed write visible, since a queued write
+   * fails later (asynchronously) rather than via this function's own return
+   * value. */
+  if (asyncWriteFile(NULL, pty->master, data, length, ptyHandleInputWriteResult, NULL)) return 1;
   logMessage(LOG_WARNING, "pty write input not queued");
   return 0;
 }

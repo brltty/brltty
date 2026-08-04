@@ -308,6 +308,22 @@ terminalResourceOwnerIsAlive (pid_t pid) {
   return errno != ESRCH;
 }
 
+/* /tmp is world-writable, and this directory is scanned for a dead pid rather
+ * than authenticated some other way, so a local user could plant a marker
+ * naming a live pid=irrelevant, dead-pid=fabricated, {shm,msg} id belonging to
+ * an unrelated process (ids are small, kernel-recycled integers, and readable
+ * system-wide via ipcs). Since a reaping instance can run as root (BRLTTY is
+ * commonly started via sudo), skipping this check would let an unprivileged
+ * local user trick root into destroying an arbitrary SysV object on the
+ * machine. Requiring the object's creator uid to match the marker file's own
+ * owner ties "who could plausibly have registered this marker" to "who
+ * actually owns the object" - an attacker can only plant markers owned by
+ * themselves, so this fails closed for anything they don't already own. */
+static int
+terminalResourceOwnedBy (uid_t owner, uid_t creatorUid) {
+  return creatorUid == owner;
+}
+
 void
 reapStaleTerminalResources (void) {
   DIR *directory = opendir(TERMINAL_RESOURCES_DIRECTORY);
@@ -323,16 +339,44 @@ reapStaleTerminalResources (void) {
     if (sscanf(entry->d_name + prefixLength, "%ld.%ld.%ld", &pid, &shmId, &msgId) != 3) continue;
     if (terminalResourceOwnerIsAlive((pid_t)pid)) continue;
 
+    char path[PATH_MAX];
+    snprintf(path, sizeof(path), "%s/%s", TERMINAL_RESOURCES_DIRECTORY, entry->d_name);
+
+    struct stat markerStatus;
+    if (stat(path, &markerStatus) == -1) continue;
+    uid_t owner = markerStatus.st_uid;
+
     logMessage(LOG_WARNING,
       "reaping terminal emulator resources leaked by dead process %ld: shm=%ld msg=%ld",
       pid, shmId, msgId
     );
 
-    if (shmId >= 0) shmctl((int)shmId, IPC_RMID, NULL);
-    if (msgId >= 0) msgctl((int)msgId, IPC_RMID, NULL);
+    if (shmId >= 0) {
+      struct shmid_ds shmStatus;
 
-    char path[PATH_MAX];
-    snprintf(path, sizeof(path), "%s/%s", TERMINAL_RESOURCES_DIRECTORY, entry->d_name);
+      if (shmctl((int)shmId, IPC_STAT, &shmStatus) == -1) {
+        /* Already gone - nothing to remove. */
+      } else if (terminalResourceOwnedBy(owner, shmStatus.shm_perm.cuid)) {
+        shmctl((int)shmId, IPC_RMID, NULL);
+      } else {
+        logMessage(LOG_WARNING,
+          "refusing to reap shm %ld: owned by a different user than its registry marker", shmId);
+      }
+    }
+
+    if (msgId >= 0) {
+      struct msqid_ds msgStatus;
+
+      if (msgctl((int)msgId, IPC_STAT, &msgStatus) == -1) {
+        /* Already gone - nothing to remove. */
+      } else if (terminalResourceOwnedBy(owner, msgStatus.msg_perm.cuid)) {
+        msgctl((int)msgId, IPC_RMID, NULL);
+      } else {
+        logMessage(LOG_WARNING,
+          "refusing to reap message queue %ld: owned by a different user than its registry marker", msgId);
+      }
+    }
+
     unlink(path);
   }
 

@@ -132,14 +132,18 @@ static int haveSegmentKey = 0;
 
 static int
 destroySegment (void) {
-  unregisterTerminalResources();
-
   if (haveTerminalMessageQueue) {
     destroyMessageQueue(terminalMessageQueue);
     haveTerminalMessageQueue = 0;
   }
 
-  return destroyScreenSegment(segmentIdentifier);
+  /* Destroy the IPC objects before removing the registry marker that would
+   * let a future instance reap them: if this process is killed between the
+   * two steps, leaving the marker behind means the leak is still reapable
+   * later, rather than becoming permanently untracked. */
+  int result = destroyScreenSegment(segmentIdentifier);
+  unregisterTerminalResources();
+  return result;
 }
 
 static int
