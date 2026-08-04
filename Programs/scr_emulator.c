@@ -19,6 +19,13 @@
 #include "prologue.h"
 
 #include <string.h>
+#include <stdio.h>
+#include <errno.h>
+#include <signal.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <limits.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
@@ -283,4 +290,76 @@ createMessageQueue (int *queue, key_t key) {
   }
 
   return 0;
+}
+
+/* Registry of SysV IPC objects created by terminal emulator instances, so a
+ * new instance can reap what a predecessor leaked by dying uncleanly. Entries
+ * live directly in /tmp (which every emulator, whatever user it runs as, can
+ * write to) as empty files named to carry their own payload, so reaping never
+ * has to open/parse a file - just list the directory and stat a pid. */
+#define TERMINAL_RESOURCES_DIRECTORY "/tmp"
+#define TERMINAL_RESOURCES_PREFIX ".brltty-pty-ipc."
+
+static char registeredResourcesPath[PATH_MAX] = "";
+
+static int
+terminalResourceOwnerIsAlive (pid_t pid) {
+  if (kill(pid, 0) != -1) return 1;
+  return errno != ESRCH;
+}
+
+void
+reapStaleTerminalResources (void) {
+  DIR *directory = opendir(TERMINAL_RESOURCES_DIRECTORY);
+  if (!directory) return;
+
+  const size_t prefixLength = strlen(TERMINAL_RESOURCES_PREFIX);
+  struct dirent *entry;
+
+  while ((entry = readdir(directory))) {
+    if (strncmp(entry->d_name, TERMINAL_RESOURCES_PREFIX, prefixLength) != 0) continue;
+
+    long pid, shmId, msgId;
+    if (sscanf(entry->d_name + prefixLength, "%ld.%ld.%ld", &pid, &shmId, &msgId) != 3) continue;
+    if (terminalResourceOwnerIsAlive((pid_t)pid)) continue;
+
+    logMessage(LOG_WARNING,
+      "reaping terminal emulator resources leaked by dead process %ld: shm=%ld msg=%ld",
+      pid, shmId, msgId
+    );
+
+    if (shmId >= 0) shmctl((int)shmId, IPC_RMID, NULL);
+    if (msgId >= 0) msgctl((int)msgId, IPC_RMID, NULL);
+
+    char path[PATH_MAX];
+    snprintf(path, sizeof(path), "%s/%s", TERMINAL_RESOURCES_DIRECTORY, entry->d_name);
+    unlink(path);
+  }
+
+  closedir(directory);
+}
+
+void
+registerTerminalResources (int screenSegmentIdentifier, int messageQueueIdentifier) {
+  snprintf(
+    registeredResourcesPath, sizeof(registeredResourcesPath),
+    "%s/%s%ld.%d.%d", TERMINAL_RESOURCES_DIRECTORY, TERMINAL_RESOURCES_PREFIX,
+    (long)getpid(), screenSegmentIdentifier, messageQueueIdentifier
+  );
+
+  int descriptor = open(registeredResourcesPath, O_CREAT | O_EXCL | O_WRONLY, S_IRUSR | S_IWUSR);
+  if (descriptor != -1) {
+    close(descriptor);
+  } else {
+    logSystemError("open[terminal resources registry entry]");
+    registeredResourcesPath[0] = 0;
+  }
+}
+
+void
+unregisterTerminalResources (void) {
+  if (registeredResourcesPath[0]) {
+    unlink(registeredResourcesPath);
+    registeredResourcesPath[0] = 0;
+  }
 }

@@ -132,6 +132,8 @@ static int haveSegmentKey = 0;
 
 static int
 destroySegment (void) {
+  unregisterTerminalResources();
+
   if (haveTerminalMessageQueue) {
     destroyMessageQueue(terminalMessageQueue);
     haveTerminalMessageQueue = 0;
@@ -296,6 +298,11 @@ ptyBeginScreen (PtyObject *pty, int driverDirectives) {
   haveTerminalMessageQueue = 0;
   haveInputTextHandler = 0;
 
+  /* Reap the shared-memory segment and message queue of any past instance
+   * that was killed uncleanly (crash, force-quit, SIGKILL) before it could
+   * remove them itself - see reapStaleTerminalResources()'s comment. */
+  reapStaleTerminalResources();
+
   /* Make curses size the screen from the real terminal rather than from the
    * inherited LINES/COLUMNS environment variables. Those variables are often
    * stale (commonly left at 80x24) and, when honored, would cap the emulated
@@ -348,6 +355,10 @@ ptyBeginScreen (PtyObject *pty, int driverDirectives) {
     if (createSegment(ptyGetPath(pty), driverDirectives)) {
       segmentHeader->screenNumber = 1;
       storeCursorPosition();
+
+      registerTerminalResources(
+        segmentIdentifier, haveTerminalMessageQueue? terminalMessageQueue: -1
+      );
 
       haveInputTextHandler = startTerminalMessageReceiver(
         "terminal-input-text-receiver", TERM_MSG_INPUT_TEXT,
