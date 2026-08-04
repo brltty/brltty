@@ -37,6 +37,37 @@ extern int convertUtf8ToCodepoint (uint32_t *codepoint, const char **utf8, size_
 extern size_t convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8);
 extern wint_t convertUtf8ToWchar (const char **utf8, size_t *utfs);
 
+/* Incremental (streaming) UTF-8 decoder. Bytes are supplied one at a time,
+ * which suits a terminal emulator that consumes its input a byte at a time.
+ * Zero-initialize the decoder before first use (and after each completed or
+ * invalid character it is ready for the next one).
+ */
+typedef struct {
+  uint32_t codepoint; /* accumulated value so far */
+  uint32_t minimum; /* smallest value legal for this length (overlong guard) */
+  unsigned char pending; /* continuation bytes still expected */
+} Utf8StreamDecoder;
+
+typedef enum {
+  UTF8_DECODE_PENDING, /* byte consumed; more bytes are needed */
+  UTF8_DECODE_DONE,    /* *character is a complete code point */
+  UTF8_DECODE_INVALID  /* malformed input; *character is U+FFFD */
+} Utf8DecodeResult;
+
+/* Feed one byte to the decoder.
+ *
+ * On UTF8_DECODE_DONE the decoded code point is stored in *character.
+ *
+ * On UTF8_DECODE_INVALID the replacement character (U+FFFD) is stored in
+ * *character and, if the offending byte may itself start a new character,
+ * *reprocess is set non-zero so the caller can feed that same byte again.
+ * *reprocess is always written (0 unless a restart is required).
+ */
+extern Utf8DecodeResult putUtf8StreamByte (
+  Utf8StreamDecoder *decoder, unsigned char byte,
+  wchar_t *character, int *reprocess
+);
+
 extern void convertUtf8ToWchars (const char **utf8, wchar_t **characters, size_t count);
 
 extern size_t makeUtf8FromWchars (const wchar_t *characters, unsigned int count, char *buffer, size_t size);

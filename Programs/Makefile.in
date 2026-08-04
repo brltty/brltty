@@ -35,7 +35,7 @@ all-tools: all-brltty-cldr all-brltty-lsinc
 all-brltty-cldr: brltty-cldr$X
 all-brltty-lsinc: brltty-lsinc$X
 
-everything: all all-brltest all-spktest all-scrtest all-cmdtest all-colortest all-crctest all-matchtest all-msgtest
+everything: all all-brltest all-spktest all-scrtest all-cmdtest all-colortest all-crctest all-matchtest all-msgtest all-utf8test all-ptytest all-ptyinput all-ptyresize
 all-brltest: brltest$X | $(BRAILLE_DRIVERS)
 all-spktest: spktest$X | $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X | $(SCREEN_DRIVERS)
@@ -44,6 +44,17 @@ all-colortest: colortest$X
 all-crctest: crctest$X
 all-matchtest: matchtest$X
 all-msgtest: msgtest$X
+all-utf8test: utf8test$X
+all-ptytest: ptytest$X
+all-ptyinput: ptyinput$X
+all-ptyresize: ptyresize$X
+
+# Build and run the brltty-pty test suite.
+tests: utf8test$X ptytest$X ptyinput$X ptyresize$X
+	./utf8test$X
+	./ptytest$X
+	./ptyinput$X
+	./ptyresize$X
 
 all-api: $(ALL_XBRLAPI) all-brltty-clip all-apitest brlapi_brldefs.auto.h
 all-xbrlapi: xbrlapi$X
@@ -405,6 +416,58 @@ crc_generate.$O:
 
 crc_verify.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_verify.c
+
+###############################################################################
+
+UTF8TEST_OBJECTS = utf8test.$O $(PROGRAM_OBJECTS)
+
+utf8test$X: $(UTF8TEST_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(UTF8TEST_OBJECTS) $(LDLIBS)
+
+utf8test.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/utf8test.c
+
+###############################################################################
+
+PTYTEST_OBJECTS = ptytest.$O $(PROGRAM_OBJECTS) $(TERMINAL_EMULATOR_OBJECTS)
+
+ptytest$X: $(PTYTEST_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(PTYTEST_OBJECTS) $(LDLIBS)
+
+ptytest.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ptytest.c
+
+###############################################################################
+
+PTYINPUT_OBJECTS = ptyinput.$O $(PROGRAM_OBJECTS)
+
+ptyinput$X: $(PTYINPUT_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(PTYINPUT_OBJECTS) $(LDLIBS)
+
+ptyinput.$O: $(SRC_DIR)/ptyinput.c
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ptyinput.c
+
+###############################################################################
+
+PTYRESIZE_OBJECTS = ptyresize.$O $(PROGRAM_OBJECTS) $(TERMINAL_EMULATOR_OBJECTS)
+
+ptyresize$X: $(PTYRESIZE_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(PTYRESIZE_OBJECTS) $(LDLIBS)
+
+ptyresize.$O: $(SRC_DIR)/ptyresize.c
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ptyresize.c
+
+###############################################################################
+
+# Diagnostic helper (not part of the automated suite): render a byte stream
+# through brltty-pty and print the resulting screen grid. See ptydump.c.
+PTYDUMP_OBJECTS = ptydump.$O $(PROGRAM_OBJECTS) $(TERMINAL_EMULATOR_OBJECTS)
+
+ptydump$X: $(PTYDUMP_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(PTYDUMP_OBJECTS) $(LDLIBS)
+
+ptydump.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ptydump.c
 
 ###############################################################################
 
@@ -1035,13 +1098,18 @@ scr_emulator.$O:
 msg_queue.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/msg_queue.c
 
-BRLTTY_PTY_OBJECTS = brltty-pty.$O $(PROGRAM_OBJECTS) pty_object.$O pty_terminal.$O pty_screen.$O color.$O $(TERMINAL_EMULATOR_OBJECTS)
+BRLTTY_PTY_OBJECTS = brltty-pty.$O $(PROGRAM_OBJECTS) pty_object.$O pty_terminal.$O pty_screen.$O pty_clipboard.$O color.$O $(TERMINAL_EMULATOR_OBJECTS)
 
 brltty-pty$X: $(BRLTTY_PTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_PTY_OBJECTS) $(CURSES_LIBS) $(LDLIBS)
 
 brltty-pty.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-pty.c
+
+# Compiled with SYSTEM_INCLUDES so it builds as Objective-C on macOS (for the
+# native NSPasteboard clipboard) and as plain C (a stub) elsewhere.
+pty_clipboard.$O: $(SRC_DIR)/pty_clipboard.c
+	$(CC) $(LIBCFLAGS) $(SYSTEM_INCLUDES) -c $(SRC_DIR)/pty_clipboard.c
 
 pty_object.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/pty_object.c
@@ -1282,6 +1350,7 @@ install-messages:
 
 install-manpages: install-man1-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/brltty.1 $(INSTALL_MAN1_DIRECTORY)
+	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/brltty-pty.1 $(INSTALL_MAN1_DIRECTORY)
 
 PKGCONFIG_FILE_NAME = brltty.pc
 PKGCONFIG_FILE_PATH = $(INSTALL_PKGCONFIG_DIRECTORY)/$(PKGCONFIG_FILE_NAME)
@@ -1361,6 +1430,7 @@ uninstall-messages:
 
 uninstall-manpages:
 	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty.1
+	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty-pty.1
 	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/xbrlapi.1
 	-rm -f $(INSTALL_MAN3_DIRECTORY)/brlapi_*.3
 
