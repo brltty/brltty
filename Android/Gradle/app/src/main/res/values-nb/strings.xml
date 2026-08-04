@@ -47,6 +47,7 @@
   <string name="GLOBAL_BUTTON_OVERVIEW">Oversikt</string>
 
   <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Bytt inndatametode</string>
+  <string name="GLOBAL_BUTTON_ALLOW_BLUETOOTH_CONNECTIONS">Tillat Bluetooth-tilkopling</string>
   <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Vis brukerveiledning</string>
   <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Bla gjennom nettstedet</string>
   <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Bla gjennom fellesskapsmeldinger</string>
@@ -185,6 +186,8 @@
   <string name="TEXT_TABLE_LABEL_gon">gondi</string>
   <string name="TEXT_TABLE_LABEL_gu">gujarati</string>
   <string name="TEXT_TABLE_LABEL_he">hebraisk</string>
+  <string name="TEXT_TABLE_LABEL_he_IL">Hebraisk (Israel)</string>
+  <string name="TEXT_TABLE_LABEL_he_old">Hebraisk (gammel versjon)</string>
   <string name="TEXT_TABLE_LABEL_hi">hindi</string>
   <string name="TEXT_TABLE_LABEL_hr">kroatisk</string>
   <string name="TEXT_TABLE_LABEL_hu">ungarsk</string>
