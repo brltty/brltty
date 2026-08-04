@@ -26,6 +26,7 @@
 #include "log.h"
 #include "pty_object.h"
 #include "scr_types.h"
+#include "async_io.h"
 
 struct PtyObjectStruct {
   char *path;
@@ -108,8 +109,16 @@ ptyWriteInputData (PtyObject *pty, const void *data, size_t length) {
     logBytes(pty->logLevel, "pty input", data, length);
   }
 
-  if (write(pty->master, data, length) != -1) return 1;
-  logSystemError("pty write input");
+  /* Queue the write and let the async I/O loop flush it once the master is
+   * writable, rather than calling write() here directly. This function runs
+   * on the same single thread that also reads the child's output, so a
+   * direct blocking write() would stall all rendering (and every other
+   * queued message) for as long as the child isn't draining its input -
+   * which is exactly when it's busy, e.g. repainting after a jump to the
+   * top of the screen. asyncWriteFile() copies the buffer internally, so it
+   * is safe to pass a short-lived/stack buffer here. */
+  if (asyncWriteFile(NULL, pty->master, data, length, NULL, NULL)) return 1;
+  logMessage(LOG_WARNING, "pty write input not queued");
   return 0;
 }
 
