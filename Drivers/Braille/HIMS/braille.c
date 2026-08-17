@@ -91,16 +91,6 @@ BEGIN_KEY_NAME_TABLE(rp)
   KEY_NAME_ENTRY(HM_KEY_RightPadRight, "RightPadRight"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(emotion)
-  KEY_NAME_ENTRY(HM_KEY_EM_Control, "Control"),
-  KEY_NAME_ENTRY(HM_KEY_EM_Alt, "Alt"),
-
-  KEY_NAME_ENTRY(HM_KEY_EM_F1, "F1"),
-  KEY_NAME_ENTRY(HM_KEY_EM_F2, "F2"),
-  KEY_NAME_ENTRY(HM_KEY_EM_F3, "F3"),
-  KEY_NAME_ENTRY(HM_KEY_EM_F4, "F4"),
-END_KEY_NAME_TABLE
-
 BEGIN_KEY_NAME_TABLES(pan)
   KEY_NAME_TABLE(common),
   KEY_NAME_TABLE(braille),
@@ -167,6 +157,16 @@ BEGIN_KEY_NAME_TABLES(beetle)
   KEY_NAME_TABLE(beetle),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLE(emotion)
+  KEY_NAME_ENTRY(HM_KEY_EM_Control, "Control"),
+  KEY_NAME_ENTRY(HM_KEY_EM_Alt, "Alt"),
+
+  KEY_NAME_ENTRY(HM_KEY_EM_F1, "F1"),
+  KEY_NAME_ENTRY(HM_KEY_EM_F2, "F2"),
+  KEY_NAME_ENTRY(HM_KEY_EM_F3, "F3"),
+  KEY_NAME_ENTRY(HM_KEY_EM_F4, "F4"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLES(emotion)
   KEY_NAME_TABLE(common),
   KEY_NAME_TABLE(braille),
@@ -226,37 +226,37 @@ static const IdentityEntry assumedIdentity = {
 };
 
 static const IdentityEntry panIdentity = {
-  .description = "Braille Sense PLUS (pan)",
+  .description = "has two pan keys",
   .id1 = 0X42, .id2 = 0X53,
   .keyTable = &KEY_TABLE_DEFINITION(pan)
 };
 
 static const IdentityEntry scrollIdentity = {
-  .description = "Braille Sense PLUS & OnHand (scroll)",
+  .description = "has four scroll keys",
   .id1 = 0X4C, .id2 = 0X58,
   .keyTable = &KEY_TABLE_DEFINITION(scroll)
 };
 
 static const IdentityEntry qwerty1Identity = {
-  .description = "Braille Sense PLUS (qwerty)",
+  .description = "has qwerty keyboard (1)",
   .id1 = 0X51, .id2 = 0X58,
   .keyTable = &KEY_TABLE_DEFINITION(qwerty)
 };
 
 static const IdentityEntry qwerty2Identity = {
-  .description = "Braille Sense PLUS (qwerty)",
+  .description = "has qwerty keyboard (2)",
   .id1 = 0X53, .id2 = 0X58,
   .keyTable = &KEY_TABLE_DEFINITION(qwerty)
 };
 
 static const IdentityEntry edgeIdentity = {
-  .description = "Braille EDGE",
+  .description = "is Braille EDGE",
   .id1 = 0X42, .id2 = 0X45,
   .keyTable = &KEY_TABLE_DEFINITION(edge)
 };
 
 static const IdentityEntry bs6Identity = {
-  .description = "BrailleSense 6",
+  .description = "is BrailleSense 6",
   .id1 = 0X4C, .id2 = 0X58,
   .keyTable = &KEY_TABLE_DEFINITION(bs6)
 };
@@ -396,11 +396,14 @@ probeIdentities (BrailleDisplay *brl, const IdentityEntry *const *identities) {
         identities += 1;
         continue;
       }
+
+      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "detected identity: %s", name);
     }
 
     return identity->keyTable;
   }
 
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "identity not detected");
   return NULL;
 }
 
