@@ -132,6 +132,13 @@ BEGIN_KEY_NAME_TABLES(edge)
   KEY_NAME_TABLE(rp),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(bs6)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(braille),
+  KEY_NAME_TABLE(f14),
+  KEY_NAME_TABLE(BE_scroll),
+END_KEY_NAME_TABLES
+
 BEGIN_KEY_NAME_TABLE(SB_scroll)
   KEY_NAME_ENTRY(HM_KEY_SB_LeftScrollUp, "LeftScrollUp"),
   KEY_NAME_ENTRY(HM_KEY_SB_LeftScrollDown, "LeftScrollDown"),
@@ -171,6 +178,7 @@ DEFINE_KEY_TABLE(pan)
 DEFINE_KEY_TABLE(scroll)
 DEFINE_KEY_TABLE(qwerty)
 DEFINE_KEY_TABLE(edge)
+DEFINE_KEY_TABLE(bs6)
 DEFINE_KEY_TABLE(sync)
 DEFINE_KEY_TABLE(beetle)
 DEFINE_KEY_TABLE(emotion)
@@ -180,6 +188,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(scroll),
   &KEY_TABLE_DEFINITION(qwerty),
   &KEY_TABLE_DEFINITION(edge),
+  &KEY_TABLE_DEFINITION(bs6),
   &KEY_TABLE_DEFINITION(sync),
   &KEY_TABLE_DEFINITION(beetle),
   &KEY_TABLE_DEFINITION(emotion),
@@ -212,7 +221,7 @@ typedef struct {
   unsigned char id2;
 } IdentityEntry;
 
-static const IdentityEntry assumePanIdentity = {
+static const IdentityEntry assumedIdentity = {
   .keyTable = &KEY_TABLE_DEFINITION(pan)
 };
 
@@ -228,15 +237,15 @@ static const IdentityEntry scrollIdentity = {
   .keyTable = &KEY_TABLE_DEFINITION(scroll)
 };
 
-static const IdentityEntry qwerty2Identity = {
-  .description = "Braille Sense PLUS (qwerty)",
-  .id1 = 0X53, .id2 = 0X58,
-  .keyTable = &KEY_TABLE_DEFINITION(qwerty)
-};
-
 static const IdentityEntry qwerty1Identity = {
   .description = "Braille Sense PLUS (qwerty)",
   .id1 = 0X51, .id2 = 0X58,
+  .keyTable = &KEY_TABLE_DEFINITION(qwerty)
+};
+
+static const IdentityEntry qwerty2Identity = {
+  .description = "Braille Sense PLUS (qwerty)",
+  .id1 = 0X53, .id2 = 0X58,
   .keyTable = &KEY_TABLE_DEFINITION(qwerty)
 };
 
@@ -244,6 +253,12 @@ static const IdentityEntry edgeIdentity = {
   .description = "Braille EDGE",
   .id1 = 0X42, .id2 = 0X45,
   .keyTable = &KEY_TABLE_DEFINITION(edge)
+};
+
+static const IdentityEntry bs6Identity = {
+  .description = "BrailleSense 6",
+  .id1 = 0X4C, .id2 = 0X58,
+  .keyTable = &KEY_TABLE_DEFINITION(bs6)
 };
 
 typedef struct {
@@ -396,7 +411,7 @@ probeIdentity_BrailleSense (BrailleDisplay *brl) {
     &qwerty1Identity,
     &scrollIdentity,
     &panIdentity,
-    &assumePanIdentity,
+    &assumedIdentity,
     NULL
   };
 
@@ -406,8 +421,8 @@ probeIdentity_BrailleSense (BrailleDisplay *brl) {
 static const KeyTableDefinition *
 probeIdentity_BrailleSense6 (BrailleDisplay *brl) {
   static const IdentityEntry *const identities[] = {
-    &scrollIdentity,
-    &assumePanIdentity,
+    &bs6Identity,
+    &assumedIdentity,
     NULL
   };
 
