@@ -679,7 +679,7 @@ static void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
     buf[i] = 0;
   }
 
-  if (brailleWindow->cursor && brailleWindow->cursor < displaySize) {
+  if (brailleWindow->cursor && brailleWindow->cursor <= displaySize) {
     buf[brailleWindow->cursor-1] |= cursorOverlay;
   }
 }
