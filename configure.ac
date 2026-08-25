@@ -1167,7 +1167,7 @@ BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
    darwin*)
       system_package="darwin"
       system_includes="-x objective-c"
-      system_libs="-framework IOKit -framework Foundation -framework CoreFoundation -lobjc"
+      system_libs="-framework IOKit -framework Foundation -framework CoreFoundation -framework AppKit -lobjc"
       ;;
    hpux*)
       if test -d /opt/audio/include
@@ -2071,6 +2071,7 @@ AC_CONFIG_FILES([
    brltty.pc
    Documents/brltty.conf
    Documents/brltty.1
+   Documents/brltty-pty.1
    Documents/xbrlapi.1
    Documents/BrlAPIref.doxy
    Bindings/Emacs/add_directory.el
