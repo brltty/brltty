@@ -42,6 +42,7 @@
 #include "async_io.h"
 #include "async_signal.h"
 #include "async_alarm.h"
+#include "parameters.h"
 
 static int opt_driverDirectives;
 static int opt_showPath;
@@ -448,7 +449,12 @@ runParent (pid_t child) {
   childHasTerminated = 0;
   slaveHasBeenClosed = 0;
 
-  if (asyncReadFile(&ptyInputHandle, ptyGetMaster(ptyObject), 1, ptyInputHandler, NULL)) {
+  /* A larger read buffer lets one read() (and one pass through the output
+   * parser/passthrough pipeline) cover a whole burst of child output instead
+   * of one byte at a time - read() still returns as soon as anything is
+   * available, so interactive latency is unaffected, but throughput-heavy
+   * output (a build log, a large cat) no longer does per-byte work. */
+  if (asyncReadFile(&ptyInputHandle, ptyGetMaster(ptyObject), PTY_MASTER_READ_SIZE, ptyInputHandler, NULL)) {
     AsyncHandle standardInputHandle;
 
     if (asyncMonitorFileInput(&standardInputHandle, STDIN_FILENO, standardInputMonitor, NULL)) {
