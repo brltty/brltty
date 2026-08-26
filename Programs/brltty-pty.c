@@ -36,6 +36,7 @@
 #include "pty_terminal.h"
 #include "parse.h"
 #include "file.h"
+#include "io_misc.h"
 #include "async_handle.h"
 #include "async_wait.h"
 #include "async_io.h"
@@ -456,6 +457,14 @@ runParent (pid_t child) {
           unsigned char level = LOG_NOTICE;
           ptySetTerminalLogLevel(level);
           ptySetLogLevel(ptyObject, level);
+
+          /* stderr is a pipe back to BRLTTY here, not a real terminal. If BRLTTY's
+           * main thread ever stalls (e.g. a slow Bluetooth reconnect attempt) it
+           * stops draining this pipe; a blocking write to a full pipe would then
+           * wedge this process's single event loop - and with it the child - until
+           * BRLTTY resumes. Losing a log line under that pressure is fine; freezing
+           * the child is not. */
+          setBlockingIo(STDERR_FILENO, 0);
         }
 
         if (ptyBeginTerminal(ptyObject, opt_driverDirectives)) {

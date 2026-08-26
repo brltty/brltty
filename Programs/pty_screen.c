@@ -95,6 +95,7 @@ initializeColorPairs (void) {
 static int haveTerminalMessageQueue = 0;
 static int terminalMessageQueue;
 static int haveInputTextHandler = 0;
+static int terminalMessagesFailing = 0;
 
 static int
 sendTerminalMessage (MessageType type, const void *content, size_t length) {
@@ -104,8 +105,29 @@ sendTerminalMessage (MessageType type, const void *content, size_t length) {
    * data: send non-blocking. The driver also polls the segment, so a dropped
    * "updated" hint just defers a braille refresh to the next poll. Blocking here
    * would stall the whole I/O loop - and thus the child - whenever the daemon is
-   * slow and the small SysV queue fills during a burst of output. */
-  return sendMessage(terminalMessageQueue, type, content, length, IPC_NOWAIT);
+   * slow and the small SysV queue fills during a burst of output.
+   *
+   * Failures are logged once on entering/leaving a failure streak rather than
+   * once per failed send (sendMessageQuietly() suppresses the usual per-call
+   * log). If BRLTTY's main thread ever stalls for a while (e.g. a slow
+   * Bluetooth reconnect attempt) while output keeps streaming, unthrottled
+   * per-failure logging would itself fill this process's stderr pipe back to
+   * BRLTTY and block this process's single event loop - and with it the
+   * child - which is worse than the dropped notification this is already
+   * designed to tolerate. */
+  int sent = sendMessageQuietly(terminalMessageQueue, type, content, length, IPC_NOWAIT);
+
+  if (sent) {
+    if (terminalMessagesFailing) {
+      logMessage(LOG_WARNING, "terminal message queue recovered");
+      terminalMessagesFailing = 0;
+    }
+  } else if (!terminalMessagesFailing) {
+    logMessage(LOG_WARNING, "terminal message queue full - further failures won't be logged individually until it recovers");
+    terminalMessagesFailing = 1;
+  }
+
+  return sent;
 }
 
 static int
