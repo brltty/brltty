@@ -135,7 +135,6 @@ static unsigned char insertMode = 0;
 static unsigned char keypadTransmitMode = 0;   /* DECKPAM: application keypad   */
 static unsigned char cursorKeyMode = 0;        /* DECCKM: application cursor keys */
 static unsigned char bracketedPasteMode = 0;
-static unsigned char absoluteCursorAddressingMode = 0;
 
 /* Character-set state for VT100 line drawing. An app designates G0/G1 as the
  * DEC special graphics set ("ESC ( 0" / "ESC ) 0") and switches between them
@@ -168,7 +167,6 @@ ptyBeginTerminal (PtyObject *pty, int driverDirectives) {
   keypadTransmitMode = 0;
   cursorKeyMode = 0;
   bracketedPasteMode = 0;
-  absoluteCursorAddressingMode = 0;
 
   charsetShiftedOut = 0;
   g0GraphicsCharset = 0;
@@ -918,7 +916,13 @@ handleClipboardRequest (char *payload) {
 
 static void
 handleOscString (void) {
-  if (oscOverflow) return;
+  if (oscOverflow) {
+    /* The OSC outgrew oscBuffer (e.g. a clipboard payload over ~64 KiB) and was
+     * truncated, so we can't act on it; drop it rather than use partial data. */
+    logMessage(terminalLogLevel, "OSC string too large; dropped");
+    return;
+  }
+
   oscBuffer[oscLength] = 0;
 
   if (strncmp(oscBuffer, "52;", 3) == 0) {
@@ -1051,7 +1055,7 @@ performBracketAction_l (unsigned char byte) {
         return OBP_DONE;
 
       case 34:
-        logOutputAction("cvvis", "cursor very visile");
+        logOutputAction("cvvis", "cursor very visible");
         ptySetCursorVisibility(2);
         return OBP_DONE;
     }
@@ -1523,8 +1527,7 @@ performQuestionMarkAction_h (unsigned char byte) {
         return OBP_DONE;
 
       case 1049:
-        logOutputAction("smcup", "absolute cursor addressing on");
-        absoluteCursorAddressingMode = 1;
+        logOutputAction("smcup", "enter alternate screen");
         /* Entering the alternate screen presents a cleared buffer (this is
          * what xterm's ?1049 does). We have only one buffer, so emulate it by
          * saving the cursor and clearing the screen; otherwise a full-screen
@@ -1559,8 +1562,7 @@ performQuestionMarkAction_l (unsigned char byte) {
         return OBP_DONE;
 
       case 1049:
-        logOutputAction("rmcup", "absolute cursor addressing off");
-        absoluteCursorAddressingMode = 0;
+        logOutputAction("rmcup", "leave alternate screen");
         /* Leaving the alternate screen would normally restore the primary
          * screen. We can't restore it (single buffer), but we must not leave
          * the full-screen program's last frame behind as stale text; clear it
@@ -1596,7 +1598,7 @@ performQuestionMarkAction (unsigned char byte) {
 static OutputByteParserResult
 parseOutputByte_ACTION (unsigned char byte) {
   if ((byte >= 0X20) && (byte <= 0X2F)) {
-    /* CSI intermediate byte (e.g. the space in "\e[5 q" to set the
+    /* CSI intermediate byte (e.g. the space in "\E[5 q" to set the
      * cursor shape). Consume it and wait for the final byte so the
      * whole sequence is swallowed as a unit rather than leaking.
      */

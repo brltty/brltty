@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <wchar.h>
+#include <sys/msg.h> /* IPC_NOWAIT */
 
 #include "get_term.h"
 #include "log.h"
@@ -98,7 +99,13 @@ static int haveInputTextHandler = 0;
 static int
 sendTerminalMessage (MessageType type, const void *content, size_t length) {
   if (!haveTerminalMessageQueue) return 0;
-  return sendMessage(terminalMessageQueue, type, content, length, 0);
+
+  /* These are best-effort notifications (segment-updated, emulator-exiting), not
+   * data: send non-blocking. The driver also polls the segment, so a dropped
+   * "updated" hint just defers a braille refresh to the next poll. Blocking here
+   * would stall the whole I/O loop - and thus the child - whenever the daemon is
+   * slow and the small SysV queue fills during a burst of output. */
+  return sendMessage(terminalMessageQueue, type, content, length, IPC_NOWAIT);
 }
 
 static int
