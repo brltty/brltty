@@ -77,7 +77,7 @@ ihexMakeRecord (char *buffer, size_t size, IhexType type, IhexAddress address, c
     *end++ = checksum & IHEX_BYTE_MASK;
   }
 
-  if ((1 + (end - bytes) + 1) > size) return 0;
+  if ((1 + ((end - bytes) * 2) + 1) > size) return 0;
   STR_BEGIN(buffer, size);
   STR_PRINTF("%c", IHEX_RECORD_PREFIX);
 
