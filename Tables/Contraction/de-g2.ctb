@@ -413,7 +413,7 @@ always doppel 145-135-1234-1234-13456 prefer el over ll
 
 
 always dossier 145-135-2346-24-12456 shouldn't use the ie-contraction
-sufword drogen 145-1235-135-1245-14 shouldn't use the ge-contractionalways ehelich 2356-15-456 shouldn't use the el-contraction
+sufword drogen 145-1235-135-1245-14 shouldn't use the ge-contraction
 before e always einreise 1246-1235-146-234-15
 always eissport 146-234-234-1234-26-2345
 always eisstau 146-234-23456-16 eisstau eisstaub gleisstaub
@@ -917,7 +917,6 @@ always pferderass 1234-124-12456-145-15-1235-1-2346
 prfword pferden 1234-124-12456-145-14
 always philosoph = shouldn't use the so-contraction
 before lnr always pizza =
-always ⠏⠇⠁⠞⠑⠁⠥ =
 always prall 1234-1235-1-12345 shouldn't use the aller- or allen-contraction
 always premier 1234-1235-12356-24-12456
 always prestige 1234-1235-15-23456-24-12346
@@ -1229,7 +1228,6 @@ always titel 2345-24-2345-13456 shouldn't use the te-contraction
 always tuberkulose 2345-136-12-12456-13-136-123-135-234-15
 prfword tuberkulosen 2345-136-12-12456-13-136-123-135-234-14
 before lnr always tundra 2345-256-145-1235-1
-sufword ultra =
 always ungebunden 256-12346-12-256-145-14
 always ungleich 256-1245-1456 shouldn't use the ung-contraction
 always terungleich 2345-12456-256-1245-1456 shouldn't use the ung-contraction
@@ -2758,7 +2756,7 @@ before f always hauptbau 125-1234-12-16
 before f always kristallbau 13-1235-24-23456-1-12345-12-16
 before f always landbau 123-235-145-12-16
 before f always maschinenbau 134-156-14-12-16
-before f always mdellbau 134-135-145-15-12345-12-16
+before f always modellbau 134-135-145-15-12345-12-16
 before f always neubau 1345-126-12-16
 before f always orgelbau 26-1245-13456-12-16
 before f always rohbau 1235-135-125-12-16
@@ -3112,7 +3110,6 @@ always		konson		=
 always		monopson	=
 begmidword	sensor		234-14-234-26
 endword		sensor		234-14-234-135-1235
-endword		sensor		234-14-234-135-1235
 always		sobjek		=
 always		sobmann		234-135-12-134-235-1345
 always		sobst		234-135-12-23456
@@ -3254,7 +3251,7 @@ always rundgäng 1235-256-145-1245-345-1345-1245
 prfword rundgänge 1235-256-145-1245-345-1345-12346
 always rundholz 1235-256-145-125-135-123-1356
 always rundkurs 1235-256-145-13-136-1235-234
-always rundrück 1235-256-145-1235-14
+always rundrück 1235-256-145-1235-46
 always rundschau 1235-256-145-156-16
 always rundschleif 1235-256-145-156-123-146-124
 always rundschreib 1235-256-145-156-12
@@ -3389,7 +3386,7 @@ always zugeinsätz 1356-136-1245-1246-5-234-1356
 always zugeinwirk 1356-136-1245-1246-2456-13
 always zugentfern 1356-136-1245-14-2345-124-12456-1345
 always zugentführ 1356-136-1245-14-2345-124-125
-always zugentgleis 136-136-1245-14-2345-1245-123-146-234
+always zugentgleis 1356-136-1245-14-2345-1245-123-146-234
 always zugentlast 1356-136-1245-14-2345-123-1-23456 shouldn't use the zu- nor ge-contraction
 always zugentscheid 1356-136-1245-14-2345-156-146-145
 before t always zugexper 1356-136-1245-15-6-1346-1234-12456
