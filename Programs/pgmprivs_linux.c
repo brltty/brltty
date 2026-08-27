@@ -668,7 +668,7 @@ logCurrentCapabilities (const char *label) {
 static int
 setRootMountPropagation (int flag) {
   if (mount(NULL, "/", NULL, (flag | MS_REC), NULL) != -1) return 1;
-  logSystemError("mount[root,propagatin]");
+  logSystemError("mount[root,propagation]");
   return 0;
 }
 
