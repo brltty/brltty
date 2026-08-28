@@ -2014,6 +2014,10 @@ refresh_LinuxScreen (void) {
     }
 
     if (problemText) {
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER) | LOG_DEBUG,
+        "read failed: %s", problemText
+      );
+
       if (*fallbackText) {
         problemText = gettext(fallbackText);
       }
