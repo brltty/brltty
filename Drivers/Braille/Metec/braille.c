@@ -164,8 +164,13 @@ struct BrailleDataStruct {
   } proto;
 };
 
-static void
+static int
 setCellCount (BrailleDisplay *brl, unsigned char count) {
+  if (count > MT_CELLS_MAXIMUM) {
+    logMessage(LOG_WARNING, "invalid cell count: %u", count);
+    return 0;
+  }
+
   brl->data->moduleCount = (brl->data->cellCount = count) / MT_MODULE_SIZE;
 
   switch (count) {
@@ -182,6 +187,8 @@ setCellCount (BrailleDisplay *brl, unsigned char count) {
   brl->data->textCount = brl->data->cellCount - brl->data->statusCount;
   brl->textColumns = brl->data->textCount;
   brl->statusColumns = brl->data->statusCount;
+
+  return 1;
 }
 
 static void
@@ -390,37 +397,37 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->data->protocol->getDeviceIdentity(brl);
 
         if (getUsbStatusPacket(brl, statusPacket)) {
-          setCellCount(brl, statusPacket[1]);
+          if (setCellCount(brl, statusPacket[1])) {
+            {
+              unsigned int moduleNumber;
 
-          {
-            unsigned int moduleNumber;
-
-            for (moduleNumber=0; moduleNumber<brl->data->moduleCount; moduleNumber+=1) {
-              brl->data->writeModule[moduleNumber] = 1;
-            }
-          }
-
-          MAKE_OUTPUT_TABLE(0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01);
-
-          {
-            const KeyTableDefinition *ktd;
-
-            if (statusPacket[2] & 0X80) {
-              ktd = brl->data->statusCount? &KEY_TABLE_DEFINITION(bd1_3s):
-                                            &KEY_TABLE_DEFINITION(bd1_3);
-            } else {
-              ktd = brl->data->statusCount? &KEY_TABLE_DEFINITION(bd1_6s):
-                                            &KEY_TABLE_DEFINITION(bd1_6);
+              for (moduleNumber=0; moduleNumber<brl->data->moduleCount; moduleNumber+=1) {
+                brl->data->writeModule[moduleNumber] = 1;
+              }
             }
 
-            brl->data->allNavigationKeys = makeKeyNumberSet(ktd->names, MT_GRP_NavigationKeys);
-            setBrailleKeyTable(brl, ktd);
+            MAKE_OUTPUT_TABLE(0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01);
+
+            {
+              const KeyTableDefinition *ktd;
+
+              if (statusPacket[2] & 0X80) {
+                ktd = brl->data->statusCount? &KEY_TABLE_DEFINITION(bd1_3s):
+                                              &KEY_TABLE_DEFINITION(bd1_3);
+              } else {
+                ktd = brl->data->statusCount? &KEY_TABLE_DEFINITION(bd1_6s):
+                                              &KEY_TABLE_DEFINITION(bd1_6);
+              }
+
+              brl->data->allNavigationKeys = makeKeyNumberSet(ktd->names, MT_GRP_NavigationKeys);
+              setBrailleKeyTable(brl, ktd);
+            }
+
+            brl->data->pressedNavigationKeys = 0;
+            brl->data->routingKey = MT_ROUTING_KEYS_NONE;
+
+            if (brl->data->protocol->beginProtocol(brl)) return 1;
           }
-
-          brl->data->pressedNavigationKeys = 0;
-          brl->data->routingKey = MT_ROUTING_KEYS_NONE;
-
-          if (brl->data->protocol->beginProtocol(brl)) return 1;
         }
 
         brl->data->protocol->setHighVoltage(brl, 0);
