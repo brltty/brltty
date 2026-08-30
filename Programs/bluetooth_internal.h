@@ -19,6 +19,10 @@
 #ifndef BRLTTY_INCLUDED_BLUETOOTH_INTERNAL
 #define BRLTTY_INCLUDED_BLUETOOTH_INTERNAL
 
+#ifdef __APPLE__
+#include "async_types_handle.h"
+#endif /* __APPLE__ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -48,6 +52,12 @@ extern int bthDiscoverChannel (
 );
 
 extern int bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout);
+
+#ifdef __APPLE__
+/* Defined in bluetooth.c, not bluetooth_darwin.c - see bthStartDarwinRunLoopPump()'s
+ * own comment there for why. */
+extern void bthStartDarwinRunLoopPump (AsyncHandle *handle);
+#endif /* __APPLE__ */
 
 struct BluetoothConnectionStruct {
   uint64_t address;

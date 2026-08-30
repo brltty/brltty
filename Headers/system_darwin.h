@@ -21,13 +21,14 @@
 
 #include <CoreFoundation/CFRunLoop.h>
 
-#import <Foundation/NSThread.h>
+#include "async_types_handle.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 extern IOReturn executeRunLoop (int seconds);
+extern void darwinDrainRunLoop (void);
 extern void addRunLoopSource (CFRunLoopSourceRef source);
 extern void removeRunLoopSource (CFRunLoopSourceRef source);
 
@@ -38,22 +39,12 @@ extern void setDarwinSystemError (IOReturn result);
 @property (assign, readonly) int isFinished;
 @property (assign, readonly) IOReturn finalStatus;
 
+/* timeoutMilliseconds: how long to wait for isFinished to become true. */
 - (int) wait
-  : (int) timeout;
+  : (int) timeoutMilliseconds;
 
 - (void) setStatus
   : (IOReturn) status;
-@end
-
-@interface AsynchronousTask: AsynchronousResult
-@property (assign, readonly) NSThread *taskThread;
-@property (assign, readonly) CFRunLoopRef taskRunLoop;
-
-- (IOReturn) run;
-
-- (int) start;
-
-- (void) stop;
 @end
 
 #ifdef __cplusplus
