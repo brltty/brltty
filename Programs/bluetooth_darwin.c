@@ -32,6 +32,7 @@
 #include "bluetooth_internal.h"
 #include "system_darwin.h"
 #include "async_io.h"
+#include "async_handle.h"
 
 @interface ServiceQueryResult: AsynchronousResult
 - (void) sdpQueryComplete
@@ -63,6 +64,14 @@ struct BluetoothConnectionExtensionStruct {
   RfcommChannelDelegate *rfcommDelegate;
 
   int inputPipe[2];
+
+  /* The handle returned by asyncMonitorFileInput() in bthMonitorInput()
+   * below, kept so it can be cancelled before inputPipe[0] is closed (see
+   * bthDestroyInputPipe()), and so a second registration can cancel a
+   * still-active previous one instead of orphaning it (see
+   * bthMonitorInput()) - matching bluetooth_android.c's own
+   * bthMonitorInput(), which already does both for the same reason. */
+  AsyncHandle inputMonitor;
 };
 
 static void
@@ -120,7 +129,19 @@ bthInitializeInputPipe (BluetoothConnectionExtension *bcx) {
 }
 
 static void
+bthCancelInputMonitor (BluetoothConnectionExtension *bcx) {
+  if (bcx->inputMonitor) {
+    asyncCancelRequest(bcx->inputMonitor);
+    bcx->inputMonitor = NULL;
+  }
+}
+
+static void
 bthDestroyInputPipe (BluetoothConnectionExtension *bcx) {
+  /* Must be cancelled before inputPipe[0] is closed below - see the
+   * inputMonitor field comment on BluetoothConnectionExtensionStruct. */
+  bthCancelInputMonitor(bcx);
+
   int *fileDescriptor = bcx->inputPipe;
   const int *end = fileDescriptor + ARRAY_COUNT(bcx->inputPipe);
 
@@ -257,7 +278,17 @@ bthDiscoverChannel (
 
 int
 bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback, void *data) {
-  return asyncMonitorFileInput(NULL, connection->extension->inputPipe[0], callback, data);
+  BluetoothConnectionExtension *bcx = connection->extension;
+
+  /* GIO deregisters by calling this again with callback == NULL (see
+   * gioDestroyHandleInputObject()) - matches bluetooth_android.c's own
+   * bthMonitorInput(). Without the early return, that call would register
+   * a fresh monitor with a NULL callback instead of just cancelling the
+   * real one, and the first invocation of that null callback would delete
+   * the operation out from under inputMonitor, leaving it dangling. */
+  bthCancelInputMonitor(bcx);
+  if (!callback) return 1;
+  return asyncMonitorFileInput(&bcx->inputMonitor, bcx->inputPipe[0], callback, data);
 }
 
 int
