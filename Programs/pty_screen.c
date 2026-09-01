@@ -451,6 +451,20 @@ ptyResizeScreen (unsigned int height, unsigned int width) {
     segmentHeader = fresh;
     segmentHeader->screenNumber = 1;
     if (old) detachScreenSegment(old);
+
+    /* The registry marker (see registerTerminalResources()'s original call
+     * in createSegment()) still names the OLD segment identifier. Without
+     * re-registering here, a future instance's reapStaleTerminalResources()
+     * would still find a marker after this process dies uncleanly, but the
+     * segment id in it would already be gone (removed by
+     * createScreenSegment() above) - so it silently does nothing for the
+     * message queue's id while the NEW segment, now untracked by any
+     * marker, leaks permanently. */
+    unregisterTerminalResources();
+
+    registerTerminalResources(
+      segmentIdentifier, haveTerminalMessageQueue? terminalMessageQueue: -1
+    );
   }
 
   /* A resize resets the scroll region to the whole screen and cancels any

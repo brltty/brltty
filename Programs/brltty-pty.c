@@ -381,6 +381,20 @@ installSignalHandlers (void) {
   if (!asyncHandleSignal(SIGTERM, parentQuitMonitor, NULL)) return 0;
   if (!asyncHandleSignal(SIGINT, parentQuitMonitor, NULL)) return 0;
   if (!asyncHandleSignal(SIGQUIT, parentQuitMonitor, NULL)) return 0;
+
+  /* The outer terminal application sends SIGHUP (not one of the three
+   * above) when its window is closed - by far the most common way this
+   * process actually ends in daily use. Without a handler, the default
+   * disposition (terminate) skips runParent()'s normal cleanup entirely
+   * (ptyEndTerminal() -> ptyEndScreen() -> destroySegment()), leaking this
+   * instance's shared-memory segment and message queue exactly like a
+   * crash would - reapStaleTerminalResources() cleans most of that up on
+   * the next startup, but only for the segment identifier it already knew
+   * about (see ptyResizeScreen()'s comment for the one case it still
+   * misses). Routing it through the same graceful-quit path other
+   * termination signals already use avoids the leak at the source. */
+  if (!asyncHandleSignal(SIGHUP, parentQuitMonitor, NULL)) return 0;
+
   if (!asyncHandleSignal(SIGWINCH, windowSizeMonitor, NULL)) return 0;
   return asyncHandleSignal(SIGCHLD, childTerminationMonitor, NULL);
 }
