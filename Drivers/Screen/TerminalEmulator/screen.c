@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "log.h"
 #include "scr_terminal.h"
@@ -28,6 +29,7 @@
 #include "hostcmd.h"
 #include "parse.h"
 #include "file.h"
+#include "io_misc.h"
 #include "program.h"
 #include "async_handle.h"
 #include "async_io.h"
@@ -147,6 +149,9 @@ accessSegmentForPath (const char *path) {
       screenSegmentKey = key;
       haveScreenSegmentKey = 1;
       screenSegmentIdentifier = identifier;
+
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "attached to screen segment (identifier %d)", identifier);
 
       problemText = gettext("no screen cache");
       enableMessages(key);
@@ -288,29 +293,45 @@ handleDriverDirective (const char *line) {
 }
 
 ASYNC_MONITOR_CALLBACK(emEmulatorMonitor) {
-  const char *line;
+  while (1) {
+    const char *line;
 
-  {
-    int ok = readLine(
-      emulatorStream, &emulatorStreamBuffer,
-      &emulatorStreamBufferSize, NULL
-    );
+    {
+      int ok = readLine(
+        emulatorStream, &emulatorStreamBuffer,
+        &emulatorStreamBufferSize, NULL
+      );
 
-    if (!ok) {
-      const char *cause =
-        ferror(emulatorStream)? "emulator stream error":
-        feof(emulatorStream)? "end of emulator stream":
-        "emulator monitor failure";
+      if (!ok) {
+        /* Fully-buffered stdio can pull more than one already-written line
+         * out of the pipe in a single underlying read() - e.g. a routine
+         * log line queued right in front of the "path" driver-directive
+         * handshake. Once that happens, the second line is invisible to
+         * select()/poll() (its bytes already left the pipe), so a monitor
+         * that only reads one line per wakeup can strand it indefinitely,
+         * until something unrelated happens to write another line later.
+         * Draining in a loop here, stopping only once the (non-blocking)
+         * stream genuinely has nothing left, closes that gap. */
+        if (ferror(emulatorStream) && (errno == EAGAIN)) {
+          clearerr(emulatorStream);
+          break;
+        }
 
-      handleException(cause);
-      return 0;
+        const char *cause =
+          ferror(emulatorStream)? "emulator stream error":
+          feof(emulatorStream)? "end of emulator stream":
+          "emulator monitor failure";
+
+        handleException(cause);
+        return 0;
+      }
+
+      line = emulatorStreamBuffer;
     }
 
-    line = emulatorStreamBuffer;
-  }
-
-  if (!handleDriverDirective(line)) {
-    logMessage(LOG_NOTICE, "%s", line);
+    if (!handleDriverDirective(line)) {
+      logMessage(LOG_NOTICE, "%s", line);
+    }
   }
 
   return 1;
@@ -405,6 +426,11 @@ startEmulator (void) {
 
   if (!exitStatus) {
     detachStandardStreams();
+
+    /* Non-blocking so emEmulatorMonitor() can safely drain every line
+     * fully-buffered stdio already holds, not just the one line per
+     * readable-fd wakeup that select()/poll() can see - see its comment. */
+    setBlockingIo(fileno(emulatorStream), 0);
 
     if (asyncMonitorFileInput(&emulatorMonitorHandle, fileno(emulatorStream), emEmulatorMonitor, NULL)) {
       return 1;
