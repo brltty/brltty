@@ -26,6 +26,12 @@ extern "C" {
 typedef long int MessageType;
 
 extern int sendMessage (int queue, MessageType type, const void *content, size_t length, int flags);
+
+/* Same as sendMessage() but never logs on failure - for best-effort senders
+ * that expect routine failures (e.g. a small queue filling during a burst)
+ * and need to rate-limit their own diagnostics instead of logging once per
+ * failed send. */
+extern int sendMessageQuietly (int queue, MessageType type, const void *content, size_t length, int flags);
 extern ssize_t receiveMessage (int queue, MessageType *type, void *buffer, size_t size, int flags);
 
 typedef struct {
