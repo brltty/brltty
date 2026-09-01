@@ -409,6 +409,19 @@ static int resumeBrailleDriver(BrailleDisplay *brl) {
   if (trueBraille == &noBraille) return 0; /* core unlinked api */
   driverConstructing = 1;
   lockMutex(&apiSuspendMutex);
+
+  /* A resume attempt must be a genuine attempt, not one silently answered
+   * from a stale per-address connect-error cache entry left over from
+   * before the suspend (bthCloseConnection() never clears it) or from an
+   * earlier failed resume (nothing on this path ever calls it either).
+   * Without this, a single connect failure here - e.g. the still-unfixed
+   * IOBluetooth RFCOMM race documented in bluetooth_darwin.c - permanently
+   * short-circuits every later resume for this device: bthOpenConnection()
+   * would keep honoring the cached failure and never even try again. The
+   * normal cold-start path (startBrailleDriver(), config.c) already does
+   * this before every attempt; this path never did. */
+  forgetDevices();
+
   driverConstructed = constructBrailleDriver();
   if (driverConstructed) {
     disp = brl;
@@ -452,6 +465,23 @@ static int resumeDriver(void) {
 
   runCoreTask(apiCoreTask_resumeBrailleDriver, &rbd, 1);
   return rbd.resumed;
+}
+
+CORE_TASK_CALLBACK(apiCoreTask_restartBrailleDriver) {
+  /* Unlike resumeBrailleDriver(), this re-walks the full braille-device
+   * candidate list (see activateBrailleDriver() in config.c) instead of
+   * only ever retrying the single device that was active before suspend.
+   * Needed because a client that never gave up suspended mode properly may
+   * have left brltty pinned to a device (e.g. a Bluetooth display) that is
+   * no longer reachable, even though another candidate (e.g. USB) now is. */
+  restartBrailleDriver();
+}
+
+/* Function : restartDriver */
+/* Requests a full driver restart, trying every configured braille device
+ * again from scratch - not just the one device resumeDriver() would retry. */
+static void restartDriver(void) {
+  runCoreTask(apiCoreTask_restartBrailleDriver, NULL, 1);
 }
 
 /* Function : resetBrailleDriver */
@@ -1472,7 +1502,15 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
   lockMutex(&apiRawMutex);
   suspendConnection = NULL;
   unlockMutex(&apiRawMutex);
-  resumeDriver();
+  if (!resumeDriver()) {
+    /* This is the normal handoff-resume path (e.g. brltty-handoff resume),
+     * not just the improper-disconnect safety net below - it used to
+     * discard failure here entirely, leaving the driver stuck unconstructed
+     * with nothing ever retrying. Fall back to a full restart so the normal
+     * retry-until-success loop takes over, same as the safety net does. */
+    logMessage(LOG_WARNING, "Couldn't resume braille driver - restarting it instead");
+    restartDriver();
+  }
   writeAck(c->fd);
   return 0;
 }
@@ -2830,8 +2868,16 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       suspendConnection = NULL;
       unlockMutex(&apiRawMutex);
       logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up suspended mode properly",c->fd);
-      if (!resumeDriver())
-	logMessage(LOG_WARNING,"Couldn't resume braille driver");
+      if (!resumeDriver()) {
+	/* resumeDriver() only retries the single device that was active
+	 * before suspend. If that device is no longer reachable (e.g. a
+	 * Bluetooth display that dropped its link while suspended), fall
+	 * back to a full restart so other configured devices (e.g. USB)
+	 * get a chance too, instead of leaving the driver stuck retrying
+	 * only the stale device. */
+	logMessage(LOG_WARNING,"Couldn't resume braille driver - restarting it instead");
+	restartDriver();
+      }
     }
     if (c->tty) {
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "client on fd %"PRIfd" did not give up control of tty %#010x properly",c->fd,c->tty->number);
