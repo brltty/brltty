@@ -57,6 +57,10 @@
 #define PID_FILE "/tmp/brltty-handoff.pid"
 #define SUSPEND_TIMEOUT_SECS 5
 
+/* How long to wait, after being told to resume, before actually calling
+ * brlapi_resumeDriver() - see its call site below for why. */
+#define RESUME_TEARDOWN_SETTLE_USECS 300000
+
 static volatile int doResume = 0;
 
 static void
@@ -135,6 +139,22 @@ cmdSuspend (void) {
 
     /* Hold connection open until SIGUSR1 signals resume. */
     while (!doResume) pause();
+
+    /* This resume typically races VoiceOver's own disconnect from the same
+     * display: the caller (Hammerspoon) tells VoiceOver to quit and calls
+     * "brltty-handoff resume" back to back, but the Bluetooth daemon takes
+     * a moment to actually finish tearing down VoiceOver's session - it
+     * reports the peer disconnected internally roughly 150-200ms after it
+     * starts (confirmed live via bluetoothd's own logs). Calling
+     * brlapi_resumeDriver() immediately reliably loses that race: BRLTTY's
+     * RFCOMM-open attempt lands while the channel is still considered
+     * occupied, fails, and its completion callback is never delivered back
+     * to it either (confirmed live, a generic IOBluetooth gap, not specific
+     * to BRLTTY) - so BRLTTY has to wait out a timeout and retry instead of
+     * connecting immediately. A short, deliberate wait here first - cheap,
+     * since resume isn't latency-critical the way a live keystroke is - is
+     * far less costly than the failed attempt it avoids. */
+    usleep(RESUME_TEARDOWN_SETTLE_USECS);
 
     if (brlapi_resumeDriver() < 0) brlapi_perror("brlapi_resumeDriver");
 
