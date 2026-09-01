@@ -99,7 +99,7 @@ extern "C" {
  * still responsive for interactive key presses. */
 #define DARWIN_BLUETOOTH_RUN_LOOP_PUMP_INTERVAL 100
 
-/* How long each async completion wait in bluetooth_darwin.c
+/* How long each of the three async completion waits in bluetooth_darwin.c
  * (bthEnsureConnectionOpen(), bthPerformServiceQuery(), bthOpenChannel())
  * waits for one attempt before giving up and letting the caller retry.
  * Much shorter than BLUETOOTH_CHANNEL_CONNECT_TIMEOUT: a real failure at
@@ -108,8 +108,36 @@ extern "C" {
  * reliably delivered to this process (see bthPerformServiceQuery()'s
  * comment) - so a longer wait here just burns time waiting for a callback
  * that will not arrive. Confirmed live: without this, a single retry cycle
- * hitting all three steps took close to a minute. */
-#define DARWIN_BLUETOOTH_ASYNC_STEP_TIMEOUT 3000
+ * hitting all three steps took close to a minute.
+ *
+ * Split into three independent constants (2026-08-31, was one shared
+ * DARWIN_BLUETOOTH_ASYNC_STEP_TIMEOUT): live testing confirmed the
+ * RFCOMM-open step specifically hits this exact dropped-callback failure on
+ * essentially every reconnect right after VoiceOver releases the display -
+ * not an occasional flake - so its full 3s was being paid nearly every time
+ * as pure dead time before a retry that then succeeds within about a
+ * second. Since that specific failure is confirmed dropped rather than
+ * merely slow, a shorter wait costs it nothing. The other two steps have
+ * NOT been shown to hit this same near-certain pattern (the SDP-query drop
+ * is real but mitigated by bthEnsureConnectionOpen() and the cached-record
+ * fallback in bthLookUpCachedChannel()), so they stay at the original,
+ * more conservative value rather than being lowered on the RFCOMM step's
+ * evidence alone. */
+#define DARWIN_BLUETOOTH_CONNECTION_OPEN_TIMEOUT 3000
+#define DARWIN_BLUETOOTH_SERVICE_QUERY_TIMEOUT 3000
+
+/* Lowered from 3000 to 1500 (2026-08-31 testing) once split from the other
+ * two steps above. Floor for this constant is the genuine success-callback
+ * latency (observed around a second), not the failure-detection latency -
+ * a wait shorter than a real open's own completion time would abort
+ * attempts that were about to succeed, which costs a full extra retry
+ * cycle (connection teardown, restart, re-discovery) and is far more
+ * expensive than the time such a cut would save. Measure the actual
+ * success-callback latency from live debug logs (the gap between the
+ * "RFCOMM channel: N" line and the successful open) before lowering this
+ * further - don't guess. Revert toward 3000 if retries become noticeably
+ * more frequent rather than just shorter. */
+#define DARWIN_BLUETOOTH_RFCOMM_OPEN_TIMEOUT 1500
 
 /* How often AsynchronousResult's wait: (system_darwin.c) polls its
  * condition while looping asyncAwaitCondition() in small slices, rather

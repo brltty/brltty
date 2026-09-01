@@ -166,10 +166,10 @@ bthPageTimeoutFromTimeout (int timeoutMilliseconds) {
   return (BluetoothHCIPageTimeout)slots;
 }
 
-/* See DARWIN_BLUETOOTH_ASYNC_STEP_TIMEOUT's comment (parameters.h). */
+/* See the per-step DARWIN_BLUETOOTH_*_TIMEOUT comments (parameters.h). */
 static int
-bthAsyncStepTimeout (int timeout) {
-  return MIN(timeout, DARWIN_BLUETOOTH_ASYNC_STEP_TIMEOUT);
+bthAsyncStepTimeout (int timeout, int stepTimeout) {
+  return MIN(timeout, stepTimeout);
 }
 
 static void
@@ -377,13 +377,13 @@ bthEnsureConnectionOpen (BluetoothConnectionExtension *bcx, int timeout) {
 
   if (connectionResult) {
     if ((result = [bcx->bluetoothDevice openConnection:connectionResult withPageTimeout:bthPageTimeoutFromTimeout(timeout) authenticationRequired:NO]) == kIOReturnSuccess) {
-      /* See DARWIN_BLUETOOTH_ASYNC_STEP_TIMEOUT's comment (parameters.h) -
-       * this bounds only how long this process waits for its own
+      /* See DARWIN_BLUETOOTH_CONNECTION_OPEN_TIMEOUT's comment (parameters.h)
+       * - this bounds only how long this process waits for its own
        * completion callback, not the real page timeout given to the OS
        * above (bthPageTimeoutFromTimeout(timeout)), which is left at the
        * caller's full budget since that one genuinely governs how long a
        * real hardware page attempt gets. */
-      int waitTimeout = bthAsyncStepTimeout(timeout);
+      int waitTimeout = bthAsyncStepTimeout(timeout, DARWIN_BLUETOOTH_CONNECTION_OPEN_TIMEOUT);
       if ([connectionResult wait:waitTimeout]) {
         if ((result = connectionResult.finalStatus) != kIOReturnSuccess) {
           logMessage(LOG_CATEGORY(BLUETOOTH_IO), "authenticated connection failed, trying anyway");
@@ -419,10 +419,11 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
         bthEnsureConnectionOpen(bcx, timeout);
 
         if ((result = [bcx->bluetoothDevice openRFCOMMChannelAsync:&bcx->rfcommChannel withChannelID:channel delegate:bcx->rfcommOpenObserver]) == kIOReturnSuccess) {
-          /* See DARWIN_BLUETOOTH_ASYNC_STEP_TIMEOUT's comment (parameters.h)
+          /* See DARWIN_BLUETOOTH_RFCOMM_OPEN_TIMEOUT's comment (parameters.h)
            * for why this step specifically uses a shorter bound than the
-           * caller-supplied timeout, never a longer one. */
-          int openTimeout = bthAsyncStepTimeout(timeout);
+           * caller-supplied timeout, never a longer one - and why it's
+           * tuned more aggressively than the other two async steps. */
+          int openTimeout = bthAsyncStepTimeout(timeout, DARWIN_BLUETOOTH_RFCOMM_OPEN_TIMEOUT);
           if ([bcx->rfcommOpenObserver wait:openTimeout]) {
             /* The open has completed (success or failure). Either way,
              * bthDestroyRfcommChannel() below always abandons rather than
@@ -488,8 +489,8 @@ bthPerformServiceQuery (BluetoothConnectionExtension *bcx, int timeout) {
 
   if (target) {
     if ((result = [bcx->bluetoothDevice performSDPQuery:target]) == kIOReturnSuccess) {
-      /* See DARWIN_BLUETOOTH_ASYNC_STEP_TIMEOUT's comment (parameters.h). */
-      int waitTimeout = bthAsyncStepTimeout(timeout);
+      /* See DARWIN_BLUETOOTH_SERVICE_QUERY_TIMEOUT's comment (parameters.h). */
+      int waitTimeout = bthAsyncStepTimeout(timeout, DARWIN_BLUETOOTH_SERVICE_QUERY_TIMEOUT);
       if ([target wait:waitTimeout]) {
         if ((result = target.finalStatus) != kIOReturnSuccess) {
           bthSetError(result, "service discovery response");
