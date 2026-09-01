@@ -260,6 +260,7 @@ struct BrailleDataStruct {
   AsyncHandle missingAcknowledgementAlarm;
 
   unsigned char configFlags;
+  unsigned char configAttemptsRemaining;
   int firmnessSetting;
 
   int outputPayloadLimit;
@@ -378,8 +379,29 @@ logNegativeAcknowledgement (const FS_Packet *packet) {
              packet->header.arg2, component);
 }
 
+/* How many times to resend the FS_PKT_CONFIG packet (the one that turns on
+ * extended keys, FS_CFG_EXTKEY - needed for the rocker/navigation keys,
+ * which arrive as a separate packet type from panning/routing/output) if it
+ * is NAK'd or its acknowledgement never arrives. Previously this was a
+ * single, never-retried attempt: one lost or NAK'd packet - plausible right
+ * after a Bluetooth reconnect, before the link has fully settled, the same
+ * class of timing issue that motivated bumping the identity-probe timeout
+ * elsewhere in this file - silently and permanently disabled extended keys
+ * for the rest of that connection, with every other key and cell output
+ * working normally. Bounded so a display that genuinely keeps NAKing (e.g.
+ * a real, non-transient incompatibility) still gives up eventually rather
+ * than retrying forever. */
+#define FS_CONFIG_ACKNOWLEDGEMENT_ATTEMPTS 3
+
 static void
 handleConfigAcknowledgement (BrailleDisplay *brl, int ok) {
+  if (!ok && (--brl->data->configAttemptsRemaining > 0)) {
+    unsigned char left = brl->data->configAttemptsRemaining;
+    logMessage(LOG_WARNING, "config packet not acknowledged - retrying (%u %s left)",
+               left, (left == 1)? "attempt": "attempts");
+    return;
+  }
+
   brl->data->configFlags = 0;
 }
 
@@ -769,6 +791,7 @@ setModel (BrailleDisplay *brl, const char *modelName, const char *firmware) {
     brl->data->acknowledgementHandler = NULL;
     brl->data->missingAcknowledgementAlarm = NULL;
     brl->data->configFlags = 0;
+    brl->data->configAttemptsRemaining = FS_CONFIG_ACKNOWLEDGEMENT_ATTEMPTS;
     brl->data->firmnessSetting = -1;
 
     if (brl->data->model->type == MOD_TYPE_Focus) {
