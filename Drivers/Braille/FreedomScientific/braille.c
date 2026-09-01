@@ -848,7 +848,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       FS_Packet response;
 
-      if (probeBrailleDisplay(brl, 2, NULL, 100,
+      if (probeBrailleDisplay(brl, 2, NULL, 1000,
                               writeIdentifyRequest,
                               readResponse, &response, sizeof(response),
                               isIdentityResponse)) {

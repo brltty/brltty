@@ -32,6 +32,11 @@
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 
+#ifdef __APPLE__
+#include "async_alarm.h"
+#include "async_handle.h"
+#endif /* __APPLE__ */
+
 static int
 bthDiscoverSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx, int timeout) {
   static const uint8_t uuid[] = {
@@ -634,6 +639,15 @@ bthGetDeviceName (uint64_t address, int timeout) {
 
   if (entry) {
     if (!entry->name) {
+      /* Deliberately independent of bthOpenConnection()'s connect-error
+       * cache: a name request and a channel connect are different
+       * operations against the same address, and can fail for different
+       * reasons (e.g. a page-scan timing quirk can fail a name request
+       * while the actual SPP channel would still connect fine). Sharing
+       * one cache between them let a failing name request silently starve
+       * every subsequent real channel-connect attempt for the address, for
+       * as long as the connect-error cache stayed unforgotten - the real
+       * connection was then never even attempted. */
       logMessage(LOG_CATEGORY(BLUETOOTH_IO), "obtaining device name");
 
       if ((entry->name = bthObtainDeviceName(address, timeout))) {
@@ -785,3 +799,37 @@ int
 isBluetoothDeviceIdentifier (const char **identifier) {
   return hasQualifier(identifier, BLUETOOTH_DEVICE_QUALIFIER);
 }
+
+#ifdef __APPLE__
+/* macOS's IOBluetooth delivers its asynchronous callbacks (including
+ * incoming RFCOMM data) by scheduling a source on whatever thread's run
+ * loop was current when the connection was made - here, this process's
+ * single main thread - and nothing else in BRLTTY ever pumps that run
+ * loop, so those callbacks are otherwise never delivered. This lives here
+ * rather than in bluetooth_darwin.c because that file is an Objective-C
+ * translation unit pulling in Foundation, whose MacTypes.h typedefs a
+ * TimeValue that collides with this codebase's own (Headers/timing_types.h,
+ * pulled in by async_alarm.h). Not declared via system_darwin.h either,
+ * for the same reason: that header pulls in the same conflicting
+ * Foundation/CoreFoundation headers. */
+extern void darwinDrainRunLoop (void);
+
+ASYNC_ALARM_CALLBACK(bthDarwinRunLoopPumpAlarmCallback) {
+  darwinDrainRunLoop();
+}
+
+void
+bthStartDarwinRunLoopPump (AsyncHandle *handle) {
+  if (asyncNewRelativeAlarm(handle, DARWIN_BLUETOOTH_RUN_LOOP_PUMP_INTERVAL, bthDarwinRunLoopPumpAlarmCallback, NULL)) {
+    if (asyncResetAlarmInterval(*handle, DARWIN_BLUETOOTH_RUN_LOOP_PUMP_INTERVAL)) return;
+    asyncCancelRequest(*handle);
+    *handle = NULL;
+  }
+
+  /* Without this alarm, incoming Bluetooth data is silently never
+   * delivered at all (see the comment above) - if it couldn't even be
+   * created or repeated, that failure needs to be visible rather than
+   * quietly degrading back into that exact bug. */
+  logMessage(LOG_WARNING, "could not start Bluetooth run loop pump alarm - incoming data may never be received");
+}
+#endif /* __APPLE__ */

@@ -19,15 +19,14 @@
 #include "prologue.h"
 
 #include <errno.h>
+#include <time.h>
 #include <IOKit/IOKitLib.h>
 
-#import <Foundation/NSLock.h>
-#import <Foundation/NSThread.h>
-#import <Foundation/NSAutoreleasePool.h>
-
 #include "log.h"
+#include "parameters.h"
 #include "system.h"
 #include "system_darwin.h"
+#include "async_wait.h"
 
 static inline CFRunLoopRef
 getRunLoop (void) {
@@ -42,6 +41,21 @@ getRunMode (void) {
 IOReturn
 executeRunLoop (int seconds) {
   return CFRunLoopRunInMode(getRunMode(), seconds, 1);
+}
+
+void
+darwinDrainRunLoop (void) {
+  /* Non-blocking: process whatever's already ready on this thread's run
+   * loop and return immediately once nothing more is pending, rather than
+   * waiting for anything new to arrive - callers own waiting between calls.
+   * See DARWIN_DRAIN_RUN_LOOP_ITERATION_LIMIT's comment for the bound. */
+  int iterations = 0;
+  while (CFRunLoopRunInMode(getRunMode(), 0, true) == kCFRunLoopRunHandledSource) {
+    if (++iterations >= DARWIN_DRAIN_RUN_LOOP_ITERATION_LIMIT) {
+      logMessage(LOG_WARNING, "darwinDrainRunLoop: iteration limit reached");
+      break;
+    }
+  }
 }
 
 void
@@ -175,22 +189,54 @@ initializeSystemObject (void) {
 @property (assign, readwrite) IOReturn finalStatus;
 @end
 
+/* asyncAwaitCondition()'s tester, called from within BRLTTY's own event
+ * loop (async_wait.c's awaitAction()) between servicing due alarms and I/O -
+ * see wait: below for why going through that loop, rather than pumping the
+ * CFRunLoop directly, is the actual fix here, not just a style change. */
+static int
+darwinAsynchronousResultFinished (void *data) {
+  AsynchronousResult *result = (AsynchronousResult *)data;
+  darwinDrainRunLoop();
+  return result.isFinished;
+}
+
 @implementation AsynchronousResult
 @synthesize isFinished;
 @synthesize finalStatus;
 
 - (int) wait
-  : (int) timeout
+  : (int) timeoutMilliseconds
   {
     if (self.isFinished) return 1;
 
-    while (1) {
-      IOReturn result = executeRunLoop(timeout);
+    /* This used to pump only this thread's CFRunLoop directly
+     * (CFRunLoopRunInMode()), never BRLTTY's own event loop
+     * (Programs/async_wait.c's awaitAction(), which services alarms and
+     * other file descriptors - the update alarm, the screen driver's own
+     * monitored input, BrlAPI, and so on) - confirmed live to starve all of
+     * those for as long as this wait ran. On every other platform, the
+     * equivalent blocking wait inside a driver callback (e.g.
+     * bluetooth_linux.c's connect wait) goes through
+     * asyncAwaitCondition()/awaitSocketInput(), a *recursive* re-entry into
+     * that same event loop, so alarms and other I/O keep running while it
+     * blocks. Looping asyncAwaitCondition() here in small slices - each one
+     * draining the CFRunLoop via darwinAsynchronousResultFinished() - makes
+     * this wait behave the same way. The slicing (rather than one call for
+     * the whole timeout) matters on its own: asyncAwaitCondition() only
+     * calls its tester between due alarms, so a single call would drain the
+     * CFRunLoop only as often as some *other* alarm happens to fire -
+     * confirmed live, a wait with no Bluetooth connection open yet (so no
+     * pump alarm running - see bluetooth_darwin.c's runLoopPumpAlarm) barely
+     * polled at all. */
+    int remaining = timeoutMilliseconds;
 
-      if (self.isFinished) return 1;
-      if (result == kCFRunLoopRunHandledSource) continue;
-      if (result == kCFRunLoopRunTimedOut) return 0;
+    while (remaining > 0) {
+      int slice = remaining < DARWIN_WAIT_POLL_INTERVAL? remaining: DARWIN_WAIT_POLL_INTERVAL;
+      if (asyncAwaitCondition(slice, darwinAsynchronousResultFinished, self)) break;
+      remaining -= slice;
     }
+
+    return self.isFinished;
   }
 
 - (void) setStatus
@@ -201,78 +247,3 @@ initializeSystemObject (void) {
   }
 @end
 
-@interface AsynchronousTask ()
-@property (assign, readwrite) NSThread *taskThread;
-@property (assign, readwrite) CFRunLoopRef taskRunLoop;
-
-@property (retain) NSCondition *startSynchronizer;
-@property (retain) NSThread *resultThread;
-
-- (void) taskFinished;
-
-- (void) main;
-
-- (void) endTask;
-@end
-
-@implementation AsynchronousTask
-@synthesize taskThread;
-@synthesize taskRunLoop;
-@synthesize startSynchronizer;
-@synthesize resultThread;
-
-- (IOReturn) run
-  {
-    logMessage(LOG_WARNING, "run method not overridden");
-    return kIOReturnSuccess;
-  }
-
-- (void) taskFinished
-  {
-    self.resultThread = nil;
-  }
-
-- (void) main
-  {
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-
-    [self.startSynchronizer lock];
-    self.taskThread = [NSThread currentThread];
-    self.taskRunLoop = CFRunLoopGetCurrent();
-    [self.startSynchronizer signal];
-    [self.startSynchronizer unlock];
-
-    [self setStatus:[self run]];
-    [self performSelector:@selector(taskFinished) onThread:self.resultThread withObject:nil waitUntilDone:0];
-
-    self.taskThread = nil;
-    [pool drain];
-  }
-
-- (int) start
-  {
-    if ((self.startSynchronizer = [NSCondition new])) {
-      self.resultThread = [NSThread currentThread];
-
-      [self.startSynchronizer lock];
-      [NSThread detachNewThreadSelector:@selector(main) toTarget:self withObject:nil];
-      [self.startSynchronizer wait];
-      [self.startSynchronizer unlock];
-
-      self.startSynchronizer = nil;
-      return 1;
-    }
-
-    return 0;
-  }
-
-- (void) endTask
-  {
-    CFRunLoopStop(self.taskRunLoop);
-  }
-
-- (void) stop
-  {
-    [self performSelector:@selector(endTask) onThread:self.taskThread withObject:nil waitUntilDone:0];
-  }
-@end
