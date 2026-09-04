@@ -20,6 +20,7 @@
 
 #include <errno.h>
 #include <IOKit/IOKitLib.h>
+#include <IOKit/pwr_mgt/IOPMLib.h>
 
 #import <Foundation/NSLock.h>
 #import <Foundation/NSThread.h>
@@ -168,6 +169,37 @@ setDarwinSystemError (IOReturn result) {
 
 void
 initializeSystemObject (void) {
+}
+
+void
+notifyUserActivity (void) {
+  /* Reported live: the machine can go to sleep mid-session while braille
+   * keys are actively being pressed (seen with a Focus 40 over Bluetooth
+   * RFCOMM; the same reasoning applies to USB). BRLTTY reads its keys
+   * directly off the raw USB/Bluetooth connection, never through
+   * IOHIDSystem, so macOS's idle/display sleep timers have no way to see
+   * braille input as user activity.
+   *
+   * IOPMAssertionDeclareUserActivity is IOKit's documented mechanism for
+   * exactly this: a non-HID input source telling power management that a
+   * real user action just happened, so the display/idle sleep timers get
+   * reset the same way a real keypress would reset them. Unlike an
+   * IOPMAssertionCreate*-style standing assertion, it does not hold sleep
+   * off indefinitely - it only nudges the existing timers - so it's safe to
+   * call on every single braille key command with no risk of preventing a
+   * legitimate idle sleep once input actually stops. The assertion ID it
+   * hands back only matters if you want to report continuous activity
+   * under the same ID; a fresh call each time (ID discarded) is fine here
+   * since calls already coincide with discrete key events. */
+  IOPMAssertionID assertionID;
+
+  IOReturn result = IOPMAssertionDeclareUserActivity(
+    CFSTR("BRLTTY: braille key input"), kIOPMUserActiveLocal, &assertionID
+  );
+
+  if (result != kIOReturnSuccess) {
+    logMessage(LOG_WARNING, "IOPMAssertionDeclareUserActivity failed: 0X%X", result);
+  }
 }
 
 @interface AsynchronousResult ()

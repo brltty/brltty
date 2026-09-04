@@ -203,6 +203,10 @@ initializeSystemObject (void) {
   loadLibraries();
 }
 
+void
+notifyUserActivity (void) {
+}
+
 #ifdef __MINGW32__
 #include "win_errno.h"
 

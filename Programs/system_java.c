@@ -488,3 +488,7 @@ initializeSystemObject (void) {
   initializeAndroidEnvironment(getJavaNativeInterface());
 #endif /* platform-speciofic initialization */
 }
+
+void
+notifyUserActivity (void) {
+}

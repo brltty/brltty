@@ -387,3 +387,7 @@ snprintf (char *str, size_t size, const char *format, ...) {
 void
 initializeSystemObject (void) {
 }
+
+void
+notifyUserActivity (void) {
+}
