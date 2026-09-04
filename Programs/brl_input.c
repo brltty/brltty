@@ -31,6 +31,7 @@
 #include "cmd_enqueue.h"
 #include "io_generic.h"
 #include "core.h"
+#include "system.h"
 
 static int
 processInput (void) {
@@ -49,6 +50,12 @@ processInput (void) {
 
   setBrailleOnline(&brl);
   if (command == EOF) return 0;
+
+  /* A real command from the user's own key press - tell the OS the user is
+   * active (see notifyUserActivity()'s comment for why this is needed at
+   * all: braille input bypasses the OS's normal HID activity tracking). */
+  notifyUserActivity();
+
   enqueueCommand(command);
   return 1;
 }

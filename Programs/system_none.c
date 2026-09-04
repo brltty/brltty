@@ -23,3 +23,7 @@
 void
 initializeSystemObject (void) {
 }
+
+void
+notifyUserActivity (void) {
+}
