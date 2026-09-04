@@ -1467,3 +1467,7 @@ destroyInputEventMonitor (InputEventMonitor *monitor) {
 void
 initializeSystemObject (void) {
 }
+
+void
+notifyUserActivity (void) {
+}
