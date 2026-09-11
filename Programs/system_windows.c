@@ -222,6 +222,12 @@ initializeSystemObject (void) {
 #define SUBLANG_GERMAN_GERMANY SUBLANG_GERMAN
 #endif /* SUBLANG_GERMAN_GERMANY */
 
+/* SUBLANG_HAUSA_NIGERIA_LATIN is what MS defines; mingw-w64 used to also
+ * alias it as SUBLANG_HAUSA_NIGERIA but has since dropped that alias. */
+#ifndef SUBLANG_HAUSA_NIGERIA
+#define SUBLANG_HAUSA_NIGERIA SUBLANG_HAUSA_NIGERIA_LATIN
+#endif /* SUBLANG_HAUSA_NIGERIA */
+
 #ifndef SUBLANG_ITALIAN_ITALY
 #define SUBLANG_ITALIAN_ITALY SUBLANG_ITALIAN
 #endif /* SUBLANG_ITALIAN_ITALY */
@@ -229,6 +235,12 @@ initializeSystemObject (void) {
 #ifndef SUBLANG_KOREAN_KOREA
 #define SUBLANG_KOREAN_KOREA SUBLANG_KOREAN
 #endif /* SUBLANG_KOREAN_KOREA */
+
+/* SUBLANG_LAO_LAO is what MS defines; mingw-w64 used to also alias it as
+ * SUBLANG_LAO_LAO_PDR but has since dropped that alias. */
+#ifndef SUBLANG_LAO_LAO_PDR
+#define SUBLANG_LAO_LAO_PDR SUBLANG_LAO_LAO
+#endif /* SUBLANG_LAO_LAO_PDR */
 
 #ifndef SUBLANG_LITHUANIAN_LITHUANIA
 #define SUBLANG_LITHUANIAN_LITHUANIA SUBLANG_LITHUANIAN
@@ -246,9 +258,22 @@ initializeSystemObject (void) {
 #define SUBLANG_SWEDISH_SWEDEN SUBLANG_SWEDISH
 #endif /* SUBLANG_SWEDISH_SWEDEN */
 
+/* Prefer SUBLANG_SYRIAC_SYRIA, the name MSDN documents; mingw-w64 used to
+ * only define the older SUBLANG_SYRIAC, then switched to only defining
+ * SUBLANG_SYRIAC_SYRIA - so a build might have either one. */
 #ifndef SUBLANG_SYRIAC_TURKEY
+#ifdef SUBLANG_SYRIAC_SYRIA
+#define SUBLANG_SYRIAC_TURKEY SUBLANG_SYRIAC_SYRIA
+#else /* SUBLANG_SYRIAC_SYRIA */
 #define SUBLANG_SYRIAC_TURKEY SUBLANG_SYRIAC
+#endif /* SUBLANG_SYRIAC_SYRIA */
 #endif /* SUBLANG_SYRIAC_TURKEY */
+
+/* Not present in current Windows SDKs at all; mingw-w64 used to define it
+ * anyway but has since dropped it. */
+#ifndef SUBLANG_TIBETAN_BHUTAN
+#define SUBLANG_TIBETAN_BHUTAN 0X02
+#endif /* SUBLANG_TIBETAN_BHUTAN */
 
 char *
 getWindowsLocaleName (void) {
