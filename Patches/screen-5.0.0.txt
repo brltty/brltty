@@ -1,0 +1,101 @@
+Introduction
+============
+
+Shared memory is another method for BRLTTY to get the content of the screen.
+For this method you need two components:
+
+*  Some other application needs to maintain the shared screen image. This can 
+   be done via the screen program when augmented by a BRLTTY-supplied patch.
+*  BRLTTY needs to be able to view the shared screen image. This is done via
+   its Screen screen driver.
+
+The original purpose of screen was to run different "screens" on a single
+terminal. It also supports features like copy-and-paste, a scrollback buffer,
+multi-window management, etc. Screen supports lots of terminal types,
+including 256-color and truecolor terminals.
+
+This patch updates BRLTTY's GNU Screen shared memory driver support for
+GNU Screen 5.0.0 (and newer). It includes support for:
+- Screen 5.0's updated window and layer architecture.
+- 16-color, 256-color, and 24-bit truecolor translation to VGA attributes.
+- Character attributes (bold, underline/reverse, blinking).
+- Safe memory bounds checking for up to 132x66 terminal dimensions.
+- Robust SysV IPC shared memory initialization, cleanup, and error reporting.
+
+
+Instructions
+============
+
+1) Build and install BRLTTY:
+
+      ./configure
+      make
+      make install
+   
+   BRLTTY's Screen screen driver will be built by default. Be sure not to 
+   explicitly exclude it via, for example, a configure option like:
+
+      --with-screen-driver=-sc
+
+2) Obtain the source for Screen 5.0.0:
+
+   From official GNU release tarball:
+      https://ftp.gnu.org/gnu/screen/screen-5.0.0.tar.gz
+
+   Or from the GNU Savannah Git repository:
+      git clone https://git.savannah.gnu.org/git/screen.git
+      cd screen
+      git checkout v5.0.0
+
+3) Unpack or navigate to the source:
+
+   If using the release tarball:
+      tar xzf /path/to/screen-5.0.0.tar.gz
+      cd screen-5.0.0
+
+   If using the git repository:
+      cd screen
+
+4) Apply the patch:
+
+   If using the release tarball:
+      patch -p2 </path/to/brltty/Patches/screen-5.0.0.patch
+
+   If using the git checkout (from repository root):
+      git apply /path/to/brltty/Patches/screen-5.0.0.patch
+      (or: patch -p1 </path/to/brltty/Patches/screen-5.0.0.patch)
+
+5) Build and install Screen:
+
+   If using the release tarball:
+      ./configure
+      make
+      make install
+
+   If using the git checkout:
+      cd src
+      ./autogen.sh
+      ./configure
+      make
+      make install
+
+   Note for macOS users:
+   On macOS, you may want to pass '--disable-socket-dir --enable-colors256'
+   to ./configure.
+
+6) Run screen, and then brltty (specifying its Screen screen driver):
+
+      screen
+      brltty -s sc
+
+   (or legacy syntax: brltty -x sc)
+
+   The only order dependency is that screen must be run first the first time in
+   order to get the shared memory segment created. Although brltty can be run
+   first from then on, the shared memory image will, of course, be stale until
+   screen is started.
+
+
+BRLTTY's screen patch was originally developed by Rudolf Weeber
+<rudolf.weeber@gmx.de>.
+Updated for GNU Screen 5.0 by David Tseng <dtseng@google.com>.

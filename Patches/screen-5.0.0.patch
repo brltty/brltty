@@ -1,0 +1,448 @@
+diff --git a/src/input.c b/src/input.c
+index 904293f..b53ae11 100644
+--- a/src/input.c
++++ b/src/input.c
+@@ -33,6 +33,7 @@
+ #include <stddef.h>
+ 
+ #include "screen.h"
++#include "layer.h"
+ 
+ #include "misc.h"
+ 
+@@ -438,3 +439,51 @@ static void InpRedisplayLine(int y, int xs, int xe, int isblank)
+ 		LClearArea(flayer, q, y, q + l - 1, y, 0, 0);
+ 	}
+ }
++
++/* add export ipc shared image */
++int
++IsInputLayer(Layer *l)
++{
++	return l && l->l_layfn == &InpLf;
++}
++
++int
++GetInputPosition(Layer *l)
++{
++	struct inpdata *inpdata;
++	if (!l || !l->l_data)
++		return 0;
++	inpdata = (struct inpdata *)l->l_data;
++	return inpdata->inpstringlen + inpdata->inp.pos;
++}
++
++void
++CopyInputLine(Layer *l, char *dest, int width)
++{
++	struct inpdata *inpdata;
++	char *src;
++	int len;
++
++	if (!dest || width <= 0)
++		return;
++
++	if (!l || !l->l_data) {
++		memset(dest, ' ', width);
++		return;
++	}
++
++	inpdata = (struct inpdata *)l->l_data;
++
++	for (src = inpdata->inpstring, len = inpdata->inpstringlen;
++	     width && len;
++	     *dest++ = *src++, len--, width--);
++
++	if (!(inpdata->inpmode & INP_NOECHO)) {
++		for (src = inpdata->inp.buf, len = inpdata->inp.len;
++		     width && len;
++		     *dest++ = *src++, len--, width--);
++	}
++
++	while (width) *dest++ = ' ', width--;
++}
++
+diff --git a/src/input.h b/src/input.h
+index bdb5bde..3ad29d2 100644
+--- a/src/input.h
++++ b/src/input.h
+@@ -2,9 +2,12 @@
+ #define SCREEN_INPUT_H
+ 
+ #include <stdlib.h>
++#include "layer.h"
+ 
+ void  inp_setprompt (char *, char *);
+ void  Input (char *, size_t, int, void (*)(char *, size_t, void *), char *, int);
+-int   InInput (void);
++int   IsInputLayer (Layer *);
++int   GetInputPosition (Layer *);
++void  CopyInputLine (Layer *, char *, int);
+ 
+ #endif /* SCREEN_INPUT_H */
+diff --git a/src/sched.c b/src/sched.c
+index 3618f11..7e453b5 100644
+--- a/src/sched.c
++++ b/src/sched.c
+@@ -37,6 +37,7 @@
+ #include <sys/time.h>
+ 
+ #include "screen.h"
++#include "window.h"
+ 
+ static Event *evs;
+ static Event *tevs;
+@@ -128,6 +129,11 @@ void sched(void)
+ 	int i, n;
+ 
+ 	for (;;) {
++/* export image from last used window */
++		Window *win = fore ? fore : (mru_window ? mru_window : first_window);
++		if (shm)
++			CopyWinImage(win, shm);
++/* end export ipc image */
+ 		if (calctimeout)
+ 			timeoutev = calctimo();
+ 		if (timeoutev) {
+diff --git a/src/screen.c b/src/screen.c
+index a79c3b1..ea814bf 100644
+--- a/src/screen.c
++++ b/src/screen.c
+@@ -59,6 +59,13 @@
+ #include "utmp.h"
+ #include "winmsg.h"
+ 
++/* export ipc image */
++#include <sys/ipc.h>
++#include <sys/shm.h>
++#include "window.h"
++unsigned char *shm;
++/* end export ipc image */
++
+ extern char **environ;
+ 
+ int           force_vt = 1;
+@@ -291,6 +298,51 @@ static void exit_with_usage(char *myname, char *message, char *arg)
+ 	exit(0);
+ }
+ 
++/* export ipc image */
++static void InitShm(void)
++{
++	const char *path;
++	key_t key;
++	int shmid;
++
++	/* allow for the header, text, attributes, and auxiliary data
++	 * (assuming no screen will be bigger than 132x66)
++	 */
++	size_t size = 18000;
++
++	path = getenv("HOME");
++	if (!path || !*path)
++		path = "/";
++	if ((key = ftok(path, 'b')) == -1)
++		key = 0XBACD072F;
++
++	shmid = shmget(key, size, IPC_CREAT | S_IRWXU);
++	if (shmid < 0 && errno == EINVAL) {
++		/* Stale segment with different size exists; attempt cleanup and retry */
++		int old_id = shmget(key, 0, 0);
++		if (old_id >= 0) {
++			shmctl(old_id, IPC_RMID, NULL);
++			shmid = shmget(key, size, IPC_CREAT | S_IRWXU);
++		}
++	}
++
++	if (shmid < 0) {
++		Msg(errno, "BRLTTY: shmget failed");
++		return;
++	}
++
++	shm = shmat(shmid, 0, 0);
++	if (shm == (void *)-1) {
++		Msg(errno, "BRLTTY: shmat failed");
++		shm = NULL;
++		return;
++	}
++
++	/* put valid data into the image */
++	SetWinImage("screen is initializing...", shm);
++}
++/* end export ipc image */
++
+ int main(int argc, char **argv)
+ {
+ 	int       n;
+@@ -335,6 +387,7 @@ int main(int argc, char **argv)
+ 	MsgWait           = MSGWAIT * 1000;
+ 	MsgMinWait        = MSGMINWAIT * 1000;
+ 	SilenceWait       = SILENCEWAIT;
++
+ 	zmodem_sendcmd    = SaveStr("!!! sz -vv -b ");
+ 	zmodem_recvcmd    = SaveStr("!!! rz -vv -b -E");
+ 
+@@ -1104,6 +1157,8 @@ int main(int argc, char **argv)
+ 	logflushev.type = EV_TIMEOUT;
+ 	logflushev.handler = logflush_fn;
+ 
++	InitShm();
++
+ 	sched();
+ 	/* NOTREACHED */
+ 	return 0;
+@@ -1281,6 +1336,10 @@ void Finit(int i)
+ 
+ void eexit(int e)
+ {
++	if (shm) {
++		shmdt(shm);
++		shm = NULL;
++	}
+ 	if (ServerSocket != -1) {
+ 		if (setgid(real_gid))
+ 			AddStr("Failed to set gid\r\n");
+diff --git a/src/window.c b/src/window.c
+index 042d152..e382cd8 100644
+--- a/src/window.c
++++ b/src/window.c
+@@ -45,6 +45,8 @@
+ #include "fileio.h"
+ #include "help.h"
+ #include "input.h"
++#include "display.h"
++#include "ansi.h"
+ #include "mark.h"
+ #include "misc.h"
+ #include "process.h"
+@@ -2010,3 +2012,217 @@ Window *GetWindowByNumber(uint16_t n)
+ 	}
+ 	return NULL;
+ }
++
++/* export ipc image */
++extern int color256to16(int);
++
++static int
++DecodeColor(uint32_t color, int is_bg)
++{
++	static const unsigned char tr[] = {
++		0X0, 0X4, 0X2, 0X6, 0X1, 0X5, 0X3, 0X7,
++		0X8, 0XC, 0XA, 0XE, 0X9, 0XD, 0XB, 0XF
++	};
++
++	if (color == 0)
++		return is_bg ? 0 : 7; /* Default: Black (0) for bg, Light Gray (7) for fg */
++
++	if ((color & 0xFF000000) == 0x01000000) {
++		/* ANSI 16 colors (0-15) */
++		return tr[color & 0x0F];
++	}
++
++	if ((color & 0xFF000000) == 0x02000000) {
++		/* 256 colors */
++		int c = color & 0xFF;
++		if (c < 16)
++			return tr[c & 0x0F];
++		return tr[color256to16(c) & 0x0F];
++	}
++
++	if ((color & 0xFF000000) == 0x04000000) {
++		/* Truecolor */
++		uint8_t r = (color >> 16) & 0xFF;
++		uint8_t g = (color >> 8) & 0xFF;
++		uint8_t b = color & 0xFF;
++		int ansi = 0;
++		if (r >= 128) ansi |= 1;
++		if (g >= 128) ansi |= 2;
++		if (b >= 128) ansi |= 4;
++		if (r >= 192 || g >= 192 || b >= 192) ansi |= 8;
++		return tr[ansi & 0x0F];
++	}
++
++	return is_bg ? 0 : 7;
++}
++
++void
++SetWinImage(const char *msg, unsigned char *dest)
++{
++	unsigned char *d;
++	size_t count = 80 * 1;
++	size_t len;
++
++	if (!dest)
++		return;
++
++	d = dest;
++	len = msg ? strlen(msg) : 0;
++	if (len > count)
++		len = count;
++
++	*d++ = 80;   /* screen width */
++	*d++ = 1;    /* screen height */
++	*d++ = 0;    /* cursor column */
++	*d++ = 0;    /* cursor row */
++
++	memset(d, ' ', count);
++	if (len > 0)
++		memcpy(d, msg, len);
++	d += count;
++
++	memset(d, 0x07, count);
++	d += count;
++
++	*d++ = 0;    /* window number */
++	*d++ = 0;    /* flags */
++}
++
++void
++CopyWinImage(Window *p, unsigned char *dest)
++{
++	unsigned char *d;
++	int x, y;
++	Display *disp;
++	int st, in, extra;
++	int w, h, total_rows;
++	int cx, cy;
++
++	if (!dest)
++		return;
++
++	if (!p || !p->w_mlines) {
++		SetWinImage("no active screen", dest);
++		return;
++	}
++
++	d = dest;
++	disp = p->w_lastdisp;
++	st = (disp && disp->d_status) ? 1 : 0;
++	in = IsInputLayer(p->w_savelayer) ? 1 : 0;
++	extra = (st || in) ? 1 : 0;
++
++	w = p->w_width;
++	if (w < 0)
++		w = 0;
++	else if (w > 132)
++		w = 132;
++
++	h = p->w_height;
++	if (h < 0)
++		h = 0;
++	if (h + extra > 66)
++		h = 66 - extra;
++	if (h < 0)
++		h = 0;
++
++	total_rows = h + extra;
++
++	if (st)
++		cx = disp->d_status_len;
++	else if (in)
++		cx = GetInputPosition(p->w_savelayer);
++	else
++		cx = p->w_x;
++
++	if (st || in)
++		cy = h;
++	else
++		cy = p->w_y;
++
++	if (w > 0) {
++		if (cx < 0)
++			cx = 0;
++		else if (cx >= w)
++			cx = w - 1;
++	} else {
++		cx = 0;
++	}
++
++	if (total_rows > 0) {
++		if (cy < 0)
++			cy = 0;
++		else if (cy >= total_rows)
++			cy = total_rows - 1;
++	} else {
++		cy = 0;
++	}
++
++	*d++ = (unsigned char)w;
++	*d++ = (unsigned char)total_rows;
++	*d++ = (unsigned char)cx;
++	*d++ = (unsigned char)cy;
++
++	/* copy window image to buffer */
++	for (y = 0; y < h; y++) {
++		uint32_t *s = p->w_mlines[y].image;
++		for (x = 0; x < w; x++) {
++			uint32_t ch = s ? s[x] : ' ';
++			*d++ = (ch < 256) ? (unsigned char)ch : (unsigned char)' ';
++		}
++	}
++
++	/* copy status line to buffer */
++	if (st) {
++		const char *s = disp->d_status_lastmsg;
++		for (x = 0; s && *s && x < w; x++)
++			*d++ = (unsigned char)*s++;
++		for (; x < w; x++)
++			*d++ = ' ';
++	} else if (in) {
++		CopyInputLine(p->w_savelayer, (char *)d, w);
++		d += w;
++	}
++
++	/* copy attributes from window image to buffer */
++	for (y = 0; y < h; y++) {
++		struct mline *ml = &p->w_mlines[y];
++		for (x = 0; x < w; x++) {
++			uint32_t raw_fg = (ml->colorfg && ml->colorfg != null) ? ml->colorfg[x] : 0;
++			uint32_t raw_bg = (ml->colorbg && ml->colorbg != null) ? ml->colorbg[x] : 0;
++			uint32_t at = (ml->attr && ml->attr != null) ? ml->attr[x] : 0;
++
++			int fg = DecodeColor(raw_fg, 0);
++			int bg = DecodeColor(raw_bg, 1);
++
++			if (at & A_BD)
++				fg |= 0x08;
++
++			if (at & (A_RV | A_SO)) {
++				int tmp = fg;
++				fg = bg;
++				bg = tmp;
++			}
++
++			unsigned char attr_byte = (fg & 0x0F) | ((bg & 0x07) << 4);
++			if (at & A_BL)
++				attr_byte |= 0x80;
++
++			*d++ = attr_byte;
++		}
++	}
++
++	if (st || in) {
++		memset(d, (st ? 0x70 : 0x07), w);
++		d += w;
++	}
++
++	*d++ = (unsigned char)p->w_number;
++
++	*d = 0;
++	if (p->w_cursorkeys) *d |= 0x01;
++	if (p->w_keypad)     *d |= 0x02;
++	d++;
++}
++/* end export ipc image */
++
+diff --git a/src/window.h b/src/window.h
+index bc08c6c..0fdaac4 100644
+--- a/src/window.h
++++ b/src/window.h
+@@ -351,4 +351,8 @@ extern bool VerboseCreate;
+ extern const struct LayFuncs WinLf;
+ extern struct NewWindow nwin_undef, nwin_default, nwin_options;
+ 
++void SetWinImage (const char *, unsigned char *);
++void CopyWinImage (Window *, unsigned char *);
++extern unsigned char *shm;
++
+ #endif /* SCREEN_WINDOW_H */
