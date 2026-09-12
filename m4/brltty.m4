@@ -443,7 +443,7 @@ AC_SUBST([$1_driver_libraries])
 
 AC_DEFUN([BRLTTY_ITEM_RESOLVE], [dnl
 brltty_item_unknown=true
-brltty_item_length=`expr length "${brltty_item}"`
+brltty_item_length=${#brltty_item}
 
 if test "${brltty_item_length}" -eq 2
 then
