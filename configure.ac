@@ -570,35 +570,8 @@ in
       brltty_mklib_gcc_make="not_supported_on_msdos"
       ;;
    darwin*)
-      dylibFound=false
-      dylibPath=/usr/lib/dylib1.o
-      set -- "${dylibPath}"
-
-      sdkRootPrefix="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX"
-      sdkRootSuffix=".sdk/${dylibPath}"
-      sdkVersion=`sw_vers -productVersion`
-
-      while true
-      do
-         set -- "${@}" "${sdkRootPrefix}${sdkVersion}${sdkRootSuffix}"
-         sdkNext="${sdkVersion%.*}"
-         test "${sdkNext}" != "${sdkVersion}" || break
-         sdkVersion="${sdkNext}"
-      done
-
-      set -- "${@}" "${sdkRootPrefix}"*"${sdkRootSuffix}"
-      for sdkPath
-      do
-         test ! -f "${sdkPath}" || {
-            dylibPath="${sdkPath}"
-            dylibFound=true
-            break
-         }
-      done
-      "${dylibFound}" || AC_MSG_WARN([cannot find ${dylibPath}])
-
       brltty_mklib_ld_make="-dylib"
-      brltty_mklib_ld_options="${dylibPath} -single_module -install_name"
+      brltty_mklib_ld_options="-install_name"
       brltty_mklib_gcc_make="-dynamiclib"
       ;;
    *)
