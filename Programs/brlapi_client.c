@@ -939,7 +939,7 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
 	/* Local connection, it should be fast, otherwise it means we have a
 	 * firewall blocking us, and then better not wait unnecessarily. */
 	struct timeval tv = { .tv_usec = 100000 };
-	setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+	setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (void*) &tv, sizeof(tv));
       }
 
       if (connect(sockfd, cur->ai_addr, cur->ai_addrlen)<0) {
