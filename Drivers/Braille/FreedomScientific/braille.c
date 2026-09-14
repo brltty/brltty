@@ -37,6 +37,24 @@
 #include "brl_driver.h"
 #include "brldefs-fs.h"
 
+#define PROBE_RETRY_LIMIT 2
+#define PROBE_INPUT_TIMEOUT 1000
+
+/* How many times to resend the FS_PKT_CONFIG packet (the one that turns on
+ * extended keys, FS_CFG_EXTKEY - needed for the rocker/navigation keys,
+ * which arrive as a separate packet type from panning/routing/output) if it
+ * is NAK'd or its acknowledgement never arrives. Previously this was a
+ * single, never-retried attempt: one lost or NAK'd packet - plausible right
+ * after a Bluetooth reconnect, before the link has fully settled, the same
+ * class of timing issue that motivated bumping the identity-probe timeout
+ * elsewhere in this file - silently and permanently disabled extended keys
+ * for the rest of that connection, with every other key and cell output
+ * working normally. Bounded so a display that genuinely keeps NAKing (e.g.
+ * a real, non-transient incompatibility) still gives up eventually rather
+ * than retrying forever.
+ */
+#define FS_CONFIG_ACKNOWLEDGEMENT_ATTEMPTS 3
+
 BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(FS_KEY_PanLeft, "PanLeft"),
   KEY_NAME_ENTRY(FS_KEY_PanRight, "PanRight"),
@@ -378,20 +396,6 @@ logNegativeAcknowledgement (const FS_Packet *packet) {
              packet->header.arg1, problem,
              packet->header.arg2, component);
 }
-
-/* How many times to resend the FS_PKT_CONFIG packet (the one that turns on
- * extended keys, FS_CFG_EXTKEY - needed for the rocker/navigation keys,
- * which arrive as a separate packet type from panning/routing/output) if it
- * is NAK'd or its acknowledgement never arrives. Previously this was a
- * single, never-retried attempt: one lost or NAK'd packet - plausible right
- * after a Bluetooth reconnect, before the link has fully settled, the same
- * class of timing issue that motivated bumping the identity-probe timeout
- * elsewhere in this file - silently and permanently disabled extended keys
- * for the rest of that connection, with every other key and cell output
- * working normally. Bounded so a display that genuinely keeps NAKing (e.g.
- * a real, non-transient incompatibility) still gives up eventually rather
- * than retrying forever. */
-#define FS_CONFIG_ACKNOWLEDGEMENT_ATTEMPTS 3
 
 static void
 handleConfigAcknowledgement (BrailleDisplay *brl, int ok) {
@@ -871,7 +875,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       FS_Packet response;
 
-      if (probeBrailleDisplay(brl, 2, NULL, 100,
+      if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
                               writeIdentifyRequest,
                               readResponse, &response, sizeof(response),
                               isIdentityResponse)) {
