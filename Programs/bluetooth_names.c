@@ -77,6 +77,9 @@ const BluetoothNameEntry bluetoothNameTable[] = {
   // HIMS: Braille Edge
   BLUETOOTH_NAME_ENTRY("BrailleEDGE", "hm"),
 
+  // HIMS: Braille eMotion
+  BLUETOOTH_NAME_ENTRY("Braille eMotion", "hm"),
+
   // Inceptor: Braille Me
   BLUETOOTH_NAME_ENTRY("BrailleMe", "ic"),
 
@@ -127,6 +130,9 @@ const BluetoothNameEntry bluetoothNameTable[] = {
 
   // HandyTech: Easy Braille
   BLUETOOTH_NAME_ENTRY("Easy Braille EBR", "ht"),
+
+  // HIMS: eMotion
+  BLUETOOTH_NAME_ENTRY("eMotion", "hm"),
 
   // Alva: EL12
   // Harpo: Braille Pen
