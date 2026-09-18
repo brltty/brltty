@@ -1126,6 +1126,7 @@ BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_TMPFILES_DIR], [systemd], [tmpfilesdir], [/us
 BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_UNIT_DIR], [systemd], [systemdsystemunitdir], [/usr/lib/systemd/system])
 BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_CONF_DIR], [systemd], [systemdsystemconfdir], [/usr/lib/systemd/system])
 
+system_extra_objects=""
 BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
    *android*)
       system_package="java"
@@ -1141,6 +1142,7 @@ BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
       system_package="darwin"
       system_includes="-x objective-c"
       system_libs="-framework IOKit -framework Foundation -framework CoreFoundation -lobjc"
+      system_extra_objects="system_darwin_runloop"
       ;;
    hpux*)
       if test -d /opt/audio/include
@@ -1162,6 +1164,7 @@ BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
       system_libs="-ldbg"
       ;;
 ])
+AC_SUBST([system_extra_objects])
 
 expat_includes=""
 expat_libs=""
