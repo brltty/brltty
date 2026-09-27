@@ -45,9 +45,10 @@ all-crctest: crctest$X
 all-matchtest: matchtest$X
 all-msgtest: msgtest$X
 
-all-api: $(ALL_XBRLAPI) all-brltty-clip all-apitest brlapi_brldefs.auto.h
+all-api: $(ALL_XBRLAPI) all-brltty-clip $(ALL_BRLTTY_HANDOFF) all-apitest brlapi_brldefs.auto.h
 all-xbrlapi: xbrlapi$X
 all-brltty-clip: brltty-clip$X
+all-brltty-handoff: brltty-handoff$X
 all-apitest: apitest$X
 
 ###############################################################################
@@ -1163,6 +1164,16 @@ brltty-clip.$O:
 
 ###############################################################################
 
+BRLTTY_HANDOFF_OBJECTS = brltty-handoff.$O
+
+brltty-handoff$X: $(BRLTTY_HANDOFF_OBJECTS) | api
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_HANDOFF_OBJECTS) $(API_LIBS) $(LDLIBS)
+
+brltty-handoff.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-handoff.c
+
+###############################################################################
+
 TBL2HEX_OBJECTS_FOR_BUILD = tbl2hex.$(O_FOR_BUILD) $(PROGRAM_OBJECTS_FOR_BUILD) dataarea.$(O_FOR_BUILD) ttb_compile.$(O_FOR_BUILD) ttb_native.$(O_FOR_BUILD) $(CHARSET_OBJECTS_FOR_BUILD) ctb_compile.$(O_FOR_BUILD) cldr.$(O_FOR_BUILD) atb_compile.$(O_FOR_BUILD)
 TBL2HEX_OBJECTS = $(TBL2HEX_OBJECTS_FOR_BUILD:.$(O_FOR_BUILD)=.$B)
 
@@ -1329,8 +1340,11 @@ install-api-key:
 	if test ! -f $$file -a -w $(sysconfdir) -a -z "$(INSTALL_ROOT)"; \
 	then $(SRC_TOP)brltty-genkey -f $$file; fi
 
-install-api-commands: all-brltty-clip install-program-directory
-	$(INSTALL_PROGRAM) brltty-clip$X $(INSTALL_PROGRAM_DIRECTORY) 
+install-api-commands: all-brltty-clip $(ALL_BRLTTY_HANDOFF) install-program-directory $(INSTALL_BRLTTY_HANDOFF)
+	$(INSTALL_PROGRAM) brltty-clip$X $(INSTALL_PROGRAM_DIRECTORY)
+
+install-brltty-handoff: install-program-directory
+	$(INSTALL_PROGRAM) brltty-handoff$X $(INSTALL_PROGRAM_DIRECTORY)
 
 ###############################################################################
 
@@ -1415,7 +1429,7 @@ clean::
 	-rm -f brltty-trtxt$X brltty-ttb$X brltty-ctb$X brltty-atb$X brltty-ktb$X
 	-rm -f brltty-tune$X brltty-morse$X brltty-pty$X
 	-rm -f brltty-cldr$X brltty-cmdref$X brltty-hid$X brltty-lsinc$X
-	-rm -f brltty-clip$X xbrlapi$X
+	-rm -f brltty-clip$X brltty-handoff$X xbrlapi$X
 	-rm -f tbl2hex$(X_FOR_BUILD) *test$X *-static$X
 	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(LIB_EXT).* *.$(ARC_EXT) *.def *.class *.jar
 	-rm -f $(BLD_TOP)$(DRV_DIR)/*
