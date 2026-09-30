@@ -9,6 +9,9 @@ Access to the Console Screen for Blind Persons using Refreshable Braille Display
 
 Copyright (c) 1995-2026 by The BRLTTY Developers. BRLTTY is free software, and comes with ABSOLUTELY NO WARRANTY. It is placed under the terms of version 2.1 or later of **The GNU Lesser General Public License** as published by **The Free Software Foundation**.
 
+.. contents:: Contents
+   :local:
+
 
 Introduction
 ============

@@ -10,6 +10,9 @@ Accès à l'écran d'une console pour les personnes non-voyantes utilisant des a
 
 Copyright (c) 1995-2026 par Les Développeurs de BRLTTY. BRLTTY est un logiciel libre, et n'est accompagné d'ABSOLUMENT AUCUNE GARANTIE. Il est placé sous les termes de la version 2.1 ou ultérieure de la **GNU Lesser General Public License** publiée par **The Free Software Foundation**.
 
+.. contents:: Table des matières
+   :local:
+
 
 Introduction
 ============
