@@ -23,6 +23,14 @@ smartquotes = False
 # Suppress both links.
 html_use_index = False
 
+# The theme's sidebar ("Navigation", "Documentation overview") has nothing
+# to offer a single-page manual, and the footer only repeats the copyright
+# notice already at the top of each manual and credits the tooling. Both
+# are noise, especially when the page is read with a screen reader.
+html_sidebars = {'**': []}
+html_show_copyright = False
+html_show_sphinx = False
+
 def _no_search_page(app):
     app.builder.search = False
 
