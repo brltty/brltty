@@ -20,7 +20,6 @@ LOCALE = C
 SETLOCALE = LC_ALL=$(LOCALE)
 
 SPHINX_CONFDIR = $(SRC_TOP)Documents/Sphinx
-DOCUMENT_LANGUAGE ?= en
 
 all: all-yes
 all-yes: txt html

@@ -17,4 +17,5 @@
 ###############################################################################
 
 DOCUMENT_NAME = BrlAPI
+DOCUMENT_LANGUAGE = en
 include $(SRC_TOP)document.mk
