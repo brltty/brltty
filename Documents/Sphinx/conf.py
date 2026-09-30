@@ -38,6 +38,14 @@ html_permalinks = False
 def _no_search_page(app):
     app.builder.search = False
 
+# The singlehtml builder titles the page with html_title, which defaults to
+# "<project> documentation". This configuration is shared by all of the
+# manuals, so title each page with its own document's top-level heading.
+def _use_document_title(app, pagename, templatename, context, doctree):
+    title = app.env.titles.get(app.config.root_doc)
+    if title:
+        context['title'] = title.astext()
+
 # Only the .html file of each manual is installed, so anything it loads
 # from _static/ would be missing. Make the page self-contained, as the
 # rst2html-generated README pages are: embed the stylesheets (resolving
@@ -86,4 +94,5 @@ def _embed_static_files(app, exception):
 
 def setup(app):
     app.connect('builder-inited', _no_search_page)
+    app.connect('html-page-context', _use_document_title)
     app.connect('build-finished', _embed_static_files)
