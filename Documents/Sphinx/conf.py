@@ -26,5 +26,52 @@ html_use_index = False
 def _no_search_page(app):
     app.builder.search = False
 
+# Only the .html file of each manual is installed, so anything it loads
+# from _static/ would be missing. Make the page self-contained, as the
+# rst2html-generated README pages are: embed the stylesheets (resolving
+# @import), and drop the scripts, which only serve the search feature.
+
+import os
+import re
+
+def _read_static_css(static_dir, name):
+    with open(os.path.join(static_dir, name), encoding='utf-8') as css:
+        text = css.read()
+
+    return re.sub(
+        r'@import\s+url\(\s*["\']?([^"\')]+)["\']?\s*\)\s*;',
+        lambda match: _read_static_css(static_dir, match.group(1)),
+        text
+    )
+
+def _embed_static_files(app, exception):
+    if exception or app.builder.format != 'html':
+        return
+
+    out_dir = str(app.outdir)
+    static_dir = os.path.join(out_dir, '_static')
+
+    def embed_stylesheet(match):
+        name = re.search(r'href="_static/([^"?]+)', match.group(0)).group(1)
+        return '<style>\n' + _read_static_css(static_dir, name) + '</style>'
+
+    for name in os.listdir(out_dir):
+        if not name.endswith('.html'):
+            continue
+
+        path = os.path.join(out_dir, name)
+        with open(path, encoding='utf-8') as page:
+            html = page.read()
+
+        html = re.sub(
+            r'<link\b[^>]*\brel="stylesheet"[^>]*\bhref="_static/[^>]*>',
+            embed_stylesheet, html
+        )
+        html = re.sub(r'[ \t]*<script\b[^>]*\bsrc="_static/[^"]*"[^>]*></script>\n?', '', html)
+
+        with open(path, 'w', encoding='utf-8') as page:
+            page.write(html)
+
 def setup(app):
     app.connect('builder-inited', _no_search_page)
+    app.connect('build-finished', _embed_static_files)
