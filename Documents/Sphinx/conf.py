@@ -31,6 +31,10 @@ html_sidebars = {'**': []}
 html_show_copyright = False
 html_show_sphinx = False
 
+# Don't append a "¶" permalink to every heading, table and code block:
+# text browsers and screen readers present each one as an extra link.
+html_permalinks = False
+
 def _no_search_page(app):
     app.builder.search = False
 
