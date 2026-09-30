@@ -20,6 +20,7 @@ LOCALE = C
 SETLOCALE = LC_ALL=$(LOCALE)
 
 SPHINX_CONFDIR = $(SRC_TOP)Documents/Sphinx
+DOCUMENT_LANGUAGE ?= en
 
 all: all-yes
 all-yes: txt html
@@ -30,11 +31,11 @@ txt: $(DOCUMENT_NAME).txt
 html: html.made
 
 $(DOCUMENT_NAME).txt: $(SRC_DIR)/$(DOCUMENT_NAME).rst
-	$(SETLOCALE) sphinx-build -Q -b text -c $(SPHINX_CONFDIR) -D master_doc=$(DOCUMENT_NAME) $(SRC_DIR) _build/text
+	$(SETLOCALE) sphinx-build -Q -b text -c $(SPHINX_CONFDIR) -D master_doc=$(DOCUMENT_NAME) -D language=$(DOCUMENT_LANGUAGE) $(SRC_DIR) _build/text
 	cp _build/text/$(DOCUMENT_NAME).txt $@
 
 html.made: $(SRC_DIR)/$(DOCUMENT_NAME).rst
-	$(SETLOCALE) sphinx-build -Q -b singlehtml -c $(SPHINX_CONFDIR) -D master_doc=$(DOCUMENT_NAME) $(SRC_DIR) _build/html
+	$(SETLOCALE) sphinx-build -Q -b singlehtml -c $(SPHINX_CONFDIR) -D master_doc=$(DOCUMENT_NAME) -D language=$(DOCUMENT_LANGUAGE) $(SRC_DIR) _build/html
 	cp _build/html/$(DOCUMENT_NAME).html $(DOCUMENT_NAME).html
 	touch $@
 
