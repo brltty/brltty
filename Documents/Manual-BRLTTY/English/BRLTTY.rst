@@ -441,12 +441,10 @@ DISPMD
 .. _command-SIXDOTS:
 
 SIXDOTS
-  Show characters using 6-dot rather than 8-dot braille; dots 7 and 8
-  remain available for the cursor representation and attribute
-  underline. If a contraction table is in effect (see the
-  :ref:`-c <options-contraction-table>` option), it is used. Also
-  changeable via the
-  :ref:`Text Style <preference-text-style>` preference.
+  Switch between 8-dot computer braille and 6-dot contracted braille.
+  The :ref:`CONTRACTED <command-CONTRACTED>` and
+  :ref:`COMPBRL6 <command-COMPBRL6>` commands change each of these
+  separately.
 
 .. _command-SLIDEWIN:
 
@@ -558,6 +556,19 @@ AUTOSPEAK
   Automatically speak the new line on vertical motion, characters as
   they're typed or deleted, and the character to which the cursor
   moves.
+
+.. _command-CONTRACTED:
+
+CONTRACTED
+  Switch between computer braille and contracted braille (see the
+  :ref:`Braille Variant <preference-braille-variant>` preference).
+
+.. _command-COMPBRL6:
+
+COMPBRL6
+  Switch computer braille between 8-dot and 6-dot cells (see the
+  :ref:`Computer Braille Cell Type
+  <preference-computer-braille-cell-type>` preference).
 
 .. _command-ASPK_EMP_LINE:
 
@@ -942,10 +953,9 @@ often in user configurations:
 .. _configure-contraction-table:
 
 ``contraction-table`` *file*
-  The :ref:`contraction table <table-contraction>` used when 6-dot
-  contracted braille is active (see the :ref:`SIXDOTS
-  <command-SIXDOTS>` command and the :ref:`Text Style
-  <preference-text-style>` preference).
+  The :ref:`contraction table <table-contraction>` used when
+  contracted braille is selected (see the :ref:`Braille Variant
+  <preference-braille-variant>` preference).
   Overridable with :ref:`-c <options-contraction-table>`.
 
 .. _configure-attributes-table:
@@ -1018,7 +1028,7 @@ Tables:
 .. _options-contraction-table:
 
 ``-c``\ *file* ``--contraction-table=``\ *file*
-  :ref:`Contraction table <table-contraction>` for 6-dot mode.
+  :ref:`Contraction table <table-contraction>` for contracted braille.
 
 .. _options-attributes-table:
 
@@ -1342,13 +1352,21 @@ on.
 Noteworthy Preferences
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. _preference-text-style:
+.. _preference-braille-variant:
 
-Text Style
-  Display screen content using all eight dots (``8-dot``) or only dots
-  1 through 6 (``6-dot``). When 6-dot mode is in effect and a
-  contraction table has been selected, contracted braille is shown.
-  Also changeable via the :ref:`SIXDOTS <command-SIXDOTS>` command.
+Braille Variant
+  Show screen content as ``Computer Braille`` (one cell per
+  character, as defined by the :ref:`text table <table-text>`) or as
+  ``Contracted Braille`` (using the :ref:`contraction table
+  <table-contraction>`). Also changeable via the
+  :ref:`CONTRACTED <command-CONTRACTED>` command.
+
+.. _preference-computer-braille-cell-type:
+
+Computer Braille Cell Type
+  Show computer braille using all eight dots (``8-dot``) or only dots
+  1 through 6 (``6-dot``). Also changeable via the
+  :ref:`COMPBRL6 <command-COMPBRL6>` command.
 
 .. _preference-skip-identical-lines:
 
@@ -1832,10 +1850,9 @@ Contracted braille is displayed when both conditions hold:
   see the :ref:`-c <options-contraction-table>` command line option
   and the :ref:`contraction-table <configure-contraction-table>` configuration file directive,
   and
-- 6-dot braille mode is active —
-  toggle it with the :ref:`SIXDOTS <command-SIXDOTS>` command,
-  or set the starting state via the
-  :ref:`Text Style <preference-text-style>` preference.
+- contracted braille is selected —
+  via the :ref:`Braille Variant <preference-braille-variant>` preference
+  or the :ref:`CONTRACTED <command-CONTRACTED>` command.
 
 Contraction support isn't compiled in
 if the ``--disable-contracted-braille`` build option was used.
