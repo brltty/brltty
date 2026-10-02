@@ -2,12 +2,10 @@
 BRLTTY Reference Manual
 ==============================
 
+:Version: 6.9.1
+:Date: April 2026
+
 Access to the Console Screen for Blind Persons using Refreshable Braille Displays
-
-:Authors: Nikhil Nair `<nn201@cus.cam.ac.uk> <mailto:nn201@cus.cam.ac.uk>`__; Nicolas Pitre `<nico@fluxnic.net> <mailto:nico@fluxnic.net>`__; Stéphane Doyon `<s.doyon@videotron.ca> <mailto:s.doyon@videotron.ca>`__; Dave Mielke `<dave@mielke.cc> <mailto:dave@mielke.cc>`__
-:Date: Version 6.9.1, April 2026
-
-Copyright (c) 1995-2026 by The BRLTTY Developers. BRLTTY is free software, and comes with ABSOLUTELY NO WARRANTY. It is placed under the terms of version 2.1 or later of **The GNU Lesser General Public License** as published by **The Free Software Foundation**.
 
 .. contents:: Contents
    :local:
@@ -2249,17 +2247,24 @@ Formalities
 License
 -------
 
-BRLTTY is free software, distributed under the terms of
-`The GNU Lesser General Public License
-<http://www.gnu.org/licenses/licenses.html#LGPL>`_, version 2.1 or
-later. It comes with **absolutely no warranty** — not even the
-implied warranty of merchantability or fitness for a particular
-purpose. The full license text ships in ``LICENSE-LGPL`` at the top
-of the source tree.
+Copyright (c) 1995-2026 by The BRLTTY Developers.
+
+BRLTTY is free software, and comes with ABSOLUTELY NO WARRANTY. It is
+placed under the terms of version 2.1 or later of `The GNU Lesser
+General Public License
+<https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html>`_ as
+published by `The Free Software Foundation <https://www.fsf.org/>`_.
+The full license text ships in ``LICENSE-LGPL`` at the top of the
+source tree.
 
 
 Authors
 -------
+
+* Nikhil Nair `<nn201@cus.cam.ac.uk> <mailto:nn201@cus.cam.ac.uk>`__
+* Nicolas Pitre `<nico@fluxnic.net> <mailto:nico@fluxnic.net>`__
+* Stéphane Doyon `<s.doyon@videotron.ca> <mailto:s.doyon@videotron.ca>`__
+* Dave Mielke `<dave@mielke.cc> <mailto:dave@mielke.cc>`__
 
 BRLTTY started in the early 1990s as the work of Nikhil Nair,
 Nicolas Pitre, and Stéphane Doyon, and is currently maintained by

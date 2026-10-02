@@ -2,13 +2,10 @@
 Manuel de référence de BRLTTY
 ==============================
 
+:Version: 6.9.1
+:Date: avril 2026
+
 Accès à l'écran d'une console pour les personnes non-voyantes utilisant des afficheurs braille
-
-:Authors: Nikhil Nair `<nn201@cus.cam.ac.uk> <mailto:nn201@cus.cam.ac.uk>`__; Nicolas Pitre `<nico@fluxnic.net> <mailto:nico@fluxnic.net>`__; Stéphane Doyon `<s.doyon@videotron.ca> <mailto:s.doyon@videotron.ca>`__; Dave Mielke `<dave@mielke.cc> <mailto:dave@mielke.cc>`__
-:Traduction française: Jean-Philippe Mengual `<texou@accelibreinfo.eu> <mailto:texou@accelibreinfo.eu>`__ pour `Traduc.org <http://www.traduc.org/>`__ (édition originale) ; révision 2026 par Nicolas Pitre `<nico@fluxnic.net> <mailto:nico@fluxnic.net>`__, avec assistance par IA (Claude, Anthropic)
-:Date: Version 6.9.1, avril 2026
-
-Copyright (c) 1995-2026 par Les Développeurs de BRLTTY. BRLTTY est un logiciel libre, et n'est accompagné d'ABSOLUMENT AUCUNE GARANTIE. Il est placé sous les termes de la version 2.1 ou ultérieure de la **GNU Lesser General Public License** publiée par **The Free Software Foundation**.
 
 .. contents:: Table des matières
    :local:
@@ -2652,20 +2649,33 @@ Formalités
 Licence
 -------
 
-BRLTTY est un logiciel libre, distribué sous les termes de la
-`GNU Lesser General Public License
-<http://www.gnu.org/licenses/licenses.html#LGPL>`_, version 2.1 ou
-ultérieure. Il est fourni **sans aucune garantie** — pas même la
-garantie implicite de qualité marchande ou d'adéquation à un usage
-particulier. Le texte intégral de la licence se trouve dans le
-fichier ``LICENSE-LGPL`` à la racine de l'arborescence des sources.
+Copyright (c) 1995-2026 par Les Développeurs de BRLTTY.
+
+BRLTTY est un logiciel libre, et n'est accompagné d'ABSOLUMENT AUCUNE
+GARANTIE. Il est placé sous les termes de la version 2.1 ou ultérieure
+de la `GNU Lesser General Public License
+<https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html>`_ publiée par
+`The Free Software Foundation <https://www.fsf.org/>`_. Le texte
+intégral de la licence se trouve dans le fichier ``LICENSE-LGPL`` à la
+racine de l'arborescence des sources.
 
 
 Auteurs
 -------
+
+* Nikhil Nair `<nn201@cus.cam.ac.uk> <mailto:nn201@cus.cam.ac.uk>`__
+* Nicolas Pitre `<nico@fluxnic.net> <mailto:nico@fluxnic.net>`__
+* Stéphane Doyon `<s.doyon@videotron.ca> <mailto:s.doyon@videotron.ca>`__
+* Dave Mielke `<dave@mielke.cc> <mailto:dave@mielke.cc>`__
 
 BRLTTY a vu le jour au début des années 1990 grâce au travail de
 Nikhil Nair, Nicolas Pitre et Stéphane Doyon. Dave Mielke en assure
 aujourd'hui la maintenance. La liste à jour de l'équipe, l'historique
 des contributions et l'actualité du projet sont publiés sur le site
 du projet : `brltty.app <http://brltty.app/>`_.
+
+Traduction française : Jean-Philippe Mengual
+`<texou@accelibreinfo.eu> <mailto:texou@accelibreinfo.eu>`__ pour
+`Traduc.org <http://www.traduc.org/>`__ (édition originale) ; révision
+2026 par Nicolas Pitre `<nico@fluxnic.net> <mailto:nico@fluxnic.net>`__,
+avec assistance par IA (Claude, Anthropic).
