@@ -939,13 +939,6 @@ often in user configurations:
   ``auto`` (the default) selects one based on the locale.
   Overridable with :ref:`-t <options-text-table>`.
 
-.. _configure-attributes-table:
-
-``attributes-table`` *file*
-  The :ref:`attributes table <table-attributes>` used when displaying
-  screen-attribute information.
-  Overridable with :ref:`-a <options-attributes-table>`.
-
 .. _configure-contraction-table:
 
 ``contraction-table`` *file*
@@ -954,6 +947,13 @@ often in user configurations:
   <command-SIXDOTS>` command and the :ref:`Text Style
   <preference-text-style>` preference).
   Overridable with :ref:`-c <options-contraction-table>`.
+
+.. _configure-attributes-table:
+
+``attributes-table`` *file*
+  The :ref:`attributes table <table-attributes>` used when displaying
+  screen-attribute information.
+  Overridable with :ref:`-a <options-attributes-table>`.
 
 .. _configure-keyboard-table:
 
@@ -1015,15 +1015,15 @@ Tables:
 ``-t``\ *file* ``--text-table=``\ *file*
   :ref:`Text table <table-text>`. Default: locale-based.
 
-.. _options-attributes-table:
-
-``-a``\ *file* ``--attributes-table=``\ *file*
-  :ref:`Attributes table <table-attributes>`.
-
 .. _options-contraction-table:
 
 ``-c``\ *file* ``--contraction-table=``\ *file*
   :ref:`Contraction table <table-contraction>` for 6-dot mode.
+
+.. _options-attributes-table:
+
+``-a``\ *file* ``--attributes-table=``\ *file*
+  :ref:`Attributes table <table-attributes>`.
 
 .. _options-keyboard-table:
 
@@ -1491,18 +1491,18 @@ Text Table
   and the :ref:`-t <options-text-table>` command line option. This
   preference isn't saved.
 
+Contraction Table
+  Select the contraction table at runtime. See
+  :ref:`Contraction Tables <table-contraction>` and the
+  :ref:`-c <options-contraction-table>` command line option. This
+  preference isn't saved.
+
 .. _preference-attributes-table:
 
 Attributes Table
   Select the attributes table at runtime. See
   :ref:`Attributes Tables <table-attributes>` and the
   :ref:`-a <options-attributes-table>` command line option. This
-  preference isn't saved.
-
-Contraction Table
-  Select the contraction table at runtime. See
-  :ref:`Contraction Tables <table-contraction>` and the
-  :ref:`-c <options-contraction-table>` command line option. This
   preference isn't saved.
 
 .. _preference-keyboard-table:
@@ -1767,7 +1767,7 @@ one directive per line,
 ``UTF-8`` encoding,
 blank lines and ``#``-comment lines ignored —
 and they can be split across subtables
-(``*.tti``, ``*.ati``, ``*.cti``, ``*.kti``)
+(``*.tti``, ``*.cti``, ``*.ati``, ``*.kti``)
 pulled in with an ``include`` directive.
 This chapter explains what each kind of table is for
 and how to select one at runtime.
@@ -1807,36 +1807,6 @@ The following text tables are provided:
 
 See ``Documents/README.TextTables`` for the text-table file format
 and the directive reference.
-
-
-.. _table-attributes:
-
-Attributes Tables
------------------
-
-Files named ``*.atb`` are attributes tables.
-Instead of showing the text on the screen,
-they let you display its *visual* attributes —
-foreground and background colour, intensity, blink —
-as braille dot patterns.
-Attributes mode is toggled on and off with the
-:ref:`DISPMD <command-DISPMD>` command;
-an attributes table controls how
-the eight ``VGA`` attribute bits map to the eight dots of a braille cell.
-
-The attributes tables shipped with BRLTTY are:
-
-.. csv-table::
-   :header-rows: 1
-   :file: ../../attributes-table.csv
-
-To select one, use the
-:ref:`-a <options-attributes-table>` command line option,
-the :ref:`attributes-table <configure-attributes-table>` configuration file directive,
-or the Attributes Table preference.
-
-See ``Documents/README.AttributesTables`` for the attributes-table
-file format and the directive reference.
 
 
 .. _table-contraction:
@@ -1880,6 +1850,36 @@ See ``Documents/README.ContractionTables`` for
 the contraction-table file format,
 the opcode reference,
 and the character-class machinery.
+
+
+.. _table-attributes:
+
+Attributes Tables
+-----------------
+
+Files named ``*.atb`` are attributes tables.
+Instead of showing the text on the screen,
+they let you display its *visual* attributes —
+foreground and background colour, intensity, blink —
+as braille dot patterns.
+Attributes mode is toggled on and off with the
+:ref:`DISPMD <command-DISPMD>` command;
+an attributes table controls how
+the eight ``VGA`` attribute bits map to the eight dots of a braille cell.
+
+The attributes tables shipped with BRLTTY are:
+
+.. csv-table::
+   :header-rows: 1
+   :file: ../../attributes-table.csv
+
+To select one, use the
+:ref:`-a <options-attributes-table>` command line option,
+the :ref:`attributes-table <configure-attributes-table>` configuration file directive,
+or the Attributes Table preference.
+
+See ``Documents/README.AttributesTables`` for the attributes-table
+file format and the directive reference.
 
 
 .. _table-key:
@@ -2003,8 +2003,8 @@ Reading the source documentation
 For implementation questions or driver-specific behaviour the source
 tree carries a family of topic READMEs in ``Documents/``: ``Bluetooth``,
 ``Devices``, ``Customize``, ``Profiles``, ``Polling``, ``Systemd``,
-``X11``, ``CommandReference``, ``TextTables``, ``AttributesTables``,
-``ContractionTables``, ``KeyTables``, ``BrailleDots``, and others.
+``X11``, ``CommandReference``, ``TextTables``, ``ContractionTables``,
+``AttributesTables``, ``KeyTables``, ``BrailleDots``, and others.
 ``Documents/brltty.conf`` is the heavily-commented configuration
 template — the fastest reference for any directive's syntax. The
 BrlAPI manual covers the application interface separately.

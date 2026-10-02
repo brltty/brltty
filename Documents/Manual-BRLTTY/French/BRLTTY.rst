@@ -990,13 +990,6 @@ dans les configurations utilisateur :
   d'après la locale.
   Contournable avec :ref:`-t <options-text-table>`.
 
-.. _configure-attributes-table:
-
-``attributes-table`` *fichier*
-  La :ref:`table d'attributs <table-attributes>` utilisée pour afficher
-  l'information d'attributs d'écran.
-  Contournable avec :ref:`-a <options-attributes-table>`.
-
 .. _configure-contraction-table:
 
 ``contraction-table`` *fichier*
@@ -1005,6 +998,13 @@ dans les configurations utilisateur :
   :ref:`SIXDOTS <command-SIXDOTS>` et la préférence :ref:`Apparence du
   texte <preference-text-style>`).
   Contournable avec :ref:`-c <options-contraction-table>`.
+
+.. _configure-attributes-table:
+
+``attributes-table`` *fichier*
+  La :ref:`table d'attributs <table-attributes>` utilisée pour afficher
+  l'information d'attributs d'écran.
+  Contournable avec :ref:`-a <options-attributes-table>`.
 
 .. _configure-keyboard-table:
 
@@ -1066,16 +1066,16 @@ Tables :
 ``-t``\ *fichier* ``--text-table=``\ *fichier*
   :ref:`Table de texte <table-text>`. Par défaut : selon la locale.
 
-.. _options-attributes-table:
-
-``-a``\ *fichier* ``--attributes-table=``\ *fichier*
-  :ref:`Table d'attributs <table-attributes>`.
-
 .. _options-contraction-table:
 
 ``-c``\ *fichier* ``--contraction-table=``\ *fichier*
   :ref:`Table de braille abrégé <table-contraction>` pour le mode
   six points.
+
+.. _options-attributes-table:
+
+``-a``\ *fichier* ``--attributes-table=``\ *fichier*
+  :ref:`Table d'attributs <table-attributes>`.
 
 .. _options-keyboard-table:
 
@@ -1592,18 +1592,18 @@ Table de texte
   :ref:`-t <options-text-table>`. Cette préférence n'est pas
   sauvegardée.
 
+Table de braille abrégé
+  Sélectionner la table de braille abrégé à l'exécution. Voir
+  :ref:`Contraction Tables <table-contraction>` et l'option en ligne
+  de commande :ref:`-c <options-contraction-table>`. Cette préférence
+  n'est pas sauvegardée.
+
 .. _preference-attributes-table:
 
 Table d'attributs
   Sélectionner la table d'attributs à l'exécution. Voir
   :ref:`Attributes Tables <table-attributes>` et l'option en ligne
   de commande :ref:`-a <options-attributes-table>`. Cette préférence
-  n'est pas sauvegardée.
-
-Table de braille abrégé
-  Sélectionner la table de braille abrégé à l'exécution. Voir
-  :ref:`Contraction Tables <table-contraction>` et l'option en ligne
-  de commande :ref:`-c <options-contraction-table>`. Cette préférence
   n'est pas sauvegardée.
 
 .. _preference-keyboard-table:
@@ -1896,7 +1896,7 @@ Le comportement de BRLTTY se règle au moyen de quatre familles de
 tables, toutes au format texte simple. Elles partagent la même
 syntaxe de base — une directive par ligne, encodage ``UTF-8``, lignes
 vides et lignes commençant par ``#`` ignorées — et peuvent être
-réparties dans des sous-tables (``*.tti``, ``*.ati``, ``*.cti``,
+réparties dans des sous-tables (``*.tti``, ``*.cti``, ``*.ati``,
 ``*.kti``) tirées au moyen d'une directive ``include``. Ce chapitre
 explique à quoi sert chaque famille et comment en sélectionner une à
 l'exécution. Pour la syntaxe exacte des directives — la référence
@@ -1934,35 +1934,6 @@ Les tables de texte fournies sont les suivantes :
 
 Voir ``Documents/README.TextTables`` pour le format de fichier des
 tables de texte et la référence des directives.
-
-
-.. _table-attributes:
-
-Tables d'attributs
-------------------
-
-Les fichiers nommés ``*.atb`` sont des tables d'attributs. Au lieu
-d'afficher le texte présent à l'écran, elles permettent d'en afficher
-les attributs *visuels* — couleur de premier plan et d'arrière-plan,
-intensité, clignotement — sous forme de configurations de points
-braille. Le mode attributs s'active et se désactive avec la commande
-:ref:`DISPMD <command-DISPMD>` ; une table d'attributs détermine la
-façon dont les huit bits d'attribut ``VGA`` se traduisent en huit
-points d'une cellule braille.
-
-Les tables d'attributs fournies avec BRLTTY sont les suivantes :
-
-.. csv-table::
-   :header-rows: 1
-   :file: ../../attributes-table.csv
-
-Pour en choisir une, utilisez l'option en ligne de commande
-:ref:`-a <options-attributes-table>`, la directive
-:ref:`attributes-table <configure-attributes-table>` du fichier de
-configuration, ou la préférence Attributes Table.
-
-Voir ``Documents/README.AttributesTables`` pour le format de fichier
-des tables d'attributs et la référence des directives.
 
 
 .. _table-contraction:
@@ -2007,6 +1978,35 @@ Les tables de braille abrégé fournies sont les suivantes :
 Voir ``Documents/README.ContractionTables`` pour le format de fichier
 des tables de braille abrégé, la référence des opcodes et la
 mécanique des classes de caractères.
+
+
+.. _table-attributes:
+
+Tables d'attributs
+------------------
+
+Les fichiers nommés ``*.atb`` sont des tables d'attributs. Au lieu
+d'afficher le texte présent à l'écran, elles permettent d'en afficher
+les attributs *visuels* — couleur de premier plan et d'arrière-plan,
+intensité, clignotement — sous forme de configurations de points
+braille. Le mode attributs s'active et se désactive avec la commande
+:ref:`DISPMD <command-DISPMD>` ; une table d'attributs détermine la
+façon dont les huit bits d'attribut ``VGA`` se traduisent en huit
+points d'une cellule braille.
+
+Les tables d'attributs fournies avec BRLTTY sont les suivantes :
+
+.. csv-table::
+   :header-rows: 1
+   :file: ../../attributes-table.csv
+
+Pour en choisir une, utilisez l'option en ligne de commande
+:ref:`-a <options-attributes-table>`, la directive
+:ref:`attributes-table <configure-attributes-table>` du fichier de
+configuration, ou la préférence Attributes Table.
+
+Voir ``Documents/README.AttributesTables`` pour le format de fichier
+des tables d'attributs et la référence des directives.
 
 
 .. _table-key:
@@ -2126,8 +2126,8 @@ Pour les questions d'implémentation ou le comportement spécifique d'un
 pilote, l'arborescence des sources contient une famille de README
 thématiques dans ``Documents/`` : ``Bluetooth``, ``Devices``,
 ``Customize``, ``Profiles``, ``Polling``, ``Systemd``, ``X11``,
-``CommandReference``, ``TextTables``, ``AttributesTables``,
-``ContractionTables``, ``KeyTables``, ``BrailleDots``, et d'autres.
+``CommandReference``, ``TextTables``, ``ContractionTables``,
+``AttributesTables``, ``KeyTables``, ``BrailleDots``, et d'autres.
 ``Documents/brltty.conf`` est le modèle de configuration largement
 commenté — la référence la plus rapide pour la syntaxe de toute
 directive. Le manuel de BrlAPI couvre séparément l'interface de
