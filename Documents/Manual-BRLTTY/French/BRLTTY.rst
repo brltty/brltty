@@ -1572,17 +1572,17 @@ Annonce automatique
 .. _preference-speech-rate:
 
 Vitesse
-  Régler le débit de la synthèse vocale (``0`` le plus lent,
-  ``20`` le plus rapide). Dépendant du pilote ; modifiable aussi via
-  les commandes
+  Régler la vitesse de la synthèse vocale, de ``-10`` (la plus lente)
+  à ``10`` (la plus rapide) ; ``0`` est la valeur par défaut.
+  Dépendant du pilote ; modifiable aussi via les commandes
   :ref:`SAY_SLOWER/SAY_FASTER <command-SAY_SLOWER-SAY_FASTER>`.
 
 .. _preference-speech-volume:
 
 Volume
-  Régler le volume de la synthèse vocale (``0`` le plus faible,
-  ``20`` le plus fort). Dépendant du pilote ; modifiable aussi via
-  les commandes
+  Régler le volume de la synthèse vocale, de ``0%`` (le plus faible)
+  à ``200%`` ; ``100%`` est la valeur par défaut.
+  Dépendant du pilote ; modifiable aussi via les commandes
   :ref:`SAY_SOFTER/SAY_LOUDER <command-SAY_SOFTER-SAY_LOUDER>`.
 
 .. _preference-punctuation-level:
