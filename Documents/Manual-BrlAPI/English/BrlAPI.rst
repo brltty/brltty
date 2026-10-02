@@ -2,14 +2,14 @@
 BrlAPI Reference manual
 ========================
 
-:Author: Sébastien Hinderer `<Sebastien.Hinderer@ens-lyon.org> <mailto:Sebastien.Hinderer@ens-lyon.org>`_
-         and Samuel Thibault `<Samuel.Thibault@ens-lyon.org> <mailto:Samuel.Thibault@ens-lyon.org>`_
-:Date: V1.5, November 2019
+:Version: 1.5
+:Date: November 2019
 
 This document describes ``BrlAPI``.
 
-.. contents::
-   :depth: 3
+.. contents:: Contents
+   :local:
+   :depth: 2
 
 .. _sec-intro:
 
@@ -1558,3 +1558,10 @@ It is structured exactly like a ``BRLAPI_PACKET_PARAM_VALUE`` packet.
 This packet is sent by the client and just acknowledged by the server. This
 allows the client to perform a round-try with the server, thus collecting any
 pending exception notification.
+
+
+Authors
+=======
+
+* Sébastien Hinderer `<Sebastien.Hinderer@ens-lyon.org> <mailto:Sebastien.Hinderer@ens-lyon.org>`_
+* Samuel Thibault `<Samuel.Thibault@ens-lyon.org> <mailto:Samuel.Thibault@ens-lyon.org>`_
