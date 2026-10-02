@@ -30,7 +30,7 @@ viewing options on and off, and trigger BRLTTY's various commands.
 Headline features include cursor tracking and routing, contracted
 braille (English and French ship in the box; many more languages
 are covered by add-on tables), screen freezing for leisurely
-review, attribute review, cut-and-paste, configurable cursor and
+review, attribute review, copy-and-paste, configurable cursor and
 blink styles, an interactive preferences menu, an on-line learn
 mode for discovering commands, optional speech output, and a
 programmable API for client applications. See :ref:`Getting
@@ -340,7 +340,7 @@ PRPROMPT/NXPROMPT
 
 PRSEARCH/NXSEARCH
   Search backward/forward for the clipboard contents
-  (see :ref:`Cut and Paste <cut>`). Wraps at the screen edge; not
+  (see :ref:`Copy and Paste <copy-and-paste>`). Wraps at the screen edge; not
   case-sensitive.
 
 The :ref:`PRINDENT/NXINDENT <command-PRINDENT-NXINDENT>` and
@@ -742,7 +742,7 @@ CSRJMP_VERT
 
 PASTE
   Insert the current clipboard contents at the cursor
-  (see :ref:`Cut and Paste <cut>`).
+  (see :ref:`Copy and Paste <copy-and-paste>`).
 
 .. _command-CLIP_SHOW:
 
@@ -785,8 +785,8 @@ ROUTE
 .. _command-CLIP_NEW:
 
 CLIP_NEW
-  Anchor the start of a cut block at the routing key, replacing the
-  clipboard (see :ref:`Cut and Paste <cut>`).
+  Anchor the start of a copy region at the routing key, replacing the
+  clipboard (see :ref:`Copy and Paste <copy-and-paste>`).
 
 .. _command-CLIP_ADD:
 
@@ -797,7 +797,7 @@ CLIP_ADD
 .. _command-COPY_RECT:
 
 COPY_RECT
-  Anchor the end of the cut block at the routing key and append the
+  Anchor the end of the copy region at the routing key and append the
   rectangular region to the clipboard.
 
 .. _command-COPY_LINE:
@@ -1173,10 +1173,10 @@ It's especially useful in conjunction with applications (like ``lynx``)
 wherein horizontal cursor motion must never be attempted.
 
 
-.. _cut:
+.. _copy-and-paste:
 
-Cut and Paste
--------------
+Copy and Paste
+--------------
 
 BRLTTY has its own clipboard for grabbing text from the screen and
 re-entering it at the cursor — handy for long file names, command
@@ -1292,7 +1292,7 @@ These events include:
 - When a lengthy command completes.
 - When a command cannot be executed.
 - When a mark is set.
-- When the start or end of the cut block is set.
+- When the start or end of the copy region is set.
 - When a feature is activated or deactivated.
 - When cursor tracking is turned on or off.
 - When the screen image is frozen or unfrozen.

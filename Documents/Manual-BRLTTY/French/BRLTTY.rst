@@ -369,7 +369,7 @@ PRPROMPT/NXPROMPT
 
 PRSEARCH/NXSEARCH
   Recherche en arrière/en avant le contenu du presse-papier
-  (voir :ref:`Copier-coller <cut>`). Boucle au bord de l'écran ;
+  (voir :ref:`Copier-coller <copy-and-paste>`). Boucle au bord de l'écran ;
   insensible à la casse.
 
 Les commandes :ref:`PRINDENT/NXINDENT <command-PRINDENT-NXINDENT>` et
@@ -785,7 +785,7 @@ CSRJMP_VERT
 
 PASTE
   Insère le contenu courant du presse-papier à l'emplacement du
-  curseur (voir :ref:`Copier-coller <cut>`).
+  curseur (voir :ref:`Copier-coller <copy-and-paste>`).
 
 .. _command-CLIP_SHOW:
 
@@ -829,7 +829,7 @@ ROUTE
 
 CLIP_NEW
   Ancre le début d'un bloc de copie sur la touche de routage, en
-  remplaçant le presse-papier (voir :ref:`Copier-coller <cut>`).
+  remplaçant le presse-papier (voir :ref:`Copier-coller <copy-and-paste>`).
 
 .. _command-CLIP_ADD:
 
@@ -1229,7 +1229,7 @@ applications (comme ``lynx``) où le déplacement horizontal du curseur
 ne doit jamais être tenté.
 
 
-.. _cut:
+.. _copy-and-paste:
 
 Copier-coller
 -------------
