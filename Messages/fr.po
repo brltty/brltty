@@ -20,7 +20,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
 "POT-Creation-Date: 2026-10-02 11:06-0400\n"
 "PO-Revision-Date: 2026-10-02 15:07+0000\n"
-"Last-Translator: Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>\n"
+"Last-Translator: Nicolas Pitre <nico@fluxnic.net>\n"
 "Language-Team: Friends of BRLTTY <BRLTTY@brlttY.app>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -103,7 +103,7 @@ msgstr "Classe Java non trouvée"
 
 #: Drivers/Screen/FileViewer/screen.c:177
 msgid "file not specified"
-msgstr ""
+msgstr "Fichier non spécifié"
 
 #: Drivers/Screen/Linux/screen.c:1930
 msgid "console not in use"
@@ -119,7 +119,7 @@ msgstr "L'écran n'est pas en mode texte"
 
 #: Drivers/Screen/Linux/screen.c:2001
 msgid "no foreground console"
-msgstr ""
+msgstr "Pas de console au premier plan"
 
 #: Drivers/Screen/Linux/screen.c:2006
 msgid "can't read screen content"
@@ -127,31 +127,31 @@ msgstr "ne peut lire le contenu de l'écran"
 
 #: Drivers/Screen/Linux/screen.c:2056
 msgid "can't get screen properties"
-msgstr ""
+msgstr "Ne peut pas obtenir les propriétés de l'écran"
 
 #: Drivers/Screen/TerminalEmulator/screen.c:137
 msgid "no screen cache"
-msgstr ""
+msgstr "Pas de cache d'écran"
 
 #: Drivers/Screen/TerminalEmulator/screen.c:141
 msgid "screen not accessible"
-msgstr ""
+msgstr "Écran non accessible"
 
 #: Drivers/Screen/TerminalEmulator/screen.c:384
 msgid "screen not available"
-msgstr ""
+msgstr "Écran non disponible"
 
 #: Drivers/Screen/TerminalEmulator/screen.c:395
 msgid "screen not attached"
-msgstr ""
+msgstr "Écran non attaché"
 
 #: Drivers/Screen/TerminalEmulator/screen.c:398
 msgid "no screen emulator"
-msgstr ""
+msgstr "Pas d'émulateur d'écran"
 
 #: Headers/cmdline_types.h:72
 msgid "Show this usage summary, and then exit."
-msgstr ""
+msgstr "Affiche ce résumé de l'utilisation, puis quitte."
 
 #: Programs/alert.c:62
 msgid "Console Bell"
@@ -159,27 +159,27 @@ msgstr "Bip de la console"
 
 #: Programs/alert.c:67
 msgid "Keys Autoreleased"
-msgstr ""
+msgstr "Touches relâchées automatiquement"
 
 #: Programs/alert.c:86
 msgid "Saved"
-msgstr ""
+msgstr "Enregistré"
 
 #: Programs/alert.c:91
 msgid "Restored"
-msgstr ""
+msgstr "Restauré"
 
 #: Programs/alert.c:126
 msgid "Screen Frozen"
-msgstr ""
+msgstr "Écran figé"
 
 #: Programs/alert.c:132
 msgid "Screen Live"
-msgstr ""
+msgstr "Écran en direct"
 
 #: Programs/apitest.c:137
 msgid "Test BrlAPI functions."
-msgstr ""
+msgstr "Teste les fonctions de BrlAPI."
 
 #: Programs/atb_translate.c:70
 msgid "cannot compile attributes table"
@@ -208,11 +208,11 @@ msgstr "Chemin du répertoire où il est possible d'écrire."
 
 #: Programs/brltest.c:100
 msgid "Test a braille driver."
-msgstr ""
+msgstr "Teste un pilote braille."
 
 #: Programs/brltty-atb.c:53
 msgid "Check an attributes table."
-msgstr ""
+msgstr "Vérifie une table d'attributs."
 
 #: Programs/brltty.c:209
 #, c-format
@@ -244,19 +244,19 @@ msgstr "chaîne"
 
 #: Programs/brltty-cldr.c:40
 msgid "The format of each output line."
-msgstr ""
+msgstr "Le format de chaque ligne de sortie."
 
 #: Programs/brltty-cldr.c:80
 msgid "List the characters defined within a CLDR (Common Locale Data Repository Project) annotations file."
-msgstr ""
+msgstr "Liste les caractères définis dans un fichier d'annotations CLDR (Common Locale Data Repository Project)."
 
 #: Programs/brltty-clip.c:80
 msgid "Manage brltty's clipboard from the command line."
-msgstr ""
+msgstr "Gère le presse-papier de brltty depuis la ligne de commande."
 
 #: Programs/brltty-cmdref.c:40
 msgid "Write a brltty command reference in reStructuredText."
-msgstr ""
+msgstr "Écrit une référence des commandes de brltty en reStructuredText."
 
 #: Programs/brltty-ctb.c:53
 msgid "Maximum length of an output line."
@@ -284,124 +284,124 @@ msgstr "Table de vérification du braille abrégé."
 
 #: Programs/brltty-ctb.c:124
 msgid "Check/validate a contraction (literary braille) table, or translate text into contracted braille."
-msgstr ""
+msgstr "Vérifie ou valide une table de braille abrégé (braille littéraire), ou traduit du texte en braille abrégé."
 
 #: Programs/brltty-hid.c:69
 msgid "Filter for a USB device (the default if not ambiguous)."
-msgstr ""
+msgstr "Recherche un périphérique USB (par défaut si ce n'est pas ambigu)."
 
 #: Programs/brltty-hid.c:75
 msgid "Filter for a Bluetooth device."
-msgstr ""
+msgstr "Recherche un périphérique Bluetooth."
 
 #: Programs/brltty-hid.c:80 Programs/brltty-hid.c:87 Programs/brltty-hid.c:171
 #: Programs/brltty-hid.c:178
 msgid "identifier"
-msgstr ""
+msgstr "identifiant"
 
 #: Programs/brltty-hid.c:82
 msgid "Match the vendor identifier (four hexadecimal digits)."
-msgstr ""
+msgstr "Correspond à l'identifiant du fabricant (quatre chiffres hexadécimaux)."
 
 #: Programs/brltty-hid.c:89
 msgid "Match the product identifier (four hexadecimal digits)."
-msgstr ""
+msgstr "Correspond à l'identifiant du produit (quatre chiffres hexadécimaux)."
 
 #: Programs/brltty-hid.c:96
 msgid "Match the start of the manufacturer name (USB only)."
-msgstr ""
+msgstr "Correspond au début du nom du fabricant (USB seulement)."
 
 #: Programs/brltty-hid.c:103
 msgid "Match the start of the product description (USB only)."
-msgstr ""
+msgstr "Correspond au début de la description du produit (USB seulement)."
 
 #: Programs/brltty-hid.c:110
 msgid "Match the start of the serial number (USB only)."
-msgstr ""
+msgstr "Correspond au début du numéro de série (USB seulement)."
 
 #: Programs/brltty-hid.c:115
 msgid "octets"
-msgstr ""
+msgstr "octets"
 
 #: Programs/brltty-hid.c:117
 msgid "Match the full device address (Bluetooth only - all six two-digit, hexadecimal octets separated by a colon [:])."
-msgstr ""
+msgstr "Correspond à l'adresse complète du périphérique (Bluetooth seulement - les six octets hexadécimaux de deux chiffres, séparés par un deux-points [:])."
 
 #: Programs/brltty-hid.c:124
 msgid "Match the start of the device name (Bluetooth only)."
-msgstr ""
+msgstr "Correspond au début du nom du périphérique (Bluetooth seulement)."
 
 #: Programs/brltty-hid.c:130
 msgid "Show the vendor and product identifiers."
-msgstr ""
+msgstr "Affiche les identifiants du fabricant et du produit."
 
 #: Programs/brltty-hid.c:136
 msgid "Show the device address (USB serial number, Bluetooth device address, etc)."
-msgstr ""
+msgstr "Affiche l'adresse du périphérique (numéro de série USB, adresse Bluetooth du périphérique, etc.)."
 
 #: Programs/brltty-hid.c:142
 msgid "Show the device name (USB manufacturer and/or product strings, Bluetooth device name, etc)."
-msgstr ""
+msgstr "Affiche le nom du périphérique (chaînes du fabricant et/ou du produit USB, nom Bluetooth du périphérique, etc.)."
 
 #: Programs/brltty-hid.c:148
 msgid "Show the host path (USB topology, Bluetooth host controller address, etc)."
-msgstr ""
+msgstr "Affiche le chemin de l'hôte (topologie USB, adresse du contrôleur hôte Bluetooth, etc.)."
 
 #: Programs/brltty-hid.c:154
 msgid "Show the host device (usually its absolute path)."
-msgstr ""
+msgstr "Affiche le périphérique de l'hôte (habituellement son chemin absolu)."
 
 #: Programs/brltty-hid.c:160
 msgid "List the HID report descriptor's items."
-msgstr ""
+msgstr "Liste les éléments du descripteur de rapports HID."
 
 #: Programs/brltty-hid.c:166
 msgid "List each report's identifier and sizes."
-msgstr ""
+msgstr "Liste l'identifiant et les tailles de chaque rapport."
 
 #: Programs/brltty-hid.c:173
 msgid "Read (get) an input report (two hexadecimal digits)."
-msgstr ""
+msgstr "Lit (get) un rapport d'entrée (deux chiffres hexadécimaux)."
 
 #: Programs/brltty-hid.c:180
 msgid "Read (get) a feature report (two hexadecimal digits)."
-msgstr ""
+msgstr "Lit (get) un rapport de fonctionnalité (deux chiffres hexadécimaux)."
 
 #: Programs/brltty-hid.c:185 Programs/brltty-hid.c:192
 msgid "bytes"
-msgstr ""
+msgstr "octets"
 
 #: Programs/brltty-hid.c:187
 msgid "Write (set) an output report (see below)."
-msgstr ""
+msgstr "Écrit (set) un rapport de sortie (voir ci-dessous)."
 
 #: Programs/brltty-hid.c:194
 msgid "Write (set) a feature report (see below)."
-msgstr ""
+msgstr "Écrit (set) un rapport de fonctionnalité (voir ci-dessous)."
 
 #: Programs/brltty-hid.c:200
 msgid "Echo (in hexadecimal) input received from the device."
-msgstr ""
+msgstr "Affiche (en hexadécimal) les entrées reçues du périphérique."
 
 #: Programs/brltty-hid.c:205
 msgid "integer"
-msgstr ""
+msgstr "entier"
 
 #: Programs/brltty-hid.c:207
 msgid "The input timeout (in seconds)."
-msgstr ""
+msgstr "Le délai d'attente des entrées (en secondes)."
 
 #: Programs/brltty-hid.c:223
 msgid "Find HID devices, list report descriptors, read/write reports/features, or monitor input from a HID device."
-msgstr ""
+msgstr "Trouve des périphériques HID, liste les descripteurs de rapports, lit ou écrit des rapports ou des fonctionnalités, ou surveille les entrées d'un périphérique HID."
 
 #: Programs/brltty-ktb.c:45
 msgid "driver"
-msgstr ""
+msgstr "pilote"
 
 #: Programs/brltty-ktb.c:47
 msgid "Braille driver code."
-msgstr ""
+msgstr "Code du pilote braille."
 
 #: Programs/brltty-ktb.c:53
 msgid "Report problems with the key table."
@@ -425,71 +425,71 @@ msgstr "Chemin du répertoire de chargement des pilotes."
 
 #: Programs/brltty-ktb.c:107
 msgid "check a key table, list the key names it can use, or write the key bindings it defines in useful formats."
-msgstr ""
+msgstr "Vérifie une table de touches, liste les noms des touches qu'elle peut utiliser, ou écrit les associations de touches qu'elle définit dans des formats utiles."
 
 #: Programs/brltty-lsinc.c:47
 msgid "List the paths to a data file and those which it recursively includes."
-msgstr ""
+msgstr "Liste les chemins d'un fichier de données et de ceux qu'il inclut récursivement."
 
 #: Programs/brltty-morse.c:126
 msgid "Translate text into Morse Code tones."
-msgstr ""
+msgstr "Traduit du texte en sons de code Morse."
 
 #: Programs/brltty-pty.c:61
 msgid "write driver directives to standard error"
-msgstr ""
+msgstr "Écrit les directives du pilote sur la sortie d'erreur standard"
 
 #: Programs/brltty-pty.c:67
 msgid "show the absolute path to the pty slave"
-msgstr ""
+msgstr "Affiche le chemin absolu du pseudo-terminal"
 
 #: Programs/brltty-pty.c:74
 msgid "the name or number of the user to run as"
-msgstr ""
+msgstr "le nom ou le numéro de l'utilisateur sous lequel s'exécuter"
 
 #: Programs/brltty-pty.c:81
 msgid "the name or number of the group to run as"
-msgstr ""
+msgstr "le nom ou le numéro du groupe sous lequel s'exécuter"
 
 #: Programs/brltty-pty.c:88
 msgid "the directory to change to"
-msgstr ""
+msgstr "le répertoire dans lequel se placer"
 
 #: Programs/brltty-pty.c:95
 msgid "the home directory to use"
-msgstr ""
+msgstr "le répertoire personnel à utiliser"
 
 #: Programs/brltty-pty.c:101
 msgid "log input written to the pty slave"
-msgstr ""
+msgstr "Journalise les données écrites vers le pseudo-terminal"
 
 #: Programs/brltty-pty.c:107
 msgid "log output received from the pty slave that isn't an escape sequence or a special character"
-msgstr ""
+msgstr "Journalise les données reçues du pseudo-terminal qui ne sont ni des séquences d'échappement ni des caractères spéciaux"
 
 #: Programs/brltty-pty.c:113
 msgid "log escape sequences and special characters received from the pty slave"
-msgstr ""
+msgstr "Journalise les séquences d'échappement et les caractères spéciaux reçus du pseudo-terminal"
 
 #: Programs/brltty-pty.c:119
 msgid "log unexpected input/output"
-msgstr ""
+msgstr "Journalise les entrées/sorties inattendues"
 
 #: Programs/brltty-pty.c:131
 msgid "Run a shell or terminal manager within a pty (virtual terminal) and export its screen via a shared memory segment so that brltty can read it via its Terminal Emulator screen driver."
-msgstr ""
+msgstr "Exécute un shell ou un gestionnaire de terminaux dans un pty (terminal virtuel) et exporte son écran via un segment de mémoire partagée afin que brltty puisse le lire avec son pilote d'écran Terminal Emulator."
 
 #: Programs/brltty-pty.c:280
 msgid "command not found"
-msgstr ""
+msgstr "Commande introuvable"
 
 #: Programs/brltty-pty.c:446
 msgid "standard input isn't a terminal"
-msgstr ""
+msgstr "L'entrée standard n'est pas un terminal"
 
 #: Programs/brltty-pty.c:451
 msgid "standard output isn't a terminal"
-msgstr ""
+msgstr "La sortie standard n'est pas un terminal"
 
 #: Programs/brltty-trtxt.c:47 Programs/brltty-trtxt.c:55 Programs/config.c:419
 #: Programs/config.c:473 Programs/config.c:483 Programs/config.c:492
@@ -501,11 +501,11 @@ msgstr "fichier"
 
 #: Programs/brltty-trtxt.c:50
 msgid "The name of (or path to) the input text table."
-msgstr ""
+msgstr "Le nom (ou le chemin) de la table de caractères d'entrée."
 
 #: Programs/brltty-trtxt.c:58
 msgid "The name of (or path to) the output text table."
-msgstr ""
+msgstr "Le nom (ou le chemin) de la table de caractères de sortie."
 
 #: Programs/brltty-trtxt.c:64
 msgid "Remove dots seven and eight."
@@ -521,7 +521,7 @@ msgstr "Chemin du répertoire des tables de caractères"
 
 #: Programs/brltty-trtxt.c:98
 msgid "Translate one binary braille representation to another."
-msgstr ""
+msgstr "Traduit une représentation binaire du braille en une autre."
 
 #: Programs/brltty-ttb.c:148
 msgid "Edit table."
@@ -549,11 +549,11 @@ msgstr "Chemin du répertoire contenant les tables de caractères."
 
 #: Programs/brltty-ttb.c:211
 msgid "Check/edit a text (computer braille) table, or convert it from one format to another."
-msgstr ""
+msgstr "Vérifie ou édite une table de caractères (braille informatique), ou la convertit d'un format à un autre."
 
 #: Programs/brltty-tune.c:104
 msgid "Compose a tune with the tune builder and play it with the tone generator."
-msgstr ""
+msgstr "Compose une mélodie avec le constructeur de mélodies et la joue avec le générateur de sons."
 
 #: Programs/cmdbase.c:47
 #, c-format
@@ -574,11 +574,11 @@ msgstr "au curseur"
 
 #: Programs/cmd_clipboard.c:573
 msgid "clipboard"
-msgstr ""
+msgstr "presse-papier"
 
 #: Programs/cmdline.c:120
 msgid "Syntax"
-msgstr ""
+msgstr "Syntaxe"
 
 #: Programs/cmdline.c:129
 msgid "option"
@@ -586,11 +586,11 @@ msgstr "option"
 
 #: Programs/cmdline.c:216
 msgid "Parameters"
-msgstr ""
+msgstr "Paramètres"
 
 #: Programs/cmdline.c:283
 msgid "Options"
-msgstr ""
+msgstr "Options"
 
 #: Programs/cmdline.c:463
 msgid "invalid counter setting"
@@ -614,11 +614,11 @@ msgstr "opérande invalide"
 
 #: Programs/cmdline.c:844
 msgid "missing parameter"
-msgstr ""
+msgstr "Paramètre manquant"
 
 #: Programs/cmdline.c:868
 msgid "too many parameters"
-msgstr ""
+msgstr "Trop de paramètres"
 
 #: Programs/cmdline.c:1065
 msgid "configuration directive specified more than once"
@@ -846,7 +846,7 @@ msgstr "Va au curseur de l'écran ou revient d'une poursuite du curseur"
 #. xgettext: This is the description of the FREEZE command.
 #: Programs/cmds.auto.h:287
 msgid "set screen image frozen/live"
-msgstr ""
+msgstr "Fige l'image de l'écran ou la remet en direct"
 
 #. xgettext: This is the description of the DISPMD command.
 #: Programs/cmds.auto.h:295
@@ -1052,7 +1052,7 @@ msgstr "Amène le curseur de l'écran sur la ligne actuelle"
 #. xgettext: This is the description of the PASTE command.
 #: Programs/cmds.auto.h:600
 msgid "insert the clipboard content before the screen cursor"
-msgstr ""
+msgstr "Insère le contenu du presse-papier avant le curseur de l'écran"
 
 #. xgettext: This is the description of the RESTARTBRL command.
 #: Programs/cmds.auto.h:607
@@ -1147,17 +1147,17 @@ msgstr "Va au caractère suivant et l'énonce"
 #. xgettext: This is the description of the SPEAK_CURR_WORD command.
 #: Programs/cmds.auto.h:742
 msgid "speak current whitespace-delimited word"
-msgstr ""
+msgstr "Énonce le mot actuel délimité par des espaces"
 
 #. xgettext: This is the description of the SPEAK_PREV_WORD command.
 #: Programs/cmds.auto.h:750
 msgid "go to and speak previous whitespace-delimited word"
-msgstr ""
+msgstr "Va au mot précédent délimité par des espaces et l'énonce"
 
 #. xgettext: This is the description of the SPEAK_NEXT_WORD command.
 #: Programs/cmds.auto.h:758
 msgid "go to and speak next whitespace-delimited word"
-msgstr ""
+msgstr "Va au mot suivant délimité par des espaces et l'énonce"
 
 #. xgettext: This is the description of the SPEAK_PREV_LINE command.
 #: Programs/cmds.auto.h:773
@@ -1197,7 +1197,7 @@ msgstr "Décrit le caractère actuel"
 #. xgettext: This is the description of the SPELL_CURR_WORD command.
 #: Programs/cmds.auto.h:827
 msgid "spell current whitespace-delimited word"
-msgstr ""
+msgstr "Épelle le mot actuel délimité par des espaces"
 
 #. xgettext: This is the description of the ROUTE_CURR_LOCN command.
 #: Programs/cmds.auto.h:835
@@ -1347,7 +1347,7 @@ msgstr "Coupe le texte sélectionné vers le presse-papier de l'hôte"
 #. xgettext: This is the description of the HOST_PASTE command.
 #: Programs/cmds.auto.h:1047
 msgid "insert the host clipboard text before the screen cursor"
-msgstr ""
+msgstr "Insère le texte du presse-papier de l'hôte avant le curseur de l'écran"
 
 #. xgettext: This is the description of the GUI_TITLE command.
 #: Programs/cmds.auto.h:1054
@@ -1457,57 +1457,57 @@ msgstr "Bascule le braille informatique entre six et huit points"
 #. xgettext: This is the description of the PREFRESET command.
 #: Programs/cmds.auto.h:1205
 msgid "reset preferences to defaults"
-msgstr ""
+msgstr "Réinitialise les préférences à leurs valeurs par défaut"
 
 #. xgettext: This is the description of the ASPK_EMP_LINE command.
 #: Programs/cmds.auto.h:1213
 msgid "set autospeak empty line on/off"
-msgstr ""
+msgstr "Active ou désactive l'annonce automatique des lignes vides"
 
 #. xgettext: This is the description of the SPK_PUNCT_LEVEL command.
 #: Programs/cmds.auto.h:1220
 msgid "cycle speech punctuation level"
-msgstr ""
+msgstr "Passe au niveau de ponctuation suivant de la synthèse"
 
 #. xgettext: This is the description of the PASTE_ALTMODE command.
 #: Programs/cmds.auto.h:1227
 msgid "insert the clipboard content before the screen cursor using the alternate paste mode"
-msgstr ""
+msgstr "Insère le contenu du presse-papier avant le curseur de l'écran avec le mode de collage alternatif"
 
 #. xgettext: This is the description of the SPEAK_CURR_PWRD command.
 #: Programs/cmds.auto.h:1234
 msgid "speak current partial (identifier or symbols) word"
-msgstr ""
+msgstr "Énonce le mot partiel actuel (identifiant ou symboles)"
 
 #. xgettext: This is the description of the SPEAK_PREV_PWRD command.
 #: Programs/cmds.auto.h:1242
 msgid "go to and speak previous partial (identifier or symbols) word"
-msgstr ""
+msgstr "Va au mot partiel précédent (identifiant ou symboles) et l'énonce"
 
 #. xgettext: This is the description of the SPEAK_NEXT_PWRD command.
 #: Programs/cmds.auto.h:1250
 msgid "go to and speak next partial (identifier or symbols) word"
-msgstr ""
+msgstr "Va au mot partiel suivant (identifiant ou symboles) et l'énonce"
 
 #. xgettext: This is the description of the SPELL_CURR_PWRD command.
 #: Programs/cmds.auto.h:1257
 msgid "spell current partial (identifier or symbols) word"
-msgstr ""
+msgstr "Épelle le mot partiel actuel (identifiant ou symboles)"
 
 #. xgettext: This is the description of the SPELL_CURR_LINE command.
 #: Programs/cmds.auto.h:1264
 msgid "spell current line"
-msgstr ""
+msgstr "Épelle la ligne actuelle"
 
 #. xgettext: This is the description of the CLIP_CLEAR command.
 #: Programs/cmds.auto.h:1271
 msgid "clear the clipboard"
-msgstr ""
+msgstr "Vide le presse-papier"
 
 #. xgettext: This is the description of the CLIP_SHOW command.
 #: Programs/cmds.auto.h:1278
 msgid "show current clipboard content"
-msgstr ""
+msgstr "Affiche le contenu actuel du presse-papier"
 
 #. xgettext: This is the description of the ROUTE command.
 #: Programs/cmds.auto.h:1287
@@ -1597,7 +1597,7 @@ msgstr "Ajoute des caractères au presse-papier"
 #. xgettext: This is the description of the PASTE_HISTORY command.
 #: Programs/cmds.auto.h:1434
 msgid "insert a clipboard history entry before the screen cursor"
-msgstr ""
+msgstr "Insère une entrée de l'historique du presse-papier avant le curseur de l'écran"
 
 #. xgettext: This is the description of the SET_TEXT_TABLE command.
 #: Programs/cmds.auto.h:1442
@@ -1647,12 +1647,12 @@ msgstr "Définit la sélection de texte"
 #. xgettext: This is the description of the ROUTE_SPEECH command.
 #: Programs/cmds.auto.h:1518
 msgid "bring speech cursor to character"
-msgstr ""
+msgstr "Amène le curseur de la synthèse au caractère"
 
 #. xgettext: This is the description of the PASTE_HISTORY_ALTMODE command.
 #: Programs/cmds.auto.h:1526
 msgid "insert a clipboard history entry before the screen cursor using the alternate paste mode"
-msgstr ""
+msgstr "Insère une entrée de l'historique du presse-papier avant le curseur de l'écran avec le mode de collage alternatif"
 
 #. xgettext: This is the description of the SELECTVT command.
 #: Programs/cmds.auto.h:1534
@@ -1702,27 +1702,27 @@ msgstr "Emplacement courant de la lecture"
 #. xgettext: This is the description of the MACRO command.
 #: Programs/cmds.auto.h:1608
 msgid "execute command macro"
-msgstr ""
+msgstr "Exécute une macro de commandes"
 
 #. xgettext: This is the description of the HOSTCMD command.
 #: Programs/cmds.auto.h:1616
 msgid "run host command"
-msgstr ""
+msgstr "Exécute une commande de l'hôte"
 
 #. xgettext: This is the description of the COLOR command.
 #: Programs/cmds.auto.h:1624
 msgid "describe color of character"
-msgstr ""
+msgstr "Décrit la couleur du caractère"
 
 #. xgettext: This is the description of the COPY_SMART_NEW command.
 #: Programs/cmds.auto.h:1632
 msgid "start new clipboard with smart copy (URL, email, etc) at character"
-msgstr ""
+msgstr "Démarre un nouveau presse-papier par copie intelligente (URL, adresse électronique, etc.) au caractère"
 
 #. xgettext: This is the description of the COPY_SMART_ADD command.
 #: Programs/cmds.auto.h:1640
 msgid "append to clipboard with smart copy (URL, email, etc) at character"
-msgstr ""
+msgstr "Ajoute au presse-papier par copie intelligente (URL, adresse électronique, etc.) au caractère"
 
 #. xgettext: This is the description of the KEY_ENTER command.
 #: Programs/cmds.auto.h:1648
@@ -1916,11 +1916,11 @@ msgstr "Propriétés des claviers éligibles."
 
 #: Programs/config.c:581
 msgid "Handle keyboard key events when using a Linux tty in graphics mode."
-msgstr ""
+msgstr "Gère les événements des touches du clavier lorsqu'un tty Linux est en mode graphique."
 
 #: Programs/config.c:590
 msgid "Name of or path to GUI keyboard table."
-msgstr ""
+msgstr "Nom ou chemin vers la table de touches du clavier de l'interface graphique."
 
 #: Programs/config.c:599
 msgid "Name of or path to default preferences file."
@@ -2017,7 +2017,7 @@ msgstr "Chemin vers le répertoire contenant les pilotes."
 
 #: Programs/config.c:757
 msgid "Path to directory containing helper commands."
-msgstr ""
+msgstr "Chemin du répertoire contenant les commandes auxiliaires."
 
 #: Programs/config.c:767
 msgid "Path to directory which contains files that can be updated."
@@ -2052,7 +2052,7 @@ msgstr "Écrit les journaux de démarrage, puis quitte."
 
 #: Programs/config.c:834
 msgid "Screen reader for those who use a braille device."
-msgstr ""
+msgstr "Lecteur d'écran pour les utilisateurs d'un afficheur braille."
 
 #: Programs/config.c:859
 msgid "unknown log level or category"
@@ -2170,7 +2170,7 @@ msgstr "indentation"
 
 #: Programs/crctest.c:115
 msgid "Test supported CRC (Cyclic Redundancy Check) checksum algorithms."
-msgstr ""
+msgstr "Teste les algorithmes de somme de contrôle CRC (contrôle de redondance cyclique) pris en charge."
 
 #: Programs/ctb_translate.c:432
 msgid "cannot compile contraction table"
@@ -2190,7 +2190,7 @@ msgstr "Séquence d'échappement non valide"
 
 #: Programs/file.c:435
 msgid "cannot make directory traversable"
-msgstr ""
+msgstr "Ne peut pas rendre le répertoire traversable"
 
 #: Programs/file.c:446
 msgid "cannot create directory"
@@ -2254,7 +2254,7 @@ msgstr "Événements du serveur"
 
 #: Programs/log.c:125
 msgid "generic I/O"
-msgstr ""
+msgstr "E/S génériques"
 
 #: Programs/log.c:131
 msgid "Serial I/O"
@@ -2270,7 +2270,7 @@ msgstr "E/S Bluetooth"
 
 #: Programs/log.c:149
 msgid "Human Interface I/O"
-msgstr ""
+msgstr "E/S HID"
 
 #: Programs/log.c:155
 msgid "Braille Driver Events"
@@ -2286,7 +2286,7 @@ msgstr "Événements du pilote de l'écran"
 
 #: Programs/matchtest.c:83
 msgid "Test smart matching (URL, email, hostname) detection."
-msgstr ""
+msgstr "Teste la détection par correspondance intelligente (URL, adresse électronique, nom d'hôte)."
 
 #: Programs/menu.c:452
 msgid "seconds"
@@ -2306,7 +2306,7 @@ msgstr "Ne peut pas ouvrir le répertoire de travail"
 
 #: Programs/menu.c:816
 msgid "not set"
-msgstr ""
+msgstr "non défini"
 
 #: Programs/menu.c:943
 msgid "Close"
@@ -2437,11 +2437,11 @@ msgstr "point 8"
 
 #: Programs/menu_prefs.c:681
 msgid "Hide"
-msgstr ""
+msgstr "Masquer"
 
 #: Programs/menu_prefs.c:681
 msgid "no dots"
-msgstr ""
+msgstr "aucun point"
 
 #: Programs/menu_prefs.c:688
 msgid "Save on Exit"
@@ -2671,7 +2671,7 @@ msgstr "Suivre le défilement de l'écran"
 
 #: Programs/menu_prefs.c:929
 msgid "Soft Cursor Detection"
-msgstr ""
+msgstr "Détection du curseur logiciel"
 
 #: Programs/menu_prefs.c:935
 msgid "Track Screen Pointer"
@@ -2759,7 +2759,7 @@ msgstr "Répétition automatique du défilement"
 
 #: Programs/menu_prefs.c:1023
 msgid "Alternate Paste Mode Enabled"
-msgstr ""
+msgstr "Mode de collage alternatif activé"
 
 #: Programs/menu_prefs.c:1028
 msgid "Touch Navigation"
@@ -2851,15 +2851,15 @@ msgstr "Points d'alerte"
 
 #: Programs/menu_prefs.c:1139
 msgid "Alert Dots Duration"
-msgstr ""
+msgstr "Durée des points d'alerte"
 
 #: Programs/menu_prefs.c:1146
 msgid "Speak Key Context"
-msgstr ""
+msgstr "Dire le contexte des touches"
 
 #: Programs/menu_prefs.c:1151
 msgid "Speak Modifier Key"
-msgstr ""
+msgstr "Dire les touches de modification"
 
 #: Programs/menu_prefs.c:1159
 msgid "Autospeak Options"
@@ -2875,7 +2875,7 @@ msgstr "Dire la ligne sélectionnée"
 
 #: Programs/menu_prefs.c:1173
 msgid "Speak Empty Line"
-msgstr ""
+msgstr "Dire les lignes vides"
 
 #: Programs/menu_prefs.c:1179
 msgid "Speak Selected Character"
@@ -2907,19 +2907,19 @@ msgstr "Options de la synthèse"
 
 #: Programs/menu_prefs.c:1219 Programs/spk.c:210
 msgid "Volume"
-msgstr ""
+msgstr "Volume"
 
 #: Programs/menu_prefs.c:1226 Programs/spk.c:236
 msgid "Rate"
-msgstr ""
+msgstr "Vitesse"
 
 #: Programs/menu_prefs.c:1233 Programs/spk.c:262
 msgid "Pitch"
-msgstr ""
+msgstr "Hauteur"
 
 #: Programs/menu_prefs.c:1246
 msgid "Punctuation Level"
-msgstr ""
+msgstr "Niveau de ponctuation"
 
 #. "cap" here, used during speech output, is short for "capital".
 #. It is spoken just before an uppercase letter, e.g. "cap A".
@@ -2933,7 +2933,7 @@ msgstr "Augmenter la hauteur"
 
 #: Programs/menu_prefs.c:1261
 msgid "Uppercase Indicator"
-msgstr ""
+msgstr "Indicateur de majuscule"
 
 #: Programs/menu_prefs.c:1268
 msgid "Say Space"
@@ -2941,19 +2941,19 @@ msgstr "Dire les espaces"
 
 #: Programs/menu_prefs.c:1271
 msgid "Whitespace Indicator"
-msgstr ""
+msgstr "Indicateur d'espace"
 
 #: Programs/menu_prefs.c:1276
 msgid "Character Autorepeat Interval"
-msgstr ""
+msgstr "Intervalle de répétition automatique des caractères"
 
 #: Programs/menu_prefs.c:1282
 msgid "Word Autorepeat Interval"
-msgstr ""
+msgstr "Intervalle de répétition automatique des mots"
 
 #: Programs/menu_prefs.c:1288
 msgid "Line Autorepeat Interval"
-msgstr ""
+msgstr "Intervalle de répétition automatique des lignes"
 
 #: Programs/menu_prefs.c:1295
 msgid "Immediate"
@@ -3169,7 +3169,7 @@ msgstr "Répertoire des pilotes"
 
 #: Programs/menu_prefs.c:1562 Programs/menu_prefs.c:1622
 msgid "Helpers Directory"
-msgstr ""
+msgstr "Répertoire des commandes auxiliaires"
 
 #: Programs/menu_prefs.c:1567 Programs/menu_prefs.c:1627
 msgid "Updatable Directory"
@@ -3185,35 +3185,35 @@ msgstr "Répertoire de la locale"
 
 #: Programs/menu_prefs.c:1583
 msgid "Command Options"
-msgstr ""
+msgstr "Options de la ligne de commande"
 
 #: Programs/menu_prefs.c:1592
 msgid "Environment Variables"
-msgstr ""
+msgstr "Variables d'environnement"
 
 #: Programs/menu_prefs.c:1597
 msgid "Boot Parameters"
-msgstr ""
+msgstr "Paramètres d'amorçage"
 
 #: Programs/menu_prefs.c:1607
 msgid "Override Preferences"
-msgstr ""
+msgstr "Préférences imposées"
 
 #: Programs/menu_prefs.c:1646
 msgid "Override Directory"
-msgstr ""
+msgstr "Répertoire des remplacements"
 
 #: Programs/menu_prefs.c:1676
 msgid "Keyboard Properties"
-msgstr ""
+msgstr "Propriétés du clavier"
 
 #: Programs/menu_prefs.c:1681
 msgid "GUI Keyboard Enabled"
-msgstr ""
+msgstr "Clavier de l'interface graphique activé"
 
 #: Programs/menu_prefs.c:1686
 msgid "GUI Keyboard Table"
-msgstr ""
+msgstr "Table de touches du clavier de l'interface graphique"
 
 #: Programs/menu_prefs.c:1691
 msgid "Braille Driver"
@@ -3221,11 +3221,11 @@ msgstr "Pilote braille"
 
 #: Programs/menu_prefs.c:1696
 msgid "Braille Parameters"
-msgstr ""
+msgstr "Paramètres braille"
 
 #: Programs/menu_prefs.c:1706
 msgid "Release Device"
-msgstr ""
+msgstr "Libérer le périphérique"
 
 #: Programs/menu_prefs.c:1712
 msgid "Speech Driver"
@@ -3233,11 +3233,11 @@ msgstr "Pilote de synthèse vocale"
 
 #: Programs/menu_prefs.c:1717
 msgid "Speech Parameters"
-msgstr ""
+msgstr "Paramètres de la synthèse"
 
 #: Programs/menu_prefs.c:1722
 msgid "Quiet If No Braille"
-msgstr ""
+msgstr "Silencieux sans braille"
 
 #: Programs/menu_prefs.c:1727
 msgid "Speech Input"
@@ -3249,63 +3249,63 @@ msgstr "Pilote de l'écran"
 
 #: Programs/menu_prefs.c:1738
 msgid "Screen Parameters"
-msgstr ""
+msgstr "Paramètres de l'écran"
 
 #: Programs/menu_prefs.c:1744
 msgid "PCM Device"
-msgstr ""
+msgstr "Périphérique PCM"
 
 #: Programs/menu_prefs.c:1751
 msgid "MIDI Device"
-msgstr ""
+msgstr "Périphérique MIDI"
 
 #: Programs/menu_prefs.c:1757
 msgid "Log File"
-msgstr ""
+msgstr "Fichier journal"
 
 #: Programs/menu_prefs.c:1762
 msgid "Log to Standard Error"
-msgstr ""
+msgstr "Journaliser sur la sortie d'erreur standard"
 
 #: Programs/menu_prefs.c:1767
 msgid "PID File"
-msgstr ""
+msgstr "Fichier PID"
 
 #: Programs/menu_prefs.c:1772
 msgid "No Daemon"
-msgstr ""
+msgstr "Pas de démon"
 
 #: Programs/menu_prefs.c:1777
 msgid "Privilege Parameters"
-msgstr ""
+msgstr "Paramètres des privilèges"
 
 #: Programs/menu_prefs.c:1782
 msgid "Stay Privileged"
-msgstr ""
+msgstr "Rester privilégié"
 
 #: Programs/menu_prefs.c:1787
 msgid "Start Message"
-msgstr ""
+msgstr "Message de démarrage"
 
 #: Programs/menu_prefs.c:1792
 msgid "Stop Message"
-msgstr ""
+msgstr "Message d'arrêt"
 
 #: Programs/menu_prefs.c:1797
 msgid "Prompt Patterns"
-msgstr ""
+msgstr "Motifs des invites"
 
 #: Programs/menu_prefs.c:1803
 msgid "No API"
-msgstr ""
+msgstr "Pas d'API"
 
 #: Programs/menu_prefs.c:1808
 msgid "API Parameters"
-msgstr ""
+msgstr "Paramètres de l'API"
 
 #: Programs/menu_prefs.c:1815
 msgid "Log Settings"
-msgstr ""
+msgstr "Réglages de journalisation"
 
 #: Programs/menu_prefs.c:1819
 msgid "Emergency"
@@ -4130,7 +4130,7 @@ msgstr "écrire les traductions en utilisant UTF-8"
 
 #: Programs/msgtest.c:87
 msgid "Test message localization using the message catalog reader."
-msgstr ""
+msgstr "Teste la traduction des messages à l'aide du lecteur de catalogue de messages."
 
 #: Programs/parse.c:495
 msgid "missing parameter value"
@@ -4222,7 +4222,7 @@ msgstr "Menu des préférences"
 
 #: Programs/scrtest.c:94
 msgid "Test a screen driver."
-msgstr ""
+msgstr "Teste un pilote d'écran."
 
 #: Programs/spk.c:279
 msgid "Some"
@@ -4230,15 +4230,15 @@ msgstr "Quelques"
 
 #: Programs/spk.c:280
 msgid "Most"
-msgstr ""
+msgstr "La plupart"
 
 #: Programs/spk.c:298
 msgid "Punctuation"
-msgstr ""
+msgstr "Ponctuation"
 
 #: Programs/spktest.c:96
 msgid "Test a speech driver."
-msgstr ""
+msgstr "Teste un pilote de synthèse vocale."
 
 #: Programs/system_windows.c:54
 msgid "cannot load library"
@@ -4250,7 +4250,7 @@ msgstr "Ne peut pas trouver la procédure"
 
 #: Programs/tbl2hex.c:54
 msgid "Write the hexadecimal array representation of a compiled table."
-msgstr ""
+msgstr "Écrit la représentation en tableau hexadécimal d'une table compilée."
 
 #: Programs/ttb_translate.c:275
 msgid "cannot compile text table"
@@ -4262,7 +4262,7 @@ msgstr "Ne peut pas charger la table de caractères"
 
 #: Programs/update.c:1026
 msgid "blank"
-msgstr ""
+msgstr "vide"
 
 #: Programs/xbrlapi.c:96
 msgid "[host][:port]"
@@ -4302,15 +4302,15 @@ msgstr "Rester un processus au premier plan"
 
 #: Programs/xbrlapi.c:137
 msgid "file to write the name of the focused command to"
-msgstr ""
+msgstr "fichier dans lequel écrire le nom de la commande qui a le focus"
 
 #: Programs/xbrlapi.c:144
 msgid "file to write the name of the focused window to"
-msgstr ""
+msgstr "fichier dans lequel écrire le nom de la fenêtre qui a le focus"
 
 #: Programs/xbrlapi.c:156
 msgid "Augment an X session by supporting input typed on the braille device, showing the title of the focused window on the braille display, and switching braille focus to it."
-msgstr ""
+msgstr "Enrichit une session X en prenant en charge la saisie sur l'afficheur braille, en affichant sur l'afficheur braille le titre de la fenêtre qui a le focus, et en y basculant le focus braille."
 
 #. This is the first attempt to connect to BRLTTY, and it failed.
 #. * Return the error immediately to the user, to provide feedback to users
@@ -4350,7 +4350,7 @@ msgstr "Ne peut pas définir le focus sur %#010x\n"
 #: Programs/xbrlapi.c:613
 #, c-format
 msgid "xbrlapi: server refused our mapping request, could not synthesize key\n"
-msgstr ""
+msgstr "xbrlapi : le serveur a refusé notre demande d'association, impossible de synthétiser la touche\n"
 
 #: Programs/xbrlapi.c:619
 #, c-format
@@ -4416,7 +4416,7 @@ msgstr "Support du serveur XKB incompatible\n"
 
 #: Programs/xbrlapi.c:832
 msgid "Could not get XKB major opcode\n"
-msgstr ""
+msgstr "Impossible d'obtenir l'opcode majeur de XKB\n"
 
 #: Programs/xbrlapi.c:868
 #, c-format
@@ -4448,12 +4448,12 @@ msgstr "xbrlapi : Le nom de la fenêtre %#010lx est devenu NULL\n"
 
 #: Programs/xbrlapi.c:975
 msgid "XFree(wm_command) for change"
-msgstr ""
+msgstr "XFree(wm_command) pour changer"
 
 #: Programs/xbrlapi.c:980
 #, c-format
 msgid "xbrlapi: window %#010lx changed to NULL command\n"
-msgstr ""
+msgstr "xbrlapi : La commande de la fenêtre %#010lx est devenue NULL\n"
 
 #. "shouldn't happen" events
 #: Programs/xbrlapi.c:1005
