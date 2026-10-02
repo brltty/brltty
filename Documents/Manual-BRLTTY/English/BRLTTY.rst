@@ -1899,18 +1899,20 @@ A key table becomes interesting when you want to remap keys,
 adapt a newer display to an older driver,
 or use your computer keyboard as braille input.
 
-There are two naming conventions:
+There are two kinds of key tables:
 
-- **Braille display key tables** have names of the form
-  ``brl-``\ *xx*\ ``-``\ *model*\ ``.ktb``,
+- **Braille display key tables** can usually be found in the
+  ``/etc/brltty/Input/``\ *xx*\ ``/`` directory,
   where *xx* is the two-letter
-  :ref:`driver identification code <drivers>`
-  and *model* identifies the display.
+  :ref:`driver identification code <drivers>`.
+  The name of each one identifies the model(s) it is for,
+  and the driver selects which one to use.
 
-- **Keyboard tables** have names of the form
-  ``kbd-``\ *kind*\ ``.ktb``
+- **Keyboard tables** can usually be found in the
+  ``/etc/brltty/Keyboard/`` directory,
   and drive the ordinary computer keyboard
   when BRLTTY is monitoring it.
+  The name of each one describes the kind of keyboard it is for.
 
 The keyboard tables shipped with BRLTTY are:
 

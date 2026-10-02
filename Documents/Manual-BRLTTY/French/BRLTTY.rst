@@ -2025,16 +2025,18 @@ coup ». Une table de touches devient intéressante si vous souhaitez
 réattribuer des touches, adapter un afficheur récent à un pilote plus
 ancien, ou utiliser votre clavier d'ordinateur en saisie braille.
 
-Deux conventions de nommage coexistent :
+Il existe deux sortes de tables de touches :
 
-- **Les tables de touches d'afficheur braille** ont des noms de la
-  forme ``brl-``\ *xx*\ ``-``\ *modèle*\ ``.ktb``, où *xx* est le
-  :ref:`code d'identification de pilote <drivers>` à deux lettres et
-  *modèle* identifie l'afficheur.
+- **Les tables de touches d'afficheur braille** se trouvent
+  habituellement dans le répertoire ``/etc/brltty/Input/``\ *xx*\ ``/``,
+  où *xx* est le :ref:`code d'identification de pilote <drivers>` à
+  deux lettres. Le nom de chacune identifie le ou les modèles
+  auxquels elle s'applique, et le pilote choisit celle à utiliser.
 
-- **Les tables de clavier** ont des noms de la forme
-  ``kbd-``\ *type*\ ``.ktb`` et pilotent le clavier d'ordinateur
-  ordinaire lorsque BRLTTY le surveille.
+- **Les tables de clavier** se trouvent habituellement dans le
+  répertoire ``/etc/brltty/Keyboard/`` et pilotent le clavier
+  d'ordinateur ordinaire lorsque BRLTTY le surveille. Le nom de
+  chacune décrit le type de clavier auquel elle est destinée.
 
 Les tables de clavier fournies avec BRLTTY sont les suivantes :
 
