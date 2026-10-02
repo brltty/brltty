@@ -472,13 +472,11 @@ DISPMD
 .. _command-SIXDOTS:
 
 SIXDOTS
-  Affiche les caractères en braille à six points plutôt qu'à huit ;
-  les points 7 et 8 restent disponibles pour la représentation du
-  curseur et le soulignement des attributs. Si une table de braille
-  abrégé est en vigueur (voir l'option
-  :ref:`-c <options-contraction-table>`), elle est utilisée.
-  Modifiable aussi via la préférence
-  :ref:`Apparence du texte <preference-text-style>`.
+  Bascule entre le braille informatique à 8 points et le braille
+  abrégé à 6 points. Les commandes
+  :ref:`CONTRACTED <command-CONTRACTED>` et
+  :ref:`COMPBRL6 <command-COMPBRL6>` changent chacun de ces réglages
+  séparément.
 
 .. _command-SLIDEWIN:
 
@@ -594,6 +592,19 @@ AUTOSPEAK
   Énonce automatiquement la nouvelle ligne lors d'un déplacement
   vertical, les caractères au fur et à mesure qu'ils sont tapés ou
   effacés, et le caractère vers lequel se déplace le curseur.
+
+.. _command-CONTRACTED:
+
+CONTRACTED
+  Bascule entre le braille informatique et le braille abrégé (voir la
+  préférence :ref:`Variante de braille <preference-braille-variant>`).
+
+.. _command-COMPBRL6:
+
+COMPBRL6
+  Bascule le braille informatique entre des cellules à 8 et à 6 points
+  (voir la préférence :ref:`Type de cellule du braille informatique
+  <preference-computer-braille-cell-type>`).
 
 .. _command-ASPK_EMP_LINE:
 
@@ -994,9 +1005,8 @@ dans les configurations utilisateur :
 
 ``contraction-table`` *fichier*
   La :ref:`table de braille abrégé <table-contraction>` utilisée
-  lorsque le braille abrégé à 6 points est actif (voir la commande
-  :ref:`SIXDOTS <command-SIXDOTS>` et la préférence :ref:`Apparence du
-  texte <preference-text-style>`).
+  lorsque le braille abrégé est sélectionné (voir la préférence
+  :ref:`Variante de braille <preference-braille-variant>`).
   Contournable avec :ref:`-c <options-contraction-table>`.
 
 .. _configure-attributes-table:
@@ -1069,8 +1079,8 @@ Tables :
 .. _options-contraction-table:
 
 ``-c``\ *fichier* ``--contraction-table=``\ *fichier*
-  :ref:`Table de braille abrégé <table-contraction>` pour le mode
-  six points.
+  :ref:`Table de braille abrégé <table-contraction>` pour le braille
+  abrégé.
 
 .. _options-attributes-table:
 
@@ -1428,14 +1438,21 @@ utilisateurs ajustent typiquement très tôt.
 Préférences notables
 ~~~~~~~~~~~~~~~~~~~~
 
-.. _preference-text-style:
+.. _preference-braille-variant:
 
-Apparence du texte
-  Afficher le contenu de l'écran avec les huit points (``8-dot``) ou
-  seulement les points 1 à 6 (``6-dot``). En mode 6 points, si une
-  table de braille abrégé est sélectionnée, le braille abrégé est
-  affiché. Modifiable aussi via la commande
-  :ref:`SIXDOTS <command-SIXDOTS>`.
+Variante de braille
+  Afficher le contenu de l'écran en ``Braille informatique`` (une
+  cellule par caractère, selon la :ref:`table de caractères <table-text>`)
+  ou en ``Braille abrégé`` (selon la :ref:`table de braille abrégé
+  <table-contraction>`). Modifiable aussi via la commande
+  :ref:`CONTRACTED <command-CONTRACTED>`.
+
+.. _preference-computer-braille-cell-type:
+
+Type de cellule du braille informatique
+  Afficher le braille informatique avec les huit points (``8 points``)
+  ou seulement les points 1 à 6 (``6 points``). Modifiable aussi via
+  la commande :ref:`COMPBRL6 <command-COMPBRL6>`.
 
 .. _preference-skip-identical-lines:
 
@@ -1962,10 +1979,9 @@ sont réunies :
   directive
   :ref:`contraction-table <configure-contraction-table>` du fichier
   de configuration, et
-- le mode braille à six points est actif — basculez-le avec la
-  commande :ref:`SIXDOTS <command-SIXDOTS>`, ou définissez l'état
-  initial via la préférence
-  :ref:`Text Style <preference-text-style>`.
+- le braille abrégé est sélectionné — via la préférence
+  :ref:`Variante de braille <preference-braille-variant>` ou la
+  commande :ref:`CONTRACTED <command-CONTRACTED>`.
 
 La prise en charge du braille abrégé n'est pas compilée si l'option
 de compilation ``--disable-contracted-braille`` a été utilisée.
