@@ -1861,7 +1861,7 @@ msgstr "Abandonne le périphérique braille quand il n'est pas possible de lire 
 #: Programs/config.c:476
 #, c-format
 msgid "Name of or path to text table (or %s)."
-msgstr "Nom ou chemin vers la table de caractères"
+msgstr "Nom ou chemin vers la table de caractères (ou %s)."
 
 #: Programs/config.c:486
 msgid "Name of or path to contraction table."
