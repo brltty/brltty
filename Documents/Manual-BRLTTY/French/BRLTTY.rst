@@ -32,10 +32,10 @@ commandes de BRLTTY.
 Parmi les fonctionnalités phares figurent la poursuite et le
 rapatriement du curseur, le braille abrégé (l'anglais et le français
 sont fournis d'origine ; de nombreuses autres langues sont couvertes
-par des tables additionnelles), le gel de l'écran pour une relecture
-posée, la revue des attributs, le copier-coller, des styles de curseur
+par des tables additionnelles), la possibilité de figer l'écran pour une
+relecture posée, la revue des attributs, le copier-coller, des styles de curseur
 et de clignotement configurables, un menu interactif des préférences,
-un mode apprentissage en ligne pour découvrir les commandes, une
+un mode d'apprentissage en ligne pour découvrir les commandes, une
 sortie vocale optionnelle et une API programmable pour les
 applications clientes. Voir :ref:`Premiers pas <getting-started>` pour
 l'installation et les premiers pas, et :ref:`Obtenir de l'aide
@@ -85,7 +85,7 @@ Une fois installé, lancez BRLTTY en tant que root ::
 Il lit sa configuration dans un fichier
 (voir :ref:`Le fichier de configuration <configure>`)
 qui fixe les valeurs par défaut comme le pilote braille, le
-périphérique auquel l'afficheur est connecté, et la table de texte. La
+périphérique auquel l'afficheur est connecté, et la table de caractères. La
 plupart de ces valeurs peuvent être remplacées en ligne de commande
 (voir :ref:`Options en ligne de commande <options>`).
 
@@ -136,8 +136,8 @@ Deux commandes méritent d'être mémorisées avant toutes les autres :
 * :ref:`LEARN <command-LEARN>` — annonce le nom de chaque commande au
   fur et à mesure que vous appuyez sur sa touche ; pratique pour
   explorer les attributions de touches qui ne vous sont pas familières.
-  Appuyez sur Entrée au clavier pour quitter le mode apprentissage
-  (voir :ref:`Mode apprentissage des commandes <learn>` pour les
+  Appuyez sur Entrée au clavier pour quitter le mode d'apprentissage
+  (voir :ref:`Mode d'apprentissage des commandes <learn>` pour les
   détails).
 
 Les deux sont des bascules : invoquez-les à nouveau pour revenir. Le
@@ -459,7 +459,7 @@ dans le :ref:`menu des préférences <preferences-menu>`.
 .. _command-FREEZE:
 
 FREEZE
-  Gèle l'image de l'écran, ce qui permet de lire à votre rythme même
+  Fige l'image de l'écran, ce qui permet de lire à votre rythme même
   si l'application continue d'écrire.
 
 .. _command-DISPMD:
@@ -486,7 +486,7 @@ SLIDEWIN
   Lorsque la poursuite du curseur est active, fait glisser la fenêtre
   horizontalement pour garder le curseur près du centre, plutôt que
   de sauter par pas d'une fenêtre. Modifiable aussi via la préférence
-  :ref:`Faire défiler la fenêtre <preference-sliding-window>`.
+  :ref:`Fenêtre braille glissante <preference-sliding-window>`.
 
 .. _command-SKPIDLNS:
 
@@ -497,7 +497,7 @@ SKPIDLNS
   :ref:`FWINLT/FWINRT <command-FWINLT-FWINRT>` et de
   :ref:`FWINLTSKIP/FWINRTSKIP <command-FWINLTSKIP-FWINRTSKIP>`.
   Modifiable aussi via la préférence
-  :ref:`Sauter les lignes identiques <preference-skip-identical-lines>`.
+  :ref:`Passer les lignes identiques <preference-skip-identical-lines>`.
 
 .. _command-SKPBLNKWINS:
 
@@ -510,7 +510,7 @@ SKPBLNKWINS
 CSRVIS
   Montre le curseur en superposant un motif de points sur son
   caractère. Initialement **activée**. Modifiable aussi via la
-  préférence :ref:`Afficher le curseur <preference-show-cursor>`.
+  préférence :ref:`Afficher le curseur de l'écran <preference-show-cursor>`.
 
 .. _command-CSRHIDE:
 
@@ -532,14 +532,14 @@ CSRTRK
 CSRSIZE
   Représente le curseur par un bloc plein (les huit points) plutôt
   que par un soulignement (points 7 et 8). Modifiable aussi via la
-  préférence :ref:`Apparence du curseur <preference-cursor-style>`.
+  préférence :ref:`Apparence du curseur de l'écran <preference-cursor-style>`.
 
 .. _command-CSRBLINK:
 
 CSRBLINK
   Fait clignoter la représentation du curseur. Modifiable aussi via
   la préférence
-  :ref:`Curseur clignotant <preference-blinking-cursor>`.
+  :ref:`Clignotement du curseur de l'écran <preference-blinking-cursor>`.
 
 .. _command-ATTRVIS:
 
@@ -565,14 +565,14 @@ ATTRVIS
 ATTRBLINK
   Fait clignoter le soulignement des attributs. Initialement
   **activée**. Modifiable aussi via la préférence
-  :ref:`Attributs clignotants <preference-blinking-attributes>`.
+  :ref:`Clignotement des attributs <preference-blinking-attributes>`.
 
 .. _command-CAPBLINK:
 
 CAPBLINK
   Fait clignoter les lettres majuscules. Modifiable aussi via la
   préférence
-  :ref:`Majuscules clignotantes <preference-blinking-capitals>`.
+  :ref:`Clignotement des majuscules <preference-blinking-capitals>`.
 
 .. _command-TUNES:
 
@@ -627,8 +627,8 @@ INFO
 .. _command-LEARN:
 
 LEARN
-  Bascule en mode apprentissage des commandes
-  (voir :ref:`Mode apprentissage des commandes <learn>`). Appuyez sur
+  Bascule en mode d'apprentissage des commandes
+  (voir :ref:`Mode d'apprentissage des commandes <learn>`). Appuyez sur
   une touche pour découvrir la commande qu'elle envoie. Invoquez
   ``LEARN`` à nouveau pour quitter. Indisponible si BRLTTY a été
   compilé avec ``--disable-learn-mode``.
@@ -688,7 +688,7 @@ Contrôles de la synthèse vocale
 
 SAY_LINE
   Énonce la ligne courante. La préférence
-  :ref:`Mode dire la ligne <preference-sayline-mode>` détermine si
+  :ref:`Mode dire-la-ligne <preference-sayline-mode>` détermine si
   l'énoncé en cours est interrompu d'abord.
 
 .. _command-SAY_ABOVE:
@@ -709,20 +709,20 @@ MUTE
 .. _command-SPKHOME:
 
 SPKHOME
-  Va à l'emplacement du curseur de lecture vocale.
+  Va à l'emplacement du curseur de la synthèse.
 
 .. _command-SAY_SLOWER-SAY_FASTER:
 
 SAY_SLOWER/SAY_FASTER
-  Diminue/augmente le débit de la synthèse vocale
-  (voir :ref:`Débit de la synthèse <preference-speech-rate>`).
+  Diminue/augmente la vitesse de la synthèse vocale
+  (voir :ref:`Vitesse <preference-speech-rate>`).
   Dépend du pilote.
 
 .. _command-SAY_SOFTER-SAY_LOUDER:
 
 SAY_SOFTER/SAY_LOUDER
   Diminue/augmente le volume de la synthèse vocale
-  (voir :ref:`Volume de la synthèse <preference-speech-volume>`).
+  (voir :ref:`Volume <preference-speech-volume>`).
   Dépend du pilote.
 
 .. _command-SPK_PUNCT_LEVEL:
@@ -739,7 +739,7 @@ SPK_PUNCT_LEVEL
 Navigation par la synthèse vocale
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Ces commandes déplacent le curseur de lecture vocale et énoncent
+Ces commandes déplacent le curseur de la synthèse et énoncent
 l'unité sur laquelle il se pose.
 
 SPEAK_CURR_CHAR / SPEAK_PREV_CHAR / SPEAK_NEXT_CHAR
@@ -985,7 +985,7 @@ dans les configurations utilisateur :
 .. _configure-text-table:
 
 ``text-table`` *fichier*\ \|\ ``auto``
-  La :ref:`table de texte <table-text>` (correspondance
+  La :ref:`table de caractères <table-text>` (correspondance
   caractère-vers-braille). ``auto`` (le défaut) en sélectionne une
   d'après la locale.
   Contournable avec :ref:`-t <options-text-table>`.
@@ -1064,7 +1064,7 @@ Tables :
 .. _options-text-table:
 
 ``-t``\ *fichier* ``--text-table=``\ *fichier*
-  :ref:`Table de texte <table-text>`. Par défaut : selon la locale.
+  :ref:`Table de caractères <table-text>`. Par défaut : selon la locale.
 
 .. _options-contraction-table:
 
@@ -1291,7 +1291,7 @@ où l'application ``gpm`` est installée, il interagit avec le
 pointeur (souris).
 
 Déplacer le pointeur entraîne la fenêtre braille (voir la préférence
-:ref:`Window Follows Pointer <preference-window-follows-pointer>`).
+:ref:`Suivre le pointeur de l'écran <preference-window-follows-pointer>`).
 Chaque fois que le pointeur sort du bord de la fenêtre braille,
 celle-ci est entraînée avec lui (un caractère à la fois). Cela donne
 au brailliste un autre moyen, en deux dimensions, d'inspecter le
@@ -1339,7 +1339,7 @@ mélodies prédéfinies. Cette fonctionnalité s'active et se désactive
 soit par la commande :ref:`TUNES <command-TUNES>`, soit par la
 préférence :ref:`Alert Tunes <tunes>`. Les mélodies sont jouées par
 défaut sur le bipeur interne, mais d'autres sorties sont disponibles
-via la préférence :ref:`Tune Device <preference-tune-device>`.
+via la préférence :ref:`Périphérique pour les mélodies <preference-tune-device>`.
 
 Chaque événement significatif est associé, par ordre de priorité
 décroissant, à un ou plusieurs des éléments suivants :
@@ -1349,19 +1349,19 @@ une mélodie
   :ref:`Alert Tunes <tunes>` (voir aussi la commande
   :ref:`TUNES <command-TUNES>`) est active, et si le périphérique de
   son sélectionné (voir la préférence
-  :ref:`Tune Device <preference-tune-device>`) peut être ouvert, la
+  :ref:`Périphérique pour les mélodies <preference-tune-device>`) peut être ouvert, la
   mélodie est jouée.
 
 un motif de points
   Si un motif de points est associé à l'événement, et si la
-  préférence :ref:`Alert Dots <preference-alert-dots>` est active,
+  préférence :ref:`Points d'alerte <preference-alert-dots>` est active,
   le motif est brièvement affiché sur chaque cellule braille.
   Certains afficheurs ne réagissent pas assez vite pour que ce
   mécanisme fonctionne efficacement.
 
 un message
   Si un message est associé à l'événement, et si la préférence
-  :ref:`Alert Messages <preference-alert-messages>` est active, il
+  :ref:`Messages d'alerte <preference-alert-messages>` est active, il
   est affiché pendant quelques secondes (voir l'option en ligne de
   commande :ref:`-M <options-message-timeout>`).
 
@@ -1375,7 +1375,7 @@ Ces événements comprennent :
 - La pose du début ou de la fin d'une zone à copier.
 - L'activation ou la désactivation d'une fonctionnalité.
 - L'activation ou la désactivation de la poursuite du curseur.
-- Le gel ou le dégel de l'image de l'écran.
+- Le passage de l'image de l'écran à l'état figé ou en direct.
 - Le retour à la ligne de la fenêtre braille, vers le début de la
   ligne suivante ou vers la fin de la ligne précédente.
 - Le saut de lignes identiques.
@@ -1447,7 +1447,7 @@ Passer les lignes identiques
 
 .. _preference-sliding-window:
 
-Fenêtre glissante
+Fenêtre braille glissante
   Quand la poursuite du curseur ferait sortir le curseur de la
   fenêtre braille, faire glisser la fenêtre pour que le curseur reste
   près du centre, plutôt que de sauter par largeurs de fenêtre
@@ -1456,20 +1456,20 @@ Fenêtre glissante
 
 .. _preference-show-cursor:
 
-Afficher le curseur
+Afficher le curseur de l'écran
   Afficher ou non le curseur de l'écran sur l'afficheur braille.
   Modifiable aussi via la commande :ref:`CSRVIS <command-CSRVIS>`.
 
 .. _preference-cursor-style:
 
-Apparence du curseur
+Apparence du curseur de l'écran
   Représenter le curseur par les huit points (un bloc plein) ou
   seulement les points 7 et 8 (un soulignement). Modifiable aussi
   via la commande :ref:`CSRSIZE <command-CSRSIZE>`.
 
 .. _preference-blinking-cursor:
 
-Clignotement du curseur
+Clignotement du curseur de l'écran
   Rendre le curseur alternativement visible et invisible à un rythme
   fixe. Modifiable aussi via la commande
   :ref:`CSRBLINK <command-CSRBLINK>`.
@@ -1494,7 +1494,7 @@ Clignotement des majuscules
   Modifiable aussi via la commande
   :ref:`CAPBLINK <command-CAPBLINK>`.
 
-Répétition automatique
+Répétition automatique activée
   Tant que la combinaison de touches d'une commande répétable reste
   enfoncée, répéter la commande à intervalle régulier après un délai
   initial. La fiabilité dépend de ce que le pilote d'afficheur
@@ -1504,48 +1504,48 @@ Répétition automatique
 
 .. _preference-window-follows-pointer:
 
-La fenêtre suit le pointeur
+Suivre le pointeur de l'écran
   Lorsque le pointeur de la souris se déplace, entraîner la fenêtre
   braille avec lui. Disponible uniquement si la prise en charge de
   GPM a été compilée.
 
 .. _preference-tune-device:
 
-Périphérique pour les sons
+Périphérique pour les mélodies
   Périphérique audio sur lequel jouer les mélodies d'alerte : bipeur
   interne, PCM (interface audio numérique de la carte son), MIDI ou
   synthèse FM. Des sous-réglages de volume distincts sont disponibles
-  pour PCM, MIDI et FM. La valeur par défaut est ``Beeper`` lorsqu'il
+  pour PCM, MIDI et FM. La valeur par défaut est ``Bipeur`` lorsqu'il
   est pris en charge, sinon ``PCM``.
 
 .. _preference-alert-dots:
 
-Points d'avertissement
+Points d'alerte
   Lorsqu'un événement significatif a un motif de points associé
   (voir :ref:`Alert Tunes <tunes>`), afficher brièvement le motif
-  sur chaque cellule braille. Un réglage distinct *Alert Dots
-  Duration* (ajouté après BRLTTY 6.5 ; valeur par défaut : 0,4 s)
+  sur chaque cellule braille. Un réglage distinct *Durée des points
+  d'alerte* (ajouté après BRLTTY 6.5 ; valeur par défaut : 0,4 s)
   contrôle la durée d'affichage du motif — utile pour les afficheurs
   dont les actuateurs réagissent lentement. Supprimé si une mélodie
   se déclenche pour le même événement.
 
 .. _preference-alert-messages:
 
-Messages d'avertissement
+Messages d'alerte
   Lorsqu'un événement significatif a un message associé (voir
   :ref:`Alert Tunes <tunes>`), l'afficher sur l'afficheur braille
   pendant quelques secondes (voir l'option en ligne de commande
   :ref:`-M <options-message-timeout>`). Supprimé si une mélodie ou
-  des points d'avertissement se déclenchent pour le même événement.
+  des points d'alerte se déclenchent pour le même événement.
 
 .. _preference-sayline-mode:
 
 Mode dire-la-ligne
   À l'exécution de la commande :ref:`SAY_LINE <command-SAY_LINE>`,
-  soit abandonner la synthèse en cours (``Immediate``, valeur par
-  défaut), soit mettre la nouvelle ligne en file derrière (``Enqueue``).
+  soit abandonner la synthèse en cours (``Immédiat``, valeur par
+  défaut), soit mettre la nouvelle ligne en file derrière (``Dans la file``).
 
-Lecture automatique
+Annonce automatique
   Quand cette préférence est activée, énoncer automatiquement la
   nouvelle ligne lors d'un déplacement vertical de la fenêtre
   braille, les caractères saisis ou supprimés, et le caractère sur
@@ -1554,7 +1554,7 @@ Lecture automatique
 
 .. _preference-speech-rate:
 
-Vitesse de la synthèse
+Vitesse
   Régler le débit de la synthèse vocale (``0`` le plus lent,
   ``20`` le plus rapide). Dépendant du pilote ; modifiable aussi via
   les commandes
@@ -1562,7 +1562,7 @@ Vitesse de la synthèse
 
 .. _preference-speech-volume:
 
-Volume de la synthèse
+Volume
   Régler le volume de la synthèse vocale (``0`` le plus faible,
   ``20`` le plus fort). Dépendant du pilote ; modifiable aussi via
   les commandes
@@ -1572,22 +1572,23 @@ Volume de la synthèse
 
 Niveau de ponctuation
   Quantité de ponctuation que la synthèse vocale énonce à voix
-  haute. Les niveaux disponibles sont ``None``, ``Some``, ``Most`` et
-  ``All`` — le niveau ``Most`` (ajouté après BRLTTY 6.5) se situe
-  entre ``Some`` et ``All`` pour les utilisateurs qui veulent
-  l'essentiel de la ponctuation mais trouvent ``All`` trop bavard.
+  haute. Les niveaux disponibles sont ``Aucune``, ``Quelques``,
+  ``La plupart`` et ``Toutes`` — le niveau ``La plupart`` (ajouté
+  après BRLTTY 6.5) se situe entre ``Quelques`` et ``Toutes`` pour
+  les utilisateurs qui veulent l'essentiel de la ponctuation mais
+  trouvent ``Toutes`` trop bavard.
   Dépendant du pilote.
 
-Énoncer les lignes vides
-  Lorsque réglé sur ``Yes`` (valeur par défaut depuis son ajout après
+Dire les lignes vides
+  Lorsque réglé sur ``Oui`` (valeur par défaut depuis son ajout après
   BRLTTY 6.5), annoncer quand le curseur arrive sur une ligne vide
-  pour que le saut de ligne soit audible. Réglez sur ``No`` pour
+  pour que le saut de ligne soit audible. Réglez sur ``Non`` pour
   passer les lignes vides en silence.
 
 .. _preference-text-table:
 
-Table de texte
-  Sélectionner la table de texte à l'exécution. Voir
+Table de caractères
+  Sélectionner la table de caractères à l'exécution. Voir
   :ref:`Text Tables <table-text>` et l'option en ligne de commande
   :ref:`-t <options-text-table>`. Cette préférence n'est pas
   sauvegardée.
@@ -1695,14 +1696,14 @@ peu cryptiques, afin de respecter la disposition exacte en colonnes.
     La surbrillance de l'écran (les attributs) est affichée.
 
 *f*
-  L'état de la fonction de gel d'écran (voir la commande
+  Indique si l'écran est figé (voir la commande
   :ref:`FREEZE <command-FREEZE>`).
 
   vide
-    L'écran n'est pas gelé.
+    L'écran n'est pas figé.
 
   ``f``
-    L'écran est gelé.
+    L'écran est figé.
 
 *d*
   Le nombre de points braille utilisés pour afficher chaque
@@ -1752,7 +1753,7 @@ peu cryptiques, afin de respecter la disposition exacte en colonnes.
   active si le point qui lui correspond est levé.
 
   Point 1
-    Image d'écran gelée (voir la commande
+    Image d'écran figée (voir la commande
     :ref:`FREEZE <command-FREEZE>`).
 
   Point 2
@@ -1780,7 +1781,7 @@ peu cryptiques, afin de respecter la disposition exacte en colonnes.
     :ref:`CSRTRK <command-CSRTRK>`).
 
   Point 8
-    Fenêtre glissante (voir la commande
+    Fenêtre braille glissante (voir la commande
     :ref:`SLIDEWIN <command-SLIDEWIN>`).
 
 *vt*
@@ -1826,14 +1827,14 @@ peu cryptiques, afin de respecter la disposition exacte en colonnes.
     La surbrillance de l'écran (les attributs) est affichée.
 
 *f*
-  L'état de la fonction de gel d'écran (voir la commande
+  Indique si l'écran est figé (voir la commande
   :ref:`FREEZE <command-FREEZE>`).
 
   vide
-    L'écran n'est pas gelé.
+    L'écran n'est pas figé.
 
   ``f``
-    L'écran est gelé.
+    L'écran est figé.
 
 *d*
   Le nombre de points braille utilisés pour afficher chaque
@@ -1858,10 +1859,10 @@ peu cryptiques, afin de respecter la disposition exacte en colonnes.
 
 .. _learn:
 
-Mode apprentissage des commandes
---------------------------------
+Mode d'apprentissage des commandes
+----------------------------------
 
-Le mode apprentissage des commandes est une façon interactive
+Le mode d'apprentissage des commandes est une façon interactive
 d'apprendre ce que font les touches de l'afficheur braille. On y
 accède soit par la commande :ref:`LEARN <command-LEARN>`, soit via
 l'utilitaire ``brltest``. Cette fonctionnalité n'est pas disponible
@@ -1907,17 +1908,17 @@ correspondante.
 
 .. _table-text:
 
-Tables de texte
----------------
+Tables de caractères
+--------------------
 
-Les fichiers nommés ``*.ttb`` sont des tables de texte. Elles
+Les fichiers nommés ``*.ttb`` sont des tables de caractères. Elles
 indiquent à BRLTTY comment traduire chaque caractère affiché à
 l'écran en sa configuration braille informatique correspondante à
 huit points. La correspondance entre caractères et points varie d'une
 langue à l'autre (et même entre conventions au sein d'une même
-langue) ; BRLTTY fournit donc une table de texte par locale.
+langue) ; BRLTTY fournit donc une table de caractères par locale.
 
-La table de texte est sélectionnée automatiquement au démarrage en
+La table de caractères est sélectionnée automatiquement au démarrage en
 fonction de votre locale, avec repli sur la table
 :ref:`North American Braille Computer Code <nabcc>` (NABCC) à défaut
 de meilleure correspondance. Pour en choisir une explicitement,
@@ -1926,14 +1927,14 @@ utilisez l'option en ligne de commande
 :ref:`text-table <configure-text-table>` du fichier de configuration,
 ou la préférence Text Table.
 
-Les tables de texte fournies sont les suivantes :
+Les tables de caractères fournies sont les suivantes :
 
 .. csv-table::
    :header-rows: 1
    :file: ../../text-table.csv
 
 Voir ``Documents/README.TextTables`` pour le format de fichier des
-tables de texte et la référence des directives.
+tables de caractères et la référence des directives.
 
 
 .. _table-contraction:
@@ -1942,7 +1943,7 @@ Tables de braille abrégé
 ------------------------
 
 Les fichiers nommés ``*.ctb`` sont des tables de braille abrégé. Là
-où une table de texte associe un caractère à une cellule braille, une
+où une table de caractères associe un caractère à une cellule braille, une
 table de braille abrégé encode les conventions d'abréviation propres
 au braille littéraire : séquences de lettres courantes, mots entiers
 et motifs de ponctuation se traduisent chacun par des séquences de
@@ -2048,7 +2049,7 @@ Pour spécifier une table de clavier, utilisez l'option en ligne de
 commande :ref:`-k <options-keyboard-table>`, la directive
 :ref:`keyboard-table <configure-keyboard-table>` du fichier de
 configuration, ou la préférence
-:ref:`Keyboard Table <preference-keyboard-table>`.
+:ref:`Table de touches du clavier <preference-keyboard-table>`.
 
 Voir ``Documents/README.KeyTables`` pour le format de fichier des
 tables de touches et la référence complète des directives (``bind``,
@@ -2363,7 +2364,7 @@ historique conservé pour les utilisateurs francophones.
 North American Braille Computer Code (NABCC)
 --------------------------------------------
 
-La table de texte par défaut de BRLTTY met en œuvre le *North American
+La table de caractères par défaut de BRLTTY met en œuvre le *North American
 Braille Computer Code* (NABCC), un codage à huit points qui étend le
 braille ASCII à six points pour couvrir l'ensemble du jeu Latin-1. La
 correspondance caractère/points faisant foi se trouve dans le fichier
