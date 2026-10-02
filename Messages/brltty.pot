@@ -429,7 +429,7 @@ msgid "Path to directory for loading drivers."
 msgstr ""
 
 #: Programs/brltty-ktb.c:107
-msgid "check a key table, list the key naems it can use, or write the key bindings it defines in useful formats."
+msgid "check a key table, list the key names it can use, or write the key bindings it defines in useful formats."
 msgstr ""
 
 #: Programs/brltty-lsinc.c:47

@@ -104,7 +104,7 @@ END_COMMAND_LINE_NOTES
 
 BEGIN_COMMAND_LINE_DESCRIPTOR(programDescriptor)
   .name = "brltty-ktb",
-  .purpose = strtext("check a key table, list the key naems it can use, or write the key bindings it defines in useful formats."),
+  .purpose = strtext("check a key table, list the key names it can use, or write the key bindings it defines in useful formats."),
 
   .options = &programOptions,
   .parameters = &programParameters,

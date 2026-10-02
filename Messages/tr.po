@@ -2650,7 +2650,7 @@ msgid "changes discarded"
 msgstr ""
 
 #: Programs/brltty-ktb.c:290
-msgid "check a key table, list the key naems it can use, or write the key bindings it defines in useful formats."
+msgid "check a key table, list the key names it can use, or write the key bindings it defines in useful formats."
 msgstr ""
 
 #. xgettext: This is the description of the UNSTICK command.

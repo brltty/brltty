@@ -2708,7 +2708,7 @@ msgstr "ცვლილებები მოცილებულია"
 
 #: Programs/brltty-ktb.c:290
 msgid ""
-"check a key table, list the key naems it can use, or write the key bindings "
+"check a key table, list the key names it can use, or write the key bindings "
 "it defines in useful formats."
 msgstr ""
 

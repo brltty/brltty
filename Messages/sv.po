@@ -445,7 +445,7 @@ msgstr "Sökväg till katalog för laddning av drivrutiner."
 
 #: Programs/brltty-ktb.c:107
 msgid ""
-"check a key table, list the key naems it can use, or write the key bindings "
+"check a key table, list the key names it can use, or write the key bindings "
 "it defines in useful formats."
 msgstr ""
 "kontrollera en nyckeltabell, lista de nyckelnamn som den kan använda eller "

@@ -433,7 +433,7 @@ msgstr "Шлях до директорії для завантаження др�
 
 #: Programs/brltty-ktb.c:107
 msgid ""
-"check a key table, list the key naems it can use, or write the key bindings "
+"check a key table, list the key names it can use, or write the key bindings "
 "it defines in useful formats."
 msgstr ""
 "перевірити таблицю клавіш, вивести список імен клавіш, які вона може "
