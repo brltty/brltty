@@ -696,7 +696,7 @@ msgstr "Remonte d'une ligne"
 #. xgettext: This is the description of the LNDN command.
 #: Programs/cmds.auto.h:23
 msgid "go down one line"
-msgstr "Descendre d'une ligne"
+msgstr "Descend d'une ligne"
 
 #. xgettext: This is the description of the WINUP command.
 #: Programs/cmds.auto.h:32
@@ -781,22 +781,22 @@ msgstr "Recherche vers l'avant le texte du presse-papier"
 #. xgettext: This is the description of the CHRLT command.
 #: Programs/cmds.auto.h:174
 msgid "go left one character"
-msgstr "Va au caractère à gauche"
+msgstr "Bouge d'un caractère à gauche"
 
 #. xgettext: This is the description of the CHRRT command.
 #: Programs/cmds.auto.h:183
 msgid "go right one character"
-msgstr "Va à droite d'un caractère"
+msgstr "Bouge d'un caractère à droite"
 
 #. xgettext: This is the description of the HWINLT command.
 #: Programs/cmds.auto.h:192
 msgid "go left half a braille window"
-msgstr "Va d'une demi-fenêtre braille à gauche"
+msgstr "Bouge d'une demi-fenêtre braille à gauche"
 
 #. xgettext: This is the description of the HWINRT command.
 #: Programs/cmds.auto.h:201
 msgid "go right half a braille window"
-msgstr "Va d'une demi-fenêtre braille à droite"
+msgstr "Bouge d'une demi-fenêtre braille à droite"
 
 #. xgettext: This is the description of the FWINLT command.
 #: Programs/cmds.auto.h:210
@@ -836,7 +836,7 @@ msgstr "Va au curseur de l'écran"
 #. xgettext: This is the description of the BACK command.
 #: Programs/cmds.auto.h:271
 msgid "go back after cursor tracking"
-msgstr "Revenir après la poursuite du curseur"
+msgstr "Revient après la poursuite du curseur"
 
 #. xgettext: This is the description of the RETURN command.
 #: Programs/cmds.auto.h:279
@@ -866,7 +866,7 @@ msgstr "Active ou désactive la fenêtre braille glissante"
 #. xgettext: This is the description of the SKPIDLNS command.
 #: Programs/cmds.auto.h:319
 msgid "set skipping of lines with identical content on/off"
-msgstr "Activation/désactivation du saut de ligne ayant un contenu identique"
+msgstr "Active ou désactive le saut des lignes au contenu identique"
 
 #. xgettext: This is the description of the SKPBLNKWINS command.
 #: Programs/cmds.auto.h:327
@@ -931,22 +931,22 @@ msgstr "Active ou désactive l'annonce automatique"
 #. xgettext: This is the description of the HELP command.
 #: Programs/cmds.auto.h:422
 msgid "enter/leave help display"
-msgstr "entrer/quitter l'affichage de l'aide"
+msgstr "Entre dans l'affichage de l'aide ou en sort"
 
 #. xgettext: This is the description of the INFO command.
 #: Programs/cmds.auto.h:429
 msgid "enter/leave status display"
-msgstr "entrer/quitter l'affichage de l'état"
+msgstr "Entre dans l'affichage de l'état ou en sort"
 
 #. xgettext: This is the description of the LEARN command.
 #: Programs/cmds.auto.h:436
 msgid "enter/leave command learn mode"
-msgstr "entrer/quitter le mode d'apprentissage des commandes"
+msgstr "Entre dans le mode d'apprentissage des commandes ou en sort"
 
 #. xgettext: This is the description of the PREFMENU command.
 #: Programs/cmds.auto.h:443
 msgid "enter/leave preferences menu"
-msgstr "entrer/quitter le menu des préférences"
+msgstr "Entre dans le menu des préférences ou en sort"
 
 #. xgettext: This is the description of the PREFSAVE command.
 #: Programs/cmds.auto.h:450
@@ -981,17 +981,17 @@ msgstr "Descend à l'élément suivant"
 #. xgettext: This is the description of the MENU_PREV_SETTING command.
 #: Programs/cmds.auto.h:500
 msgid "select previous choice"
-msgstr "Sélection du choix précédent"
+msgstr "Sélectionne le choix précédent"
 
 #. xgettext: This is the description of the MENU_NEXT_SETTING command.
 #: Programs/cmds.auto.h:507
 msgid "select next choice"
-msgstr "Sélection du choix suivant"
+msgstr "Sélectionne le choix suivant"
 
 #. xgettext: This is the description of the MUTE command.
 #: Programs/cmds.auto.h:514
 msgid "stop speaking"
-msgstr "Arrêt de la parole"
+msgstr "Arrête la parole"
 
 #. xgettext: This is the description of the SPKHOME command.
 #: Programs/cmds.auto.h:522
@@ -1002,22 +1002,22 @@ msgstr "Va à la position actuelle de la synthèse vocale"
 #. xgettext: This is the description of the SPEAK_CURR_LINE command.
 #: Programs/cmds.auto.h:529 Programs/cmds.auto.h:765
 msgid "speak current line"
-msgstr "Lit vocalement la ligne actuelle"
+msgstr "Énonce la ligne actuelle"
 
 #. xgettext: This is the description of the SAY_ABOVE command.
 #: Programs/cmds.auto.h:536
 msgid "speak from top of screen through current line"
-msgstr "Lit vocalement du haut de l'écran jusqu'à la ligne actuelle"
+msgstr "Énonce du haut de l'écran jusqu'à la ligne actuelle"
 
 #. xgettext: This is the description of the SAY_BELOW command.
 #: Programs/cmds.auto.h:543
 msgid "speak from current line through bottom of screen"
-msgstr "Lit vocalement depuis la ligne actuelle jusqu'au bas de l'écran"
+msgstr "Énonce depuis la ligne actuelle jusqu'au bas de l'écran"
 
 #. xgettext: This is the description of the SAY_SLOWER command.
 #: Programs/cmds.auto.h:550
 msgid "decrease speaking rate"
-msgstr "Diminuer la vitesse de la parole"
+msgstr "Diminue la vitesse de la parole"
 
 #. xgettext: This is the description of the SAY_FASTER command.
 #: Programs/cmds.auto.h:557
@@ -1027,7 +1027,7 @@ msgstr "Augmente la vitesse de la parole"
 #. xgettext: This is the description of the SAY_SOFTER command.
 #: Programs/cmds.auto.h:564
 msgid "decrease speaking volume"
-msgstr "Diminuer le volume de la parole"
+msgstr "Diminue le volume de la parole"
 
 #. xgettext: This is the description of the SAY_LOUDER command.
 #: Programs/cmds.auto.h:571
@@ -1102,22 +1102,22 @@ msgstr "Va au niveau de menu précédent"
 #. xgettext: This is the description of the ASPK_SEL_LINE command.
 #: Programs/cmds.auto.h:672
 msgid "set autospeak selected line on/off"
-msgstr "Activer/désactiver l'annonce automatique de la ligne sélectionnée"
+msgstr "Active ou désactive l'annonce automatique de la ligne sélectionnée"
 
 #. xgettext: This is the description of the ASPK_SEL_CHAR command.
 #: Programs/cmds.auto.h:680
 msgid "set autospeak selected character on/off"
-msgstr "Activer/désactiver l'annonce automatique du caractère sélectionné"
+msgstr "Active ou désactive l'annonce automatique du caractère sélectionné"
 
 #. xgettext: This is the description of the ASPK_INS_CHARS command.
 #: Programs/cmds.auto.h:688
 msgid "set autospeak inserted characters on/off"
-msgstr "Activer/désactiver l'annonce automatique des caractères insérés"
+msgstr "Active ou désactive l'annonce automatique des caractères insérés"
 
 #. xgettext: This is the description of the ASPK_DEL_CHARS command.
 #: Programs/cmds.auto.h:696
 msgid "set autospeak deleted characters on/off"
-msgstr "Activer/désactiver l'annonce automatique des caractères effacés"
+msgstr "Active ou désactive l'annonce automatique des caractères effacés"
 
 #. xgettext: This is the description of the ASPK_REP_CHARS command.
 #: Programs/cmds.auto.h:704
@@ -1127,22 +1127,22 @@ msgstr "Active ou désactive l'annonce automatique des caractères remplacés"
 #. xgettext: This is the description of the ASPK_CMP_WORDS command.
 #: Programs/cmds.auto.h:712
 msgid "set autospeak completed words on/off"
-msgstr "Activer/désactiver l'annonce automatique des mots complétés"
+msgstr "Active ou désactive l'annonce automatique des mots complétés"
 
 #. xgettext: This is the description of the SPEAK_CURR_CHAR command.
 #: Programs/cmds.auto.h:719
 msgid "speak current character"
-msgstr "Lire le caractère actuel"
+msgstr "Énonce le caractère actuel"
 
 #. xgettext: This is the description of the SPEAK_PREV_CHAR command.
 #: Programs/cmds.auto.h:727
 msgid "go to and speak previous character"
-msgstr "Va et lit le caractère précédent"
+msgstr "Va au caractère précédent et l'énonce"
 
 #. xgettext: This is the description of the SPEAK_NEXT_CHAR command.
 #: Programs/cmds.auto.h:735
 msgid "go to and speak next character"
-msgstr "Va et lit le caractère suivant"
+msgstr "Va au caractère suivant et l'énonce"
 
 #. xgettext: This is the description of the SPEAK_CURR_WORD command.
 #: Programs/cmds.auto.h:742
@@ -1162,37 +1162,37 @@ msgstr ""
 #. xgettext: This is the description of the SPEAK_PREV_LINE command.
 #: Programs/cmds.auto.h:773
 msgid "go to and speak previous line"
-msgstr "Va et lit la ligne précédente"
+msgstr "Va à la ligne précédente et l'énonce"
 
 #. xgettext: This is the description of the SPEAK_NEXT_LINE command.
 #: Programs/cmds.auto.h:781
 msgid "go to and speak next line"
-msgstr "Va et lit la ligne suivante"
+msgstr "Va à la ligne suivante et l'énonce"
 
 #. xgettext: This is the description of the SPEAK_FRST_CHAR command.
 #: Programs/cmds.auto.h:789
 msgid "go to and speak first non-blank character on line"
-msgstr "Aller et lire le premier caractère non vide de la ligne"
+msgstr "Va au premier caractère non vide de la ligne et l'énonce"
 
 #. xgettext: This is the description of the SPEAK_LAST_CHAR command.
 #: Programs/cmds.auto.h:797
 msgid "go to and speak last non-blank character on line"
-msgstr "Aller et lire le dernier caractère non vide de la ligne"
+msgstr "Va au dernier caractère non vide de la ligne et l'énonce"
 
 #. xgettext: This is the description of the SPEAK_FRST_LINE command.
 #: Programs/cmds.auto.h:805
 msgid "go to and speak first non-blank line on screen"
-msgstr "Aller et lire la première ligne non vide de l'écran"
+msgstr "Va à la première ligne non vide de l'écran et l'énonce"
 
 #. xgettext: This is the description of the SPEAK_LAST_LINE command.
 #: Programs/cmds.auto.h:813
 msgid "go to and speak last non-blank line on screen"
-msgstr "Aller et lire la dernière ligne non vide de l'écran"
+msgstr "Va à la dernière ligne non vide de l'écran et l'énonce"
 
 #. xgettext: This is the description of the DESC_CURR_CHAR command.
 #: Programs/cmds.auto.h:820
 msgid "describe current character"
-msgstr "Décrire le caractère actuel"
+msgstr "Décrit le caractère actuel"
 
 #. xgettext: This is the description of the SPELL_CURR_WORD command.
 #: Programs/cmds.auto.h:827
@@ -1227,7 +1227,7 @@ msgstr "Restaure le presse-papier à partir du disque"
 #. xgettext: This is the description of the BRLUCDOTS command.
 #: Programs/cmds.auto.h:872
 msgid "set braille typing mode dots/text"
-msgstr "définit le mode de saisie braille à texte/points"
+msgstr "Bascule le mode de saisie braille entre points et texte"
 
 #. xgettext: This is the description of the BRLKBD command.
 #: Programs/cmds.auto.h:880
@@ -1297,7 +1297,7 @@ msgstr "Recule à la fenêtre braille non vide la plus proche"
 #. xgettext: This is the description of the NXNBWIN command.
 #: Programs/cmds.auto.h:975
 msgid "go forward to nearest non-blank braille window"
-msgstr "Va à la prochaine fenêtre braille non vide"
+msgstr "Avance à la fenêtre braille non vide la plus proche"
 
 #. xgettext: This is the description of the TOUCH_NAV command.
 #: Programs/cmds.auto.h:983
@@ -1307,42 +1307,42 @@ msgstr "Active ou désactive la navigation tactile"
 #. xgettext: This is the description of the SPEAK_INDENT command.
 #: Programs/cmds.auto.h:990
 msgid "speak indent of current line"
-msgstr "énonce l'indentation de la ligne courante"
+msgstr "Énonce l'indentation de la ligne courante"
 
 #. xgettext: This is the description of the ASPK_INDENT command.
 #: Programs/cmds.auto.h:998
 msgid "set autospeak indent of current line on/off"
-msgstr "active/désactive l'annonce automatique de l'indentation de la ligne courante"
+msgstr "Active ou désactive l'annonce automatique de l'indentation de la ligne courante"
 
 #. xgettext: This is the description of the REFRESH command.
 #: Programs/cmds.auto.h:1005
 msgid "refresh braille display"
-msgstr "rafraîchit l'afficheur braille"
+msgstr "Rafraîchit l'afficheur braille"
 
 #. xgettext: This is the description of the INDICATORS command.
 #: Programs/cmds.auto.h:1012
 msgid "show various device status indicators"
-msgstr "affiche divers indicateurs d'état de l'appareil"
+msgstr "Affiche divers indicateurs d'état de l'appareil"
 
 #. xgettext: This is the description of the TXTSEL_CLEAR command.
 #: Programs/cmds.auto.h:1019
 msgid "clear the text selection"
-msgstr "réinitialiser la sélection de texte"
+msgstr "Réinitialise la sélection de texte"
 
 #. xgettext: This is the description of the TXTSEL_ALL command.
 #: Programs/cmds.auto.h:1026
 msgid "select all of the text"
-msgstr "sélectionne tout le texte"
+msgstr "Sélectionne tout le texte"
 
 #. xgettext: This is the description of the HOST_COPY command.
 #: Programs/cmds.auto.h:1033
 msgid "copy selected text to host clipboard"
-msgstr "copie le texte sélectionné vers le presse-papier hôte"
+msgstr "Copie le texte sélectionné vers le presse-papier de l'hôte"
 
 #. xgettext: This is the description of the HOST_CUT command.
 #: Programs/cmds.auto.h:1040
 msgid "cut selected text to host clipboard"
-msgstr "coupe le texte sélectionné vers le presse-papier hôte"
+msgstr "Coupe le texte sélectionné vers le presse-papier de l'hôte"
 
 #. xgettext: This is the description of the HOST_PASTE command.
 #: Programs/cmds.auto.h:1047
@@ -1352,107 +1352,107 @@ msgstr ""
 #. xgettext: This is the description of the GUI_TITLE command.
 #: Programs/cmds.auto.h:1054
 msgid "show the window title"
-msgstr "affiche le titre de la fenêtre"
+msgstr "Affiche le titre de la fenêtre"
 
 #. xgettext: This is the description of the GUI_BRL_ACTIONS command.
 #: Programs/cmds.auto.h:1061
 msgid "open the braille actions window"
-msgstr "ouvre la fenêtre des actions braille"
+msgstr "Ouvre la fenêtre des actions braille"
 
 #. xgettext: This is the description of the GUI_HOME command.
 #: Programs/cmds.auto.h:1069
 msgid "go to the home screen"
-msgstr "va à l'écran d'accueil"
+msgstr "Va à l'écran d'accueil"
 
 #. xgettext: This is the description of the GUI_BACK command.
 #: Programs/cmds.auto.h:1077
 msgid "go back to the previous screen"
-msgstr "retourne à l'écran précédent"
+msgstr "Retourne à l'écran précédent"
 
 #. xgettext: This is the description of the GUI_DEV_SETTINGS command.
 #: Programs/cmds.auto.h:1084
 msgid "open the device settings window"
-msgstr "ouvre la fenêtre des réglages de l'appareil"
+msgstr "Ouvre la fenêtre des réglages de l'appareil"
 
 #. xgettext: This is the description of the GUI_DEV_OPTIONS command.
 #: Programs/cmds.auto.h:1091
 msgid "open the device options window"
-msgstr "ouvre la fenêtre des options de l'appareil"
+msgstr "Ouvre la fenêtre des options de l'appareil"
 
 #. xgettext: This is the description of the GUI_APP_LIST command.
 #: Programs/cmds.auto.h:1098
 msgid "open the application list window"
-msgstr "ouvre la fenêtre de liste des applications"
+msgstr "Ouvre la fenêtre de liste des applications"
 
 #. xgettext: This is the description of the GUI_APP_MENU command.
 #: Programs/cmds.auto.h:1105
 msgid "open the application-specific menu"
-msgstr "ouvre le menu spécifique à l'application"
+msgstr "Ouvre le menu spécifique à l'application"
 
 #. xgettext: This is the description of the GUI_APP_ALERTS command.
 #: Programs/cmds.auto.h:1112
 msgid "open the application alerts window"
-msgstr "ouvre la fenêtre des alertes de l'application"
+msgstr "Ouvre la fenêtre des alertes de l'application"
 
 #. xgettext: This is the description of the GUI_AREA_ACTV command.
 #: Programs/cmds.auto.h:1119
 msgid "return to the active screen area"
-msgstr "retourne à la zone active de l'écran"
+msgstr "Retourne à la zone active de l'écran"
 
 #. xgettext: This is the description of the GUI_AREA_PREV command.
 #: Programs/cmds.auto.h:1126
 msgid "switch to the previous screen area"
-msgstr "passe à la zone précédente de l'écran"
+msgstr "Passe à la zone précédente de l'écran"
 
 #. xgettext: This is the description of the GUI_AREA_NEXT command.
 #: Programs/cmds.auto.h:1133
 msgid "switch to the next screen area"
-msgstr "passe à la zone suivante de l'écran"
+msgstr "Passe à la zone suivante de l'écran"
 
 #. xgettext: This is the description of the GUI_ITEM_FRST command.
 #: Programs/cmds.auto.h:1140
 msgid "move to the first item in the screen area"
-msgstr "va au premier élément de la zone de l'écran"
+msgstr "Va au premier élément de la zone de l'écran"
 
 #. xgettext: This is the description of the GUI_ITEM_PREV command.
 #: Programs/cmds.auto.h:1147
 msgid "move to the previous item in the screen area"
-msgstr "va à l'élément précédent de la zone de l'écran"
+msgstr "Va à l'élément précédent de la zone de l'écran"
 
 #. xgettext: This is the description of the GUI_ITEM_NEXT command.
 #: Programs/cmds.auto.h:1154
 msgid "move to the next item in the screen area"
-msgstr "va au prochain élément de la zone de l'écran"
+msgstr "Va à l'élément suivant de la zone de l'écran"
 
 #. xgettext: This is the description of the GUI_ITEM_LAST command.
 #: Programs/cmds.auto.h:1161
 msgid "move to the last item in the screen area"
-msgstr "va au dernier élément de la zone de l'écran"
+msgstr "Va au dernier élément de la zone de l'écran"
 
 #. xgettext: This is the description of the SAY_LOWER command.
 #: Programs/cmds.auto.h:1168
 msgid "decrease speaking pitch"
-msgstr "diminuer la hauteur de la voix"
+msgstr "Diminue la hauteur de la voix"
 
 #. xgettext: This is the description of the SAY_HIGHER command.
 #: Programs/cmds.auto.h:1175
 msgid "increase speaking pitch"
-msgstr "augmenter la hauteur de la voix"
+msgstr "Augmente la hauteur de la voix"
 
 #. xgettext: This is the description of the SAY_ALL command.
 #: Programs/cmds.auto.h:1182
 msgid "speak from top of screen through bottom of screen"
-msgstr "énonce l'écran de haut en bas"
+msgstr "Énonce l'écran de haut en bas"
 
 #. xgettext: This is the description of the CONTRACTED command.
 #: Programs/cmds.auto.h:1190
 msgid "set contracted/computer braille"
-msgstr "active le braille abrégé/informatique"
+msgstr "Bascule entre braille abrégé et braille informatique"
 
 #. xgettext: This is the description of the COMPBRL6 command.
 #: Programs/cmds.auto.h:1198
 msgid "set six/eight dot computer braille"
-msgstr "active le braille informatique six/huit points"
+msgstr "Bascule le braille informatique entre six et huit points"
 
 #. xgettext: This is the description of the PREFRESET command.
 #: Programs/cmds.auto.h:1205
@@ -1512,7 +1512,7 @@ msgstr ""
 #. xgettext: This is the description of the ROUTE command.
 #: Programs/cmds.auto.h:1287
 msgid "bring screen cursor to character"
-msgstr "Amener le curseur de l'écran au caractère"
+msgstr "Amène le curseur de l'écran au caractère"
 
 #. xgettext: This is the description of the CLIP_NEW command.
 #: Programs/cmds.auto.h:1295
@@ -1527,12 +1527,12 @@ msgstr "Ajoute au presse-papier à partir du caractère"
 #. xgettext: This is the description of the COPY_RECT command.
 #: Programs/cmds.auto.h:1311
 msgid "rectangular copy to character"
-msgstr "copie rectangulaire jusqu'au caractère"
+msgstr "Copie rectangulaire jusqu'au caractère"
 
 #. xgettext: This is the description of the COPY_LINE command.
 #: Programs/cmds.auto.h:1319
 msgid "linear copy to character"
-msgstr "copie linéaire jusqu'au caractère"
+msgstr "Copie linéaire jusqu'au caractère"
 
 #. xgettext: This is the description of the SWITCHVT command.
 #: Programs/cmds.auto.h:1327
@@ -1552,12 +1552,12 @@ msgstr "Descend à la ligne la plus proche ayant moins d'indentation que le cara
 #. xgettext: This is the description of the DESCCHAR command.
 #: Programs/cmds.auto.h:1355
 msgid "describe character"
-msgstr "Décrire le caractère"
+msgstr "Décrit le caractère"
 
 #. xgettext: This is the description of the SETLEFT command.
 #: Programs/cmds.auto.h:1363
 msgid "place left end of braille window at character"
-msgstr "met le bord gauche de la fenêtre braille sur le caractère"
+msgstr "Place le bord gauche de la fenêtre braille sur le caractère"
 
 #. xgettext: This is the description of the SETMARK command.
 #: Programs/cmds.auto.h:1371
@@ -1567,7 +1567,7 @@ msgstr "Mémorise la position actuelle de la fenêtre braille"
 #. xgettext: This is the description of the GOTOMARK command.
 #: Programs/cmds.auto.h:1380
 msgid "go to remembered braille window position"
-msgstr "Va à la position de la fenêtre braille dont on se rappelle"
+msgstr "Va à la position mémorisée de la fenêtre braille"
 
 #. xgettext: This is the description of the GOTOLINE command.
 #: Programs/cmds.auto.h:1390
@@ -1622,27 +1622,27 @@ msgstr "Définit la table de touches du clavier"
 #. xgettext: This is the description of the SET_LANGUAGE_PROFILE command.
 #: Programs/cmds.auto.h:1474
 msgid "set language profile"
-msgstr "Définir le profil de la langue"
+msgstr "Définit le profil de langue"
 
 #. xgettext: This is the description of the ROUTE_LINE command.
 #: Programs/cmds.auto.h:1484
 msgid "bring screen cursor to line"
-msgstr "amène le curseur de l'écran sur la ligne"
+msgstr "Amène le curseur de l'écran sur la ligne"
 
 #. xgettext: This is the description of the REFRESH_LINE command.
 #: Programs/cmds.auto.h:1493
 msgid "refresh braille line"
-msgstr "rafraîchit la ligne braille"
+msgstr "Rafraîchit la ligne braille"
 
 #. xgettext: This is the description of the TXTSEL_START command.
 #: Programs/cmds.auto.h:1501
 msgid "start text selection"
-msgstr "commence la sélection de texte"
+msgstr "Commence la sélection de texte"
 
 #. xgettext: This is the description of the TXTSEL_SET command.
 #: Programs/cmds.auto.h:1509
 msgid "set text selection"
-msgstr "définit la sélection de texte"
+msgstr "Définit la sélection de texte"
 
 #. xgettext: This is the description of the ROUTE_SPEECH command.
 #: Programs/cmds.auto.h:1518
@@ -1662,7 +1662,7 @@ msgstr "Se lie à un terminal virtuel particulier"
 #. xgettext: This is the description of the ALERT command.
 #: Programs/cmds.auto.h:1542
 msgid "render an alert"
-msgstr "Émettre une alerte"
+msgstr "Émet une alerte"
 
 #. xgettext: This is the description of the PASSCHAR command.
 #: Programs/cmds.auto.h:1551
@@ -1672,12 +1672,12 @@ msgstr "Saisit un caractère Unicode"
 #. xgettext: This is the description of the PASSDOTS command.
 #: Programs/cmds.auto.h:1560
 msgid "type braille dots"
-msgstr "Saisie de points braille"
+msgstr "Saisit des points braille"
 
 #. xgettext: This is the description of the PASSAT command.
 #: Programs/cmds.auto.h:1568
 msgid "AT (set 2) keyboard scan code"
-msgstr "Scancode AT du clavier (set 2)"
+msgstr "Scancode de clavier AT (set 2)"
 
 #. xgettext: This is the description of the PASSXT command.
 #: Programs/cmds.auto.h:1576
@@ -1692,7 +1692,7 @@ msgstr "Scancode de clavier PS/2 (set 3)"
 #. xgettext: This is the description of the CONTEXT command.
 #: Programs/cmds.auto.h:1592
 msgid "switch to command context"
-msgstr "Va au contexte de la commande"
+msgstr "Passe au contexte de commande"
 
 #. xgettext: This is the description of the TOUCH_AT command.
 #: Programs/cmds.auto.h:1600
@@ -1727,17 +1727,17 @@ msgstr ""
 #. xgettext: This is the description of the KEY_ENTER command.
 #: Programs/cmds.auto.h:1648
 msgid "enter key"
-msgstr "touche entrée"
+msgstr "Touche Entrée"
 
 #. xgettext: This is the description of the KEY_TAB command.
 #: Programs/cmds.auto.h:1656
 msgid "tab key"
-msgstr "Touche tab"
+msgstr "Touche Tab"
 
 #. xgettext: This is the description of the KEY_BACKSPACE command.
 #: Programs/cmds.auto.h:1664
 msgid "backspace key"
-msgstr "Touche retour arrière"
+msgstr "Touche Retour arrière"
 
 #. xgettext: This is the description of the KEY_ESCAPE command.
 #: Programs/cmds.auto.h:1672
@@ -1747,27 +1747,27 @@ msgstr "Touche Échap"
 #. xgettext: This is the description of the KEY_CURSOR_LEFT command.
 #: Programs/cmds.auto.h:1680
 msgid "cursor-left key"
-msgstr "Touche curseur à gauche"
+msgstr "Touche Flèche gauche"
 
 #. xgettext: This is the description of the KEY_CURSOR_RIGHT command.
 #: Programs/cmds.auto.h:1688
 msgid "cursor-right key"
-msgstr "Touche curseur à droite"
+msgstr "Touche Flèche droite"
 
 #. xgettext: This is the description of the KEY_CURSOR_UP command.
 #: Programs/cmds.auto.h:1696
 msgid "cursor-up key"
-msgstr "Touche curseur vers le haut"
+msgstr "Touche Flèche haut"
 
 #. xgettext: This is the description of the KEY_CURSOR_DOWN command.
 #: Programs/cmds.auto.h:1704
 msgid "cursor-down key"
-msgstr "Touche curseur vers le bas"
+msgstr "Touche Flèche bas"
 
 #. xgettext: This is the description of the KEY_PAGE_UP command.
 #: Programs/cmds.auto.h:1712
 msgid "page-up key"
-msgstr "touche page précédente"
+msgstr "Touche Page précédente"
 
 #. xgettext: This is the description of the KEY_PAGE_DOWN command.
 #: Programs/cmds.auto.h:1720
@@ -1777,12 +1777,12 @@ msgstr "Touche page suivante"
 #. xgettext: This is the description of the KEY_HOME command.
 #: Programs/cmds.auto.h:1728
 msgid "home key"
-msgstr "Touche origine"
+msgstr "Touche Origine"
 
 #. xgettext: This is the description of the KEY_END command.
 #: Programs/cmds.auto.h:1736
 msgid "end key"
-msgstr "touche fin"
+msgstr "Touche Fin"
 
 #. xgettext: This is the description of the KEY_INSERT command.
 #: Programs/cmds.auto.h:1744
@@ -1792,7 +1792,7 @@ msgstr "Touche Inser"
 #. xgettext: This is the description of the KEY_DELETE command.
 #: Programs/cmds.auto.h:1752
 msgid "delete key"
-msgstr "Touche supprimer"
+msgstr "Touche Suppr"
 
 #. xgettext: This is the description of the KEY_FUNCTION command.
 #: Programs/cmds.auto.h:1761
@@ -1817,7 +1817,7 @@ msgstr "qualité du contenu de l'écran inconnue"
 
 #: Programs/config.c:407
 msgid "Log the versions of the core, API, and built-in drivers, and then exit."
-msgstr "Enregistre les versions du cœur, de l'API et des pilotes intégrés puis quitter"
+msgstr "Enregistre les versions du cœur, de l'API et des pilotes intégrés, puis quitte."
 
 #: Programs/config.c:413
 msgid "Recognize environment variables."
@@ -1932,7 +1932,7 @@ msgstr "Réglages explicites des préférences."
 
 #: Programs/config.c:616
 msgid "Disable the application programming interface."
-msgstr "Désactiver l'interface de programmation d'applications (API)."
+msgstr "Désactive l'interface de programmation d'applications (API)."
 
 #: Programs/config.c:625
 msgid "Parameters for the application programming interface."
@@ -1965,7 +1965,7 @@ msgstr "Reste un processus au premier plan."
 
 #: Programs/config.c:669
 msgid "Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc)."
-msgstr "Ne pas passer à un utilisateur non privilégié et ne renoncer à aucun privilège (appartenance à des groupes, capacités, etc.)."
+msgstr "Ne passe pas à un utilisateur non privilégié et ne renonce à aucun privilège (appartenance à des groupes, capacités, etc.)."
 
 #: Programs/config.c:678
 msgid "Parameters for the privilege establishment stage."
@@ -2034,21 +2034,21 @@ msgstr "Chemin du fichier d'identifiants de processus."
 #: Programs/config.c:801
 #, c-format
 msgid "Stop an existing instance of %s, and then exit."
-msgstr "Arrêter une instance de %s en cours et quitter."
+msgstr "Arrête une instance de %s en cours, puis quitte."
 
 #: Programs/config.c:808
 #, c-format
 msgid "Install the %s service, and then exit."
-msgstr "Installez le service %s et quittez."
+msgstr "Installe le service %s, puis quitte."
 
 #: Programs/config.c:815
 #, c-format
 msgid "Remove the %s service, and then exit."
-msgstr "Supprime le service %s et quitte."
+msgstr "Supprime le service %s, puis quitte."
 
 #: Programs/config.c:822
 msgid "Write the start-up logs, and then exit."
-msgstr "Écrit les journaux de démarrage et quitte."
+msgstr "Écrit les journaux de démarrage, puis quitte."
 
 #: Programs/config.c:834
 msgid "Screen reader for those who use a braille device."
@@ -2178,11 +2178,11 @@ msgstr "Ne peut pas compiler la table de braille abrégé"
 
 #: Programs/ctb_translate.c:438
 msgid "cannot access internal contraction table"
-msgstr "ne peut accéder à la table de braille abrégé interne"
+msgstr "Ne peut pas accéder à la table de braille abrégé interne"
 
 #: Programs/ctb_translate.c:452
 msgid "cannot load contraction table"
-msgstr "ne peut charger la table de braille abrégé"
+msgstr "Ne peut pas charger la table de braille abrégé"
 
 #: Programs/datafile.c:318
 msgid "invalid escape sequence"
@@ -2202,11 +2202,11 @@ msgstr "Ne peut pas obtenir de répertoire de travail"
 
 #: Programs/file.c:610 Programs/menu.c:588
 msgid "cannot set working directory"
-msgstr "Ne peut pas paramétrer le répertoire de travail"
+msgstr "Ne peut pas définir le répertoire de travail"
 
 #: Programs/learn.c:164
 msgid "Learn Mode"
-msgstr "mode d'apprentissage"
+msgstr "Mode d'apprentissage"
 
 #: Programs/learn.c:184
 msgid "done"
@@ -2318,7 +2318,7 @@ msgstr "Fin"
 
 #: Programs/menu_prefs.c:550 Programs/menu_prefs.c:566
 msgid "Window Coordinates"
-msgstr "Coordonnées de la Fenêtre"
+msgstr "Coordonnées de la fenêtre"
 
 #: Programs/menu_prefs.c:550 Programs/menu_prefs.c:553
 #: Programs/menu_prefs.c:556 Programs/menu_prefs.c:557
@@ -2328,7 +2328,7 @@ msgstr "2 cellules"
 
 #: Programs/menu_prefs.c:551
 msgid "Window Column"
-msgstr "Colonne de la Fenêtre"
+msgstr "Colonne de la fenêtre"
 
 #: Programs/menu_prefs.c:551 Programs/menu_prefs.c:552
 #: Programs/menu_prefs.c:554 Programs/menu_prefs.c:555
@@ -2340,27 +2340,27 @@ msgstr "1 cellule"
 
 #: Programs/menu_prefs.c:552
 msgid "Window Row"
-msgstr "Ligne de la Fenêtre"
+msgstr "Ligne de la fenêtre"
 
 #: Programs/menu_prefs.c:553 Programs/menu_prefs.c:565
 msgid "Cursor Coordinates"
-msgstr "Coordonnées du Curseur"
+msgstr "Coordonnées du curseur"
 
 #: Programs/menu_prefs.c:554
 msgid "Cursor Column"
-msgstr "Colonne du Curseur"
+msgstr "Colonne du curseur"
 
 #: Programs/menu_prefs.c:555
 msgid "Cursor Row"
-msgstr "Ligne du Curseur"
+msgstr "Ligne du curseur"
 
 #: Programs/menu_prefs.c:556 Programs/menu_prefs.c:567
 msgid "Cursor and Window Column"
-msgstr "Colonne du Curseur et de la Fenêtre"
+msgstr "Colonne du curseur et de la fenêtre"
 
 #: Programs/menu_prefs.c:557 Programs/menu_prefs.c:568
 msgid "Cursor and Window Row"
-msgstr "Ligne du Curseur et de la Fenêtre"
+msgstr "Ligne du curseur et de la fenêtre"
 
 #: Programs/menu_prefs.c:558
 msgid "Screen Number"
@@ -2380,11 +2380,11 @@ msgstr "Heure"
 
 #: Programs/menu_prefs.c:562
 msgid "Alphabetic Window Coordinates"
-msgstr "Coordonnées Alphabétiques de la Fenêtre"
+msgstr "Coordonnées alphabétiques de la fenêtre"
 
 #: Programs/menu_prefs.c:563
 msgid "Alphabetic Cursor Coordinates"
-msgstr "Coordonnées Alphabétiques du Curseur"
+msgstr "Coordonnées alphabétiques du curseur"
 
 #: Programs/menu_prefs.c:564
 msgid "Generic"
@@ -2469,7 +2469,7 @@ msgstr "Affichage braille"
 
 #: Programs/menu_prefs.c:716
 msgid "Computer Braille"
-msgstr "Braille Informatique"
+msgstr "Braille informatique"
 
 #: Programs/menu_prefs.c:717
 msgid "Contracted Braille"
@@ -2477,7 +2477,7 @@ msgstr "Braille abrégé"
 
 #: Programs/menu_prefs.c:720
 msgid "Braille Variant"
-msgstr "Variante de Braille"
+msgstr "Variante de braille"
 
 #: Programs/menu_prefs.c:727
 msgid "Expand Current Word"
@@ -2553,11 +2553,11 @@ msgstr "Clignotement du curseur de l'écran"
 
 #: Programs/menu_prefs.c:794
 msgid "Screen Cursor Blink Period"
-msgstr "Période de Clignotement du Curseur de l'écran"
+msgstr "Période de clignotement du curseur de l'écran"
 
 #: Programs/menu_prefs.c:802
 msgid "Screen Cursor Percent Visible"
-msgstr "Pourcentage de Visibilité du Curseur de l'écran"
+msgstr "Pourcentage de visibilité du curseur de l'écran"
 
 #: Programs/menu_prefs.c:810
 msgid "Show Attributes"
@@ -2569,11 +2569,11 @@ msgstr "Clignotement des attributs"
 
 #: Programs/menu_prefs.c:821
 msgid "Attributes Blink Period"
-msgstr "Période de Clignotement des Attributs"
+msgstr "Période de clignotement des attributs"
 
 #: Programs/menu_prefs.c:829
 msgid "Attributes Percent Visible"
-msgstr "Pourcentage de Visibilité des Attributs"
+msgstr "Pourcentage de visibilité des attributs"
 
 #: Programs/menu_prefs.c:837
 msgid "Blinking Capitals"
@@ -2581,11 +2581,11 @@ msgstr "Clignotement des majuscules"
 
 #: Programs/menu_prefs.c:842
 msgid "Capitals Blink Period"
-msgstr "Période de Clignotement des Majuscules"
+msgstr "Période de clignotement des majuscules"
 
 #: Programs/menu_prefs.c:850
 msgid "Capitals Percent Visible"
-msgstr "Pourcentage de Visibilité des Majuscules"
+msgstr "Pourcentage de visibilité des majuscules"
 
 #: Programs/menu_prefs.c:859
 msgid "Navigation Options"
@@ -2617,7 +2617,7 @@ msgstr "Reste de la ligne"
 
 #: Programs/menu_prefs.c:884
 msgid "Skip Which Blank Braille Windows"
-msgstr "Quelles fenêtres braille vides sauter."
+msgstr "Fenêtres braille vides à passer"
 
 #: Programs/menu_prefs.c:889
 msgid "Sliding Braille Window"
@@ -2629,7 +2629,7 @@ msgstr "Fenêtre braille glissante anticipée"
 
 #: Programs/menu_prefs.c:900
 msgid "Braille Window Overlap"
-msgstr "Chevauchement de fenêtre braille"
+msgstr "Chevauchement de la fenêtre braille"
 
 #: Programs/menu_prefs.c:901 Programs/menu_prefs.c:1420
 msgid "cells"
@@ -2683,15 +2683,15 @@ msgstr "Mise en surbrillance de l'emplacement de la fenêtre braille"
 
 #: Programs/menu_prefs.c:946
 msgid "Start Selection with Routing Key"
-msgstr "Commence la sélection avec touche de routage"
+msgstr "Commencer la sélection avec la touche de routage"
 
 #: Programs/menu_prefs.c:952
 msgid "Braille Typing"
-msgstr "Saisie Braille"
+msgstr "Saisie braille"
 
 #: Programs/menu_prefs.c:955
 msgid "Keyboard Enabled"
-msgstr "Clavier Activé"
+msgstr "Clavier activé"
 
 #: Programs/menu_prefs.c:961
 msgid "Translated via Text Table"
@@ -2699,7 +2699,7 @@ msgstr "Traduit via la table de caractères"
 
 #: Programs/menu_prefs.c:962
 msgid "Dots via Unicode Braille"
-msgstr "Points en braille unicode"
+msgstr "Points via le braille Unicode"
 
 #: Programs/menu_prefs.c:965
 msgid "Typing Mode"
@@ -2707,7 +2707,7 @@ msgstr "Mode de saisie"
 
 #: Programs/menu_prefs.c:970
 msgid "Quick Space"
-msgstr "Espace Rapide"
+msgstr "Espace rapide"
 
 #: Programs/menu_prefs.c:976
 msgid "Input Options"
@@ -2739,7 +2739,7 @@ msgstr "Délai avant le relâchement automatique"
 
 #: Programs/menu_prefs.c:993
 msgid "On First Release"
-msgstr "Au Premier Relâchement"
+msgstr "Au premier relâchement"
 
 #: Programs/menu_prefs.c:998
 msgid "Long Press Time"
@@ -2747,7 +2747,7 @@ msgstr "Durée de l'appui long"
 
 #: Programs/menu_prefs.c:1004
 msgid "Autorepeat Enabled"
-msgstr "Répétition Automatique Activée"
+msgstr "Répétition automatique activée"
 
 #: Programs/menu_prefs.c:1010
 msgid "Autorepeat Interval"
@@ -2871,7 +2871,7 @@ msgstr "Annonce automatique"
 
 #: Programs/menu_prefs.c:1167
 msgid "Speak Selected Line"
-msgstr "Lire la ligne sélectionnée"
+msgstr "Dire la ligne sélectionnée"
 
 #: Programs/menu_prefs.c:1173
 msgid "Speak Empty Line"
@@ -2899,7 +2899,7 @@ msgstr "Dire les mots complétés"
 
 #: Programs/menu_prefs.c:1209
 msgid "Speak Line Indent"
-msgstr "Énoncer l'indentation de la ligne"
+msgstr "Dire l'indentation de la ligne"
 
 #: Programs/menu_prefs.c:1216
 msgid "Speech Options"
@@ -2981,11 +2981,11 @@ msgstr "Clignotement du curseur de la synthèse"
 
 #: Programs/menu_prefs.c:1321
 msgid "Speech Cursor Blink Period"
-msgstr "Période de Clignotement du curseur de la synthèse"
+msgstr "Période de clignotement du curseur de la synthèse"
 
 #: Programs/menu_prefs.c:1329
 msgid "Speech Cursor Percent Visible"
-msgstr "Pourcentage de Visibilité du curseur de la synthèse"
+msgstr "Pourcentage de visibilité du curseur de la synthèse"
 
 #: Programs/menu_prefs.c:1339
 msgid "Time Presentation"
@@ -3117,15 +3117,15 @@ msgstr "Outils"
 
 #: Programs/menu_prefs.c:1495
 msgid "Restart Braille Driver"
-msgstr "Redémarre le pilote braille"
+msgstr "Redémarrer le pilote braille"
 
 #: Programs/menu_prefs.c:1501
 msgid "Restart Speech Driver"
-msgstr "Redémarre le pilote de synthèse vocale"
+msgstr "Redémarrer le pilote de synthèse vocale"
 
 #: Programs/menu_prefs.c:1507
 msgid "Restart Screen Driver"
-msgstr "Redémarre le pilote de l'écran"
+msgstr "Redémarrer le pilote de l'écran"
 
 #: Programs/menu_prefs.c:1513
 msgid "Build Information"
@@ -3145,7 +3145,7 @@ msgstr "Site Web"
 
 #: Programs/menu_prefs.c:1532
 msgid "Mailing List"
-msgstr "Liste de Diffusion"
+msgstr "Liste de diffusion"
 
 #: Programs/menu_prefs.c:1537 Programs/menu_prefs.c:1587
 msgid "Configuration File"
@@ -3662,7 +3662,7 @@ msgstr "Alto"
 #. xgettext: This is the name of MIDI musical instrument #43 (in the Strings group).
 #: Programs/midi.c:211
 msgid "Cello"
-msgstr "violoncelle"
+msgstr "Violoncelle"
 
 #. xgettext: This is the name of MIDI musical instrument #44 (in the Strings group).
 #: Programs/midi.c:214
@@ -3775,22 +3775,22 @@ msgstr "Cuivre synthétique 2"
 #. xgettext: This is the name of MIDI musical instrument #65 (in the Reed group).
 #: Programs/midi.c:280
 msgid "Soprano Saxophone"
-msgstr "Saxophone Soprano"
+msgstr "Saxophone soprano"
 
 #. xgettext: This is the name of MIDI musical instrument #66 (in the Reed group).
 #: Programs/midi.c:283
 msgid "Alto Saxophone"
-msgstr "Saxophone Alto"
+msgstr "Saxophone alto"
 
 #. xgettext: This is the name of MIDI musical instrument #67 (in the Reed group).
 #: Programs/midi.c:286
 msgid "Tenor Saxophone"
-msgstr "Saxophone Ténor"
+msgstr "Saxophone ténor"
 
 #. xgettext: This is the name of MIDI musical instrument #68 (in the Reed group).
 #: Programs/midi.c:289
 msgid "Baritone Saxophone"
-msgstr "Saxophone Baryton"
+msgstr "Saxophone baryton"
 
 #. xgettext: This is the name of MIDI musical instrument #69 (in the Reed group).
 #: Programs/midi.c:292
@@ -3821,7 +3821,7 @@ msgstr "Piccolo"
 #. xgettext: This is the name of MIDI musical instrument #74 (in the Pipe group).
 #: Programs/midi.c:308
 msgid "Flute"
-msgstr "flûte"
+msgstr "Flûte"
 
 #. xgettext: This is the name of MIDI musical instrument #75 (in the Pipe group).
 #: Programs/midi.c:311
@@ -3846,7 +3846,7 @@ msgstr "Shakuhachi"
 #. xgettext: This is the name of MIDI musical instrument #79 (in the Pipe group).
 #: Programs/midi.c:323
 msgid "Whistle"
-msgstr "sifflet"
+msgstr "Sifflet"
 
 #. xgettext: This is the name of MIDI musical instrument #80 (in the Pipe group).
 #: Programs/midi.c:326
@@ -4047,7 +4047,7 @@ msgstr "Batterie Taiko"
 #. xgettext: This is the name of MIDI musical instrument #118 (in the Percussive group).
 #: Programs/midi.c:446
 msgid "Melodic Tom"
-msgstr "tom mélodique"
+msgstr "Tom mélodique"
 
 #. xgettext: This is the name of MIDI musical instrument #119 (in the Percussive group).
 #: Programs/midi.c:449
@@ -4344,7 +4344,7 @@ msgstr "xbrlapi : Ne peut pas écrire le nom de la fenêtre %s\n"
 #: Programs/xbrlapi.c:378
 #, c-format
 msgid "cannot set focus to %#010x\n"
-msgstr "Ne peut pas paramétrer le focus sur %#010x\n"
+msgstr "Ne peut pas définir le focus sur %#010x\n"
 
 #. Server refused our Xkb remapping request, probably the buggy version 21, ignore error
 #: Programs/xbrlapi.c:613
@@ -4355,7 +4355,7 @@ msgstr ""
 #: Programs/xbrlapi.c:619
 #, c-format
 msgid "xbrlapi: X Error %d, %s on display %s\n"
-msgstr "xbrlapi: Erreur X %d, %s sur l'affichage %s\n"
+msgstr "xbrlapi : Erreur X %d, %s sur l'affichage %s\n"
 
 #: Programs/xbrlapi.c:620
 #, c-format
@@ -4459,7 +4459,7 @@ msgstr ""
 #: Programs/xbrlapi.c:1005
 #, c-format
 msgid "xbrlapi: unhandled event type: %d\n"
-msgstr "xbrlapi : Type d'événement non pris en charge: %d\n"
+msgstr "xbrlapi : Type d'événement non pris en charge : %d\n"
 
 #: Programs/xbrlapi.c:1058
 msgid "unexpected cmd"
