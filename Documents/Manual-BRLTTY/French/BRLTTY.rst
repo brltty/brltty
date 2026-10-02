@@ -1347,7 +1347,7 @@ Mélodies d'alerte
 BRLTTY signale les événements significatifs en jouant de courtes
 mélodies prédéfinies. Cette fonctionnalité s'active et se désactive
 soit par la commande :ref:`TUNES <command-TUNES>`, soit par la
-préférence :ref:`Alert Tunes <tunes>`. Les mélodies sont jouées par
+préférence :ref:`Mélodies d'alerte <tunes>`. Les mélodies sont jouées par
 défaut sur le bipeur interne, mais d'autres sorties sont disponibles
 via la préférence :ref:`Périphérique pour les mélodies <preference-tune-device>`.
 
@@ -1356,7 +1356,7 @@ décroissant, à un ou plusieurs des éléments suivants :
 
 une mélodie
   Si une mélodie est associée à l'événement, si la préférence
-  :ref:`Alert Tunes <tunes>` (voir aussi la commande
+  :ref:`Mélodies d'alerte <tunes>` (voir aussi la commande
   :ref:`TUNES <command-TUNES>`) est active, et si le périphérique de
   son sélectionné (voir la préférence
   :ref:`Périphérique pour les mélodies <preference-tune-device>`) peut être ouvert, la
@@ -1422,7 +1422,7 @@ intégré à la place. Le menu s'active par la commande
 appliquer les nouveaux réglages, sortir du menu et reprendre le
 fonctionnement normal. ``PREFLOAD`` annule toutes les modifications
 faites depuis l'entrée dans le menu. Voir
-:ref:`Menu Navigation Commands <menu-navigation>` pour l'ensemble des
+:ref:`Navigation dans le menu <menu-navigation>` pour l'ensemble des
 touches qui sélectionnent les éléments et ajustent les réglages ; les
 touches de routage permettent aussi de choisir directement un
 réglage.
@@ -1539,7 +1539,7 @@ Périphérique pour les mélodies
 
 Points d'alerte
   Lorsqu'un événement significatif a un motif de points associé
-  (voir :ref:`Alert Tunes <tunes>`), afficher brièvement le motif
+  (voir :ref:`Mélodies d'alerte <tunes>`), afficher brièvement le motif
   sur chaque cellule braille. Un réglage distinct *Durée des points
   d'alerte* (ajouté après BRLTTY 6.5 ; valeur par défaut : 0,4 s)
   contrôle la durée d'affichage du motif — utile pour les afficheurs
@@ -1550,7 +1550,7 @@ Points d'alerte
 
 Messages d'alerte
   Lorsqu'un événement significatif a un message associé (voir
-  :ref:`Alert Tunes <tunes>`), l'afficher sur l'afficheur braille
+  :ref:`Mélodies d'alerte <tunes>`), l'afficher sur l'afficheur braille
   pendant quelques secondes (voir l'option en ligne de commande
   :ref:`-M <options-message-timeout>`). Supprimé si une mélodie ou
   des points d'alerte se déclenchent pour le même événement.
@@ -1606,13 +1606,13 @@ Dire les lignes vides
 
 Table de caractères
   Sélectionner la table de caractères à l'exécution. Voir
-  :ref:`Text Tables <table-text>` et l'option en ligne de commande
+  :ref:`Tables de caractères <table-text>` et l'option en ligne de commande
   :ref:`-t <options-text-table>`. Cette préférence n'est pas
   sauvegardée.
 
 Table de braille abrégé
   Sélectionner la table de braille abrégé à l'exécution. Voir
-  :ref:`Contraction Tables <table-contraction>` et l'option en ligne
+  :ref:`Tables de braille abrégé <table-contraction>` et l'option en ligne
   de commande :ref:`-c <options-contraction-table>`. Cette préférence
   n'est pas sauvegardée.
 
@@ -1620,7 +1620,7 @@ Table de braille abrégé
 
 Table d'attributs
   Sélectionner la table d'attributs à l'exécution. Voir
-  :ref:`Attributes Tables <table-attributes>` et l'option en ligne
+  :ref:`Tables d'attributs <table-attributes>` et l'option en ligne
   de commande :ref:`-a <options-attributes-table>`. Cette préférence
   n'est pas sauvegardée.
 
@@ -1628,7 +1628,7 @@ Table d'attributs
 
 Table de touches du clavier
   Sélectionner la table de touches à l'exécution. Voir
-  :ref:`Key Tables <table-key>` et l'option en ligne de commande
+  :ref:`Tables de touches <table-key>` et l'option en ligne de commande
   :ref:`-k <options-keyboard-table>`. Cette préférence n'est pas
   sauvegardée.
 
