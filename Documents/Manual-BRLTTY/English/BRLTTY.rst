@@ -1339,8 +1339,8 @@ since BRLTTY 6.5, and a handful that new users typically adjust early
 on.
 
 
-Selected Preferences
-~~~~~~~~~~~~~~~~~~~~
+Noteworthy Preferences
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. _preference-text-style:
 

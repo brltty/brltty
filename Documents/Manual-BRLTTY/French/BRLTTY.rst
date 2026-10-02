@@ -1425,8 +1425,8 @@ ajoutées depuis BRLTTY 6.5, et quelques réglages que les nouveaux
 utilisateurs ajustent typiquement très tôt.
 
 
-Préférences sélectionnées
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Préférences notables
+~~~~~~~~~~~~~~~~~~~~
 
 .. _preference-text-style:
 
