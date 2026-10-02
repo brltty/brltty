@@ -454,7 +454,7 @@ SLIDEWIN
   When cursor tracking is on, slide the window horizontally so the
   cursor stays near the centre, instead of jumping in window-sized
   steps. Also changeable via the
-  :ref:`Sliding Window <preference-sliding-window>` preference.
+  :ref:`Sliding Braille Window <preference-sliding-window>` preference.
 
 .. _command-SKPIDLNS:
 
@@ -478,7 +478,7 @@ SKPBLNKWINS
 CSRVIS
   Show the cursor by superimposing a dot pattern on its character.
   Initially **on**. Also changeable via the
-  :ref:`Show Cursor <preference-show-cursor>` preference.
+  :ref:`Show Screen Cursor <preference-show-cursor>` preference.
 
 .. _command-CSRHIDE:
 
@@ -499,13 +499,13 @@ CSRTRK
 CSRSIZE
   Represent the cursor as a solid block (all eight dots) rather than
   as an underline (dots 7 and 8). Also changeable via the
-  :ref:`Cursor Style <preference-cursor-style>` preference.
+  :ref:`Screen Cursor Style <preference-cursor-style>` preference.
 
 .. _command-CSRBLINK:
 
 CSRBLINK
   Blink the cursor representation. Also changeable via the
-  :ref:`Blinking Cursor <preference-blinking-cursor>` preference.
+  :ref:`Blinking Screen Cursor <preference-blinking-cursor>` preference.
 
 .. _command-ATTRVIS:
 
@@ -648,7 +648,7 @@ Speech Controls
 
 SAY_LINE
   Speak the current line. The
-  :ref:`Say-Line Mode <preference-sayline-mode>` preference controls
+  :ref:`Say Line Mode <preference-sayline-mode>` preference controls
   whether pending speech is interrupted first.
 
 .. _command-SAY_ABOVE:
@@ -675,13 +675,13 @@ SPKHOME
 
 SAY_SLOWER/SAY_FASTER
   Decrease/increase the speech rate
-  (see :ref:`Speech Rate <preference-speech-rate>`). Driver-dependent.
+  (see the :ref:`Rate <preference-speech-rate>` speech preference). Driver-dependent.
 
 .. _command-SAY_SOFTER-SAY_LOUDER:
 
 SAY_SOFTER/SAY_LOUDER
   Decrease/increase the speech volume
-  (see :ref:`Speech Volume <preference-speech-volume>`).
+  (see the :ref:`Volume <preference-speech-volume>` speech preference).
   Driver-dependent.
 
 .. _command-SPK_PUNCT_LEVEL:
@@ -1227,7 +1227,7 @@ on a system where the ``gpm`` application has been installed,
 then it'll interact with the pointer (mouse).
 
 Moving the pointer drags the braille window
-(see the :ref:`Window Follows Pointer <preference-window-follows-pointer>` preference).
+(see the :ref:`Track Screen Pointer <preference-window-follows-pointer>` preference).
 Whenever the pointer is moved beyond the edge of the braille window,
 the braille window is dragged along (one character at a time).
 This gives the braille user another two-dimensional way
@@ -1359,7 +1359,7 @@ Skip Identical Lines
 
 .. _preference-sliding-window:
 
-Sliding Window
+Sliding Braille Window
   When cursor tracking would otherwise push the cursor off the edge
   of the braille window, slide the window so the cursor stays nearer
   the centre instead of jumping by full window widths. Also
@@ -1367,20 +1367,20 @@ Sliding Window
 
 .. _preference-show-cursor:
 
-Show Cursor
+Show Screen Cursor
   Whether to show the screen cursor on the braille display. Also
   changeable via the :ref:`CSRVIS <command-CSRVIS>` command.
 
 .. _preference-cursor-style:
 
-Cursor Style
+Screen Cursor Style
   Represent the cursor with all eight dots (a solid block) or with
   just dots 7 and 8 (an underline). Also changeable via the
   :ref:`CSRSIZE <command-CSRSIZE>` command.
 
 .. _preference-blinking-cursor:
 
-Blinking Cursor
+Blinking Screen Cursor
   Make the cursor alternately visible and invisible at a fixed rate.
   Also changeable via the :ref:`CSRBLINK <command-CSRBLINK>` command.
 
@@ -1403,7 +1403,7 @@ Blinking Capitals
   Make capital letters blink so they stand out. Also changeable via
   the :ref:`CAPBLINK <command-CAPBLINK>` command.
 
-Autorepeat
+Autorepeat Enabled
   While the key combination for an autorepeatable command remains
   pressed, repeat the command at a regular interval after an initial
   delay. Whether key-release events are reliable enough to support
@@ -1412,7 +1412,7 @@ Autorepeat
 
 .. _preference-window-follows-pointer:
 
-Window Follows Pointer
+Track Screen Pointer
   When the mouse pointer moves, drag the braille window along with
   it. Only available when GPM support is built in.
 
@@ -1445,7 +1445,7 @@ Alert Messages
 
 .. _preference-sayline-mode:
 
-Say-Line Mode
+Say Line Mode
   When the :ref:`SAY_LINE <command-SAY_LINE>` command runs, either
   discard pending speech (``Immediate``, the default) or queue the
   new line behind it (``Enqueue``).
@@ -1458,14 +1458,14 @@ Autospeak
 
 .. _preference-speech-rate:
 
-Speech Rate
+Rate
   Adjust the speech rate (``0`` slowest, ``20`` fastest).
   Driver-dependent; also changeable via the
   :ref:`SAY_SLOWER/SAY_FASTER <command-SAY_SLOWER-SAY_FASTER>` commands.
 
 .. _preference-speech-volume:
 
-Speech Volume
+Volume
   Adjust the speech volume (``0`` softest, ``20`` loudest).
   Driver-dependent; also changeable via the
   :ref:`SAY_SOFTER/SAY_LOUDER <command-SAY_SOFTER-SAY_LOUDER>` commands.
@@ -1654,7 +1654,7 @@ in order to show the precise column layout.
     Cursor tracking (see the :ref:`CSRTRK <command-CSRTRK>` command).
 
   Dot 8
-    Sliding window (see the :ref:`SLIDEWIN <command-SLIDEWIN>` command).
+    Sliding braille window (see the :ref:`SLIDEWIN <command-SLIDEWIN>` command).
 
 *vt*
   The number (counting from 1) of the current virtual terminal.
