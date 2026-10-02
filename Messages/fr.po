@@ -517,7 +517,7 @@ msgstr "Ne se rabat pas sur le caractère Unicode de base."
 
 #: Programs/brltty-trtxt.c:79
 msgid "Path to directory for text tables."
-msgstr "Chemin du répertoire des tables de texte"
+msgstr "Chemin du répertoire des tables de caractères"
 
 #: Programs/brltty-trtxt.c:98
 msgid "Translate one binary braille representation to another."
@@ -622,11 +622,11 @@ msgstr ""
 
 #: Programs/cmdline.c:1065
 msgid "configuration directive specified more than once"
-msgstr "Ligne de configuration spécifiée plus d'une fois"
+msgstr "Directive de configuration spécifiée plus d'une fois"
 
 #: Programs/cmdline.c:1081
 msgid "unknown configuration directive"
-msgstr "Ligne de configuration non reconnue"
+msgstr "Directive de configuration inconnue"
 
 #: Programs/cmdline.c:1251
 #, c-format
@@ -861,7 +861,7 @@ msgstr "Bascule l'apparence du texte entre 6 et 8 points"
 #. xgettext: This is the description of the SLIDEWIN command.
 #: Programs/cmds.auto.h:311
 msgid "set sliding braille window on/off"
-msgstr "Active ou désactive le glissement de la fenêtre braille"
+msgstr "Active ou désactive la fenêtre braille glissante"
 
 #. xgettext: This is the description of the SKPIDLNS command.
 #: Programs/cmds.auto.h:319
@@ -891,7 +891,7 @@ msgstr "Active ou désactive la poursuite du curseur de l'écran"
 #. xgettext: This is the description of the CSRSIZE command.
 #: Programs/cmds.auto.h:359
 msgid "set screen cursor style block/underline"
-msgstr "Bascule entre un style de curseur souligné ou en bloc"
+msgstr "Bascule l'apparence du curseur de l'écran entre bloc et soulignement"
 
 #. xgettext: This is the description of the CSRBLINK command.
 #: Programs/cmds.auto.h:367
@@ -916,7 +916,7 @@ msgstr "Active ou désactive le clignotement des lettres majuscules"
 #. xgettext: This is the description of the TUNES command.
 #: Programs/cmds.auto.h:399
 msgid "set alert tunes on/off"
-msgstr "Active ou désactive les sons d'avertissement"
+msgstr "Active ou désactive les mélodies d'alerte"
 
 #. xgettext: This is the description of the AUTOREPEAT command.
 #: Programs/cmds.auto.h:407
@@ -926,7 +926,7 @@ msgstr "Active ou désactive la répétition automatique"
 #. xgettext: This is the description of the AUTOSPEAK command.
 #: Programs/cmds.auto.h:415
 msgid "set autospeak on/off"
-msgstr "Active ou désactive la parole automatique"
+msgstr "Active ou désactive l'annonce automatique"
 
 #. xgettext: This is the description of the HELP command.
 #: Programs/cmds.auto.h:422
@@ -1022,7 +1022,7 @@ msgstr "Diminuer la vitesse de la parole"
 #. xgettext: This is the description of the SAY_FASTER command.
 #: Programs/cmds.auto.h:557
 msgid "increase speaking rate"
-msgstr "Augmente le débit de la parole"
+msgstr "Augmente la vitesse de la parole"
 
 #. xgettext: This is the description of the SAY_SOFTER command.
 #: Programs/cmds.auto.h:564
@@ -1102,32 +1102,32 @@ msgstr "Va au niveau de menu précédent"
 #. xgettext: This is the description of the ASPK_SEL_LINE command.
 #: Programs/cmds.auto.h:672
 msgid "set autospeak selected line on/off"
-msgstr "Activer/désactiver la diction automatique de la ligne sélectionnée"
+msgstr "Activer/désactiver l'annonce automatique de la ligne sélectionnée"
 
 #. xgettext: This is the description of the ASPK_SEL_CHAR command.
 #: Programs/cmds.auto.h:680
 msgid "set autospeak selected character on/off"
-msgstr "Activer/désactiver la diction automatique du caractère sélectionné"
+msgstr "Activer/désactiver l'annonce automatique du caractère sélectionné"
 
 #. xgettext: This is the description of the ASPK_INS_CHARS command.
 #: Programs/cmds.auto.h:688
 msgid "set autospeak inserted characters on/off"
-msgstr "Activer/désactiver la diction automatique des caractères insérés"
+msgstr "Activer/désactiver l'annonce automatique des caractères insérés"
 
 #. xgettext: This is the description of the ASPK_DEL_CHARS command.
 #: Programs/cmds.auto.h:696
 msgid "set autospeak deleted characters on/off"
-msgstr "Activer/désactiver la diction automatique des caractères effacés"
+msgstr "Activer/désactiver l'annonce automatique des caractères effacés"
 
 #. xgettext: This is the description of the ASPK_REP_CHARS command.
 #: Programs/cmds.auto.h:704
 msgid "set autospeak replaced characters on/off"
-msgstr "Active ou désactive la diction automatique des caractères remplacés"
+msgstr "Active ou désactive l'annonce automatique des caractères remplacés"
 
 #. xgettext: This is the description of the ASPK_CMP_WORDS command.
 #: Programs/cmds.auto.h:712
 msgid "set autospeak completed words on/off"
-msgstr "Activer/désactiver la diction automatique des mots complétés"
+msgstr "Activer/désactiver l'annonce automatique des mots complétés"
 
 #. xgettext: This is the description of the SPEAK_CURR_CHAR command.
 #: Programs/cmds.auto.h:719
@@ -1202,17 +1202,17 @@ msgstr ""
 #. xgettext: This is the description of the ROUTE_CURR_LOCN command.
 #: Programs/cmds.auto.h:835
 msgid "bring screen cursor to speech cursor"
-msgstr "Amène le curseur de l'écran au curseur de synthèse"
+msgstr "Amène le curseur de l'écran au curseur de la synthèse"
 
 #. xgettext: This is the description of the SPEAK_CURR_LOCN command.
 #: Programs/cmds.auto.h:842
 msgid "speak speech cursor location"
-msgstr "Énonce la position du curseur de synthèse"
+msgstr "Énonce la position du curseur de la synthèse"
 
 #. xgettext: This is the description of the SHOW_CURR_LOCN command.
 #: Programs/cmds.auto.h:850
 msgid "set speech cursor visibility on/off"
-msgstr "Rend le curseur de synthèse visible ou invisible"
+msgstr "Rend le curseur de la synthèse visible ou invisible"
 
 #. xgettext: This is the description of the CLIP_SAVE command.
 #: Programs/cmds.auto.h:857
@@ -1312,7 +1312,7 @@ msgstr "énonce l'indentation de la ligne courante"
 #. xgettext: This is the description of the ASPK_INDENT command.
 #: Programs/cmds.auto.h:998
 msgid "set autospeak indent of current line on/off"
-msgstr "active/désactive l'énonciation automatique de l'indentation de la ligne courante"
+msgstr "active/désactive l'annonce automatique de l'indentation de la ligne courante"
 
 #. xgettext: This is the description of the REFRESH command.
 #: Programs/cmds.auto.h:1005
@@ -1602,12 +1602,12 @@ msgstr ""
 #. xgettext: This is the description of the SET_TEXT_TABLE command.
 #: Programs/cmds.auto.h:1442
 msgid "set text table"
-msgstr "Définit la table du texte"
+msgstr "Définit la table de caractères"
 
 #. xgettext: This is the description of the SET_ATTRIBUTES_TABLE command.
 #: Programs/cmds.auto.h:1450
 msgid "set attributes table"
-msgstr "Définit la table des attributs"
+msgstr "Définit la table d'attributs"
 
 #. xgettext: This is the description of the SET_CONTRACTION_TABLE command.
 #: Programs/cmds.auto.h:1458
@@ -1617,7 +1617,7 @@ msgstr "Définit la table de braille abrégé"
 #. xgettext: This is the description of the SET_KEYBOARD_TABLE command.
 #: Programs/cmds.auto.h:1466
 msgid "set keyboard table"
-msgstr "Définit la table de touches"
+msgstr "Définit la table de touches du clavier"
 
 #. xgettext: This is the description of the SET_LANGUAGE_PROFILE command.
 #: Programs/cmds.auto.h:1474
@@ -1882,7 +1882,7 @@ msgstr "Paramètres pour le pilote de synthèse vocale."
 
 #: Programs/config.c:521
 msgid "Do not autospeak when braille is not being used."
-msgstr "Pas de parole automatique quand le braille n'est pas utilisé."
+msgstr "Pas d'annonce automatique quand le braille n'est pas utilisé."
 
 #: Programs/config.c:529
 msgid "Name of or path to speech input object."
@@ -1895,7 +1895,7 @@ msgstr "qualité"
 #: Programs/config.c:536
 #, c-format
 msgid "Minimum screen content quality to autospeak (one of {%s})."
-msgstr "Le niveau minimal de qualité du contenu de l'écran à partir duquel activer l'énonciation automatique (une valeur parmi {%s})."
+msgstr "Le niveau minimal de qualité du contenu de l'écran à partir duquel activer l'annonce automatique (une valeur parmi {%s})."
 
 #: Programs/config.c:547
 #, c-format
@@ -1908,7 +1908,7 @@ msgstr "Paramètres pour le pilote de l'écran."
 
 #: Programs/config.c:566
 msgid "Name of or path to keyboard table."
-msgstr "Nom ou chemin vers le fichier de la table de touches."
+msgstr "Nom ou chemin vers la table de touches du clavier."
 
 #: Programs/config.c:574
 msgid "Properties of eligible keyboards."
@@ -2068,7 +2068,7 @@ msgstr "Ne peut pas ouvrir l'aide des touches"
 
 #: Programs/config.c:1325
 msgid "no key bindings"
-msgstr "Pas de raccourci clavier"
+msgstr "Aucune association de touches"
 
 #: Programs/config.c:1875
 msgid "Key Bindings"
@@ -2080,7 +2080,7 @@ msgstr "Table de touches"
 
 #: Programs/config.c:1886
 msgid "cannot compile key table"
-msgstr "Ne peut pas compiler la table des touches"
+msgstr "Ne peut pas compiler la table de touches"
 
 #: Programs/config.c:1949 Programs/menu_prefs.c:1701
 msgid "Braille Device"
@@ -2178,11 +2178,11 @@ msgstr "Ne peut pas compiler la table de braille abrégé"
 
 #: Programs/ctb_translate.c:438
 msgid "cannot access internal contraction table"
-msgstr "ne peut accéder à la table d'abrègement interne"
+msgstr "ne peut accéder à la table de braille abrégé interne"
 
 #: Programs/ctb_translate.c:452
 msgid "cannot load contraction table"
-msgstr "ne peut charger la table d'abrègement"
+msgstr "ne peut charger la table de braille abrégé"
 
 #: Programs/datafile.c:318
 msgid "invalid escape sequence"
@@ -2234,7 +2234,7 @@ msgstr "Poursuite du curseur"
 
 #: Programs/log.c:95
 msgid "Cursor Routing"
-msgstr "Déplacement du curseur"
+msgstr "Rapatriement du curseur"
 
 #: Programs/log.c:101
 msgid "Update Events"
@@ -2413,7 +2413,7 @@ msgstr "Points 7 et 8"
 
 #: Programs/menu_prefs.c:678 Programs/menu_prefs.c:1429
 msgid "Block"
-msgstr "Pavé"
+msgstr "Bloc"
 
 #: Programs/menu_prefs.c:678
 msgid "all dots"
@@ -2601,7 +2601,7 @@ msgstr "Passer les lignes identiques"
 
 #: Programs/menu_prefs.c:873
 msgid "Skip Blank Braille Windows"
-msgstr "Passer les fenêtres braille vierges"
+msgstr "Passer les fenêtres braille vides"
 
 #: Programs/menu_prefs.c:879 Programs/spk.c:281
 msgid "All"
@@ -2617,15 +2617,15 @@ msgstr "Reste de la ligne"
 
 #: Programs/menu_prefs.c:884
 msgid "Skip Which Blank Braille Windows"
-msgstr "Quelles fenêtres braille vierges sauter."
+msgstr "Quelles fenêtres braille vides sauter."
 
 #: Programs/menu_prefs.c:889
 msgid "Sliding Braille Window"
-msgstr "Faire défiler la fenêtre"
+msgstr "Fenêtre braille glissante"
 
 #: Programs/menu_prefs.c:894
 msgid "Eager Sliding Braille Window"
-msgstr "Défilement dynamique de la fenêtre braille"
+msgstr "Fenêtre braille glissante anticipée"
 
 #: Programs/menu_prefs.c:900
 msgid "Braille Window Overlap"
@@ -2675,11 +2675,11 @@ msgstr ""
 
 #: Programs/menu_prefs.c:935
 msgid "Track Screen Pointer"
-msgstr "Poursuivre le pointeur de l'écran"
+msgstr "Suivre le pointeur de l'écran"
 
 #: Programs/menu_prefs.c:941
 msgid "Highlight Braille Window Location"
-msgstr "Surlignement de l'emplacement de la fenêtre braille"
+msgstr "Mise en surbrillance de l'emplacement de la fenêtre braille"
 
 #: Programs/menu_prefs.c:946
 msgid "Start Selection with Routing Key"
@@ -2743,7 +2743,7 @@ msgstr "Au Premier Relâchement"
 
 #: Programs/menu_prefs.c:998
 msgid "Long Press Time"
-msgstr "Durée d'appui prolongée"
+msgstr "Durée de l'appui long"
 
 #: Programs/menu_prefs.c:1004
 msgid "Autorepeat Enabled"
@@ -2771,11 +2771,11 @@ msgstr "Sensibilité du tactile"
 
 #: Programs/menu_prefs.c:1049 Programs/menu_prefs.c:1671
 msgid "Keyboard Table"
-msgstr "Table des touches du clavier"
+msgstr "Table de touches du clavier"
 
 #: Programs/menu_prefs.c:1057
 msgid "Event Alerts"
-msgstr "Signaux d'événements"
+msgstr "Alertes d'événements"
 
 #: Programs/menu_prefs.c:1060
 msgid "Console Bell Alert"
@@ -2787,7 +2787,7 @@ msgstr "Alertes lumineuses du clavier"
 
 #: Programs/menu_prefs.c:1074
 msgid "Alert Tunes"
-msgstr "Sons d'avertissement"
+msgstr "Mélodies d'alerte"
 
 #: Programs/menu_prefs.c:1081
 msgid "Beeper"
@@ -2823,7 +2823,7 @@ msgstr "Synthétiseur de la carte son"
 
 #: Programs/menu_prefs.c:1087
 msgid "Tune Device"
-msgstr "Périphérique pour les sons"
+msgstr "Périphérique pour les mélodies"
 
 #: Programs/menu_prefs.c:1095
 msgid "PCM Volume"
@@ -2843,11 +2843,11 @@ msgstr "Volume FM"
 
 #: Programs/menu_prefs.c:1129
 msgid "Alert Messages"
-msgstr "Messages d'avertissement"
+msgstr "Messages d'alerte"
 
 #: Programs/menu_prefs.c:1134
 msgid "Alert Dots"
-msgstr "Points d'avertissement"
+msgstr "Points d'alerte"
 
 #: Programs/menu_prefs.c:1139
 msgid "Alert Dots Duration"
@@ -2863,11 +2863,11 @@ msgstr ""
 
 #: Programs/menu_prefs.c:1159
 msgid "Autospeak Options"
-msgstr "Options pour l'énonciation automatique"
+msgstr "Options de l'annonce automatique"
 
 #: Programs/menu_prefs.c:1162
 msgid "Autospeak"
-msgstr "Parole automatique"
+msgstr "Annonce automatique"
 
 #: Programs/menu_prefs.c:1167
 msgid "Speak Selected Line"
@@ -2929,7 +2929,7 @@ msgstr "Dire l'état du verrouillage majuscule"
 
 #: Programs/menu_prefs.c:1258
 msgid "Raise Pitch"
-msgstr "Augmenter le ton"
+msgstr "Augmenter la hauteur"
 
 #: Programs/menu_prefs.c:1261
 msgid "Uppercase Indicator"
@@ -2965,7 +2965,7 @@ msgstr "Dans la file"
 
 #: Programs/menu_prefs.c:1299
 msgid "Say Line Mode"
-msgstr "Mode Dire la ligne"
+msgstr "Mode dire-la-ligne"
 
 #: Programs/menu_prefs.c:1304
 msgid "Show Speech Cursor"
@@ -2981,11 +2981,11 @@ msgstr "Clignotement du curseur de la synthèse"
 
 #: Programs/menu_prefs.c:1321
 msgid "Speech Cursor Blink Period"
-msgstr "Période de Clignotement du Curseur Vocal"
+msgstr "Période de Clignotement du curseur de la synthèse"
 
 #: Programs/menu_prefs.c:1329
 msgid "Speech Cursor Percent Visible"
-msgstr "Pourcentage de Visibilité du Curseur Vocal"
+msgstr "Pourcentage de Visibilité du curseur de la synthèse"
 
 #: Programs/menu_prefs.c:1339
 msgid "Time Presentation"
@@ -3097,7 +3097,7 @@ msgstr "Tables braille"
 
 #: Programs/menu_prefs.c:1459 Programs/menu_prefs.c:1656
 msgid "Text Table"
-msgstr "Table de texte"
+msgstr "Table de caractères"
 
 #: Programs/menu_prefs.c:1466 Programs/menu_prefs.c:1661
 msgid "Contraction Table"
@@ -4146,7 +4146,7 @@ msgstr "Nom du paramètre manquant"
 
 #: Programs/parse.c:562
 msgid "unsupported parameter"
-msgstr "Paramètre non supporté"
+msgstr "Paramètre non pris en charge"
 
 #: Programs/pgmprivs_linux.c:1909
 msgid "working directory changed"
@@ -4254,11 +4254,11 @@ msgstr ""
 
 #: Programs/ttb_translate.c:275
 msgid "cannot compile text table"
-msgstr "Ne peut pas compiler la table de texte"
+msgstr "Ne peut pas compiler la table de caractères"
 
 #: Programs/ttb_translate.c:295
 msgid "cannot load text table"
-msgstr "Ne peut pas charger la table de texte"
+msgstr "Ne peut pas charger la table de caractères"
 
 #: Programs/update.c:1026
 msgid "blank"
