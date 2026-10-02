@@ -62,7 +62,7 @@ msgstr "Désactivation de l'émulation du clavier"
 #: Drivers/Braille/BrailleLite/braille.c:782
 #: Drivers/Braille/BrailleLite/braille.c:791
 msgid "repeat count"
-msgstr "Répétition du comptage"
+msgstr "Nombre de répétitions"
 
 #. configuration menu
 #: Drivers/Braille/BrailleLite/braille.c:607
@@ -264,7 +264,7 @@ msgstr "Longueur maximale d'une ligne d'affichage"
 
 #: Programs/brltty-ctb.c:59
 msgid "Reformat input."
-msgstr "Entrée de reformatage."
+msgstr "Reformate le texte d'entrée."
 
 #: Programs/brltty-ctb.c:65
 msgid "Force immediate output."
@@ -513,7 +513,7 @@ msgstr "Supprime les points sept et huit"
 
 #: Programs/brltty-trtxt.c:70
 msgid "Don't fall back to the Unicode base character."
-msgstr "Ne se rabat pas sur des caractères en unicode"
+msgstr "Ne se rabat pas sur le caractère Unicode de base."
 
 #: Programs/brltty-trtxt.c:79
 msgid "Path to directory for text tables."
@@ -537,11 +537,11 @@ msgstr "Format du fichier de sortie."
 
 #: Programs/brltty-ttb.c:169
 msgid "8-bit character set to use."
-msgstr "Utilisation de caractères 8 bits"
+msgstr "Jeu de caractères 8 bits à utiliser."
 
 #: Programs/brltty-ttb.c:176
 msgid "Report the characters within the current screen font that aren't defined within the text table."
-msgstr "Signale les caractères dans une police à l'écran n'ayant pas été définis dans la table de caractères"
+msgstr "Signale les caractères de la police actuelle de l'écran qui ne sont pas définis dans la table de caractères."
 
 #: Programs/brltty-ttb.c:186
 msgid "Path to directory containing text tables."
@@ -876,7 +876,7 @@ msgstr "Active ou désactive le saut des fenêtres braille vides"
 #. xgettext: This is the description of the CSRVIS command.
 #: Programs/cmds.auto.h:335
 msgid "set screen cursor visibility on/off"
-msgstr "Rend le curseur visible ou invisible"
+msgstr "Rend le curseur de l'écran visible ou invisible"
 
 #. xgettext: This is the description of the CSRHIDE command.
 #: Programs/cmds.auto.h:343
@@ -1117,7 +1117,7 @@ msgstr "Activer/désactiver la diction automatique des caractères insérés"
 #. xgettext: This is the description of the ASPK_DEL_CHARS command.
 #: Programs/cmds.auto.h:696
 msgid "set autospeak deleted characters on/off"
-msgstr "Activer/désactiver la diction automatique des mots effacés"
+msgstr "Activer/désactiver la diction automatique des caractères effacés"
 
 #. xgettext: This is the description of the ASPK_REP_CHARS command.
 #: Programs/cmds.auto.h:704
@@ -1207,7 +1207,7 @@ msgstr "Amène le curseur de l'écran au curseur de synthèse"
 #. xgettext: This is the description of the SPEAK_CURR_LOCN command.
 #: Programs/cmds.auto.h:842
 msgid "speak speech cursor location"
-msgstr "Lit là où est le curseur de synthèse"
+msgstr "Énonce la position du curseur de synthèse"
 
 #. xgettext: This is the description of the SHOW_CURR_LOCN command.
 #: Programs/cmds.auto.h:850
@@ -1237,7 +1237,7 @@ msgstr "Active ou désactive le clavier braille"
 #. xgettext: This is the description of the UNSTICK command.
 #: Programs/cmds.auto.h:887
 msgid "clear all sticky input modifiers"
-msgstr "Vider les modificateurs d'entrée polluants"
+msgstr "Efface tous les modificateurs d'entrée rémanents"
 
 #. xgettext: This is the description of the ALTGR command.
 #: Programs/cmds.auto.h:894
@@ -1252,7 +1252,7 @@ msgstr "Change le cycle du modificateur Touche Windows (La prochaine fois, activ
 #. xgettext: This is the description of the BRL_STOP command.
 #: Programs/cmds.auto.h:908
 msgid "stop the braille driver"
-msgstr "Démarre le pilote braille"
+msgstr "Arrête le pilote braille"
 
 #. xgettext: This is the description of the BRL_START command.
 #: Programs/cmds.auto.h:915
@@ -1282,12 +1282,12 @@ msgstr "Démarre le pilote de l'écran"
 #. xgettext: This is the description of the SELECTVT_PREV command.
 #: Programs/cmds.auto.h:950
 msgid "bind to the previous virtual terminal"
-msgstr "Envoie au terminal virtuel précédent"
+msgstr "Se lie au terminal virtuel précédent"
 
 #. xgettext: This is the description of the SELECTVT_NEXT command.
 #: Programs/cmds.auto.h:957
 msgid "bind to the next virtual terminal"
-msgstr "Envoie au terminal virtuel suivant"
+msgstr "Se lie au terminal virtuel suivant"
 
 #. xgettext: This is the description of the PRNBWIN command.
 #: Programs/cmds.auto.h:966
@@ -1522,7 +1522,7 @@ msgstr "Démarre un nouveau presse-papier au caractère"
 #. xgettext: This is the description of the CLIP_ADD command.
 #: Programs/cmds.auto.h:1303
 msgid "append to clipboard from character"
-msgstr "ajoute le caractère au presse-papier"
+msgstr "Ajoute au presse-papier à partir du caractère"
 
 #. xgettext: This is the description of the COPY_RECT command.
 #: Programs/cmds.auto.h:1311
@@ -1542,12 +1542,12 @@ msgstr "Va à un terminal virtuel spécifique"
 #. xgettext: This is the description of the PRINDENT command.
 #: Programs/cmds.auto.h:1337
 msgid "go up to nearest line with less indent than character"
-msgstr "Remonte à la ligne la plus proche ayant moins d'indentation que de caractère"
+msgstr "Remonte à la ligne la plus proche ayant moins d'indentation que le caractère"
 
 #. xgettext: This is the description of the NXINDENT command.
 #: Programs/cmds.auto.h:1347
 msgid "go down to nearest line with less indent than character"
-msgstr "Descend à la ligne la plus proche ayant moins d'indentation que de caractère"
+msgstr "Descend à la ligne la plus proche ayant moins d'indentation que le caractère"
 
 #. xgettext: This is the description of the DESCCHAR command.
 #: Programs/cmds.auto.h:1355
@@ -1557,7 +1557,7 @@ msgstr "Décrire le caractère"
 #. xgettext: This is the description of the SETLEFT command.
 #: Programs/cmds.auto.h:1363
 msgid "place left end of braille window at character"
-msgstr "met le coin gauche de la fenêtre braille sur le caractère"
+msgstr "met le bord gauche de la fenêtre braille sur le caractère"
 
 #. xgettext: This is the description of the SETMARK command.
 #: Programs/cmds.auto.h:1371
@@ -1592,7 +1592,7 @@ msgstr "Copie les caractères dans le presse-papier"
 #. xgettext: This is the description of the CLIP_APPEND command.
 #: Programs/cmds.auto.h:1426
 msgid "append characters to clipboard"
-msgstr "envoie des caractères dans le presse-papier"
+msgstr "Ajoute des caractères au presse-papier"
 
 #. xgettext: This is the description of the PASTE_HISTORY command.
 #: Programs/cmds.auto.h:1434
@@ -1657,7 +1657,7 @@ msgstr ""
 #. xgettext: This is the description of the SELECTVT command.
 #: Programs/cmds.auto.h:1534
 msgid "bind to specific virtual terminal"
-msgstr "Envoie dans un terminal virtuel particulier"
+msgstr "Se lie à un terminal virtuel particulier"
 
 #. xgettext: This is the description of the ALERT command.
 #: Programs/cmds.auto.h:1542
@@ -1667,7 +1667,7 @@ msgstr "Émettre une alerte"
 #. xgettext: This is the description of the PASSCHAR command.
 #: Programs/cmds.auto.h:1551
 msgid "type unicode character"
-msgstr "Caractère de type unicode"
+msgstr "Saisit un caractère Unicode"
 
 #. xgettext: This is the description of the PASSDOTS command.
 #: Programs/cmds.auto.h:1560
@@ -1687,7 +1687,7 @@ msgstr "Scancode de clavier XT (set 1)"
 #. xgettext: This is the description of the PASSPS2 command.
 #: Programs/cmds.auto.h:1584
 msgid "PS/2 (set 3) keyboard scan code"
-msgstr "Scancode de clavier PS/2 (réglé à 3)"
+msgstr "Scancode de clavier PS/2 (set 3)"
 
 #. xgettext: This is the description of the CONTEXT command.
 #: Programs/cmds.auto.h:1592
@@ -1787,7 +1787,7 @@ msgstr "touche fin"
 #. xgettext: This is the description of the KEY_INSERT command.
 #: Programs/cmds.auto.h:1744
 msgid "insert key"
-msgstr "touche Insère"
+msgstr "Touche Inser"
 
 #. xgettext: This is the description of the KEY_DELETE command.
 #: Programs/cmds.auto.h:1752
@@ -1817,7 +1817,7 @@ msgstr "qualité du contenu de l'écran inconnue"
 
 #: Programs/config.c:407
 msgid "Log the versions of the core, API, and built-in drivers, and then exit."
-msgstr "Enregistre les versions de l'application principale, de l'API, des pilotes intégrés puis quitter"
+msgstr "Enregistre les versions du cœur, de l'API et des pilotes intégrés puis quitter"
 
 #: Programs/config.c:413
 msgid "Recognize environment variables."
@@ -1928,11 +1928,11 @@ msgstr "Nom ou chemin vers le fichier des préférences par défaut."
 
 #: Programs/config.c:607
 msgid "Explicit preference settings."
-msgstr "Paramètres explicites d'une préférence."
+msgstr "Réglages explicites des préférences."
 
 #: Programs/config.c:616
 msgid "Disable the application programming interface."
-msgstr "Désactiver l'interface de programmation de l'application (API)."
+msgstr "Désactiver l'interface de programmation d'applications (API)."
 
 #: Programs/config.c:625
 msgid "Parameters for the application programming interface."
@@ -1961,11 +1961,11 @@ msgstr "Enregistre sur l'erreur standard plutôt que sur le journal du système.
 
 #: Programs/config.c:662
 msgid "Remain a foreground process."
-msgstr "Rappelle un processus en tâche de fond."
+msgstr "Reste un processus au premier plan."
 
 #: Programs/config.c:669
 msgid "Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc)."
-msgstr "Ne pas passer à un utilisateur non privilégié ou renoncer à tous les privilèges (appartenance à des groupes, capacités, etc.)."
+msgstr "Ne pas passer à un utilisateur non privilégié et ne renoncer à aucun privilège (appartenance à des groupes, capacités, etc.)."
 
 #: Programs/config.c:678
 msgid "Parameters for the privilege establishment stage."
@@ -1985,7 +1985,7 @@ msgstr "Texte"
 
 #: Programs/config.c:693
 msgid "The text to be shown when the braille driver starts and to be spoken when the speech driver starts."
-msgstr "Texte à afficher au démarrage du pilote braille ou à dire quand le pilote de synthèse vocal se lance."
+msgstr "Texte à afficher au démarrage du pilote braille et à énoncer au démarrage du pilote de synthèse vocal."
 
 #: Programs/config.c:700
 msgid "The text to be shown when the braille driver stops."
@@ -2034,7 +2034,7 @@ msgstr "Chemin du fichier d'identifiants de processus."
 #: Programs/config.c:801
 #, c-format
 msgid "Stop an existing instance of %s, and then exit."
-msgstr "Arrêter une session de %s en cours et quitter."
+msgstr "Arrêter une instance de %s en cours et quitter."
 
 #: Programs/config.c:808
 #, c-format
@@ -2060,11 +2060,11 @@ msgstr "Niveau ou catégorie de journalisation inconnu"
 
 #: Programs/config.c:1314
 msgid "Key Help"
-msgstr "Touche Aide"
+msgstr "Aide des touches"
 
 #: Programs/config.c:1316
 msgid "cannot open key help"
-msgstr "Ne peut pas ouvrir l'aide de la touche"
+msgstr "Ne peut pas ouvrir l'aide des touches"
 
 #: Programs/config.c:1325
 msgid "no key bindings"
@@ -2118,7 +2118,7 @@ msgstr "le pilote de la synthèse vocale redémarre"
 #: Programs/config.c:2564
 #, c-format
 msgid "reinitializing speech driver"
-msgstr "Réinitialisation de la synthèse vocale"
+msgstr "Réinitialisation du pilote de synthèse vocale"
 
 #: Programs/config.c:2643
 msgid "screen driver not loadable"
@@ -2481,7 +2481,7 @@ msgstr "Variante de Braille"
 
 #: Programs/menu_prefs.c:727
 msgid "Expand Current Word"
-msgstr "Extension du mot actuel"
+msgstr "Développement du mot actuel"
 
 #: Programs/menu_prefs.c:734
 msgid "No Capitalization"
@@ -2509,7 +2509,7 @@ msgstr "6 points"
 
 #: Programs/menu_prefs.c:750
 msgid "Computer Braille Cell Type"
-msgstr "Cellule de type Braille Informatique"
+msgstr "Type de cellule du braille informatique"
 
 #: Programs/menu_prefs.c:759 Programs/menu_prefs.c:1035
 msgid "Minimum"
@@ -2533,7 +2533,7 @@ msgstr "Maximum"
 
 #: Programs/menu_prefs.c:766
 msgid "Braille Firmness"
-msgstr "Rugosité du braille"
+msgstr "Fermeté du braille"
 
 #: Programs/menu_prefs.c:774
 msgid "Text Indicators"
@@ -2593,7 +2593,7 @@ msgstr "Options de navigation"
 
 #: Programs/menu_prefs.c:862
 msgid "Word Wrap"
-msgstr "Césure par mot"
+msgstr "Retour à la ligne par mot"
 
 #: Programs/menu_prefs.c:867
 msgid "Skip Identical Lines"
@@ -2663,7 +2663,7 @@ msgstr "2 secondes"
 
 #: Programs/menu_prefs.c:919
 msgid "Cursor Tracking Delay"
-msgstr "Durée de la poursuite du curseur"
+msgstr "Délai avant la poursuite du curseur"
 
 #: Programs/menu_prefs.c:924
 msgid "Track Screen Scroll"
@@ -3081,11 +3081,11 @@ msgstr "Nombre d'états"
 
 #: Programs/menu_prefs.c:1430
 msgid "Status Side"
-msgstr "Limite de l'état"
+msgstr "Côté de l'état"
 
 #: Programs/menu_prefs.c:1431
 msgid "Text Side"
-msgstr "Limite du texte"
+msgstr "Côté du texte"
 
 #: Programs/menu_prefs.c:1434
 msgid "Status Separator"
@@ -3129,7 +3129,7 @@ msgstr "Redémarre le pilote de l'écran"
 
 #: Programs/menu_prefs.c:1513
 msgid "Build Information"
-msgstr "Informations de construction"
+msgstr "Informations de compilation"
 
 #: Programs/menu_prefs.c:1517
 msgid "Package Version"
@@ -3325,7 +3325,7 @@ msgstr "Erreur"
 
 #: Programs/menu_prefs.c:1823
 msgid "Warning"
-msgstr "Attention"
+msgstr "Avertissement"
 
 #: Programs/menu_prefs.c:1824
 msgid "Notice"
@@ -3345,7 +3345,7 @@ msgstr "Niveau de journalisation du système"
 
 #: Programs/menu_prefs.c:1835
 msgid "Standard Error Log Level"
-msgstr "Niveau standard de journalisation des erreurs"
+msgstr "Niveau de journalisation sur la sortie d'erreur standard"
 
 #: Programs/menu_prefs.c:1840
 msgid "Category Log Level"
@@ -3407,19 +3407,19 @@ msgstr "Anche"
 #. xgettext: This is the name of MIDI musical instrument group #10.
 #: Programs/midi.c:52
 msgid "Pipe"
-msgstr "Tuyau"
+msgstr "Flûtes"
 
 #. xgettext: This is the name of MIDI musical instrument group #11.
 #. xgettext: (synth is a common short form for synthesizer)
 #: Programs/midi.c:56
 msgid "Synth Lead"
-msgstr "Position synthé"
+msgstr "Synthé solo"
 
 #. xgettext: This is the name of MIDI musical instrument group #12.
 #. xgettext: (synth is a common short form for synthesizer)
 #: Programs/midi.c:60
 msgid "Synth Pad"
-msgstr "Bloc synthé"
+msgstr "Nappe de synthé"
 
 #. xgettext: This is the name of MIDI musical instrument group #13.
 #. xgettext: (synth is a common short form for synthesizer)
@@ -3529,7 +3529,7 @@ msgstr "Dulcimer"
 #. xgettext: This is the name of MIDI musical instrument #17 (in the Organ group).
 #: Programs/midi.c:130
 msgid "Drawbar Organ"
-msgstr "Orgue drawbar"
+msgstr "Orgue à tirettes"
 
 #. xgettext: This is the name of MIDI musical instrument #18 (in the Organ group).
 #: Programs/midi.c:133
@@ -3585,7 +3585,7 @@ msgstr "Guitare électrique (jazz)"
 #. xgettext: This is the name of MIDI musical instrument #28 (in the Guitar group).
 #: Programs/midi.c:164
 msgid "Electric Guitar (clean)"
-msgstr "Guitare électrique (propre)"
+msgstr "Guitare électrique (son clair)"
 
 #. xgettext: This is the name of MIDI musical instrument #29 (in the Guitar group).
 #: Programs/midi.c:167
@@ -3595,7 +3595,7 @@ msgstr "Guitare électrique (étouffée)"
 #. xgettext: This is the name of MIDI musical instrument #30 (in the Guitar group).
 #: Programs/midi.c:170
 msgid "Overdriven Guitar"
-msgstr "Guitare overdriven"
+msgstr "Guitare saturée"
 
 #. xgettext: This is the name of MIDI musical instrument #31 (in the Guitar group).
 #: Programs/midi.c:173
@@ -3626,7 +3626,7 @@ msgstr "Basse électrique (plectre)"
 #. xgettext: This is the name of MIDI musical instrument #36 (in the Bass group).
 #: Programs/midi.c:189
 msgid "Fretless Bass"
-msgstr "Basse glissée"
+msgstr "Basse sans frettes"
 
 #. xgettext: This is the name of MIDI musical instrument #37 (in the Bass group).
 #: Programs/midi.c:192
@@ -3713,12 +3713,12 @@ msgstr "Cordes synthétiques 2"
 #. xgettext: This is the name of MIDI musical instrument #53 (in the Ensemble group).
 #: Programs/midi.c:242
 msgid "Choir Aahs"
-msgstr "Haha de choeur"
+msgstr "Chœur « aah »"
 
 #. xgettext: This is the name of MIDI musical instrument #54 (in the Ensemble group).
 #: Programs/midi.c:245
 msgid "Voice Oohs"
-msgstr "Hoos vocaux"
+msgstr "Voix « ooh »"
 
 #. xgettext: This is the name of MIDI musical instrument #55 (in the Ensemble group).
 #: Programs/midi.c:248
@@ -3728,7 +3728,7 @@ msgstr "Voix synthétique"
 #. xgettext: This is the name of MIDI musical instrument #56 (in the Ensemble group).
 #: Programs/midi.c:251
 msgid "Orchestra Hit"
-msgstr "Orchestre de percussions"
+msgstr "Coup d'orchestre"
 
 #. Brass
 #. xgettext: This is the name of MIDI musical instrument #57 (in the Brass group).
@@ -3754,7 +3754,7 @@ msgstr "Trompette bouchée"
 #. xgettext: This is the name of MIDI musical instrument #61 (in the Brass group).
 #: Programs/midi.c:267
 msgid "French Horn"
-msgstr "Corne française"
+msgstr "Cor d'harmonie"
 
 #. xgettext: This is the name of MIDI musical instrument #62 (in the Brass group).
 #: Programs/midi.c:270
@@ -3800,7 +3800,7 @@ msgstr "Hautbois"
 #. xgettext: This is the name of MIDI musical instrument #70 (in the Reed group).
 #: Programs/midi.c:295
 msgid "English Horn"
-msgstr "Corne anglaise"
+msgstr "Cor anglais"
 
 #. xgettext: This is the name of MIDI musical instrument #71 (in the Reed group).
 #: Programs/midi.c:298
@@ -3826,7 +3826,7 @@ msgstr "flûte"
 #. xgettext: This is the name of MIDI musical instrument #75 (in the Pipe group).
 #: Programs/midi.c:311
 msgid "Recorder"
-msgstr "Magnétophone"
+msgstr "Flûte à bec"
 
 #. xgettext: This is the name of MIDI musical instrument #76 (in the Pipe group).
 #: Programs/midi.c:314
@@ -3836,7 +3836,7 @@ msgstr "Flûte de pan"
 #. xgettext: This is the name of MIDI musical instrument #77 (in the Pipe group).
 #: Programs/midi.c:317
 msgid "Blown Bottle"
-msgstr "Bouteille cassée"
+msgstr "Bouteille soufflée"
 
 #. xgettext: This is the name of MIDI musical instrument #78 (in the Pipe group).
 #: Programs/midi.c:320
@@ -3857,83 +3857,83 @@ msgstr "Ocarina"
 #. xgettext: This is the name of MIDI musical instrument #81 (in the Synth Lead group).
 #: Programs/midi.c:330
 msgid "Lead 1 (square)"
-msgstr "Position 1 (carré)"
+msgstr "Solo 1 (carré)"
 
 #. xgettext: This is the name of MIDI musical instrument #82 (in the Synth Lead group).
 #: Programs/midi.c:333
 msgid "Lead 2 (sawtooth)"
-msgstr "Position 2 (en dents de scie)"
+msgstr "Solo 2 (dents de scie)"
 
 #. xgettext: This is the name of MIDI musical instrument #83 (in the Synth Lead group).
 #: Programs/midi.c:336
 msgid "Lead 3 (calliope)"
-msgstr "Position 3 (Calliope)"
+msgstr "Solo 3 (calliope)"
 
 #. xgettext: This is the name of MIDI musical instrument #84 (in the Synth Lead group).
 #: Programs/midi.c:339
 msgid "Lead 4 (chiff)"
-msgstr "Position 4 (chiff)"
+msgstr "Solo 4 (chiff)"
 
 #. xgettext: This is the name of MIDI musical instrument #85 (in the Synth Lead group).
 #: Programs/midi.c:342
 msgid "Lead 5 (charang)"
-msgstr "Position 5 (charang)"
+msgstr "Solo 5 (charang)"
 
 #. xgettext: This is the name of MIDI musical instrument #86 (in the Synth Lead group).
 #: Programs/midi.c:345
 msgid "Lead 6 (voice)"
-msgstr "Position 6 (voix)"
+msgstr "Solo 6 (voix)"
 
 #. xgettext: This is the name of MIDI musical instrument #87 (in the Synth Lead group).
 #: Programs/midi.c:348
 msgid "Lead 7 (fifths)"
-msgstr "Position 7 (cinquièmes)"
+msgstr "Solo 7 (quintes)"
 
 #. xgettext: This is the name of MIDI musical instrument #88 (in the Synth Lead group).
 #: Programs/midi.c:351
 msgid "Lead 8 (bass + lead)"
-msgstr "Position 8 (basse + position)"
+msgstr "Solo 8 (basse + solo)"
 
 #. Synth Pad
 #. xgettext: This is the name of MIDI musical instrument #89 (in the Synth Pad group).
 #: Programs/midi.c:355
 msgid "Pad 1 (new age)"
-msgstr "bloc 1 (new age)"
+msgstr "Nappe 1 (new age)"
 
 #. xgettext: This is the name of MIDI musical instrument #90 (in the Synth Pad group).
 #: Programs/midi.c:358
 msgid "Pad 2 (warm)"
-msgstr "bloc 2 (chaud)"
+msgstr "Nappe 2 (chaude)"
 
 #. xgettext: This is the name of MIDI musical instrument #91 (in the Synth Pad group).
 #: Programs/midi.c:361
 msgid "Pad 3 (polysynth)"
-msgstr "Bloc 3 (polysynthé)"
+msgstr "Nappe 3 (polysynthé)"
 
 #. xgettext: This is the name of MIDI musical instrument #92 (in the Synth Pad group).
 #: Programs/midi.c:364
 msgid "Pad 4 (choir)"
-msgstr "Bloc 4 (choeur)"
+msgstr "Nappe 4 (chœur)"
 
 #. xgettext: This is the name of MIDI musical instrument #93 (in the Synth Pad group).
 #: Programs/midi.c:367
 msgid "Pad 5 (bowed)"
-msgstr "Bloc 5 (huées)"
+msgstr "Nappe 5 (archet)"
 
 #. xgettext: This is the name of MIDI musical instrument #94 (in the Synth Pad group).
 #: Programs/midi.c:370
 msgid "Pad 6 (metallic)"
-msgstr "Bloc 6 (métallique)"
+msgstr "Nappe 6 (métallique)"
 
 #. xgettext: This is the name of MIDI musical instrument #95 (in the Synth Pad group).
 #: Programs/midi.c:373
 msgid "Pad 7 (halo)"
-msgstr "Bloc 7 (acclamations)"
+msgstr "Nappe 7 (halo)"
 
 #. xgettext: This is the name of MIDI musical instrument #96 (in the Synth Pad group).
 #: Programs/midi.c:376
 msgid "Pad 8 (sweep)"
-msgstr "Bloc 8 (coup de balai)"
+msgstr "Nappe 8 (balayage)"
 
 #. Synth FM
 #. xgettext: This is the name of MIDI musical instrument #97 (in the Synth FM group).
@@ -3981,7 +3981,7 @@ msgstr "FX 8 (SF)"
 #. xgettext: This is the name of MIDI musical instrument #105 (in the Ethnic group).
 #: Programs/midi.c:406
 msgid "Sitar"
-msgstr "Cithare"
+msgstr "Sitar"
 
 #. xgettext: This is the name of MIDI musical instrument #106 (in the Ethnic group).
 #: Programs/midi.c:409
@@ -4011,7 +4011,7 @@ msgstr "Cornemuse"
 #. xgettext: This is the name of MIDI musical instrument #111 (in the Ethnic group).
 #: Programs/midi.c:424
 msgid "Fiddle"
-msgstr "violon"
+msgstr "Violon traditionnel"
 
 #. xgettext: This is the name of MIDI musical instrument #112 (in the Ethnic group).
 #: Programs/midi.c:427
@@ -4032,7 +4032,7 @@ msgstr "Agogo"
 #. xgettext: This is the name of MIDI musical instrument #115 (in the Percussive group).
 #: Programs/midi.c:437
 msgid "Steel Drums"
-msgstr "Batterie métal"
+msgstr "Steeldrum"
 
 #. xgettext: This is the name of MIDI musical instrument #116 (in the Percussive group).
 #: Programs/midi.c:440
@@ -4057,7 +4057,7 @@ msgstr "Batterie synthétique"
 #. xgettext: This is the name of MIDI musical instrument #120 (in the Percussive group).
 #: Programs/midi.c:452
 msgid "Reverse Cymbal"
-msgstr "Cymbales renversées"
+msgstr "Cymbale inversée"
 
 #. Sound Effects
 #. xgettext: This is the name of MIDI musical instrument #121 (in the Sound Effects group).
@@ -4286,7 +4286,7 @@ msgstr "écran"
 
 #: Programs/xbrlapi.c:112
 msgid "X display to connect to"
-msgstr "Afficheur X auquel se connecter"
+msgstr "Affichage X auquel se connecter"
 
 #: Programs/xbrlapi.c:118
 msgid "Do not write any text to the braille device"
@@ -4298,7 +4298,7 @@ msgstr "Écrire sortie de débogage sur stdout"
 
 #: Programs/xbrlapi.c:130
 msgid "Remain a foreground process"
-msgstr "Rester un processus interactif"
+msgstr "Rester un processus au premier plan"
 
 #: Programs/xbrlapi.c:137
 msgid "file to write the name of the focused command to"
@@ -4355,7 +4355,7 @@ msgstr ""
 #: Programs/xbrlapi.c:619
 #, c-format
 msgid "xbrlapi: X Error %d, %s on display %s\n"
-msgstr "xbrlapi: Erreur X %d, %s sur l'écran %s\n"
+msgstr "xbrlapi: Erreur X %d, %s sur l'affichage %s\n"
 
 #: Programs/xbrlapi.c:620
 #, c-format
