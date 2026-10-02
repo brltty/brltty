@@ -1477,14 +1477,16 @@ Autospeak
 .. _preference-speech-rate:
 
 Rate
-  Adjust the speech rate (``0`` slowest, ``20`` fastest).
+  Adjust the speech rate, from ``-10`` (slowest) to ``10`` (fastest);
+  ``0`` is the default.
   Driver-dependent; also changeable via the
   :ref:`SAY_SLOWER/SAY_FASTER <command-SAY_SLOWER-SAY_FASTER>` commands.
 
 .. _preference-speech-volume:
 
 Volume
-  Adjust the speech volume (``0`` softest, ``20`` loudest).
+  Adjust the speech volume, from ``0%`` (softest) to ``200%``;
+  ``100%`` is the default.
   Driver-dependent; also changeable via the
   :ref:`SAY_SOFTER/SAY_LOUDER <command-SAY_SOFTER-SAY_LOUDER>` commands.
 
