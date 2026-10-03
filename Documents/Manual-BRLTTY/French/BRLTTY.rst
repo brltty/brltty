@@ -2172,16 +2172,6 @@ BRLTTY prend en charge les synthétiseurs vocaux suivants :
    :header-rows: 1
    :file: ../../speech-driver.csv
 
-.. _drivers:
-
-Codes d'identification des pilotes
-==================================
-
-
-.. csv-table::
-   :header-rows: 1
-   :file: ../../driver-code.csv
-
 Pilotes d'écran pris en charge
 ==============================
 
@@ -2199,6 +2189,16 @@ systèmes dépourvus de pilote natif — ``screen`` doit être patché
 (voir le sous-répertoire ``Patches``) et en cours d'exécution. Le
 pilote ``tx``, utilisé par
 :ref:`brltty-tmux <utility-brltty-tmux>`, surveille une session tmux.
+
+.. _drivers:
+
+Codes d'identification des pilotes
+==================================
+
+
+.. csv-table::
+   :header-rows: 1
+   :file: ../../driver-code.csv
 
 Syntaxe des opérandes
 =====================

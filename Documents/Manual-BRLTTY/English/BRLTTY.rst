@@ -2053,17 +2053,6 @@ BRLTTY supports the following speech synthesizers:
    :file: ../../speech-driver.csv
 
 
-.. _drivers:
-
-Driver Identification Codes
-===========================
-
-
-.. csv-table::
-   :header-rows: 1
-   :file: ../../driver-code.csv
-
-
 .. _screen:
 
 Supported Screen Drivers
@@ -2082,6 +2071,17 @@ sessions and is the default fallback on systems without a native
 driver — ``screen`` must be patched (see the ``Patches``
 subdirectory) and running. The ``tx`` driver, used by
 :ref:`brltty-tmux <utility-brltty-tmux>`, watches a tmux session.
+
+
+.. _drivers:
+
+Driver Identification Codes
+===========================
+
+
+.. csv-table::
+   :header-rows: 1
+   :file: ../../driver-code.csv
 
 
 Operand Syntax
