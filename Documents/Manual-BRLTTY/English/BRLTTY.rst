@@ -1802,6 +1802,7 @@ Text Tables
 -----------
 
 Files named ``*.ttb`` are text tables.
+They can usually be found in the ``/etc/brltty/Text/`` directory.
 They tell BRLTTY how to translate each character on the screen
 into its corresponding 8-dot computer-braille dot pattern.
 Because the mapping between characters and dots
@@ -1835,6 +1836,7 @@ Contraction Tables
 ------------------
 
 Files named ``*.ctb`` are contraction tables.
+They can usually be found in the ``/etc/brltty/Contraction/`` directory.
 Where a text table maps one character to one braille cell,
 a contraction table encodes the shorthand conventions
 used by literary braille:
@@ -1877,6 +1879,7 @@ Attributes Tables
 -----------------
 
 Files named ``*.atb`` are attributes tables.
+They can usually be found in the ``/etc/brltty/Attributes/`` directory.
 Instead of showing the text on the screen,
 they let you display its *visual* attributes —
 foreground and background colour, intensity, blink —

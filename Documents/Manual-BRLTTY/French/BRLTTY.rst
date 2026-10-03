@@ -1928,7 +1928,8 @@ correspondante.
 Tables de caractères
 --------------------
 
-Les fichiers nommés ``*.ttb`` sont des tables de caractères. Elles
+Les fichiers nommés ``*.ttb`` sont des tables de caractères. Elles se
+trouvent habituellement dans le répertoire ``/etc/brltty/Text/``. Elles
 indiquent à BRLTTY comment traduire chaque caractère affiché à
 l'écran en sa configuration braille informatique correspondante à
 huit points. La correspondance entre caractères et points varie d'une
@@ -1959,7 +1960,9 @@ tables de caractères et la référence des directives.
 Tables de braille abrégé
 ------------------------
 
-Les fichiers nommés ``*.ctb`` sont des tables de braille abrégé. Là
+Les fichiers nommés ``*.ctb`` sont des tables de braille abrégé. Elles
+se trouvent habituellement dans le répertoire
+``/etc/brltty/Contraction/``. Là
 où une table de caractères associe un caractère à une cellule braille, une
 table de braille abrégé encode les conventions d'abréviation propres
 au braille littéraire : séquences de lettres courantes, mots entiers
@@ -2002,7 +2005,9 @@ mécanique des classes de caractères.
 Tables d'attributs
 ------------------
 
-Les fichiers nommés ``*.atb`` sont des tables d'attributs. Au lieu
+Les fichiers nommés ``*.atb`` sont des tables d'attributs. Elles se
+trouvent habituellement dans le répertoire ``/etc/brltty/Attributes/``.
+Au lieu
 d'afficher le texte présent à l'écran, elles permettent d'en afficher
 les attributs *visuels* — couleur de premier plan et d'arrière-plan,
 intensité, clignotement — sous forme de configurations de points
