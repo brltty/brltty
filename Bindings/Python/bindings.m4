@@ -111,6 +111,44 @@ test -n "${CYTHON}" || {
    PYTHON_OK=false
 }
 
+BRLTTY_ARG_WITH(
+   [python-limited-api], [VERSION],
+   [minimum Python version of a version-independent (stable ABI) module],
+   [PYTHON_LIMITED_API], ["no"]
+)
+
+case "${PYTHON_LIMITED_API}"
+in
+   no)
+      PYTHON_LIMITED_API=""
+      ;;
+
+   yes)
+      PYTHON_LIMITED_API="3.12"
+      ;;
+
+   [3.[0-9]|3.[0-9][0-9]])
+      ;;
+
+   *)
+      AC_MSG_ERROR([invalid Python limited API version: ${PYTHON_LIMITED_API}])
+      ;;
+esac
+
+test -n "${PYTHON_LIMITED_API}" && test -n "${CYTHON}" && {
+   [cython_version=`"${CYTHON}" --version 2>&1 | sed -n -e 's/^Cython version \([0-9]*\.[0-9]*\).*$/\1/p'`]
+   [cython_major=`echo "${cython_version}" | sed -e 's/\..*//'`]
+   [cython_minor=`echo "${cython_version}" | sed -e 's/.*\.//'`]
+
+   test "${cython_major:-0}" -gt 3 || {
+      test "${cython_major:-0}" -eq 3 && test "${cython_minor:-0}" -ge 1
+   } || {
+      AC_MSG_ERROR([Cython 3.1 or later is needed for the Python limited API (found ${cython_version:-unknown version})])
+   }
+}
+
+AC_SUBST([PYTHON_LIMITED_API])
+
 if test "${GCC}" = "yes"
 then
    CYTHON_CFLAGS="-Wno-parentheses -Wno-unused -fno-strict-aliasing -U_POSIX_C_SOURCE -U_XOPEN_SOURCE"

@@ -18,9 +18,36 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+import re
+import sys
+
 from setuptools import setup, Extension
+from setuptools.command.build_ext import build_ext
+
+limitedApiVersion = "@PYTHON_LIMITED_API@"
+
+class BuildExtension(build_ext):
+    def get_libraries(self, ext):
+        libraries = super().get_libraries(ext)
+
+        if ext.py_limited_api and (sys.platform == "win32"):
+            # link against python3.dll instead of python3XX.dll
+            libraries = [
+                "python3" if re.fullmatch(r"python3\d+", library) else library
+                for library in libraries
+            ]
+
+        return libraries
 
 if __name__ == "__main__":
+    defineMacros = []
+    wheelOptions = {}
+
+    if limitedApiVersion:
+        (major, minor) = (int(number) for number in limitedApiVersion.split("."))
+        defineMacros.append(("Py_LIMITED_API", "0x%02X%02X0000" % (major, minor)))
+        wheelOptions["py_limited_api"] = "cp%d%d" % (major, minor)
+
     brlapi = Extension("brlapi",
         language = "c",
 
@@ -47,8 +74,8 @@ if __name__ == "__main__":
             "pthread"
         ],
 
-        define_macros = [
-        ],
+        define_macros = defineMacros,
+        py_limited_api = bool(limitedApiVersion),
 
         extra_compile_args = "@CYTHON_CFLAGS@".split()
     )
@@ -69,5 +96,7 @@ if __name__ == "__main__":
         license = "LGPL 2.1",
         url = "@PACKAGE_URL@",
 
+        cmdclass = {"build_ext": BuildExtension},
+        options = {"bdist_wheel": wheelOptions},
         ext_modules = [brlapi]
     )
