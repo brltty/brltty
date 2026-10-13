@@ -59,7 +59,7 @@ extern void ptyDeleteLines (unsigned int count);
 
 extern void ptyInsertCharacters (unsigned int count);
 extern void ptyDeleteCharacters (unsigned int count);
-extern void ptyAddCharacter (unsigned char character);
+extern void ptyAddCharacter (wchar_t character);
 
 extern void ptySetCursorVisibility (unsigned int visibility);
 extern void ptySetAttributes (attr_t attributes);
@@ -70,7 +70,12 @@ extern void ptySetBackgroundColor (int color);
 
 extern void ptyClearToEndOfLine (void);
 extern void ptyClearToBeginningOfLine (void);
+extern void ptyClearLine (void);
 extern void ptyClearToEndOfDisplay (void);
+extern void ptyClearToBeginningOfDisplay (void);
+extern void ptyClearDisplay (void);
+extern void ptyEraseCharacters (unsigned int count);
+extern void ptyGetCursorPosition (unsigned int *row, unsigned int *column);
 
 extern void ptySetScreenLogLevel (unsigned char level);
 

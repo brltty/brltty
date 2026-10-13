@@ -50,6 +50,20 @@ extern int destroyScreenSegment (int identifier);
 extern int createMessageQueue (int *queue, key_t key);
 extern int destroyMessageQueue (int queue);
 
+/* SysV IPC objects (message queues, shared-memory segments) have no "die with
+ * owning process" semantics and macOS's system-wide limits on them are tiny
+ * (tens of messages/queues total). A terminal emulator killed uncleanly (a
+ * crash, a force-quit, SIGKILL) leaks its queue and segment, and enough leaks
+ * exhaust the whole system - after which unrelated, perfectly healthy
+ * processes start blocking forever on IPC calls that have nothing to do with
+ * the leaked ones. Since macOS has no portable way to enumerate all SysV IDs
+ * on the system, each emulator instead registers what it created in a small
+ * file-based registry and reaps entries left behind by dead PIDs at the start
+ * of every new instance. */
+extern void reapStaleTerminalResources (void);
+extern void registerTerminalResources (int screenSegmentIdentifier, int messageQueueIdentifier);
+extern void unregisterTerminalResources (void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
