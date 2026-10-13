@@ -408,7 +408,7 @@ getBaseCharacter (wchar_t character) {
 wchar_t
 getTransliteratedCharacter (wchar_t character) {
 #ifdef HAVE_ICONV_H
-  static iconv_t handle = NULL;
+  static iconv_t handle = (iconv_t)-1;
   if (!handle) handle = iconv_open("ASCII//TRANSLIT", "WCHAR_T");
 
   if (handle != (iconv_t)-1) {
