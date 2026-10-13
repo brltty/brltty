@@ -151,6 +151,74 @@ convertUtf8ToWchar (const char **utf8, size_t *utfs) {
   return codepoint;
 }
 
+Utf8DecodeResult
+putUtf8StreamByte (
+  Utf8StreamDecoder *decoder, unsigned char byte,
+  wchar_t *character, int *reprocess
+) {
+  *reprocess = 0;
+
+  if (decoder->pending > 0) {
+    if ((byte & 0XC0) == 0X80) {
+      decoder->codepoint = (decoder->codepoint << 6) | (byte & 0X3F);
+
+      if (--decoder->pending > 0) return UTF8_DECODE_PENDING;
+
+      uint32_t codepoint = decoder->codepoint;
+      uint32_t minimum = decoder->minimum;
+      decoder->codepoint = 0;
+      decoder->minimum = 0;
+
+      if (codepoint < minimum) goto invalid; /* overlong encoding */
+      if (codepoint > 0X10FFFF) goto invalid; /* beyond Unicode */
+      if ((codepoint >= 0XD800) && (codepoint <= 0XDFFF)) goto invalid; /* surrogate */
+      if (codepoint > WCHAR_MAX) codepoint = UNICODE_REPLACEMENT_CHARACTER;
+
+      *character = codepoint;
+      return UTF8_DECODE_DONE;
+    }
+
+    /* A non-continuation byte arrived mid-sequence: the partial character is
+     * truncated. Report it as invalid and let the caller reprocess this byte
+     * as the potential start of a new character.
+     */
+    decoder->codepoint = 0;
+    decoder->minimum = 0;
+    decoder->pending = 0;
+    *reprocess = 1;
+    goto invalid;
+  }
+
+  if (byte < 0X80) { /* 0xxxxxxx - ASCII */
+    *character = byte;
+    return UTF8_DECODE_DONE;
+  }
+
+  if (byte < 0XC0) goto invalid; /* 10xxxxxx - stray continuation byte */
+
+  if (byte < 0XE0) { /* 110xxxxx - 2 bytes */
+    decoder->codepoint = byte & 0X1F;
+    decoder->pending = 1;
+    decoder->minimum = 0X80;
+  } else if (byte < 0XF0) { /* 1110xxxx - 3 bytes */
+    decoder->codepoint = byte & 0X0F;
+    decoder->pending = 2;
+    decoder->minimum = 0X800;
+  } else if (byte < 0XF8) { /* 11110xxx - 4 bytes */
+    decoder->codepoint = byte & 0X07;
+    decoder->pending = 3;
+    decoder->minimum = 0X10000;
+  } else { /* 11111xxx - invalid lead byte */
+    goto invalid;
+  }
+
+  return UTF8_DECODE_PENDING;
+
+invalid:
+  *character = UNICODE_REPLACEMENT_CHARACTER;
+  return UTF8_DECODE_INVALID;
+}
+
 void
 convertUtf8ToWchars (const char **utf8, wchar_t **characters, size_t count) {
   while (**utf8 && (count > 1)) {
