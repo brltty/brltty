@@ -1751,9 +1751,15 @@ typedef struct {
 } DriverActivationData;
 
 static int
+wantAutodetection (const char *const *requestedDrivers) {
+  return requestedDrivers[0] && !requestedDrivers[1] &&
+         (strcmp(requestedDrivers[0], optionOperand_autodetect) == 0);
+}
+
+static int
 activateDriver (const DriverActivationData *data, int verify) {
   int oneDriver = data->requestedDrivers[0] && !data->requestedDrivers[1];
-  int autodetect = oneDriver && (strcmp(data->requestedDrivers[0], optionOperand_autodetect) == 0);
+  int autodetect = wantAutodetection(data->requestedDrivers);
   const char *const defaultDrivers[] = {data->getDefaultDriver(), NULL};
   const char *const *driver;
 
@@ -1993,6 +1999,17 @@ activateBrailleDriver (int verify) {
   int oneDevice = brailleDevices[0] && !brailleDevices[1];
   const char *const *device = (const char *const *)brailleDevices;
 
+  /* activateDriver() below only ever consults autodetectableDrivers when
+   * the caller hasn't already pinned down one specific, non-"auto" driver
+   * name - see wantAutodetection(), which this reuses. When a driver has
+   * been pinned down (e.g. "braille-driver fs" in the config, or -b fs on
+   * the command line - the common case for a device already known to the
+   * user), computing autodetectableDrivers for a Bluetooth candidate is
+   * pure waste: bthGetDriverCodes() pays a real, bounded network-timeout
+   * cost (BLUETOOTH_DEVICE_NAME_OBTAIN_TIMEOUT) to look up a device name
+   * that would just be thrown away. */
+  int needAutodetection = wantAutodetection((const char *const *)brailleDrivers);
+
   if (!oneDevice) verify = 0;
 
   while (*device) {
@@ -2020,7 +2037,9 @@ activateBrailleDriver (int verify) {
           }
 
           case GIO_TYPE_BLUETOOTH: {
-            if (!(autodetectableDrivers = bthGetDriverCodes(dev, BLUETOOTH_DEVICE_NAME_OBTAIN_TIMEOUT))) {
+            if (!needAutodetection) {
+              autodetectableDrivers = autodetectableBrailleDrivers_Bluetooth;
+            } else if (!(autodetectableDrivers = bthGetDriverCodes(dev, BLUETOOTH_DEVICE_NAME_OBTAIN_TIMEOUT))) {
               autodetectableDrivers = autodetectableBrailleDrivers_Bluetooth;
             }
 
