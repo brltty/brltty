@@ -122,6 +122,7 @@ always arbeitgeber 356-12-12346-12-12456 shouldn't use the be-contraction
 always auftraggeber 2-16-2345-1245-12346-12-12456
 always dienstgeber 145-346-1345-23456-12346-12-12456
 always gastgeber 1245-1-23456-12346-12-12456
+before hilmnrsu always gäste 1245-345-23456-15
 always gesetzgeber 12346-2-15-12346-12-12456
 always herausgeber 125-12456-16-234-12346-12-12456
 always impulsgeber 24-134-1234-136-123-234-12346-12-12456
@@ -583,7 +584,9 @@ always health =
 before cost always heeres 125-15-15-1235-123456
 begword heimat 125-146-134-1-2345 shouldn't allow te-contraction and possibly overlaps with materi(e)
 always ehebel 15-125-15-12-13456
+always ehemmer 15-125-15-1346-12456 should use the eh-contraction
 always eherstell 15-125-12456-2-13456
+always ehilf = shouldn't use the eh-contraction
 always hetero 125-15-2345-12456-135 shoudln't use the te-contraction
 always hierarch 125-346-1235-356-1456 shouldn't use the hier- nor er-contraction
 before hilmnrsu always hilfe =
@@ -720,6 +723,7 @@ always laufzeit 123-16-124-1356-2345
 always laufzettel 123-16-124-1356-15-2345-2345-13456
 always knauf 13-1345-16-124
 always kreislauf 13-1235-146-234-123-16-124
+always wettlauf 2456-15-2345-2345-123-16-124
 always leiter 123-146-2345-12456 shouldn't use the te-contraction
 begmidword liberal 123-24-12-12456-25 shouldn't use the be-contraction
 endword liberal 123-24-12-12456-1-123 shouldn't use the be-contraction
@@ -908,6 +912,7 @@ always ortstein 26-2345-23456-1246
 always papagei 1234-1-1234-1-1245-146
 always paprika =
 sufword pastell 1234-1-23456-15-12345 shouldn't use the stell-contraction
+always ölpastell 246-123-1234-1-23456-15-12345
 always patienten 1234-1-2345-24-14-2345-14 shouldn't use the te-contraction
 before l always pauschal 1234-16-156-25
 always pegel 1234-15-1245-13456
@@ -1685,6 +1690,7 @@ always nukleinsäur 1345-136-13-123-15-35-234-34-1235
 always dateinam 145-1-2345-146-1345-1-134
 
 always el 13456
+always elehrer 15-123-2356-1235-12456
 begmidword elineal 15-123-35-15-25
 endword elineal 15-123-35-15-1-123
 always eleist 15-123-146-23456
@@ -1790,6 +1796,7 @@ before konsonant always bem 12-12356
 before konsonant always ben 12-14
 before konsonant always ber 12-12456
 always ober 135-12-12456 shouldn't use the be-contraction
+always fieber 124-346-12-12456
 always säuber 234-34-12-12456
 always schrauber 156-1235-16-12-12456
 always zauber 1356-16-12-12456
@@ -1912,12 +1919,24 @@ always holland 125-135-123-123-235-145 shouldn't use the ll-contraction
 always holländer 125-135-123-123-345-1345-145-12456 shouldn't use the ll-contraction
 always hollaender 125-135-123-123-345-1345-145-12456 shouldn't use the ll-contraction
 before e always llamp =
+always llehrer 123-123-2356-1235-12456
+always allehrer 25-123-2356-1235-12456
 always lleitung 123-123-146-2345-136
 always elleitung 13456-123-146-2345-136
 midendword lliefer 123-123-346-124-12456
 midendword lloch 123-123-135-1456
 midendword llöslich 123-123-246-234-456
 before t always edelleu 15-145-13456-123-126
+before e always öllach 246-123-123-56
+always öllack 246-123-123-1-46
+always öllager 246-123-123-1-1245-12456
+always öllämpchen 246-123-123-345-134-1234-1456-14
+before e always öllanz 246-123-123-235-1356
+always ölleck 246-123-123-15-46
+before t always öllich 246-123-456
+always öllobby =
+always ölluft =
+
 
 midendword mm 1346
 always ummantel 136-134-134-235-2345-13456
@@ -1960,11 +1979,20 @@ always neoreal 1345-15-135-1235-15-25
 always neorokoko =
 prfword neoroman 1345-15-135-1235-135-134-1-1345
 always neoroman 1345-15-135-1235-135-134-235
+
 before r always audio 16-145-24-135
 before r always bio =
+before r always büro =
+before r always echo 15-1456-135
+before r always euro 126-1235-135
+before r always elektro 13456-15-13-2345-1235-135
+before r always kino 13-35-135
+before r always makro =
+before r always mikro =
 before r always photo =
 before r always pseudo 1234-234-126-145-135
 before r always studio 23456-136-145-24-135
+before r always thermo 2345-125-12456-134-135
 before r always video =
 
 always schance 234-1456-235-6-14-15
@@ -2069,6 +2097,9 @@ prfword texperimentes 2345-15-6-1346-1234-12456-24-134-14-2345-123456
 prfword texperiments 2345-15-6-1346-1234-12456-24-134-14-2345-234
 prfword texplosion 2345-15-6-1346-1234-123-135-234-24-135-1345
 prfword texplosionen 2345-15-6-1346-1234-123-135-234-24-135-1345-14
+always altehr 25-2345-2356-1235 altehrwürdig
+always sportehr 234-1234-26-2345-2356-1235
+always stadtehr 23456-1-145-2345-2356-1235
 
 always un 256
 
@@ -2194,6 +2225,7 @@ endword ters 2345-12456-234
 always liter 123-24-2345-12456
 endword tern 2345-12456-1345
 endword tes 2345-123456
+always pilates 1234-24-123-1-2345-123456
 
 endword bel 12-13456 shouldn't use the be-contraction
 endword bele 12-13456-15 shouldn't use the be-contraction
@@ -2739,6 +2771,7 @@ always ausrauf 16-234-1235-16-124
 begword tauf 2345-16-124
 prfword taufe 2345-16-124-15
 prfword taufen 2345-16-124-14
+always trauf 2345-1235-16-124
 before t always auforma 16-124-26-134-1
 always aufrequenz 16-124-1235-15-6-12345-136-14-1356
 before f always ackerbau 1-46-12456-12-16
@@ -3332,6 +3365,8 @@ prfword vollzug 2-12345-1356-136-1245
 prfword vollzuge 2-12345-1356-136-12346
 prfword vollzuges 2-12345-1356-136-1245-123456
 always vollzugs 2-12345-1356-136-1245-234
+
+always völl 5-12345
 
 word von 1236
 always von 2-1236
@@ -4381,6 +4416,23 @@ always politisch 1234-156
 
 always punkt 1234-2345
 contraction pt
+always punktehalb 1234-2345-15-125-25-12
+always punkteliefer 1234-2345-15-123-346-124-12456
+always punktelimit 1234-2345-15-123-24-134-24-2345
+always punktelist 1234-2345-15-123-24-23456
+always punktelos 1234-2345-15-123-135-234
+always punktenieder 1234-2345-15-1345-346-145-12456
+before t always punkterabat 1234-2345-15-1235-1-12-1-2345
+always punkterahmen 1234-2345-15-1235-1-125-134-14
+always punkterechn 1234-2345-15-1235-15-1456-1345
+always punkterekord 1234-2345-15-1235-15-13-26-145
+always punkterennen 1234-2345-15-1235-14-1345-14
+always punkterück 1234-2345-15-1235-46
+always punkterund 1234-2345-15-1235-256-145
+always punktesammel 1234-2345-15-234-1-1346-13456
+always punktesammler 1234-2345-15-234-1-1346-123-12456
+before g always punktesie 1234-2345-15-234-346
+always punktesymbol 1234-2345-15-234-6-13456-134-12-135-123
 always pünkt 5-1234-2345
 
 always recht 1235-2345
@@ -4520,7 +4572,7 @@ always stell 2-13456
 before l sufword bastel 12-1-23456-13456
 always sstell 234-2-13456 shouldn't use the ss-contraction
 always kastell 13-1-23456-15-12345
-always pastellfarb 1234-1-23456-13456-124-356-12
+always pastellfarb 1234-1-23456-15-12345-124-356-12
 
 
 word stets 23456-234
@@ -4827,6 +4879,7 @@ midendword emaedchen 15-134-345-145-1456-14
 midendword emänn 15-134-345-1345-1345
 midendword emaenn 15-5-134-1345
 midendword estand 15-2-23456
+midendword eständ 15-5-23456
 midword estell 15-2-13456
 always found 124-135-256-145 Foundation shouldn't use the und-contraction
 begword gänse =
@@ -4887,6 +4940,7 @@ always zeithall 1356-2345-125-1-12345
 
 always hauf 125-16-124 shouldn't use the auf-contraction
 always nahauf 1345-1-125-2-16
+always frühauf 124-1235-1256-125-2-16
 always hotel 125-135-2345-13456 shouldn't use the te-contraction
 always installer 35-23456-1-12345-12456 shouldn't use the aller-contraction
 always internet 35-2345-12456-1345-15-2345 shouldn't use the te-contraction
@@ -5001,8 +5055,10 @@ always daenemark 145-345-1345-15-134-356-13 shouldn't use the em-contraction
 sufword aaron =
 word abbey =
 word angela 235-1245-13456-1 shouldn't use the ge-contraction
+word angelas 235-1245-13456-1-234 shouldn't use the ge-contraction
 word angeles 235-1245-13456-123456 shouldn't use the ge-contraction
 word angelika 235-1245-13456-24-13-1 shouldn't use the ge-contraction
+word angelikas 235-1245-13456-24-13-1-234 shouldn't use the ge-contraction
 word angelina 235-1245-13456-35-1 shouldn't use the ge-contraction
 word angelo 235-1245-13456-135 shouldn't use the ge-contraction
 always aristotel 356-24-23456-135-2345-13456
