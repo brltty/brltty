@@ -2793,6 +2793,11 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type,
     if (!strcmp(auth,"none"))
       authCorrect = 1;
     else {
+      if (remaining<sizeof(authPacket->type)) {
+	WERR(c->fd, BRLAPI_ERROR_PROTOCOL_VERSION, "wrong protocol version");
+	return 1;
+      }
+
       authType = ntohl(authPacket->type);
       remaining -= sizeof(authPacket->type);
 
