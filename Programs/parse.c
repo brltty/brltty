@@ -172,6 +172,7 @@ changeListSetting (char ***list, char **setting, const char *value) {
 
 int
 rescaleInteger (int value, int from, int to) {
+  if (!to) return 0;
   return (to * (value + (from / (to * 2)))) / from;
 }
 
