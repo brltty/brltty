@@ -30,9 +30,10 @@ typedef enum {
   PARM_MODULE,
   PARM_LANGUAGE,
   PARM_VOICE,
-  PARM_NAME
+  PARM_NAME,
+  PARM_MAXRATE
 } DriverParameter;
-#define SPKPARMS "address", "autospawn", "module", "language", "voice", "name"
+#define SPKPARMS "address", "autospawn", "module", "language", "voice", "name", "maxrate"
 
 #include "spk_driver.h"
 
@@ -46,6 +47,7 @@ static SPDVoiceType voiceType;
 static const char *voiceName;
 static signed int relativeVolume;
 static signed int relativeRate;
+static signed int maximumRate;
 static signed int relativePitch;
 static SPDPunctuation punctuationLevel;
 
@@ -58,6 +60,7 @@ clearSettings (void) {
   voiceName = NULL;
   relativeVolume = 0;
   relativeRate = 0;
+  maximumRate = 100;
   relativePitch = 0;
   punctuationLevel = -1;
 }
@@ -119,7 +122,7 @@ setRate (const void *data) {
 
 static void
 spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-  relativeRate = getIntegerSpeechRate(setting, 100) - 100;
+  relativeRate = getIntegerSpeechRate(setting, (maximumRate + 100) / 2) - 100;
   speechdAction(setRate, NULL);
   logMessage(LOG_DEBUG, "set rate: %u -> %d", setting, relativeRate);
 }
@@ -245,6 +248,18 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
 
   if (parameters[PARM_NAME] && *parameters[PARM_NAME]) {
     voiceName = parameters[PARM_NAME];
+  }
+
+  if (parameters[PARM_MAXRATE] && *parameters[PARM_MAXRATE]) {
+    static const int minimum = -99;
+    static const int maximum = 100;
+    int value;
+
+    if (validateInteger(&value, parameters[PARM_MAXRATE], &minimum, &maximum)) {
+      maximumRate = value;
+    } else {
+      logMessage(LOG_WARNING, "%s: %s", "invalid maximum rate", parameters[PARM_MAXRATE]);
+    }
   }
 
   return openConnection();
