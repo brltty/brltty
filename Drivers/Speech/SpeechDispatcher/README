@@ -24,3 +24,7 @@ This driver recognizes the following parameters:
    language  two-letter language code
    voice     type (male1, female1, male2, female2, male3, female3,
                    child_male, child_female)
+   maxrate   maximum relative rate (-99 to 100, default 100); the rate
+             settings are spread from -100 to this value, so the default
+             setting maps to the middle of that range. Rates are relative
+             to the output module's default rate.
