@@ -510,6 +510,22 @@ USB_DEVICE_ENTRY(0X1FE4, 0X00A6, "ht"),
 // HandyTech [Activator Pro 80]
 USB_DEVICE_ENTRY(0X1FE4, 0X00A8, "ht"),
 
+// Device: 1FE4:00B2
+// HandyTech [myBraille 24]
+USB_DEVICE_ENTRY(0X1FE4, 0X00B2, "ht"),
+
+// Device: 1FE4:00B4
+// HandyTech [myBraille 40]
+USB_DEVICE_ENTRY(0X1FE4, 0X00B4, "ht"),
+
+// Device: 1FE4:00B6
+// HandyTech [myBraille 64]
+USB_DEVICE_ENTRY(0X1FE4, 0X00B6, "ht"),
+
+// Device: 1FE4:00B8
+// HandyTech [myBraille 80]
+USB_DEVICE_ENTRY(0X1FE4, 0X00B8, "ht"),
+
 // Device: 28AC:0012
 // EuroBraille [b.note]
 USB_DEVICE_ENTRY(0X28AC, 0X0012, "eu"),

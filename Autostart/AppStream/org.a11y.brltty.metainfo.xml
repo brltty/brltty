@@ -521,6 +521,22 @@
     <!-- HandyTech [Activator Pro 80] -->
     <modalias>usb:v1FE4p00A8*</modalias>
 
+    <!-- Device: 1FE4:00B2 -->
+    <!-- HandyTech [myBraille 24] -->
+    <modalias>usb:v1FE4p00B2*</modalias>
+
+    <!-- Device: 1FE4:00B4 -->
+    <!-- HandyTech [myBraille 40] -->
+    <modalias>usb:v1FE4p00B4*</modalias>
+
+    <!-- Device: 1FE4:00B6 -->
+    <!-- HandyTech [myBraille 64] -->
+    <modalias>usb:v1FE4p00B6*</modalias>
+
+    <!-- Device: 1FE4:00B8 -->
+    <!-- HandyTech [myBraille 80] -->
+    <modalias>usb:v1FE4p00B8*</modalias>
+
     <!-- Device: 28AC:0012 -->
     <!-- EuroBraille [b.note] -->
     <modalias>usb:v28ACp0012*</modalias>
