@@ -46,9 +46,11 @@ Braille display
 Braille keyboard
    The keyboard of the braille terminal.
 
-Braille terminal
-   A computer designed to display text in braille. In this case, the text is
-   supposed to come from another computer running Linux or any other Unix system.
+Braille terminal (or Braille device)
+   A device designed to display text in braille and get key presses. It thus
+   contains both a Braille display and a Braille keyboard. In the BrlAPI
+   context, the text is supposed to come from a computer running Linux or any
+   other Unix system, and key events are sent to the computer.
 
 Brltty
    The background process that gives a blind person access to the console screen
@@ -285,7 +287,8 @@ Braille display and braille key presses processing.
 If the client wants to display something on the braille
 display or to process braille keys itself, rather than letting
 *brltty* process them, it has to take control of the Linux
-terminal it is running on.
+tty it is running on (See the Concurrency management section for
+more details).
 
 Once a client has obtained the control of his tty, *BrlAPI*
 will completely discard *brltty*'s display on this tty (and only
