@@ -439,7 +439,7 @@
 #speech-parameters sd:address= # [address of speech-dispatcher's server]
 #speech-parameters sd:autospawn= # [yes,no]
 #speech-parameters sd:language= # [two-letter language code]
-#speech-parameters sd:maxRate=100 # [-99-100]
+#speech-parameters sd:maxRate=100 # [-100-100]
 #speech-parameters sd:module= # [flite,festival,epos-generic,dtk-generic,...]
 #speech-parameters sd:name= # 
 #speech-parameters sd:voice= # [male1,female1,male2,female2,male3,female3,child_male,child_female]

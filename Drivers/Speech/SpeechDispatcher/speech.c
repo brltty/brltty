@@ -251,7 +251,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
   }
 
   if (parameters[PARM_MAXRATE] && *parameters[PARM_MAXRATE]) {
-    static const int minimum = -99;
+    static const int minimum = -100;
     static const int maximum = 100;
     int value;
 
