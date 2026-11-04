@@ -36,8 +36,8 @@ typedef struct {
   unsigned char name##_bytes[sizeof(MessageType) + (length)]; \
   Message *name = (void *)name##_bytes;
 
-int
-sendMessage (int queue, MessageType type, const void *content, size_t length, int flags) {
+static int
+sendMessageInternal (int queue, MessageType type, const void *content, size_t length, int flags) {
   MESSAGE(message, length);
 
   if (!content) {
@@ -47,10 +47,19 @@ sendMessage (int queue, MessageType type, const void *content, size_t length, in
   }
 
   message->type = type;
-  if (msgsnd(queue, message, length, flags) != -1) return 1;
+  return msgsnd(queue, message, length, flags) != -1;
+}
 
+int
+sendMessage (int queue, MessageType type, const void *content, size_t length, int flags) {
+  if (sendMessageInternal(queue, type, content, length, flags)) return 1;
   logSystemError("msgsnd");
   return 0;
+}
+
+int
+sendMessageQuietly (int queue, MessageType type, const void *content, size_t length, int flags) {
+  return sendMessageInternal(queue, type, content, length, flags);
 }
 
 ssize_t

@@ -19,6 +19,13 @@
 #include "prologue.h"
 
 #include <string.h>
+#include <stdio.h>
+#include <errno.h>
+#include <signal.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <limits.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
@@ -283,4 +290,120 @@ createMessageQueue (int *queue, key_t key) {
   }
 
   return 0;
+}
+
+/* Registry of SysV IPC objects created by terminal emulator instances, so a
+ * new instance can reap what a predecessor leaked by dying uncleanly. Entries
+ * live directly in /tmp (which every emulator, whatever user it runs as, can
+ * write to) as empty files named to carry their own payload, so reaping never
+ * has to open/parse a file - just list the directory and stat a pid. */
+#define TERMINAL_RESOURCES_DIRECTORY "/tmp"
+#define TERMINAL_RESOURCES_PREFIX ".brltty-pty-ipc."
+
+static char registeredResourcesPath[PATH_MAX] = "";
+
+static int
+terminalResourceOwnerIsAlive (pid_t pid) {
+  if (kill(pid, 0) != -1) return 1;
+  return errno != ESRCH;
+}
+
+/* /tmp is world-writable, and this directory is scanned for a dead pid rather
+ * than authenticated some other way, so a local user could plant a marker
+ * naming a live pid=irrelevant, dead-pid=fabricated, {shm,msg} id belonging to
+ * an unrelated process (ids are small, kernel-recycled integers, and readable
+ * system-wide via ipcs). Since a reaping instance can run as root (BRLTTY is
+ * commonly started via sudo), skipping this check would let an unprivileged
+ * local user trick root into destroying an arbitrary SysV object on the
+ * machine. Requiring the object's creator uid to match the marker file's own
+ * owner ties "who could plausibly have registered this marker" to "who
+ * actually owns the object" - an attacker can only plant markers owned by
+ * themselves, so this fails closed for anything they don't already own. */
+static int
+terminalResourceOwnedBy (uid_t owner, uid_t creatorUid) {
+  return creatorUid == owner;
+}
+
+void
+reapStaleTerminalResources (void) {
+  DIR *directory = opendir(TERMINAL_RESOURCES_DIRECTORY);
+  if (!directory) return;
+
+  const size_t prefixLength = strlen(TERMINAL_RESOURCES_PREFIX);
+  struct dirent *entry;
+
+  while ((entry = readdir(directory))) {
+    if (strncmp(entry->d_name, TERMINAL_RESOURCES_PREFIX, prefixLength) != 0) continue;
+
+    long pid, shmId, msgId;
+    if (sscanf(entry->d_name + prefixLength, "%ld.%ld.%ld", &pid, &shmId, &msgId) != 3) continue;
+    if (terminalResourceOwnerIsAlive((pid_t)pid)) continue;
+
+    char path[PATH_MAX];
+    snprintf(path, sizeof(path), "%s/%s", TERMINAL_RESOURCES_DIRECTORY, entry->d_name);
+
+    struct stat markerStatus;
+    if (stat(path, &markerStatus) == -1) continue;
+    uid_t owner = markerStatus.st_uid;
+
+    logMessage(LOG_WARNING,
+      "reaping terminal emulator resources leaked by dead process %ld: shm=%ld msg=%ld",
+      pid, shmId, msgId
+    );
+
+    if (shmId >= 0) {
+      struct shmid_ds shmStatus;
+
+      if (shmctl((int)shmId, IPC_STAT, &shmStatus) == -1) {
+        /* Already gone - nothing to remove. */
+      } else if (terminalResourceOwnedBy(owner, shmStatus.shm_perm.cuid)) {
+        shmctl((int)shmId, IPC_RMID, NULL);
+      } else {
+        logMessage(LOG_WARNING,
+          "refusing to reap shm %ld: owned by a different user than its registry marker", shmId);
+      }
+    }
+
+    if (msgId >= 0) {
+      struct msqid_ds msgStatus;
+
+      if (msgctl((int)msgId, IPC_STAT, &msgStatus) == -1) {
+        /* Already gone - nothing to remove. */
+      } else if (terminalResourceOwnedBy(owner, msgStatus.msg_perm.cuid)) {
+        msgctl((int)msgId, IPC_RMID, NULL);
+      } else {
+        logMessage(LOG_WARNING,
+          "refusing to reap message queue %ld: owned by a different user than its registry marker", msgId);
+      }
+    }
+
+    unlink(path);
+  }
+
+  closedir(directory);
+}
+
+void
+registerTerminalResources (int screenSegmentIdentifier, int messageQueueIdentifier) {
+  snprintf(
+    registeredResourcesPath, sizeof(registeredResourcesPath),
+    "%s/%s%ld.%d.%d", TERMINAL_RESOURCES_DIRECTORY, TERMINAL_RESOURCES_PREFIX,
+    (long)getpid(), screenSegmentIdentifier, messageQueueIdentifier
+  );
+
+  int descriptor = open(registeredResourcesPath, O_CREAT | O_EXCL | O_WRONLY, S_IRUSR | S_IWUSR);
+  if (descriptor != -1) {
+    close(descriptor);
+  } else {
+    logSystemError("open[terminal resources registry entry]");
+    registeredResourcesPath[0] = 0;
+  }
+}
+
+void
+unregisterTerminalResources (void) {
+  if (registeredResourcesPath[0]) {
+    unlink(registeredResourcesPath);
+    registeredResourcesPath[0] = 0;
+  }
 }

@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "log.h"
 #include "scr_terminal.h"
@@ -28,6 +29,7 @@
 #include "hostcmd.h"
 #include "parse.h"
 #include "file.h"
+#include "io_misc.h"
 #include "program.h"
 #include "async_handle.h"
 #include "async_io.h"
@@ -88,6 +90,13 @@ static const char *problemText = NULL;
 static ScreenSegmentHeader *screenSegment = NULL;
 static ScreenSegmentHeader *cachedSegment = NULL;
 
+/* The emulator recreates its shared-memory segment (under the same key) when
+ * the terminal is resized, so the identifier we attached to becomes stale. We
+ * remember the key and identifier to detect this and re-attach. */
+static key_t screenSegmentKey = 0;
+static int haveScreenSegmentKey = 0;
+static int screenSegmentIdentifier = -1;
+
 static int haveTerminalMessageQueue = 0;
 static int terminalMessageQueue;
 static int haveSegmentUpdatedHandler = 0;
@@ -133,7 +142,17 @@ accessSegmentForPath (const char *path) {
   key_t key;
 
   if (makeTerminalKey(&key, path)) {
-    if ((screenSegment = getScreenSegmentForKey(key))) {
+    int identifier;
+
+    if (getScreenSegment(&identifier, key) &&
+        (screenSegment = attachScreenSegment(identifier))) {
+      screenSegmentKey = key;
+      haveScreenSegmentKey = 1;
+      screenSegmentIdentifier = identifier;
+
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "attached to screen segment (identifier %d)", identifier);
+
       problemText = gettext("no screen cache");
       enableMessages(key);
       return 1;
@@ -143,6 +162,31 @@ accessSegmentForPath (const char *path) {
   }
 
   return 0;
+}
+
+/* When the emulator resizes, it publishes a new segment under the same key.
+ * Detect the changed identifier and re-attach so we read the new size. */
+static void
+reattachIfSegmentChanged (void) {
+  if (!haveScreenSegmentKey) return;
+
+  int identifier;
+  if (!getScreenSegment(&identifier, screenSegmentKey)) return;
+  if (identifier == screenSegmentIdentifier) return;
+
+  ScreenSegmentHeader *fresh = attachScreenSegment(identifier);
+  if (!fresh) return;
+
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER), "re-attaching to resized screen segment");
+
+  if (screenSegment) detachScreenSegment(screenSegment);
+  screenSegment = fresh;
+  screenSegmentIdentifier = identifier;
+
+  if (cachedSegment) {
+    free(cachedSegment);
+    cachedSegment = NULL;
+  }
 }
 
 static void
@@ -173,6 +217,9 @@ destruct_TerminalEmulatorScreen (void) {
     free(cachedSegment);
     cachedSegment = NULL;
   }
+
+  haveScreenSegmentKey = 0;
+  screenSegmentIdentifier = -1;
 }
 
 static void
@@ -246,29 +293,45 @@ handleDriverDirective (const char *line) {
 }
 
 ASYNC_MONITOR_CALLBACK(emEmulatorMonitor) {
-  const char *line;
+  while (1) {
+    const char *line;
 
-  {
-    int ok = readLine(
-      emulatorStream, &emulatorStreamBuffer,
-      &emulatorStreamBufferSize, NULL
-    );
+    {
+      int ok = readLine(
+        emulatorStream, &emulatorStreamBuffer,
+        &emulatorStreamBufferSize, NULL
+      );
 
-    if (!ok) {
-      const char *cause =
-        ferror(emulatorStream)? "emulator stream error":
-        feof(emulatorStream)? "end of emulator stream":
-        "emulator monitor failure";
+      if (!ok) {
+        /* Fully-buffered stdio can pull more than one already-written line
+         * out of the pipe in a single underlying read() - e.g. a routine
+         * log line queued right in front of the "path" driver-directive
+         * handshake. Once that happens, the second line is invisible to
+         * select()/poll() (its bytes already left the pipe), so a monitor
+         * that only reads one line per wakeup can strand it indefinitely,
+         * until something unrelated happens to write another line later.
+         * Draining in a loop here, stopping only once the (non-blocking)
+         * stream genuinely has nothing left, closes that gap. */
+        if (ferror(emulatorStream) && (errno == EAGAIN)) {
+          clearerr(emulatorStream);
+          break;
+        }
 
-      handleException(cause);
-      return 0;
+        const char *cause =
+          ferror(emulatorStream)? "emulator stream error":
+          feof(emulatorStream)? "end of emulator stream":
+          "emulator monitor failure";
+
+        handleException(cause);
+        return 0;
+      }
+
+      line = emulatorStreamBuffer;
     }
 
-    line = emulatorStreamBuffer;
-  }
-
-  if (!handleDriverDirective(line)) {
-    logMessage(LOG_NOTICE, "%s", line);
+    if (!handleDriverDirective(line)) {
+      logMessage(LOG_NOTICE, "%s", line);
+    }
   }
 
   return 1;
@@ -364,6 +427,11 @@ startEmulator (void) {
   if (!exitStatus) {
     detachStandardStreams();
 
+    /* Non-blocking so emEmulatorMonitor() can safely drain every line
+     * fully-buffered stdio already holds, not just the one line per
+     * readable-fd wakeup that select()/poll() can see - see its comment. */
+    setBlockingIo(fileno(emulatorStream), 0);
+
     if (asyncMonitorFileInput(&emulatorMonitorHandle, fileno(emulatorStream), emEmulatorMonitor, NULL)) {
       return 1;
     }
@@ -405,11 +473,18 @@ construct_TerminalEmulatorScreen (void) {
 
 static int
 poll_TerminalEmulatorScreen (void) {
-  return !haveSegmentUpdatedHandler;
+  /* The segment-updated message is a best-effort, non-blocking notification
+   * (see ptyRefreshScreen()/sendTerminalMessage() in pty_screen.c) - the small
+   * SysV queue can fill and silently drop it. Always poll as a fallback so a
+   * dropped notification costs at most one poll interval instead of leaving
+   * the braille display stuck until some unrelated event (e.g. a key press)
+   * happens to trigger a refresh. */
+  return 1;
 }
 
 static int
 refresh_TerminalEmulatorScreen (void) {
+  reattachIfSegmentChanged();
   if (!screenSegment) return 0;
   size_t size = screenSegment->segmentSize;
 

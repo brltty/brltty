@@ -1,0 +1,108 @@
+.\" @configure_input@
+.\"
+.\" BRLTTY - A background process providing access to the console screen (when in
+.\"          text mode) for a blind person using a refreshable braille display.
+.\"
+.\" Copyright (C) 1995-2026 by The BRLTTY Developers.
+.\"
+.\" BRLTTY comes with ABSOLUTELY NO WARRANTY.
+.\"
+.\" This is free software, placed under the terms of the
+.\" GNU Lesser General Public License, as published by the Free Software
+.\" Foundation; either version 2.1 of the License, or (at your option) any
+.\" later version. Please see the file LICENSE-LGPL for details.
+.\"
+.\" Web Page: http://brltty.app/
+.\"
+.\" This software is maintained by Dave Mielke <dave@mielke.cc>.
+.TH "BRLTTY-PTY" "1" "June 2026" "@PACKAGE_TARNAME@ @PACKAGE_VERSION@" "@PACKAGE_NAME@ User's Manual"
+.SH NAME
+brltty-pty \- run a terminal within a pty and export its screen to BRLTTY
+.SH SYNOPSIS
+\fBbrltty-pty\fR [\fIoption\fR ...] [\fIcommand\fR [\fIargument\fR ...]]
+.SH DESCRIPTION
+.B brltty-pty
+runs a shell (or a terminal manager such as
+.B tmux
+or
+.BR screen )
+within a pseudo-terminal, interprets that terminal's output into a screen image,
+and exports the image through a shared-memory segment so that
+.B BRLTTY
+can read it via its Terminal Emulator
+.RB ( em )
+screen driver.
+This lets a braille user reach a terminal that runs inside a graphical terminal
+emulator (for example macOS Terminal.app or iTerm2), where the system console
+screen driver does not apply.
+.PP
+It is normally started by the
+.B brltty-term
+launcher, which runs it together with
+.BR brltty 's
+Terminal Emulator screen driver, but it can also be run directly.
+.PP
+If no
+.I command
+is given, the user's login shell is run.
+.PP
+When a program inside the terminal emits an
+.B OSC 52
+sequence (a request to copy),
+.B brltty-pty
+writes the text to the host clipboard (on macOS, the pasteboard). An
+.B OSC 52
+read request is declined for privacy.
+.SH OPTIONS
+.TP
+\fB-x\fR (\fB--driver-directives\fR)
+Write driver directives to standard error.
+.TP
+\fB-p\fR (\fB--show-path\fR)
+Show the absolute path to the pty slave.
+.TP
+\fB-u\fR \fIuser\fR (\fB--user=\fR)
+The name or number of the user to run as.
+.TP
+\fB-g\fR \fIgroup\fR (\fB--group=\fR)
+The name or number of the group to run as.
+.TP
+\fB-d\fR \fIpath\fR (\fB--working-directory=\fR)
+The directory to change to.
+.TP
+\fB-D\fR \fIpath\fR (\fB--home-directory=\fR)
+The home directory to use.
+.TP
+\fB-I\fR (\fB--log-input\fR)
+Log input written to the pty slave.
+.TP
+\fB-O\fR (\fB--log-output\fR)
+Log output received from the pty slave that isn't an escape sequence or a
+special character.
+.TP
+\fB-S\fR (\fB--log-sequences\fR)
+Log escape sequences and special characters received from the pty slave.
+.TP
+\fB-U\fR (\fB--log-unexpected\fR)
+Log unexpected input/output.
+.TP
+\fB-h\fR (\fB--help\fR)
+Print a command line usage summary and then exit.
+.TP
+\fB-H\fR (\fB--full-help\fR)
+Print a thorough command line usage summary and then exit.
+.SH ENVIRONMENT
+.TP
+.B BRLTTY_PTY_CLIPBOARD_FILE
+If set, a copy is written to this file instead of the host clipboard. This is a
+fork-free way to wire up a custom clipboard (for example a fifo paired with
+.B xclip
+or
+.BR wl-copy ).
+.SH "SEE ALSO"
+.BR brltty (1)
+.PP
+For full documentation, see
+.BR BRLTTY 's
+on-line manual at
+.RB "[" "http://brltty.app/documentation.html" "]."

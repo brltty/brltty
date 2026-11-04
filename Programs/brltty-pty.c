@@ -18,7 +18,6 @@
 
 /* not done yet:
  * parent: terminal type list
- * screen: resize
  */
 
 #include "prologue.h"
@@ -37,10 +36,13 @@
 #include "pty_terminal.h"
 #include "parse.h"
 #include "file.h"
+#include "io_misc.h"
 #include "async_handle.h"
 #include "async_wait.h"
 #include "async_io.h"
 #include "async_signal.h"
+#include "async_alarm.h"
+#include "parameters.h"
 
 static int opt_driverDirectives;
 static int opt_showPath;
@@ -296,9 +298,66 @@ static unsigned char parentIsQuitting;
 static unsigned char childHasTerminated;
 static unsigned char slaveHasBeenClosed;
 
+/* Dragging a window emits a storm of SIGWINCH signals; recreating the screen
+ * segment for each one would be wasteful. Coalesce them: each signal just sets
+ * this flag (the only thing a signal handler may safely do), and the async loop
+ * (re)arms a short settle alarm so the resize happens once, after it settles. */
+static volatile sig_atomic_t windowSizeChanged = 0;
+#define WINDOW_RESIZE_SETTLE_TIME 150
+
+static AsyncHandle windowResizeAlarm = NULL;
+
+static void
+applyWindowSize (void) {
+  size_t width, height;
+
+  if (getConsoleSize(&width, &height)) {
+    setWindowSize(ptyGetMaster(ptyObject), width, height);
+    ptyResizeTerminal(height, width);
+  }
+}
+
+ASYNC_ALARM_CALLBACK(windowResizeAlarmCallback) {
+  asyncDiscardHandle(windowResizeAlarm);
+  windowResizeAlarm = NULL;
+  applyWindowSize();
+}
+
+/* Run in the async loop (NOT signal context): arm/reset the settle alarm if a
+ * SIGWINCH was seen. Arming the alarm allocates, so it must not run in the
+ * signal handler itself. */
+static void
+serviceWindowSizeChange (void) {
+  if (!windowSizeChanged) return;
+  windowSizeChanged = 0;
+
+  if (windowResizeAlarm) {
+    asyncResetAlarmIn(windowResizeAlarm, WINDOW_RESIZE_SETTLE_TIME);
+  } else {
+    asyncNewRelativeAlarm(&windowResizeAlarm, WINDOW_RESIZE_SETTLE_TIME,
+                          windowResizeAlarmCallback, NULL);
+  }
+}
+
+static void
+cancelWindowResizeAlarm (void) {
+  if (windowResizeAlarm) {
+    asyncCancelRequest(windowResizeAlarm);
+    windowResizeAlarm = NULL;
+  }
+}
+
 static
 ASYNC_CONDITION_TESTER(parentTerminationTester) {
+  /* The SIGWINCH that woke the async wait is serviced here, in safe context. */
+  serviceWindowSizeChange();
+
   if (parentIsQuitting) return 1;
+#ifdef __APPLE__
+  /* On macOS the PTY slave is not closed by the kernel when the child exits,
+   * so slaveHasBeenClosed never fires.  Exit as soon as the child terminates. */
+  if (childHasTerminated) return 1;
+#endif /* __APPLE__ */
   return childHasTerminated && slaveHasBeenClosed;
 }
 
@@ -309,12 +368,7 @@ parentQuitMonitor (int signalNumber) {
 
 static void
 windowSizeMonitor (int signalNumber) {
-  size_t width, height;
-
-  if (getConsoleSize(&width, &height)) {
-    setWindowSize(ptyGetMaster(ptyObject), width, height);
-    ptyResizeTerminal(height, width);
-  }
+  windowSizeChanged = 1;
 }
 
 static void
@@ -327,6 +381,20 @@ installSignalHandlers (void) {
   if (!asyncHandleSignal(SIGTERM, parentQuitMonitor, NULL)) return 0;
   if (!asyncHandleSignal(SIGINT, parentQuitMonitor, NULL)) return 0;
   if (!asyncHandleSignal(SIGQUIT, parentQuitMonitor, NULL)) return 0;
+
+  /* The outer terminal application sends SIGHUP (not one of the three
+   * above) when its window is closed - by far the most common way this
+   * process actually ends in daily use. Without a handler, the default
+   * disposition (terminate) skips runParent()'s normal cleanup entirely
+   * (ptyEndTerminal() -> ptyEndScreen() -> destroySegment()), leaking this
+   * instance's shared-memory segment and message queue exactly like a
+   * crash would - reapStaleTerminalResources() cleans most of that up on
+   * the next startup, but only for the segment identifier it already knew
+   * about (see ptyResizeScreen()'s comment for the one case it still
+   * misses). Routing it through the same graceful-quit path other
+   * termination signals already use avoids the leak at the source. */
+  if (!asyncHandleSignal(SIGHUP, parentQuitMonitor, NULL)) return 0;
+
   if (!asyncHandleSignal(SIGWINCH, windowSizeMonitor, NULL)) return 0;
   return asyncHandleSignal(SIGCHLD, childTerminationMonitor, NULL);
 }
@@ -395,7 +463,12 @@ runParent (pid_t child) {
   childHasTerminated = 0;
   slaveHasBeenClosed = 0;
 
-  if (asyncReadFile(&ptyInputHandle, ptyGetMaster(ptyObject), 1, ptyInputHandler, NULL)) {
+  /* A larger read buffer lets one read() (and one pass through the output
+   * parser/passthrough pipeline) cover a whole burst of child output instead
+   * of one byte at a time - read() still returns as soon as anything is
+   * available, so interactive latency is unaffected, but throughput-heavy
+   * output (a build log, a large cat) no longer does per-byte work. */
+  if (asyncReadFile(&ptyInputHandle, ptyGetMaster(ptyObject), PTY_MASTER_READ_SIZE, ptyInputHandler, NULL)) {
     AsyncHandle standardInputHandle;
 
     if (asyncMonitorFileInput(&standardInputHandle, STDIN_FILENO, standardInputMonitor, NULL)) {
@@ -404,6 +477,14 @@ runParent (pid_t child) {
           unsigned char level = LOG_NOTICE;
           ptySetTerminalLogLevel(level);
           ptySetLogLevel(ptyObject, level);
+
+          /* stderr is a pipe back to BRLTTY here, not a real terminal. If BRLTTY's
+           * main thread ever stalls (e.g. a slow Bluetooth reconnect attempt) it
+           * stops draining this pipe; a blocking write to a full pipe would then
+           * wedge this process's single event loop - and with it the child - until
+           * BRLTTY resumes. Losing a log line under that pressure is fine; freezing
+           * the child is not. */
+          setBlockingIo(STDERR_FILENO, 0);
         }
 
         if (ptyBeginTerminal(ptyObject, opt_driverDirectives)) {
@@ -412,6 +493,7 @@ runParent (pid_t child) {
           asyncAwaitCondition(INT_MAX, parentTerminationTester, NULL);
           if (!parentIsQuitting) exitStatus = reapExitStatus(child);
 
+          cancelWindowResizeAlarm();
           ptyEndTerminal();
         }
       }
