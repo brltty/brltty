@@ -935,7 +935,7 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
 	    && (ntohl(((struct sockaddr_in *)cur->ai_addr)->sin_addr.s_addr) & IN_CLASSA_NET)
 	      == (INADDR_LOOPBACK & IN_CLASSA_NET))
 	  || (cur->ai_family == AF_INET6
-	    && !memcmp(cur->ai_addr, &ip6_localhost, sizeof(ip6_localhost)))) {
+	    && !memcmp(&((struct sockaddr_in6 *)cur->ai_addr)->sin6_addr, &ip6_localhost, sizeof(ip6_localhost)))) {
 	/* Local connection, it should be fast, otherwise it means we have a
 	 * firewall blocking us, and then better not wait unnecessarily. */
 	struct timeval tv = { .tv_usec = 100000 };
