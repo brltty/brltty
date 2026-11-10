@@ -55,8 +55,11 @@ OCAML_FILES = $(OCAML_MISC) $(OCAML_CLIBS) $(OCAML_BCLIB) $(OCAML_NCLIB)
 
 all: $(OCAML_FILES)
 
-$(OCAML_CLIBS): brlapi_stubs.$O | brlapi
+$(OCAML_CLIBS): ocaml_clibs-stamp
+
+ocaml_clibs-stamp: brlapi_stubs.$O | brlapi
 	$(OCAMLMKLIB) -ldopt "$(LDFLAGS)" $(API_LDFLAGS) -oc $(OCAML_LIB)_stubs brlapi_stubs.$O
+	touch $@
 
 $(OCAML_BCLIB): $(OCAML_CLIBS) brlapi.cmo
 	$(OCAMLC) -a $(OCAMLMKLIB_FLAGS) -o $(OCAML_LIB).cma brlapi.cmo
@@ -89,7 +92,7 @@ constants.ml: $(CONSTANTS_DEPENDENCIES)
 	$(AWK) $(CONSTANTS_ARGUMENTS) >$@
 
 clean::
-	-rm -f -- *.cm* *.a *.so constants.ml* brlapi.ml*
+	-rm -f -- *.cm* *.a *.so constants.ml* brlapi.ml* ocaml_clibs-stamp
 
 install: all $(OCAML_INSTALL_TARGET)
 
