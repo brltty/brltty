@@ -298,6 +298,10 @@ static const RequiredGroupEntry requiredGroupTable[] = {
     .name = "pulse-access",
   },
 
+  { .reason = "for speaking via the Speech Dispatcher daemon",
+    .name = "speech-dispatcher",
+  },
+
   { .reason = "for monitoring keyboard input",
     .name = "input",
     .path = "/dev/input/mice",
