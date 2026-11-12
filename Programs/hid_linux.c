@@ -183,7 +183,33 @@ hidLinuxReadData (
   HidHandle *handle, unsigned char *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  return readFile(handle->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
+  // Each read from a hidraw device returns one whole report, and the kernel
+  // discards the part of it that doesn't fit into the buffer. Reading as many
+  // reports as fit could therefore cut the last one short. Return just one
+  // report so that the caller always gets whole reports, each starting with
+  // its identifier (when the device numbers its reports).
+
+  while (1) {
+    ssize_t count = read(handle->fileDescriptor, buffer, size);
+    if (count != -1) return count;
+    if (errno == EINTR) continue;
+
+    if (errno != EAGAIN) {
+      logSystemError("read");
+      return -1;
+    }
+
+    if (initialTimeout) {
+      if (awaitFileInput(handle->fileDescriptor, initialTimeout)) {
+        initialTimeout = 0;
+        continue;
+      }
+    } else {
+      errno = EAGAIN;
+    }
+
+    return 0;
+  }
 }
 
 static int
