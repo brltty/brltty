@@ -21,13 +21,19 @@
 #include <string.h>
 
 #include "log.h"
+#include "bitmask.h"
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "io_hid.h"
+#include "hid_items.h"
+#include "hid_defs.h"
 
 struct GioHandleStruct {
   HidDevice *device;
   const HidModelEntry *model;
+
+  // The input reports of the device's keyboard (if it has one).
+  BITMASK(keyboardReports, (UINT8_MAX + 1), char);
 };
 
 static int
@@ -75,8 +81,19 @@ readHidData (
   GioHandle *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  return hidReadData(handle->device, buffer, size,
-                     initialTimeout, subsequentTimeout);
+  while (1) {
+    ssize_t result = hidReadData(handle->device, buffer, size,
+                                 initialTimeout, subsequentTimeout);
+    if (result <= 0) return result;
+
+    // Each read returns one whole report. A display with a keyboard (e.g. an
+    // APH Mantis Q40 connected via Bluetooth) also sends that keyboard's
+    // reports this way. The operating system already handles them, and a
+    // braille driver would only mistake the key codes within them for its
+    // own reports, so drop them here.
+    const unsigned char *report = buffer;
+    if (!BITMASK_TEST(handle->keyboardReports, report[0])) return result;
+  }
 }
 
 static int
@@ -232,6 +249,76 @@ getHidModelEntry (HidDevice *device, const HidModelEntry *model) {
   return NULL;
 }
 
+static void
+findKeyboardReports (GioHandle *handle) {
+  const HidItemsDescriptor *items = hidGetItems(handle->device);
+  if (!items) return;
+
+  const unsigned char *nextByte = items->bytes;
+  size_t bytesLeft = items->count;
+
+  HidUnsignedValue usagePage = 0;
+  HidUnsignedValue usage = 0;
+  HidUnsignedValue reportIdentifier = 0;
+  unsigned int collectionDepth = 0;
+  int isKeyboard = 0;
+
+  while (bytesLeft) {
+    HidItem item;
+    if (!hidNextItem(&item, &nextByte, &bytesLeft)) break;
+
+    switch (item.tag) {
+      case HID_ITM_UsagePage:
+        usagePage = item.value.u;
+        break;
+
+      case HID_ITM_Usage:
+        usage = item.value.u;
+
+        // A four-byte usage includes its own usage page.
+        if (item.valueSize < 4) usage |= usagePage << 16;
+        break;
+
+      case HID_ITM_ReportID:
+        reportIdentifier = item.value.u;
+        break;
+
+      case HID_ITM_Collection:
+        if (!collectionDepth++) {
+          isKeyboard =
+            (usage == ((HID_UPG_GenericDesktop << 16) | HID_USG_GDT_Keyboard)) ||
+            (usage == ((HID_UPG_GenericDesktop << 16) | HID_USG_GDT_Keypad));
+        }
+
+        usage = 0;
+        break;
+
+      case HID_ITM_EndCollection:
+        if (collectionDepth) collectionDepth -= 1;
+        usage = 0;
+        break;
+
+      case HID_ITM_Input:
+        // Only numbered reports can be told apart from the others.
+        if (isKeyboard && collectionDepth && reportIdentifier && (reportIdentifier <= UINT8_MAX)) {
+          if (!BITMASK_TEST(handle->keyboardReports, reportIdentifier)) {
+            BITMASK_SET(handle->keyboardReports, reportIdentifier);
+            logMessage(LOG_CATEGORY(HID_IO), "keyboard report: %02X", (unsigned int)reportIdentifier);
+          }
+        }
+        /* fall through */
+
+      case HID_ITM_Output:
+      case HID_ITM_Feature:
+        usage = 0;
+        break;
+
+      default:
+        break;
+    }
+  }
+}
+
 static GioHandle *
 connectHidResource (
   const char *identifier,
@@ -249,7 +336,10 @@ connectHidResource (
           descriptor->hid.modelTable
         );
 
-        if (handle->model) return handle;
+        if (handle->model) {
+          findKeyboardReports(handle);
+          return handle;
+        }
       }
     }
 
