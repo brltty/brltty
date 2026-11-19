@@ -157,8 +157,13 @@ int removeKeyrange(KeyrangeElem x0, KeyrangeElem y0, KeyrangeList **l)
   /* Need to intersect with every range */
   p = l; c = *p;
   while (c) {
+    /*
+     * The flag sets intersect only if every flag required by one range is
+     * allowed by the other range. A required bit outside the other range's
+     * maximum, in either direction, proves that the ranges are disjoint.
+     */
     if (c->minVal > maxVal || c->maxVal < minVal ||
-        !(c->maxFlags | ~minFlags) || !(~c->minFlags | maxFlags)) {
+        (minFlags & ~c->maxFlags) || (c->minFlags & ~maxFlags)) {
       /* don't intersect */
       p = &c->next;
       c = *p;
@@ -217,7 +222,7 @@ int removeKeyrange(KeyrangeElem x0, KeyrangeElem y0, KeyrangeList **l)
         c->maxFlags &= ~mask;
       }
 
-      if (!(c->maxFlags | ~minFlags) || !(~c->minFlags | maxFlags))
+      if ((minFlags & ~c->maxFlags) || (c->minFlags & ~maxFlags))
         /* don't intersect any more*/
 	break;
     }
