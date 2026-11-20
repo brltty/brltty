@@ -224,29 +224,121 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
   return 0;
 }
 
+/* Explicitly opens the baseband connection to bcx's device, rather than
+ * letting performSDPQuery: below trigger it implicitly. Confirmed live: a
+ * query issued against a not-yet-connected device races macOS's own
+ * automatic per-device "identification" SDP query (bluetoothd completes
+ * its own copy in under a second, but BRLTTY's own performSDPQuery: against
+ * the same still-connecting device gets no completion callback,
+ * repeatably); once the device is already connected first (confirmed by
+ * the case where something else connected to it before BRLTTY did),
+ * BRLTTY's own SDP query reliably gets its callback.
+ *
+ * Calling this again when already connected is safe (IOBluetooth's header
+ * documents openConnection as returning success in that case too, at least
+ * prior to macOS 10.7 - since 10.7 it explicitly may instead report a
+ * "connection exists" error, which this function treats the same as any
+ * other failure: logged, then proceeds anyway), but is NOT a fast no-op
+ * like a page-timeout-bounded async call would be: this is fully
+ * synchronous, blocking this process's single thread for as long as
+ * IOBluetooth's own default page timeout allows, with no BRLTTY-imposed
+ * cap of its own (the caller-supplied discovery timeout isn't threaded
+ * through here). Accepted as a one-time cost per outer connection attempt,
+ * not per retry-loop iteration, since bounding it further would require
+ * the same async-observer machinery bthPerformServiceQuery() below already
+ * uses for its own wait - out of scope for this fix, which is about
+ * ordering, not about making every step here asynchronous. */
+static void
+bthEnsureConnectionOpen (BluetoothConnectionExtension *bcx) {
+  IOReturn result = [bcx->bluetoothDevice openConnection];
+  if (result != kIOReturnSuccess) {
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "connection open failed, trying anyway");
+  }
+}
+
+/* Returns true unless the live query got a definitive negative answer (a
+ * real error status, not just a dropped/timed-out callback) - in that
+ * case, bthDiscoverChannel() below skips bthLookUpCachedChannel() entirely
+ * rather than risk returning a stale cached record instead of correctly
+ * falling through to the caller's own hardcoded fallback channel. On
+ * success the cache still needs to be consulted (a successful query only
+ * means the cache is now populated, not that the channel number is known
+ * yet), and on a timeout it's still worth trying - see
+ * bthLookUpCachedChannel()'s own comment for why a dropped callback
+ * doesn't rule out a usable cached record. */
 static int
 bthPerformServiceQuery (BluetoothConnectionExtension *bcx) {
-  int ok = 0;
   IOReturn result;
   ServiceQueryResult *target = [ServiceQueryResult new];
+  int tryCache = 1;
 
   if (target) {
     if ((result = [bcx->bluetoothDevice performSDPQuery:target]) == kIOReturnSuccess) {
       if ([target wait:10]) {
-        if ((result = target.finalStatus) == kIOReturnSuccess) {
-          ok = 1;
-        } else {
+        if ((result = target.finalStatus) != kIOReturnSuccess) {
           bthSetError(result, "service discovery response");
+          tryCache = 0;
         }
+
+        [target release];
+      } else {
+        /* Timed out. IOBluetooth may still deliver the completion later,
+         * arbitrarily, on this thread's run loop - deliberately leak
+         * rather than release an object it might still call back into.
+         * ServiceQueryResult only ever touches its own ivars in that
+         * callback, so a late delivery is a safe no-op. */
+        logMessage(LOG_CATEGORY(BLUETOOTH_IO), "service discovery response timed out");
       }
     } else {
       bthSetError(result, "service discovery request");
+      tryCache = 0;
+      [target release];
     }
-
-    [target release];
+  } else {
+    logMallocError();
+    tryCache = 0;
   }
 
-  return ok;
+  return tryCache;
+}
+
+/* performSDPQuery:'s completion callback can go permanently missing - not
+ * failing, just never arriving - on a connection that is still being
+ * established: confirmed live via Console logging Apple's own "This
+ * currently won't trigger SDP delegate" on exactly that path.
+ * bthEnsureConnectionOpen() above avoids that by holding the link open
+ * first, but doesn't fully eliminate it. When it does time out,
+ * bthLookUpCachedChannel() below is the fallback, not a same-process retry
+ * here - there's no evidence a second attempt behaves differently. */
+
+/* Looks up an already-cached SDP record for uuidBytes without asking for a
+ * fresh query - getServiceRecordForUUID: only consults records already
+ * queried, so this is synchronous, free, and cannot time out. Called after
+ * a successful or merely-timed-out bthPerformServiceQuery() (see its own
+ * comment for why bthDiscoverChannel() skips this entirely after a
+ * definitive failure instead): macOS's automatic per-device identification
+ * pass can populate this same cache even when this process's own query
+ * never got a completion callback for it. A record found this way could be
+ * stale, but that is still at least as good a guess as the hardcoded
+ * fallback used when this returns 0. */
+static int
+bthLookUpCachedChannel (
+  uint8_t *channel, BluetoothConnectionExtension *bcx,
+  const void *uuidBytes, size_t uuidLength
+) {
+  IOBluetoothSDPUUID *uuid = [IOBluetoothSDPUUID uuidWithBytes:uuidBytes length:uuidLength];
+
+  if (uuid) {
+    IOBluetoothSDPServiceRecord *record = [bcx->bluetoothDevice getServiceRecordForUUID:uuid];
+
+    if (record) {
+      IOReturn result = [record getRFCOMMChannelID:channel];
+      if (result == kIOReturnSuccess) return 1;
+      bthSetError(result, "RFCOMM channel lookup");
+    }
+  }
+
+  return 0;
 }
 
 int
@@ -255,25 +347,9 @@ bthDiscoverChannel (
   const void *uuidBytes, size_t uuidLength,
   int timeout
 ) {
-  IOReturn result;
-
-  if (bthPerformServiceQuery(bcx)) {
-    IOBluetoothSDPUUID *uuid = [IOBluetoothSDPUUID uuidWithBytes:uuidBytes length:uuidLength];
-
-    if (uuid) {
-      IOBluetoothSDPServiceRecord *record = [bcx->bluetoothDevice getServiceRecordForUUID:uuid];
-
-      if (record) {
-        if ((result = [record getRFCOMMChannelID:channel]) == kIOReturnSuccess) {
-          return 1;
-        } else {
-          bthSetError(result, "RFCOMM channel lookup");
-        }
-      }
-    }
-  }
-
-  return 0;
+  bthEnsureConnectionOpen(bcx);
+  if (!bthPerformServiceQuery(bcx)) return 0;
+  return bthLookUpCachedChannel(channel, bcx, uuidBytes, uuidLength);
 }
 
 int
