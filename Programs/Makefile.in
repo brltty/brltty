@@ -249,6 +249,9 @@ $(PORTS_OBJECT).$O:
 $(SYSTEM_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(SYSTEM_INCLUDES) -c $(SRC_DIR)/$(SYSTEM_OBJECT).c
 
+system_darwin_runloop.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/system_darwin_runloop.c
+
 ###############################################################################
 
 io_misc.$O:

@@ -634,6 +634,15 @@ bthGetDeviceName (uint64_t address, int timeout) {
 
   if (entry) {
     if (!entry->name) {
+      /* Deliberately independent of bthOpenConnection()'s connect-error
+       * cache: a name request and a channel connect are different
+       * operations against the same address, and can fail for different
+       * reasons (e.g. a page-scan timing quirk can fail a name request
+       * while the actual SPP channel would still connect fine). Sharing
+       * one cache between them let a failing name request silently starve
+       * every subsequent real channel-connect attempt for the address, for
+       * as long as the connect-error cache stayed unforgotten - the real
+       * connection was then never even attempted. */
       logMessage(LOG_CATEGORY(BLUETOOTH_IO), "obtaining device name");
 
       if ((entry->name = bthObtainDeviceName(address, timeout))) {

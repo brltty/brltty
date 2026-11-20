@@ -162,7 +162,8 @@ ATSPI2_LIBS = @atspi2_libs@
 
 SYSTEM_PACKAGE = @system_package@
 SYSTEM_OBJECT = system_$(SYSTEM_PACKAGE)
-SYSTEM_OBJECTS = $(SYSTEM_OBJECT).$O $(HOSTCMD_OBJECTS)
+SYSTEM_EXTRA_OBJECTS = @system_extra_objects@
+SYSTEM_OBJECTS = $(SYSTEM_OBJECT).$O $(HOSTCMD_OBJECTS) $(patsubst %,%.$O,$(SYSTEM_EXTRA_OBJECTS))
 SYSTEM_INCLUDES = @system_includes@
 SYSTEM_LIBS = @system_libs@
 
