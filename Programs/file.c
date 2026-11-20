@@ -1045,7 +1045,7 @@ readLine (FILE *file, char **buffer, size_t *size, size_t *length) {
       /* Read the rest of the line into the end of the buffer. */
       if (!(line = fgets(&(*buffer)[count], (*size -count), file))) {
         if (!ferror(file)) goto done;
-        logSystemError("fgets");
+        if (errno != EAGAIN) logSystemError("fgets");
         return 0;
       }
 
@@ -1064,7 +1064,13 @@ readLine (FILE *file, char **buffer, size_t *size, size_t *length) {
     if (length) *length = count;
     return 1;
   } else if (ferror(file)) {
-    logSystemError("fgets");
+    /* EAGAIN means only that a non-blocking stream has no more data ready
+     * right now, not a real error - logging it would be misleading noise
+     * for a caller that's deliberately draining a non-blocking stream in a
+     * loop until it catches up (see emEmulatorMonitor() in
+     * Drivers/Screen/TerminalEmulator/screen.c). No current caller uses a
+     * non-blocking stream, so this is inert for all of them. */
+    if (errno != EAGAIN) logSystemError("fgets");
   }
 
   return 0;

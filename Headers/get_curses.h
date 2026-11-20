@@ -29,6 +29,24 @@
 
 #elif defined(HAVE_PKG_NCURSES)
 #define GOT_CURSES
+
+/* Some systems (notably macOS) ship an ncurses that is built with
+ * wide-character support but merged into the plain library rather than a
+ * separate ncursesw, so configure selects the NCURSES package. Request the
+ * X/Open extended (wide) interfaces before including the header so that
+ * cchar_t, add_wch(), in_wch(), setcchar() and friends become available.
+ * Define BRLTTY_NO_CURSES_WCH to opt out.
+ */
+#if defined(__APPLE__) && !defined(BRLTTY_NO_CURSES_WCH)
+#ifndef _XOPEN_SOURCE_EXTENDED
+#define _XOPEN_SOURCE_EXTENDED 1
+#endif /* _XOPEN_SOURCE_EXTENDED */
+#ifndef NCURSES_WIDECHAR
+#define NCURSES_WIDECHAR 1
+#endif /* NCURSES_WIDECHAR */
+#define GOT_CURSES_WCH
+#endif /* wide ncurses */
+
 #include <ncurses.h>
 
 #elif defined(HAVE_PKG_NCURSESW)
