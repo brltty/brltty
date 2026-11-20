@@ -31,7 +31,16 @@ typedef enum {
   TERM_MSG_INPUT_TEXT       = 't', // driver->emulator - UTF-8
   TERM_MSG_SEGMENT_UPDATED  = 'u', // emulator->driver - no content
   TERM_MSG_EMULATOR_EXITING = 'x', // emulator->driver - no content
+
+  // BRLTTY clipboard -> host (system) clipboard bridging. The driver lives in
+  // the daemon (so it owns BRLTTY's clipboard); the emulator runs in the GUI
+  // session (so it can reach the system clipboard). Content is UTF-8.
+  TERM_MSG_CLIPBOARD_TO_HOST   = 'C', // driver->emulator - BRLTTY clipboard text
 } TerminalMessageType;
+
+// The largest clipboard payload exchanged over the message queue. macOS caps a
+// SysV message queue at ~2KB (msgmnb), so larger content is not bridged.
+#define TERM_CLIPBOARD_MESSAGE_SIZE 0X800
 
 extern int getMessageQueue (int *queue, key_t key);
 
