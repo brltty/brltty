@@ -19,7 +19,7 @@
 all install uninstall install-documents:
 	cd $(PGM_DIR) && $(MAKE) $@
 
-install-extras: install-appstream install-messages install-polkit install-systemd install-udev
+install-extras: install-appstream install-hammerspoon install-messages install-polkit install-systemd install-udev
 
 install-appstream uninstall-appstream:
 	cd Autostart/AppStream && $(MAKE) $(@:-appstream=)
@@ -38,6 +38,9 @@ install-systemd uninstall-systemd:
 
 install-udev uninstall-udev:
 	cd Autostart/Udev && $(MAKE) $(@:-udev=)
+
+install-hammerspoon uninstall-hammerspoon:
+	cd Autostart/Hammerspoon && $(MAKE) $(@:-hammerspoon=)
 
 ARCHIVE_NAME = $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
 TAR_EXTENSION = tar
@@ -105,6 +108,7 @@ ITERATE = \
    $(DOC_DIR) \
    $(MSG_DIR) \
    Autostart/AppStream \
+   Autostart/Hammerspoon \
    Autostart/Systemd \
    Autostart/Udev \
    Autostart/X11 \
