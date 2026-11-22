@@ -564,7 +564,8 @@ changeCellCount (BrailleDisplay *brl, int count) {
 
   if (!isAcceptableCellCount(count)) {
     logUnexpectedCellCount(count);
-    return ok;
+    errno = EPROTO;
+    return 0;
   }
 
   if (count != cellCount) {
