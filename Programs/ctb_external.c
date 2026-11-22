@@ -193,7 +193,7 @@ static const unsigned char brfTable[0X40] = {
 };
 
 static int
-handleExternalResponse_brf (BrailleContractionData *bcd, const char *value) {
+handleExternalResponse_brf (BrailleContractionData *bcd, char *value) {
   int useDot7 = prefs.capitalizationMode == CTB_CAP_DOT7;
 
   while (*value && (bcd->output.current < bcd->output.end)) {
@@ -215,7 +215,7 @@ handleExternalResponse_brf (BrailleContractionData *bcd, const char *value) {
 }
 
 static int
-handleExternalResponse_consumedLength (BrailleContractionData *bcd, const char *value) {
+handleExternalResponse_consumedLength (BrailleContractionData *bcd, char *value) {
   int length;
 
   if (!isInteger(&length, value)) return 0;
@@ -227,7 +227,7 @@ handleExternalResponse_consumedLength (BrailleContractionData *bcd, const char *
 }
 
 static int
-handleExternalResponse_outputOffsets (BrailleContractionData *bcd, const char *value) {
+handleExternalResponse_outputOffsets (BrailleContractionData *bcd, char *value) {
   if (bcd->input.offsets) {
     int previous = CTB_NO_OFFSET;
     unsigned int count = getInputCount(bcd);
@@ -271,7 +271,7 @@ handleExternalResponse_outputOffsets (BrailleContractionData *bcd, const char *v
 
 typedef struct {
   const char *name;
-  int (*handler) (BrailleContractionData *bcd, const char *value);
+  int (*handler) (BrailleContractionData *bcd, char *value);
   unsigned stop:1;
 } ExternalResponseEntry;
 
@@ -302,7 +302,7 @@ getExternalResponses (BrailleContractionData *bcd) {
     char *delimiter = strchr(bcd->table->data.external.input.buffer, '=');
 
     if (delimiter) {
-      const char *value = delimiter + 1;
+      char *value = delimiter + 1;
       const ExternalResponseEntry *rsp = externalResponseTable;
 
       char oldDelimiter = *delimiter;
