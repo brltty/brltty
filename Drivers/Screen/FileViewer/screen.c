@@ -117,7 +117,7 @@ setScreenContent (const char *text) {
     const wchar_t *end = current + characterCount;
 
     while (current < end) {
-      wchar_t *next = wcschr(current, WC_C('\n'));
+      const wchar_t *next = wcschr(current, WC_C('\n'));
 
       if (!next) {
         if (!addLine(current, end)) return 0;
