@@ -562,16 +562,18 @@ static int
 changeCellCount (BrailleDisplay *brl, int count) {
   int ok = 1;
 
+  if (!isAcceptableCellCount(count)) {
+    logUnexpectedCellCount(count);
+    return ok;
+  }
+
   if (count != cellCount) {
     if (count > cellCount) {
       if (!clearCellRange(brl, cellCount, count-cellCount)) ok = 0;
 
-      {
-        int number;
-        for (number=cellCount; number<count; number+=1) {
-          setGroupedKey(keysState.routingKeys, number, 0);
-          setGroupedKey(keysState.horizontalSensors, number, 0);
-        }
+      for (int number=cellCount; number<count; number+=1) {
+        setGroupedKey(keysState.routingKeys, number, 0);
+        setGroupedKey(keysState.horizontalSensors, number, 0);
       }
     }
 
@@ -2795,7 +2797,14 @@ probePowerBrailleDevice (BrailleDisplay *brl) {
           const unsigned char *version = response.data.values.identity.version;
           logMessage(LOG_INFO, "Baum emulation: PowerBraille Version: %c%c%c%c",
                      version[0], version[1], version[2], version[3]);
-          cellCount = response.data.values.identity.cells;
+          unsigned char count = response.data.values.identity.cells;
+
+          if (!isAcceptableCellCount(count)) {
+            logUnexpectedCellCount(count);
+            return 0;
+          }
+
+          cellCount = count;
           return 1;
         }
       }
